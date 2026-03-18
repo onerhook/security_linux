@@ -1,0 +1,12 @@
+aiohttp==3.9.1
+aiogram==3.4.1
+psutil==5.9.7
+python-dotenv==1.0.0
+beautifulsoup4==4.12.2
+lxml==4.9.3
+steamclient
+pyotp
+steam
+eventemitter
+gevent
+protobuf<4.0.0
