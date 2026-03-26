@@ -1,322 +1,338 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure Sandbox - Главный оркестратор
-Максимальная безопасность: отключение сети, классификация угроз, детальный анализ.
-Только для запуска в изолированной ВМ от имени Администратора!
+RedSand Secure v2.0 - Главный оркестратор
+Максимально безопасная система анализа вредоносного ПО
+Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
 
 import os
 import sys
-import json
 import time
-import logging
+import json
+import argparse
 import subprocess
-import hashlib
-import threading
+import shutil
 from datetime import datetime
 from pathlib import Path
 
-# Настройка логирования
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
-    handlers=[
-        logging.FileHandler('logs/redsand.log', encoding='utf-8'),
-        logging.StreamHandler()
-    ]
-)
-logger = logging.getLogger("RedSand")
+# Добавляем модули в путь
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'modules'))
 
-class NetworkIsolator:
-    """Управление сетевой безопасностью (отключение/эмуляция)"""
-    
-    def __init__(self):
-        self.original_state = {}
-        self.isolated = False
-        
-    def kill_network(self):
-        """Полное отключение всех сетевых адаптеров и блокировка фаерволом"""
-        logger.warning("!!! ОТКЛЮЧЕНИЕ СЕТИ ДЛЯ БЕЗОПАСНОСТИ !!!")
-        try:
-            # Отключение всех интерфейсов через netsh
-            cmd_disable = 'netsh interface set interface "Ethernet" admin=disabled'
-            # Попытка отключить все видимые адаптеры
-            result = subprocess.run(['netsh', 'interface', 'show', 'interface'], 
-                                    capture_output=True, text=True, shell=True)
-            
-            interfaces = []
-            for line in result.stdout.splitlines():
-                if 'Connected' in line or 'Disconnected' in line:
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        iface_name = " ".join(parts[3:])
-                        interfaces.append(iface_name)
-            
-            for iface in interfaces:
-                try:
-                    subprocess.run(f'netsh interface set interface "{iface}" admin=disabled', 
-                                   shell=True, check=False)
-                    logger.info(f"Адаптер '{iface}' отключен.")
-                except Exception as e:
-                    logger.debug(f"Не удалось отключить {iface}: {e}")
-
-            # Блокировка всего исходящего трафика через Firewall
-            subprocess.run('netsh advfirewall firewall add rule name="RedSand_Block_All_Out" dir=out action=block enable=yes', 
-                           shell=True, check=False)
-            subprocess.run('netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes', 
-                           shell=True, check=False)
-            
-            self.isolated = True
-            logger.critical("СЕТЬ ПОЛНОСТЬЮ ОТКЛЮЧЕНА. ОБРАЗЕЦ ИЗОЛИРОВАН.")
-            return True
-        except Exception as e:
-            logger.error(f"Ошибка отключения сети: {e}")
-            return False
-
-    def restore_network(self):
-        """Восстановление сетевого подключения"""
-        if not self.isolated:
-            return
-            
-        logger.warning("ВОССТАНОВЛЕНИЕ СЕТИ...")
-        try:
-            # Удаление правил фаервола
-            subprocess.run('netsh advfirewall firewall delete rule name="RedSand_Block_All_Out"', shell=True, check=False)
-            subprocess.run('netsh advfirewall firewall delete rule name="RedSand_Block_All_In"', shell=True, check=False)
-            
-            # Включение адаптеров (можно доработать под конкретные имена)
-            result = subprocess.run(['netsh', 'interface', 'show', 'interface'], 
-                                    capture_output=True, text=True, shell=True)
-            for line in result.stdout.splitlines():
-                if 'Disabled' in line:
-                    parts = line.split()
-                    if len(parts) >= 4:
-                        iface_name = " ".join(parts[3:])
-                        subprocess.run(f'netsh interface set interface "{iface_name}" admin=enabled', shell=True, check=False)
-            
-            self.isolated = False
-            logger.info("Сеть восстановлена.")
-        except Exception as e:
-            logger.error(f"Ошибка восстановления сети: {e}")
-
-class ThreatClassifier:
-    """Классификатор типов угроз на основе поведения и статики"""
-    
-    SIGNATURES = {
-        'Ransomware': [b'MZ', b'.pdb', b'encrypt', b'decrypt', b'bitcoin', b'wallet', b'.onion', b'locky', b'wannacry'],
-        'Stealer': [b'password', b'cookie', b'credential', b'wallet', b'meta', b'steal', b'log', b'telegram'],
-        'Miner': [b'stratum', b'pool.', b'xmr', b'miner', b'cpu', b'gpu', b'hash', b'cryptonight'],
-        'RAT': [b'cmd.exe', b'powershell', b'screenshot', b'webcam', b'microphone', b'keylog', b'remote'],
-        'Botnet': [b'ddos', b'flood', b'bot', b'zombie', b'irc', b'udp', b'syn', b'amplification'],
-        'Dropper': [b'download', b'execute', b'payload', b'shell', b'drop', b'install']
-    }
-    
-    BEHAVIOR_PATTERNS = {
-        'Ransomware': ['file_encryption', 'shadow_copy_delete', 'ransom_note_create'],
-        'Stealer': ['browser_access', 'clipboard_monitor', 'keyhook_install'],
-        'Miner': ['high_cpu_usage', 'gpu_access', 'network_pool_connection'],
-        'RAT': ['process_injection', 'persistence_registry', 'screenshot_capture'],
-        'Botnet': ['ddos_pattern', 'port_scan', 'spam_activity'],
-        'Dropper': ['file_download', 'secondary_execution', 'self_delete']
-    }
-
-    def classify_static(self, file_content: bytes) -> dict:
-        """Статическая классификация по байтам"""
-        scores = {k: 0 for k in self.SIGNATURES.keys()}
-        found_indicators = {k: [] for k in self.SIGNATURES.keys()}
-        
-        for threat_type, signatures in self.SIGNATURES.items():
-            for sig in signatures:
-                if sig in file_content:
-                    scores[threat_type] += 15
-                    found_indicators[threat_type].append(sig.decode('utf-8', errors='ignore'))
-        
-        max_score = max(scores.values()) if scores.values() else 0
-        primary_type = max(scores, key=scores.get) if max_score > 0 else "Unknown"
-        
-        return {
-            "type": primary_type,
-            "confidence": min(max_score, 100),
-            "indicators": found_indicators[primary_type]
-        }
-
-    def classify_dynamic(self, events: list) -> dict:
-        """Динамическая классификация по событиям"""
-        scores = {k: 0 for k in self.BEHAVIOR_PATTERNS.keys()}
-        detected_actions = []
-        
-        for event in events:
-            action = event.get('action', '')
-            for threat_type, patterns in self.BEHAVIOR_PATTERNS.items():
-                if any(p in action for p in patterns):
-                    scores[threat_type] += 20
-                    detected_actions.append(f"{threat_type}: {action}")
-        
-        max_score = max(scores.values()) if scores.values() else 0
-        primary_type = max(scores, key=scores.get) if max_score > 0 else "Unknown"
-        
-        return {
-            "type": primary_type,
-            "confidence": min(max_score, 100),
-            "actions": detected_actions
-        }
+from panic_button import PanicButton
+from poly_engine import PolyEngine
+from threat_classifier import ThreatClassifier
+from report_generator import ReportGenerator
+from static_analyzer import StaticAnalyzer
+from network_emulator import NetworkEmulator
+from anti_sandbox import AntiSandbox
 
 class RedSandSecure:
-    """Основной класс песочницы"""
-    
-    def __init__(self, sample_path: str):
-        self.sample_path = Path(sample_path).resolve()
-        self.net_isolator = NetworkIsolator()
+    def __init__(self, output_dir='reports'):
+        self.output_dir = Path(output_dir)
+        self.output_dir.mkdir(exist_ok=True)
+        
+        self.panic_button = PanicButton()
+        self.poly_engine = PolyEngine()
         self.classifier = ThreatClassifier()
-        self.events_log = []
-        self.start_time = None
-        self.end_time = None
+        self.report_gen = ReportGenerator(str(self.output_dir))
+        self.static_analyzer = StaticAnalyzer()
+        self.net_emulator = None
+        self.anti_sandbox = AntiSandbox()
         
-        if not self.sample_path.exists():
-            raise FileNotFoundError(f"Файл не найден: {self.sample_path}")
-
-    def run_analysis(self):
-        """Запуск полного цикла анализа"""
-        logger.info("="*50)
-        logger.info(f"НАЧАЛО АНАЛИЗА: {self.sample_path}")
-        logger.info("="*50)
+        self.original_network_state = {}
+        self.is_network_disabled = False
+        self.analysis_start_time = None
+        self.processes_monitored = []
         
-        # 1. Отключение сети
-        if not self.net_isolator.kill_network():
-            logger.error("КРИТИЧЕСКАЯ ОШИБКА: Не удалось отключить сеть! Прерывание.")
-            return None
-
+    def disable_network(self):
+        """Полное отключение сети для максимальной безопасности"""
+        print("[*] Отключение всех сетевых адаптеров...")
         try:
-            self.start_time = datetime.now()
+            # Сохраняем текущее состояние
+            result = subprocess.run(
+                ['netsh', 'interface', 'show', 'interface'],
+                capture_output=True, text=True, shell=True
+            )
+            self.original_network_state['output'] = result.stdout
             
-            # 2. Статический анализ
-            logger.info("[1/3] Статический анализ...")
-            with open(self.sample_path, 'rb') as f:
-                content = f.read()
+            # Отключаем все адаптеры
+            adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
+            for adapter in adapters:
+                subprocess.run(
+                    f'netsh interface set interface "{adapter}" admin=disabled',
+                    shell=True, capture_output=True
+                )
             
-            static_result = self.classifier.classify_static(content)
-            self.events_log.append({
-                "stage": "static",
-                "timestamp": self.start_time.isoformat(),
-                "result": static_result
-            })
-            logger.info(f"Статический вердикт: {static_result['type']} (Уверенность: {static_result['confidence']}%)")
+            # Блокируем весь трафик через фаервол
+            subprocess.run(
+                'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
+                shell=True, capture_output=True
+            )
+            subprocess.run(
+                'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
+                shell=True, capture_output=True
+            )
             
-            # 3. Динамический анализ (Эмуляция запуска)
-            # В реальной версии здесь будет запуск агента C++ и мониторинг
-            logger.info("[2/3] Динамический анализ (Эмуляция)...")
-            time.sleep(2) # Имитация времени выполнения
+            self.is_network_disabled = True
+            print("[+] Сеть успешно отключена")
+            return True
+        except Exception as e:
+            print(f"[-] Ошибка отключения сети: {e}")
+            return False
+    
+    def restore_network(self):
+        """Восстановление сетевого подключения"""
+        if not self.is_network_disabled:
+            return
             
-            # Фейковые события для демонстрации (заменится на реальные данные от агента)
-            fake_events = [
-                {"action": "registry_persistence", "detail": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"},
-                {"action": "file_encryption", "detail": "C:\\Users\\Public\\*.docx locked"},
-                {"action": "network_attempt", "detail": "Blocked connection to 192.168.1.1"}
-            ]
-            self.events_log.extend(fake_events)
+        print("[*] Восстановление сетевого подключения...")
+        try:
+            # Включаем адаптеры
+            adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
+            for adapter in adapters:
+                subprocess.run(
+                    f'netsh interface set interface "{adapter}" admin=enabled',
+                    shell=True, capture_output=True
+                )
             
-            dynamic_result = self.classifier.classify_dynamic(fake_events)
-            logger.info(f"Динамический вердикт: {dynamic_result['type']} (Уверенность: {dynamic_result['confidence']}%)")
+            # Удаляем правила фаервола
+            subprocess.run(
+                'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
+                shell=True, capture_output=True
+            )
+            subprocess.run(
+                'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
+                shell=True, capture_output=True
+            )
             
-            self.end_time = datetime.now()
+            self.is_network_disabled = False
+            print("[+] Сеть восстановлена")
+        except Exception as e:
+            print(f"[-] Ошибка восстановления сети: {e}")
+    
+    def start_network_emulation(self):
+        """Запуск эмуляции сети для образца"""
+        print("[*] Запуск эмуляции сети...")
+        self.net_emulator = NetworkEmulator()
+        self.net_emulator.start()
+        print("[+] Эмуляция сети запущена (локальные DNS/HTTP)")
+    
+    def stop_network_emulation(self):
+        """Остановка эмуляции сети"""
+        if self.net_emulator:
+            self.net_emulator.stop()
+            self.net_emulator = None
+    
+    def apply_anti_sandbox(self):
+        """Применение техник обхода анти-песочницы"""
+        print("[*] Применение анти-песочничных техник...")
+        self.anti_sandbox.emulate_user_activity()
+        self.anti_sandbox.fake_registry_entries()
+        self.anti_sandbox.spawn_fake_processes()
+        print("[+] Анти-песочница активирована")
+    
+    def analyze_static(self, file_path):
+        """Статический анализ файла"""
+        print(f"[*] Статический анализ: {file_path}")
+        results = self.static_analyzer.analyze(file_path)
+        
+        # Предварительная классификация
+        threat_type = self.classifier.classify_static(results)
+        results['preliminary_threat_type'] = threat_type
+        
+        return results
+    
+    def run_dynamic_analysis(self, file_path, timeout=60):
+        """Динамический анализ с мониторингом"""
+        print(f"[*] Запуск динамического анализа (таймаут: {timeout}с)...")
+        
+        self.analysis_start_time = datetime.now()
+        events_log = []
+        
+        # Запускаем образец
+        try:
+            process = subprocess.Popen(
+                [file_path],
+                cwd=os.path.dirname(file_path),
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE
+            )
+            self.processes_monitored.append(process.pid)
             
-            # 4. Формирование итогового отчета
-            report = self.generate_report(static_result, dynamic_result)
+            # Мониторинг процессов
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                if process.poll() is not None:
+                    break
+                
+                # Проверка на критические действия
+                if self.panic_button.check_critical_actions():
+                    print("[!] Обнаружены критические действия! Экстренная остановка!")
+                    self.panic_button.trigger()
+                    break
+                
+                time.sleep(1)
             
-            return report
+            # Завершаем процесс если еще работает
+            if process.poll() is None:
+                process.terminate()
+                process.wait(timeout=5)
+            
+            events_log = self.panic_button.get_events_log()
+            
+        except Exception as e:
+            print(f"[-] Ошибка выполнения: {e}")
+            events_log = [{'error': str(e)}]
+        
+        return events_log
+    
+    def classify_threat(self, static_results, dynamic_events):
+        """Классификация угрозы"""
+        print("[*] Классификация угрозы...")
+        threat_info = self.classifier.classify(static_results, dynamic_events)
+        return threat_info
+    
+    def generate_reports(self, file_path, static_results, dynamic_events, threat_info):
+        """Генерация отчетов"""
+        print("[*] Генерация отчетов...")
+        
+        report_data = {
+            'file': {
+                'path': file_path,
+                'name': os.path.basename(file_path),
+                'size': os.path.getsize(file_path) if os.path.exists(file_path) else 0
+            },
+            'static_analysis': static_results,
+            'dynamic_analysis': dynamic_events,
+            'threat_classification': threat_info,
+            'analysis_time': {
+                'start': self.analysis_start_time.isoformat() if self.analysis_start_time else None,
+                'end': datetime.now().isoformat(),
+                'duration': (datetime.now() - self.analysis_start_time).total_seconds() if self.analysis_start_time else 0
+            },
+            'system_info': {
+                'network_disabled': self.is_network_disabled,
+                'emulation_used': self.net_emulator is not None,
+                'anti_sandbox_applied': True
+            }
+        }
+        
+        # Генерируем все форматы отчетов
+        json_report = self.report_gen.generate_json(report_data)
+        html_report = self.report_gen.generate_html(report_data)
+        txt_report = self.report_gen.generate_txt(report_data)
+        
+        print(f"[+] Отчеты сохранены:")
+        print(f"    JSON: {json_report}")
+        print(f"    HTML: {html_report}")
+        print(f"    TXT:  {txt_report}")
+        
+        return report_data
+    
+    def analyze(self, file_path, use_poly=False, timeout=60):
+        """Полный анализ файла"""
+        if not os.path.exists(file_path):
+            print(f"[-] Файл не найден: {file_path}")
+            return None
+        
+        print("=" * 60)
+        print("RedSand Secure v2.0 - Анализ вредоносного ПО")
+        print("=" * 60)
+        print(f"Файл: {file_path}")
+        print(f"Время: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        print("=" * 60)
+        
+        try:
+            # Шаг 1: Отключение сети
+            self.disable_network()
+            
+            # Шаг 2: Применение анти-песочницы
+            self.apply_anti_sandbox()
+            
+            # Шаг 3: Запуск эмуляции сети
+            self.start_network_emulation()
+            
+            # Шаг 4: Статический анализ
+            static_results = self.analyze_static(file_path)
+            
+            # Шаг 5: Полиморфная генерация (опционально)
+            if use_poly:
+                print("[*] Генерация полиморфных вариантов...")
+                poly_variants = self.poly_engine.generate_variants(file_path, count=3)
+                static_results['poly_variants'] = poly_variants
+            
+            # Шаг 6: Динамический анализ
+            dynamic_events = self.run_dynamic_analysis(file_path, timeout)
+            
+            # Шаг 7: Классификация угрозы
+            threat_info = self.classify_threat(static_results, dynamic_events)
+            
+            # Шаг 8: Генерация отчетов
+            report_data = self.generate_reports(file_path, static_results, dynamic_events, threat_info)
+            
+            # Вывод вердикта
+            print("\n" + "=" * 60)
+            print("ВЕРДИКТ")
+            print("=" * 60)
+            print(f"Тип угрозы: {threat_info.get('type', 'Неизвестно')}")
+            print(f"Семейство: {threat_info.get('family', 'Неизвестно')}")
+            print(f"Уровень риска: {threat_info.get('risk_score', 0)}/100")
+            print(f"MITRE ATT&CK: {', '.join(threat_info.get('mitre_tactics', []))}")
+            print("=" * 60)
+            
+            return report_data
+            
+        except Exception as e:
+            print(f"[-] Критическая ошибка анализа: {e}")
+            import traceback
+            traceback.print_exc()
+            return None
             
         finally:
-            # 4. Восстановление сети (ОБЯЗАТЕЛЬНО)
-            logger.info("[3/3] Восстановление системы...")
-            self.net_isolator.restore_network()
+            # Всегда восстанавливаем сеть и останавливаем эмуляцию
+            self.stop_network_emulation()
+            self.restore_network()
+            print("[*] Система возвращена в исходное состояние")
 
-    def generate_report(self, static_res, dynamic_res):
-        """Генерация детального отчета"""
-        final_type = dynamic_res['type'] if dynamic_res['confidence'] > static_res['confidence'] else static_res['type']
-        risk_score = max(static_res['confidence'], dynamic_res['confidence'])
-        
-        verdict = "SAFE"
-        if risk_score > 70: verdict = "MALICIOUS"
-        elif risk_score > 40: verdict = "SUSPICIOUS"
-        
-        report = {
-            "meta": {
-                "sample": str(self.sample_path),
-                "md5": hashlib.md5(open(self.sample_path, 'rb').read()).hexdigest(),
-                "sha256": hashlib.sha256(open(self.sample_path, 'rb').read()).hexdigest(),
-                "analysis_time": str(self.end_time - self.start_time),
-                "timestamp": datetime.now().isoformat()
-            },
-            "verdict": {
-                "status": verdict,
-                "risk_score": risk_score,
-                "malware_family": final_type,
-                "description": self._get_description(final_type)
-            },
-            "static_analysis": static_res,
-            "dynamic_analysis": dynamic_res,
-            "mitre_attack": self._map_mitre(final_type),
-            "recommendations": self._get_recommendations(final_type)
-        }
-        
-        # Сохранение отчета
-        report_path = Path("reports") / f"report_{hashlib.md5(str(time.time()).encode()).hexdigest()[:8]}.json"
-        with open(report_path, 'w', encoding='utf-8') as f:
-            json.dump(report, f, indent=2, ensure_ascii=False)
-            
-        logger.info(f"Отчет сохранен: {report_path}")
-        return report
+def generate_test_samples():
+    """Генерация тестовых симуляторов"""
+    print("[*] Генерация тестовых симуляторов вирусов...")
+    from test_samples.generate_all import generate_all_samples
+    samples_dir = Path('test_samples/generated')
+    samples_dir.mkdir(exist_ok=True)
+    generated = generate_all_samples(str(samples_dir))
+    print(f"[+] Сгенерировано {len(generated)} тестовых образцов в {samples_dir}")
+    return generated
 
-    def _get_description(self, malware_type):
-        desc = {
-            'Ransomware': "Шифровальщик файлов. Требует выкуп за расшифровку.",
-            'Stealer': "Похищает пароли, куки и криптокошельки.",
-            'Miner': "Использует ресурсы ПК для майнинга криптовалюты.",
-            'RAT': "Удаленное управление компьютером (троян).",
-            'Botnet': "Вовлекает ПК в бот-сеть для атак.",
-            'Dropper': "Загрузчик, устанавливающий другие вирусы.",
-            'Unknown': "Тип угрозы не определен точно."
-        }
-        return desc.get(malware_type, "Нет описания")
+def main():
+    parser = argparse.ArgumentParser(description='RedSand Secure v2.0 - Анализ вредоносного ПО')
+    parser.add_argument('file', nargs='?', help='Файл для анализа')
+    parser.add_argument('--poly', action='store_true', help='Использовать полиморфный анализ')
+    parser.add_argument('--timeout', type=int, default=60, help='Таймаут динамического анализа (сек)')
+    parser.add_argument('--generate-test-samples', action='store_true', help='Сгенерировать тестовые образцы')
+    parser.add_argument('--output', default='reports', help='Директория для отчетов')
+    
+    args = parser.parse_args()
+    
+    if args.generate_test_samples:
+        generate_test_samples()
+        return
+    
+    if not args.file:
+        parser.print_help()
+        print("\nПримеры использования:")
+        print("  python redsand_secure.py suspicious.exe")
+        print("  python redsand_secure.py malware.dll --poly")
+        print("  python redsand_secure.py --generate-test-samples")
+        return
+    
+    sandbox = RedSandSecure(output_dir=args.output)
+    sandbox.analyze(args.file, use_poly=args.poly, timeout=args.timeout)
 
-    def _map_mitre(self, malware_type):
-        mapping = {
-            'Ransomware': ['T1486 (Data Encrypted for Impact)', 'T1490 (Inhibit System Recovery)'],
-            'Stealer': ['T1555 (Credentials from Password Stores)', 'T1539 (Steal Web Session Cookie)'],
-            'Miner': ['T1496 (Resource Hijacking)'],
-            'RAT': ['T1059 (Command and Scripting Interpreter)', 'T1055 (Process Injection)'],
-            'Botnet': ['T1498 (Network Denial of Service)', 'T1071 (Application Layer Protocol)'],
-            'Dropper': ['T1105 (Ingress Tool Transfer)', 'T1204 (User Execution)']
-        }
-        return mapping.get(malware_type, [])
-
-    def _get_recommendations(self, malware_type):
-        recs = {
-            'Ransomware': ["Не платить выкуп!", "Восстановить файлы из бэкапа", "Проверить другие ПК в сети"],
-            'Stealer': ["Сменить все пароли", "Выйти из сессий везде", "Проверить банковские счета"],
-            'Miner': ["Проверить автозагрузку", "Обновить драйверы", "Проверить процессы в Диспетчере задач"],
-            'RAT': ["Отключить интернет", "Сбросить пароли", "Провести полную проверку антивирусом"],
-            'Botnet': ["Блокировать подозрительные порты", "Перепрошить роутер", "Следить за трафиком"],
-            'Dropper': ["Удалить файл", "Проверить временные папки", "Очистить кэш браузера"]
-        }
-        return recs.get(malware_type, ["Провести полный анализ системы"])
-
-if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Использование: python redsand_secure.py <путь_к_файлу>")
-        print("ВАЖНО: Запускать ТОЛЬКО в виртуальной машине от имени АДМИНИСТРАТОРА!")
-        sys.exit(1)
-
-    try:
-        sandbox = RedSandSecure(sys.argv[1])
-        result = sandbox.run_analysis()
-        if result:
-            print("\n" + "="*50)
-            print(f"ВЕРДИКТ: {result['verdict']['status']}")
-            print(f"Угроза: {result['verdict']['malware_family']}")
-            print(f"Риск: {result['verdict']['risk_score']}/100")
-            print("="*50)
-    except Exception as e:
-        logger.critical(f"Фатальная ошибка: {e}")
-        # Экстренное восстановление сети при крахе
-        NetworkIsolator().restore_network()
+if __name__ == '__main__':
+    # Проверка прав администратора
+    if os.name == 'nt' and not ctypes.windll.shell32.IsUserAnAdmin():
+        print("[!] Внимание: Рекомендуется запуск от имени администратора для полного функционала")
+    
+    main()
