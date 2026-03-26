@@ -1,0 +1,48 @@
+{
+  "metadata": {
+    "tool": "RedSand",
+    "version": "1.0.0",
+    "analysis_time": "2026-03-26T14:37:36.447631",
+    "host": "unknown"
+  },
+  "session": {
+    "sample": {
+      "name": "test.txt",
+      "path": "samples/test.txt",
+      "size": 10,
+      "hash_md5": "b05403212c66bdc8ccc597fedf6cd5fe",
+      "hash_sha256": "55f8718109829bf506b09d8af615b9f107a266e19f7a311039d1035f180b22d4",
+      "submission_time": "2026-03-26T14:37:36.446069"
+    },
+    "duration_seconds": 0.0011796951293945312,
+    "events_count": 1,
+    "file_changes_count": 0,
+    "registry_changes_count": 0,
+    "network_connections_count": 0,
+    "processes_count": 0,
+    "errors": [],
+    "events": [
+      {
+        "timestamp": 1774535856.4471538,
+        "type": "error",
+        "data": {
+          "message": "[Errno 13] Permission denied: 'samples/test.txt'"
+        }
+      }
+    ]
+  },
+  "verdict": {
+    "score": 0,
+    "risk_level": "LOW",
+    "verdict": "SAFE",
+    "reasons": []
+  },
+  "iocs": {
+    "files": [],
+    "registry_keys": [],
+    "ip_addresses": [],
+    "domains": [],
+    "urls": [],
+    "mutexes": []
+  }
+}

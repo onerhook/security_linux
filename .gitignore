@@ -1,37 +1,27 @@
 ```
-# Logs
-*.log
-
-# Reports and test outputs
-RedSand/reports/
-RedSand/logs/
-
-# Python specific
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-.Python
-env/
-venv/
-.venv/
-.ENV
-.ENV.local
+*.log
+*.tmp
+.DS_Store
+Thumbs.db
 .env
 .env.local
 .env.*
-.pytest_cache/
-.mypy_cache/
+.vscode/
+.idea/
 .coverage
 coverage/
 htmlcov/
-
-# Build directories
-build/
+.mypy_cache/
+.pytest_cache/
 dist/
-*.egg-info/
-
-# OS generated files
-.DS_Store
-Thumbs.db
+build/
+target/
+.gradle/
+node_modules/
+venv/
+.venv/
 ```

@@ -1,0 +1,212 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedSand - Отчет анализа: test.txt</title>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #d32f2f;
+            border-bottom: 3px solid #d32f2f;
+            padding-bottom: 10px;
+        }
+        h2 {
+            color: #1976d2;
+            margin-top: 30px;
+        }
+        h3 {
+            color: #388e3c;
+        }
+        .verdict {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .verdict-safe {
+            background: #c8e6c9;
+            color: #2e7d32;
+        }
+        .verdict-suspicious {
+            background: #fff9c4;
+            color: #f57f17;
+        }
+        .verdict-malicious {
+            background: #ffcdd2;
+            color: #c62828;
+        }
+        .score-bar {
+            width: 100%;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        .score-fill {
+            height: 100%;
+            transition: width 0.5s;
+        }
+        .score-low { background: #4caf50; }
+        .score-medium { background: #ff9800; }
+        .score-high { background: #f44336; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        tr:hover {
+            background: #f9f9f9;
+        }
+        .ioc-list {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        .timeline {
+            border-left: 3px solid #1976d2;
+            padding-left: 20px;
+            margin-left: 10px;
+        }
+        .timeline-event {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 12px;
+        }
+        .reason-item {
+            padding: 5px 10px;
+            background: #fff3e0;
+            margin: 5px 0;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .metadata {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .mitre-tag {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #9c27b0;
+            color: white;
+            border-radius: 3px;
+            font-size: 12px;
+            margin: 2px;
+        }
+    </style>
+    
+</head>
+<body>
+    <div class="container">
+        <h1>🛡️ RedSand - Отчет анализа вредоносного ПО</h1>
+        
+        <div class="metadata">
+            <strong>Файл:</strong> test.txt<br>
+            <strong>Размер:</strong> 10 байт<br>
+            <strong>MD5:</strong> <code>b05403212c66bdc8ccc597fedf6cd5fe</code><br>
+            <strong>SHA256:</strong> <code>55f8718109829bf506b09d8af615b9f107a266e19f7a311039d1035f180b22d4</code><br>
+            <strong>Время анализа:</strong> 2026-03-26T14:37:36.447631<br>
+            <strong>Длительность:</strong> 0.00 сек
+        </div>
+        
+        <h2>📊 Вердикт</h2>
+        <div class="verdict verdict-safe">
+            SAFE
+        </div>
+        
+        <div style="margin: 20px 0;">
+            <strong>Оценка риска: 0/100</strong>
+            <div class="score-bar">
+                <div class="score-fill score-low" style="width: 0%"></div>
+            </div>
+            <strong>Уровень:</strong> LOW
+        </div>
+        
+        <h3>Причины:</h3>
+        <div>
+            
+        </div>
+        
+        <h2>🔍 Индикаторы компрометации (IOC)</h2>
+        <p>IOC не обнаружены</p>
+        
+        <h2>🎯 MITRE ATT&CK</h2>
+        <p>Сопоставлений с MITRE ATT&CK не найдено</p>
+        
+        <h2>📈 Статистика</h2>
+        
+        <table>
+            <tr>
+                <th>Метрика</th>
+                <th>Значение</th>
+            </tr>
+            <tr>
+                <td>Всего событий</td>
+                <td>1</td>
+            </tr>
+            <tr>
+                <td>Уникальных процессов</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Уникальных файлов</td>
+                <td>0</td>
+            </tr>
+            <tr>
+                <td>Временной интервал</td>
+                <td>0.00 сек</td>
+            </tr>
+        </table>
+        
+        
+        <h2>⏱️ Временная шкала событий</h2>
+        <div class="timeline">
+            <div class="timeline-event">
+                <div class="timestamp">[1774535856.447] <strong>ERROR</strong></div>
+                <div>message=[Errno 13] Permission denied: &#x27;samples/test.txt&#x27;</div>
+            </div>
+            </div>
+        
+        <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; color: #666; font-size: 12px;">
+            Сгенерировано RedSand v1.0.0 | 2026-03-26 14:37:48
+        </div>
+    </div>
+</body>
+</html>
