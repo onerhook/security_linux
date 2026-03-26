@@ -1,27 +1,49 @@
 ```
-__pycache__/
+# Executables and binaries
+*.exe
+*.dll
+*.so
+*.o
+*.obj
+*.out
+*.a
+*.class
 *.pyc
-*.pyo
-*.pyd
-*.log
-*.tmp
-.DS_Store
-Thumbs.db
+
+# Build and distribution directories
+build/
+dist/
+target/
+__pycache__/
+*.egg-info/
+
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
 .env.local
-.env.*
+*.env.*
+
+# Reports and temporary files
+reports/
+*.tmp
+*.log
+
+# Editors and IDEs
 .vscode/
 .idea/
+*.swp
+*.swo
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Coverage and testing
 .coverage
 coverage/
 htmlcov/
 .mypy_cache/
 .pytest_cache/
-dist/
-build/
-target/
-.gradle/
-node_modules/
-venv/
-.venv/
 ```
