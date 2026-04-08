@@ -1,35 +1,39 @@
 ```
-# Dependencies
+# Python
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
+# Dependencies
 .venv/
 venv/
 env/
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-.tox/
-.coverage
-.coverage.*
-.cache
-nosetests.xml
-coverage.xml
-*.cover
-*.db
-*.sqlite
-*.sqlite3
-*.log
-*.tmp
-*.swp
-*.swo
-.DS_Store
-Thumbs.db
 .env
 .env.local
 .env.*
-.recommenders
-.ensime_cache
-.ensime_lucene
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Logs
+*.log
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# Coverage
+.coverage
+coverage/
+htmlcov/
+
+# Testing
+.pytest_cache/
+.mypy_cache/
 ```
