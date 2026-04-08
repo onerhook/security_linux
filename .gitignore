@@ -1,19 +1,22 @@
 ```
-# Python
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
 # Dependencies
-.venv/
+node_modules/
 venv/
-env/
+.venv/
+__pycache__/
+*.egg-info/
+dist/
+build/
+target/
+.gradle/
 
-# Logs
+# Logs and temp files
 *.log
+*.tmp
+*.swp
+*.swo
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
@@ -24,8 +27,23 @@ env/
 *.swp
 *.swo
 
-# Build artifacts
-build/
-dist/
-target/
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+*.pyc
+*.pyo
+*.pyd
+.Python
+__pycache__/
+.coverage
+htmlcov/
+.mypy_cache/
+.pytest_cache/
+
+# Docker
+.dockerenv
+!Dockerfile
+!docker-compose.yml
 ```

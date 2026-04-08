@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  redsand-analyzer:
+    build: .
+    container_name: redsand-secure
+    hostname: redsand-sandbox
+    restart: unless-stopped
+    
+    # Security: Read-only root filesystem
+    read_only: true
+    
+    # Temporary filesystems for runtime needs
+    tmpfs:
+      - /tmp:size=100M,mode=1777
+      - /app/logs:size=50M,mode=755
+      - /app/reports:size=100M,mode=755
+    
+    # Volumes for persistent data
+    volumes:
+      - ./samples:/app/samples:ro          # Read-only access to samples
+      - ./reports:/app/reports             # Reports output
+      - ./quarantine:/app/quarantine       # Quarantined files
+      - ./config:/app/config:ro            # Configuration files
+    
+    # Environment variables
+    environment:
+      - REDSAND_ENV=production
+      - LOG_LEVEL=INFO
+      - MAX_WORKERS=4
+      - QUARANTINE_ENABLED=true
+      - NETWORK_EMULATION=false
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 128M
+    
+    # Network isolation
+    networks:
+      - redsand-isolated
+    
+    # No port exposure by default (air-gapped)
+    # Uncomment only if API mode is needed
+    # ports:
+    #   - "8080:8080"
+    
+    # Security options
+    security_opt:
+      - no-new-privileges:true
+      - apparmor:docker-default
+    
+    # Drop all capabilities
+    cap_drop:
+      - ALL
+    
+    # Add only necessary capabilities
+    cap_add:
+      - CHOWN
+      - SETUID
+      - SETGID
+    
+    # Disable inter-process communication
+    ipc: none
+    
+    # PID namespace isolation
+    pid: none
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "python", "-c", "import os; exit(0)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    
+    # Command override (example)
+    # command: >
+    #   python redsand_secure.py
+    #   --input /app/samples
+    #   --output /app/reports
+    #   --workers 4
+    #   --verbose
+
+  # Optional: Redis cache for results
+  redsand-cache:
+    image: redis:7-alpine
+    container_name: redsand-cache
+    restart: unless-stopped
+    networks:
+      - redsand-isolated
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --maxmemory 128mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+
+networks:
+  redsand-isolated:
+    driver: bridge
+    internal: true  # No external connectivity
+
+volumes:
+  redis-data:
+    driver: local
