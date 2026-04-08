@@ -1,20 +1,20 @@
 ```
 # Dependencies
 node_modules/
-venv/
 .venv/
+venv/
 __pycache__/
-*.egg-info/
-dist/
-build/
+.mypy_cache/
+.pytest_cache/
 target/
 .gradle/
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
+# Build artifacts
+dist/
+build/
+*.o
+*.obj
+*.out
 
 # Environment
 .env
@@ -26,24 +26,17 @@ target/
 .idea/
 *.swp
 *.swo
+*.tmp
 
-# OS
+# Logs
+*.log
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# System
 .DS_Store
 Thumbs.db
-
-# Python
-*.pyc
-*.pyo
-*.pyd
-.Python
-__pycache__/
-.coverage
-htmlcov/
-.mypy_cache/
-.pytest_cache/
-
-# Docker
-.dockerenv
-!Dockerfile
-!docker-compose.yml
 ```

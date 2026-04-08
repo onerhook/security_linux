@@ -1,0 +1,175 @@
+#include <tunables/global>
+
+# =============================================================================
+# RedSand Secure - AppArmor Profile
+# Максимально ограниченный профиль для контейнера анализа вредоносного ПО
+# =============================================================================
+
+profile redsand-secure flags=(attach_disconnected,mediate_deleted) {
+  #include <abstractions/base>
+
+  # ==========================================================================
+  # Network: Ограниченный сетевой доступ
+  # ==========================================================================
+  # Разрешаем только базовый IPv4 трафик
+  network inet tcp,
+  network inet udp,
+  network inet icmp,
+  
+  # Запрещаем raw sockets и packet sockets (используются для атак)
+  deny network raw,
+  deny network packet,
+  
+  # Запрещаем Unix domain sockets для межпроцессного взаимодействия
+  deny network unix,
+  
+  # ==========================================================================
+  # Filesystem: Доступ к файлам
+  # ==========================================================================
+  # Базовый доступ к файлам
+  file,
+  
+  # Разрешаем umount (для tmpfs)
+  umount,
+  
+  # ==========================================================================
+  # Запрет доступа к системным директориям
+  # ==========================================================================
+  # Запрещаем запись в системные директории
+  deny /{dev,proc,sys,run}/** w,
+  deny /{dev,proc,sys,run}/** rw,
+  
+  # Запрещаем чтение чувствительной информации из /proc
+  deny @{PROC}/{*,**/${PROC_PAT},*/*/softirqs} w,
+  deny /proc/kcore r,
+  deny /proc/sysrq-trigger rw,
+  deny /proc/asound/** rw,
+  deny /proc/bus/** rw,
+  deny /proc/fs/** rw,
+  deny /proc/irq/** rw,
+  deny /proc/sys/** rw,
+  deny /proc/sys/kernel/** rw,
+  
+  # Запрещаем доступ к ядру
+  deny /sys/kernel/** rw,
+  deny /sys/fs/cgroup/** rw,
+  deny /sys/module/** rw,
+  deny /sys/devices/** w,
+  
+  # ==========================================================================
+  # Capabilities: Запрет опасных возможностей
+  # ==========================================================================
+  # Запрещаем все опасные capabilities
+  capability !sys_admin,
+  capability !sys_ptrace,
+  capability !sys_module,
+  capability !sys_rawio,
+  capability !sys_boot,
+  capability !sys_time,
+  capability !sys_resource,
+  capability !syslog,
+  capability !wake_alarm,
+  capability !block_suspend,
+  capability !audit_control,
+  capability !audit_write,
+  capability !audit_read,
+  capability !mac_admin,
+  capability !mac_override,
+  capability !ipc_lock,
+  capability !ipc_owner,
+  capability !linux_immutable,
+  capability !net_bind_service,
+  capability !net_broadcast,
+  capability !net_admin,
+  capability !net_raw,
+  capability !dac_override,
+  capability !fowner,
+  capability !fsetid,
+  capability !kill,
+  capability !setgid,
+  capability !setuid,
+  capability !setpcap,
+  capability !setfcap,
+  capability !chown,
+  capability !dac_read_search,
+  capability !lease,
+  capability !sys_chroot,
+  capability !mknod,
+  
+  # ==========================================================================
+  # Executable: Разрешение на выполнение только основного скрипта
+  # ==========================================================================
+  # Разрешаем выполнение основного скрипта
+  /app/redsand_secure.py ix,
+  
+  # Модули только для чтения
+  /app/modules/** r,
+  
+  # ==========================================================================
+  # Directories: Доступ к директориям приложения
+  # ==========================================================================
+  # Логи - чтение и запись
+  /app/logs/** rw,
+  /app/logs/ r,
+  
+  # Отчеты - чтение и запись
+  /app/reports/** rw,
+  /app/reports/ r,
+  
+  # Карантин - чтение и запись
+  /app/quarantine/** rw,
+  /app/quarantine/ r,
+  
+  # Samples - только чтение (образцы вредоносного ПО!)
+  /app/samples/** r,
+  /app/samples/ r,
+  
+  # Конфигурация - только чтение
+  /app/config/** r,
+  /app/config/ r,
+  
+  # Кэш - чтение и запись
+  /app/cache/** rw,
+  /app/cache/ r,
+  
+  # Временные файлы
+  /tmp/** rw,
+  /tmp/ r,
+  
+  # Домашняя директория пользователя
+  /home/redsand/** rw,
+  /home/redsand/ r,
+  
+  # ==========================================================================
+  # Binary Restrictions: Запрет выполнения системных бинарников
+  # ==========================================================================
+  # Запрещаем выполнение системных утилит
+  deny /bin/** ix,
+  deny /sbin/** ix,
+  deny /usr/bin/** ix,
+  deny /usr/sbin/** ix,
+  
+  # Исключение для критически необходимых утилит (если нужно)
+  # /bin/sh ix,
+  # /usr/bin/python* ix,
+  
+  # ==========================================================================
+  # Additional Restrictions: Дополнительные ограничения
+  # ==========================================================================
+  # Запрещаем доступ к Docker socket
+  deny /var/run/docker.sock rw,
+  deny /run/docker.sock rw,
+  
+  # Запрещаем доступ к Kubelet
+  deny /var/lib/kubelet/** rw,
+  
+  # Запрещаем доступ к systemd
+  deny /run/systemd/** rw,
+  
+  # Запрещаем ptrace (отладка процессов)
+  deny ptrace,
+  
+  # Запрещаем переименование процессов
+  deny /proc/*/comm w,
+  deny /proc/*/cmdline w,
+}
