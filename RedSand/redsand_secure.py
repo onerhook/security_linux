@@ -13,8 +13,11 @@ import json
 import argparse
 import subprocess
 import shutil
+import ctypes
+import logging
 from datetime import datetime
 from pathlib import Path
+from typing import Optional, Dict, Any, List
 
 # Добавляем модули в путь
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'modules'))
@@ -28,31 +31,53 @@ from network_emulator import NetworkEmulator
 from anti_sandbox import AntiSandbox
 
 class RedSandSecure:
-    def __init__(self, output_dir='reports'):
+    """Основной класс оркестратора анализа вредоносного ПО."""
+    
+    def __init__(self, output_dir: str = 'reports', log_level: int = logging.INFO):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+        
+        # Настройка логирования
+        self._setup_logging(log_level)
         
         self.panic_button = PanicButton()
         self.poly_engine = PolyEngine()
         self.classifier = ThreatClassifier()
         self.report_gen = ReportGenerator(str(self.output_dir))
         self.static_analyzer = StaticAnalyzer()
-        self.net_emulator = None
+        self.net_emulator: Optional[NetworkEmulator] = None
         self.anti_sandbox = AntiSandbox()
         
-        self.original_network_state = {}
+        self.original_network_state: Dict[str, Any] = {}
         self.is_network_disabled = False
-        self.analysis_start_time = None
-        self.processes_monitored = []
+        self.analysis_start_time: Optional[datetime] = None
+        self.processes_monitored: List[int] = []
         
-    def disable_network(self):
-        """Полное отключение сети для максимальной безопасности"""
+        self.logger.info("RedSand Secure инициализирован")
+    
+    def _setup_logging(self, log_level: int) -> None:
+        """Настройка системы логирования."""
+        log_file = self.output_dir / f'redsand_{datetime.now().strftime("%Y%m%d_%H%M%S")}.log'
+        
+        logging.basicConfig(
+            level=log_level,
+            format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            handlers=[
+                logging.FileHandler(log_file, encoding='utf-8'),
+                logging.StreamHandler(sys.stdout)
+            ]
+        )
+        self.logger = logging.getLogger('RedSandSecure')
+        
+    def disable_network(self) -> bool:
+        """Полное отключение сети для максимальной безопасности."""
+        self.logger.info("Отключение всех сетевых адаптеров")
         print("[*] Отключение всех сетевых адаптеров...")
         try:
             # Сохраняем текущее состояние
             result = subprocess.run(
                 ['netsh', 'interface', 'show', 'interface'],
-                capture_output=True, text=True, shell=True
+                capture_output=True, text=True, shell=True, check=False
             )
             self.original_network_state['output'] = result.stdout
             
@@ -61,31 +86,34 @@ class RedSandSecure:
             for adapter in adapters:
                 subprocess.run(
                     f'netsh interface set interface "{adapter}" admin=disabled',
-                    shell=True, capture_output=True
+                    shell=True, capture_output=True, check=False
                 )
             
             # Блокируем весь трафик через фаервол
             subprocess.run(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
-                shell=True, capture_output=True
+                shell=True, capture_output=True, check=False
             )
             subprocess.run(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
-                shell=True, capture_output=True
+                shell=True, capture_output=True, check=False
             )
             
             self.is_network_disabled = True
+            self.logger.info("Сеть успешно отключена")
             print("[+] Сеть успешно отключена")
             return True
         except Exception as e:
+            self.logger.error(f"Ошибка отключения сети: {e}")
             print(f"[-] Ошибка отключения сети: {e}")
             return False
     
-    def restore_network(self):
-        """Восстановление сетевого подключения"""
+    def restore_network(self) -> None:
+        """Восстановление сетевого подключения."""
         if not self.is_network_disabled:
             return
             
+        self.logger.info("Восстановление сетевого подключения")
         print("[*] Восстановление сетевого подключения...")
         try:
             # Включаем адаптеры
@@ -93,22 +121,24 @@ class RedSandSecure:
             for adapter in adapters:
                 subprocess.run(
                     f'netsh interface set interface "{adapter}" admin=enabled',
-                    shell=True, capture_output=True
+                    shell=True, capture_output=True, check=False
                 )
             
             # Удаляем правила фаервола
             subprocess.run(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
-                shell=True, capture_output=True
+                shell=True, capture_output=True, check=False
             )
             subprocess.run(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
-                shell=True, capture_output=True
+                shell=True, capture_output=True, check=False
             )
             
             self.is_network_disabled = False
+            self.logger.info("Сеть восстановлена")
             print("[+] Сеть восстановлена")
         except Exception as e:
+            self.logger.error(f"Ошибка восстановления сети: {e}")
             print(f"[-] Ошибка восстановления сети: {e}")
     
     def start_network_emulation(self):
@@ -230,9 +260,10 @@ class RedSandSecure:
         
         return report_data
     
-    def analyze(self, file_path, use_poly=False, timeout=60):
-        """Полный анализ файла"""
+    def analyze(self, file_path: str, use_poly: bool = False, timeout: int = 60) -> Optional[Dict[str, Any]]:
+        """Полный анализ файла с использованием контекстного менеджера."""
         if not os.path.exists(file_path):
+            self.logger.error(f"Файл не найден: {file_path}")
             print(f"[-] Файл не найден: {file_path}")
             return None
         
@@ -258,6 +289,7 @@ class RedSandSecure:
             
             # Шаг 5: Полиморфная генерация (опционально)
             if use_poly:
+                self.logger.info("Генерация полиморфных вариантов")
                 print("[*] Генерация полиморфных вариантов...")
                 poly_variants = self.poly_engine.generate_variants(file_path, count=3)
                 static_results['poly_variants'] = poly_variants
@@ -281,9 +313,11 @@ class RedSandSecure:
             print(f"MITRE ATT&CK: {', '.join(threat_info.get('mitre_tactics', []))}")
             print("=" * 60)
             
+            self.logger.info(f"Анализ завершен. Угроза: {threat_info.get('type', 'UNKNOWN')}, Риск: {threat_info.get('risk_score', 0)}")
             return report_data
             
         except Exception as e:
+            self.logger.error(f"Критическая ошибка анализа: {e}", exc_info=True)
             print(f"[-] Критическая ошибка анализа: {e}")
             import traceback
             traceback.print_exc()
@@ -293,6 +327,7 @@ class RedSandSecure:
             # Всегда восстанавливаем сеть и останавливаем эмуляцию
             self.stop_network_emulation()
             self.restore_network()
+            self.logger.info("Система возвращена в исходное состояние")
             print("[*] Система возвращена в исходное состояние")
 
 def generate_test_samples():
@@ -306,12 +341,22 @@ def generate_test_samples():
     return generated
 
 def main():
-    parser = argparse.ArgumentParser(description='RedSand Secure v2.0 - Анализ вредоносного ПО')
+    parser = argparse.ArgumentParser(
+        description='RedSand Secure v2.0 - Анализ вредоносного ПО',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Примеры использования:
+  python redsand_secure.py suspicious.exe
+  python redsand_secure.py malware.dll --poly
+  python redsand_secure.py --generate-test-samples
+        """
+    )
     parser.add_argument('file', nargs='?', help='Файл для анализа')
     parser.add_argument('--poly', action='store_true', help='Использовать полиморфный анализ')
     parser.add_argument('--timeout', type=int, default=60, help='Таймаут динамического анализа (сек)')
     parser.add_argument('--generate-test-samples', action='store_true', help='Сгенерировать тестовые образцы')
     parser.add_argument('--output', default='reports', help='Директория для отчетов')
+    parser.add_argument('--verbose', '-v', action='store_true', help='Включить подробное логирование')
     
     args = parser.parse_args()
     
@@ -321,13 +366,10 @@ def main():
     
     if not args.file:
         parser.print_help()
-        print("\nПримеры использования:")
-        print("  python redsand_secure.py suspicious.exe")
-        print("  python redsand_secure.py malware.dll --poly")
-        print("  python redsand_secure.py --generate-test-samples")
         return
     
-    sandbox = RedSandSecure(output_dir=args.output)
+    log_level = logging.DEBUG if args.verbose else logging.INFO
+    sandbox = RedSandSecure(output_dir=args.output, log_level=log_level)
     sandbox.analyze(args.file, use_poly=args.poly, timeout=args.timeout)
 
 if __name__ == '__main__':
