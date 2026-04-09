@@ -119,8 +119,8 @@ class ThreatClassifier:
         ]
         
         # Критические пороги для обнаружения
-        self.MIN_THREAT_SCORE = 60  # Минимальный скор для определения угрозы
-        self.MIN_KEYWORD_MATCHES = 3  # Минимум совпадений ключевых слов
+        self.MIN_THREAT_SCORE = 40  # Минимальный скор для определения угрозы (снижен с 60)
+        self.MIN_KEYWORD_MATCHES = 2  # Минимум совпадений ключевых слов (снижен с 3)
         self.MIN_CRITICAL_INDICATORS = 1  # Минимум критических индикаторов
         
     def classify_static(self, static_results):

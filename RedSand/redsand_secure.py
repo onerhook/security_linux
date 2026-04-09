@@ -135,30 +135,87 @@ class RedSandSecure:
         self.logger.info("Отключение всех сетевых адаптеров")
         print("[*] Отключение всех сетевых адаптеров...")
         try:
-            # Сохраняем текущее состояние
-            result = subprocess.run(
-                ['netsh', 'interface', 'show', 'interface'],
-                capture_output=True, text=True, shell=True, check=False
-            )
-            self.original_network_state['output'] = result.stdout
-            
-            # Отключаем все адаптеры
-            adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
-            for adapter in adapters:
+            import sys
+            if sys.platform == 'win32':
+                # Windows методы
+                result = subprocess.run(
+                    ['netsh', 'interface', 'show', 'interface'],
+                    capture_output=True, text=True, shell=True, check=False
+                )
+                self.original_network_state['output'] = result.stdout
+                
+                adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
+                for adapter in adapters:
+                    subprocess.run(
+                        f'netsh interface set interface "{adapter}" admin=disabled',
+                        shell=True, capture_output=True, check=False
+                    )
+                
                 subprocess.run(
-                    f'netsh interface set interface "{adapter}" admin=disabled',
+                    'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
                     shell=True, capture_output=True, check=False
                 )
-            
-            # Блокируем весь трафик через фаервол
-            subprocess.run(
-                'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
-                shell=True, capture_output=True, check=False
-            )
-            subprocess.run(
-                'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
-                shell=True, capture_output=True, check=False
-            )
+                subprocess.run(
+                    'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
+                    shell=True, capture_output=True, check=False
+                )
+            else:
+                # Linux методы
+                self.original_network_state['interfaces'] = []
+                
+                # Пробуем разные команды для получения списка интерфейсов
+                result = subprocess.run(
+                    ['ip', '-o', 'link', 'show'],
+                    capture_output=True, text=True, check=False
+                )
+                self.original_network_state['output'] = result.stdout
+                
+                interfaces = []
+                if result.returncode == 0:
+                    for line in result.stdout.split('\n'):
+                        if line.strip():
+                            parts = line.split(':')
+                            if len(parts) >= 2:
+                                iface = parts[1].strip()
+                                if iface != 'lo':
+                                    interfaces.append(iface)
+                                    self.original_network_state['interfaces'].append(iface)
+                else:
+                    # Если ip команда не доступна, пробуем ifconfig
+                    result = subprocess.run(
+                        ['ifconfig', '-a'],
+                        capture_output=True, text=True, check=False
+                    )
+                    if result.returncode == 0:
+                        for line in result.stdout.split('\n'):
+                            if line and not line.startswith(' ') and ':' in line:
+                                iface = line.split(':')[0].strip()
+                                if iface != 'lo' and iface:
+                                    interfaces.append(iface)
+                                    self.original_network_state['interfaces'].append(iface)
+                
+                # Отключаем интерфейсы
+                for iface in interfaces:
+                    try:
+                        subprocess.run(
+                            ['ip', 'link', 'set', iface, 'down'],
+                            capture_output=True, check=False
+                        )
+                    except:
+                        pass
+                
+                # Блокируем трафик через iptables если доступно
+                try:
+                    subprocess.run(
+                        ['iptables', '-A', 'OUTPUT', '-j', 'DROP'],
+                        capture_output=True, check=False
+                    )
+                    subprocess.run(
+                        ['iptables', '-A', 'INPUT', '-j', 'DROP'],
+                        capture_output=True, check=False
+                    )
+                except:
+                    pass
             
             self.is_network_disabled = True
             self.logger.info("Сеть успешно отключена")
@@ -167,6 +224,8 @@ class RedSandSecure:
         except Exception as e:
             self.logger.error(f"Ошибка отключения сети: {e}")
             print(f"[-] Ошибка отключения сети: {e}")
+            # Даже если ошибка - считаем что сеть отключена для безопасности
+            self.is_network_disabled = True
             return False
     
     def restore_network(self) -> None:
@@ -177,23 +236,43 @@ class RedSandSecure:
         self.logger.info("Восстановление сетевого подключения")
         print("[*] Восстановление сетевого подключения...")
         try:
-            # Включаем адаптеры
-            adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
-            for adapter in adapters:
+            import sys
+            if sys.platform == 'win32':
+                # Windows методы
+                adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
+                for adapter in adapters:
+                    subprocess.run(
+                        f'netsh interface set interface "{adapter}" admin=enabled',
+                        shell=True, capture_output=True, check=False
+                    )
+                
                 subprocess.run(
-                    f'netsh interface set interface "{adapter}" admin=enabled',
+                    'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
                     shell=True, capture_output=True, check=False
                 )
-            
-            # Удаляем правила фаервола
-            subprocess.run(
-                'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
-                shell=True, capture_output=True, check=False
-            )
-            subprocess.run(
-                'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
-                shell=True, capture_output=True, check=False
-            )
+                subprocess.run(
+                    'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
+                    shell=True, capture_output=True, check=False
+                )
+            else:
+                # Linux методы
+                interfaces = self.original_network_state.get('interfaces', [])
+                for iface in interfaces:
+                    try:
+                        subprocess.run(
+                            ['ip', 'link', 'set', iface, 'up'],
+                            capture_output=True, check=False
+                        )
+                    except:
+                        pass
+                
+                try:
+                    subprocess.run(
+                        ['iptables', '-F'],
+                        capture_output=True, check=False
+                    )
+                except:
+                    pass
             
             self.is_network_disabled = False
             self.logger.info("Сеть восстановлена")
@@ -201,6 +280,8 @@ class RedSandSecure:
         except Exception as e:
             self.logger.error(f"Ошибка восстановления сети: {e}")
             print(f"[-] Ошибка восстановления сети: {e}")
+            # Сбрасываем флаг в любом случае
+            self.is_network_disabled = False
     
     def start_network_emulation(self):
         """Запуск эмуляции сети для образца"""
@@ -241,13 +322,60 @@ class RedSandSecure:
         self.analysis_start_time = datetime.now()
         events_log = []
         
-        # Запускаем образец
+        # Проверяем существование файла и его тип
+        if not os.path.exists(file_path):
+            print(f"[-] Файл не найден: {file_path}")
+            return [{'error': f'File not found: {file_path}'}]
+        
+        # Определяем интерпретатор для запуска в зависимости от типа файла
+        import sys
+        file_ext = os.path.splitext(file_path)[1].lower()
+        
         try:
+            if file_ext == '.bat' or file_ext == '.cmd':
+                if sys.platform == 'win32':
+                    cmd = [file_path]
+                else:
+                    # На Linux используем wine или просто читаем файл
+                    print(f"[*] BAT файл на Linux - только статический анализ")
+                    return [{'info': 'BAT file on Linux - static analysis only'}]
+            elif file_ext == '.ps1':
+                if sys.platform == 'win32':
+                    cmd = ['powershell', '-ExecutionPolicy', 'Bypass', '-File', file_path]
+                else:
+                    print(f"[*] PowerShell файл на Linux - только статический анализ")
+                    return [{'info': 'PowerShell file on Linux - static analysis only'}]
+            elif file_ext in ['.exe', '.dll']:
+                if sys.platform == 'win32':
+                    cmd = [file_path]
+                else:
+                    # Пробуем wine для запуска Windows исполняемых файлов
+                    wine_path = shutil.which('wine')
+                    if wine_path:
+                        cmd = [wine_path, file_path]
+                        print(f"[*] Запуск через Wine: {file_path}")
+                    else:
+                        print(f"[*] Wine не найден - только статический анализ")
+                        return [{'info': 'Wine not available - static analysis only'}]
+            elif file_ext == '.py':
+                cmd = [sys.executable, file_path]
+            elif file_ext == '.sh':
+                cmd = ['/bin/bash', file_path]
+            else:
+                # Пытаемся запустить как скрипт или бинарник
+                if os.access(file_path, os.X_OK):
+                    cmd = [file_path]
+                else:
+                    print(f"[*] Неизвестный тип файла - только статический анализ")
+                    return [{'info': f'Unknown file type: {file_ext}'}]
+            
+            # Запускаем образец
             process = subprocess.Popen(
-                [file_path],
-                cwd=os.path.dirname(file_path),
+                cmd,
+                cwd=os.path.dirname(file_path) or '.',
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                preexec_fn=None if sys.platform == 'win32' else os.setsid
             )
             self.processes_monitored.append(process.pid)
             
@@ -267,10 +395,18 @@ class RedSandSecure:
             
             # Завершаем процесс если еще работает
             if process.poll() is None:
-                process.terminate()
+                if sys.platform == 'win32':
+                    process.terminate()
+                else:
+                    import signal
+                    os.killpg(os.getpgid(process.pid), signal.SIGTERM)
                 process.wait(timeout=5)
             
             events_log = self.panic_button.get_events_log()
+            
+            # Добавляем информацию о завершении
+            if process.returncode is not None:
+                events_log.append({'process_exit_code': process.returncode})
             
         except Exception as e:
             print(f"[-] Ошибка выполнения: {e}")
