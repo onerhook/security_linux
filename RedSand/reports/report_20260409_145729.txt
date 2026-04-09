@@ -1,0 +1,42 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-09 14:57:29
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: sim_ransomware.bat
+Путь: test_samples/generated/sim_ransomware.bat
+Размер: 487 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: CLEAN
+Семейство: None
+Уровень риска: 0/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_info: {'name': 'sim_ransomware.bat', 'size': 487, 'path': 'test_samples/generated/sim_ransomware.bat', 'extension': '.bat'}
+hashes: {'md5': 'c267d581cb2eb9e6ff48b87298052abd', 'sha1': 'e966faed7954908511f9f5df479535df93458c03', 'sha256': 'b882a2d716e316b576e22c1b98079965932da26befe633e25fc3dfd46f62a5fc', 'sha512': '9620a894a068e044ef6ce84e0ca744cc57fd49404b5e3cb752994b3ef1551e2b8febd3272e81eaccc7b1add95cbc84b2e296cd10100b9c3148a6209b9f7c2754'}
+strings: ['@echo off', 'REM ', ' ransomware ', 'echo [RANSOMWARE_SIM] Starting file encryption simulation...', 'echo [RANSOMWARE_SIM] Scanning for documents...', 'echo [RANSOMWARE_SIM] Would encrypt: *.docx, *.xlsx, *.pdf', 'echo [RANSOMWARE_SIM] Creating ransom note: READ_ME.txt', 'echo RANSOMWARE SIMULATION - Your files would be encrypted! > "%TEMP%\\READ_ME.txt"', 'echo [RANSOMWARE_SIM] Requesting bitcoin payment...', 'echo [RANSOMWARE_SIM] Simulation complete']
+pe_info: {}
+yara_matches: []
+preliminary_threat_type: RANSOMWARE
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================

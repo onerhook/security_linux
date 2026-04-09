@@ -1,0 +1,9 @@
+@echo off
+REM Симулятор trojan поведения (БЕЗОПАСНЫЙ)
+echo [TROJAN_SIM] Starting trojan simulation...
+echo [TROJAN_SIM] Disguised as legitimate software...
+echo [TROJAN_SIM] Would download additional payload...
+echo [TROJAN_SIM] Would inject into system processes
+echo [TROJAN_SIM] Would establish persistence
+echo [TROJAN_SIM] Trojan active (simulated)
+echo [TROJAN_SIM] Simulation complete

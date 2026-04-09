@@ -1,0 +1,42 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-09 14:58:40
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: sim_spyware.bat
+Путь: test_samples/generated/sim_spyware.bat
+Размер: 435 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: CLEAN
+Семейство: None
+Уровень риска: 0/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_info: {'name': 'sim_spyware.bat', 'size': 435, 'path': 'test_samples/generated/sim_spyware.bat', 'extension': '.bat'}
+hashes: {'md5': 'cbbda290005a8f1fae661a09015bb94b', 'sha1': 'a2ed7601641404059fb3b9220c436c9000b18afd', 'sha256': 'fa44ed0df84f311a8ce0c56930acbd1069d28126d1b8dafeddb598ec489eec49', 'sha512': 'd8b1d279c25a55d3edcb95aff6eda74b6cdf60fb7a13837ef1b7c38c5daca971060dc0a3a9e613154d8703ea7f67a91e112ca279289336aa25645b9103a5aaed'}
+strings: ['@echo off', 'REM ', ' spyware ', 'echo [SPYWARE_SIM] Starting spyware simulation...', 'echo [SPYWARE_SIM] Would monitor user activity...', 'echo [SPYWARE_SIM] Would capture screenshots every 10 seconds', 'echo [SPYWARE_SIM] Would track clipboard contents', 'echo [SPYWARE_SIM] Would record browsing history', 'echo [SPYWARE_SIM] Sending data to remote server...', 'echo [SPYWARE_SIM] Simulation complete']
+pe_info: {}
+yara_matches: []
+preliminary_threat_type: SPYWARE
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================

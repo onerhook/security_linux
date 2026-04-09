@@ -1,0 +1,78 @@
+{
+  "file": {
+    "path": "test_samples/generated/sim_botnet.bat",
+    "name": "sim_botnet.bat",
+    "size": 371
+  },
+  "static_analysis": {
+    "file_info": {
+      "name": "sim_botnet.bat",
+      "size": 371,
+      "path": "test_samples/generated/sim_botnet.bat",
+      "extension": ".bat"
+    },
+    "hashes": {
+      "md5": "ac927e27c468a935f6d3ce9fbd21a483",
+      "sha1": "2002f898dbd7bc0171598b93bc9e7c05c145fb90",
+      "sha256": "647899e9ed5de0dc5f9982399dd9c5b7021fedcbcab2807465180132ef04a136",
+      "sha512": "11c263b995af26780464374ff3426e8cf8a297d5449f792893a3dec862985f0446c8cefe59d149ec9d96e43c6521fda97557337292b6f89f30c6f9e6c75726fc"
+    },
+    "strings": [
+      "@echo off",
+      "REM ",
+      " botnet ",
+      "echo [BOTNET_SIM] Starting botnet client simulation...",
+      "echo [BOTNET_SIM] Connecting to IRC C2 server...",
+      "echo [BOTNET_SIM] Bot ID: BOT_12345 registered",
+      "echo [BOTNET_SIM] Waiting for DDoS commands...",
+      "echo [BOTNET_SIM] Would participate in flood attacks",
+      "echo [BOTNET_SIM] Simulation complete"
+    ],
+    "pe_info": {},
+    "yara_matches": [],
+    "preliminary_threat_type": "BOTNET"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "BAT file on Linux - static analysis only"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "None",
+    "risk_score": 0,
+    "confidence": "HIGH",
+    "mitre_tactics": [],
+    "all_scores": {
+      "RANSOMWARE": 0,
+      "STEALER": 0,
+      "MINER": 0,
+      "RAT": 0,
+      "WORM": 0,
+      "BOTNET": 7,
+      "ROOTKIT": 0,
+      "SPYWARE": 0,
+      "ADWARE": 0,
+      "TROJAN": 0,
+      "DROPPER": 0,
+      "KEYLOGGER": 0
+    },
+    "behaviors_detected": [],
+    "is_clean": true,
+    "analysis_notes": "Risk score below threshold"
+  },
+  "analysis_time": {
+    "start": "2026-04-09T14:59:00.307606",
+    "end": "2026-04-09T14:59:00.307908",
+    "duration": 0.000308
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}rk_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

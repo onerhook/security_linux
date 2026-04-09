@@ -1,0 +1,75 @@
+{
+  "file": {
+    "path": "test_samples/generated/sim_ransomware.bat",
+    "name": "sim_ransomware.bat",
+    "size": 487
+  },
+  "static_analysis": {
+    "file_info": {
+      "name": "sim_ransomware.bat",
+      "size": 487,
+      "path": "test_samples/generated/sim_ransomware.bat",
+      "extension": ".bat"
+    },
+    "hashes": {
+      "md5": "c267d581cb2eb9e6ff48b87298052abd",
+      "sha1": "e966faed7954908511f9f5df479535df93458c03",
+      "sha256": "b882a2d716e316b576e22c1b98079965932da26befe633e25fc3dfd46f62a5fc",
+      "sha512": "9620a894a068e044ef6ce84e0ca744cc57fd49404b5e3cb752994b3ef1551e2b8febd3272e81eaccc7b1add95cbc84b2e296cd10100b9c3148a6209b9f7c2754"
+    },
+    "strings": [
+      "@echo off",
+      "REM ",
+      " ransomware ",
+      "echo [RANSOMWARE_SIM] Starting file encryption simulation...",
+      "echo [RANSOMWARE_SIM] Scanning for documents...",
+      "echo [RANSOMWARE_SIM] Would encrypt: *.docx, *.xlsx, *.pdf",
+      "echo [RANSOMWARE_SIM] Creating ransom note: READ_ME.txt",
+      "echo RANSOMWARE SIMULATION - Your files would be encrypted! > \"%TEMP%\\READ_ME.txt\"",
+      "echo [RANSOMWARE_SIM] Requesting bitcoin payment...",
+      "echo [RANSOMWARE_SIM] Simulation complete"
+    ],
+    "pe_info": {},
+    "yara_matches": [],
+    "preliminary_threat_type": "RANSOMWARE"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "BAT file on Linux - static analysis only"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "None",
+    "risk_score": 0,
+    "confidence": "HIGH",
+    "mitre_tactics": [],
+    "all_scores": {
+      "RANSOMWARE": 7,
+      "STEALER": 0,
+      "MINER": 0,
+      "RAT": 0,
+      "WORM": 0,
+      "BOTNET": 0,
+      "ROOTKIT": 0,
+      "SPYWARE": 0,
+      "ADWARE": 0,
+      "TROJAN": 0,
+      "DROPPER": 0,
+      "KEYLOGGER": 0
+    },
+    "behaviors_detected": [],
+    "is_clean": true,
+    "analysis_notes": "Risk score below threshold"
+  },
+  "analysis_time": {
+    "start": "2026-04-09T14:58:03.866113",
+    "end": "2026-04-09T14:58:03.866564",
+    "duration": 0.000455
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

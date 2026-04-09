@@ -1,0 +1,9 @@
+@echo off
+REM Симулятор RAT поведения (БЕЗОПАСНЫЙ)
+echo [RAT_SIM] Starting remote access trojan simulation...
+echo [RAT_SIM] Opening backdoor port 4444...
+echo [RAT_SIM] Waiting for C2 commands...
+echo [RAT_SIM] Would capture screenshots
+echo [RAT_SIM] Would log keystrokes
+echo [RAT_SIM] Would access webcam
+echo [RAT_SIM] Simulation complete

@@ -1,0 +1,75 @@
+{
+  "file": {
+    "path": "test_samples/generated/sim_adware.bat",
+    "name": "sim_adware.bat",
+    "size": 411
+  },
+  "static_analysis": {
+    "file_info": {
+      "name": "sim_adware.bat",
+      "size": 411,
+      "path": "test_samples/generated/sim_adware.bat",
+      "extension": ".bat"
+    },
+    "hashes": {
+      "md5": "67d5d016afc4b48178228943e5a3fa6d",
+      "sha1": "c4f04d8f08bd4f8c0c787096fdfc276c762d8785",
+      "sha256": "de6e0a049caa45097b478431ef191ffbaee425b011f4500703ce4efc251a15da",
+      "sha512": "b93ea9f796da586b0b3c7706b70397f34c82fb610ee4e72327e8d81371a8dda35ad21305f04867c20bcd275f03cb29151735929e6e936b7e8350752fdf3e0943"
+    },
+    "strings": [
+      "@echo off",
+      "REM ",
+      " adware ",
+      "echo [ADWARE_SIM] Starting adware simulation...",
+      "echo [ADWARE_SIM] Would modify browser homepage...",
+      "echo [ADWARE_SIM] Would inject ads into web pages",
+      "echo [ADWARE_SIM] Would show popup advertisements",
+      "echo [ADWARE_SIM] Would redirect search queries",
+      "echo [ADWARE_SIM] Adware active (simulated)",
+      "echo [ADWARE_SIM] Simulation complete"
+    ],
+    "pe_info": {},
+    "yara_matches": [],
+    "preliminary_threat_type": "ADWARE"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "BAT file on Linux - static analysis only"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "None",
+    "risk_score": 0,
+    "confidence": "HIGH",
+    "mitre_tactics": [],
+    "all_scores": {
+      "RANSOMWARE": 0,
+      "STEALER": 0,
+      "MINER": 0,
+      "RAT": 0,
+      "WORM": 0,
+      "BOTNET": 0,
+      "ROOTKIT": 0,
+      "SPYWARE": 0,
+      "ADWARE": 3,
+      "TROJAN": 0,
+      "DROPPER": 0,
+      "KEYLOGGER": 0
+    },
+    "behaviors_detected": [],
+    "is_clean": true,
+    "analysis_notes": "Risk score below threshold"
+  },
+  "analysis_time": {
+    "start": "2026-04-09T14:58:50.630180",
+    "end": "2026-04-09T14:58:50.630414",
+    "duration": 0.000237
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

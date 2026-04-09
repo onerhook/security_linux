@@ -1,7 +1,19 @@
 ```
-# Reports directory
-RedSand/reports/
+# Compiled Python files
+__pycache__/
+*.pyc
 
-# Generated test samples
-RedSand/test_samples/generated/
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
 ```

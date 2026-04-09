@@ -1,0 +1,42 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-09 14:59:14
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: sim_adware.bat
+Путь: test_samples/generated/sim_adware.bat
+Размер: 411 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: CLEAN
+Семейство: None
+Уровень риска: 0/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_info: {'name': 'sim_adware.bat', 'size': 411, 'path': 'test_samples/generated/sim_adware.bat', 'extension': '.bat'}
+hashes: {'md5': '67d5d016afc4b48178228943e5a3fa6d', 'sha1': 'c4f04d8f08bd4f8c0c787096fdfc276c762d8785', 'sha256': 'de6e0a049caa45097b478431ef191ffbaee425b011f4500703ce4efc251a15da', 'sha512': 'b93ea9f796da586b0b3c7706b70397f34c82fb610ee4e72327e8d81371a8dda35ad21305f04867c20bcd275f03cb29151735929e6e936b7e8350752fdf3e0943'}
+strings: ['@echo off', 'REM ', ' adware ', 'echo [ADWARE_SIM] Starting adware simulation...', 'echo [ADWARE_SIM] Would modify browser homepage...', 'echo [ADWARE_SIM] Would inject ads into web pages', 'echo [ADWARE_SIM] Would show popup advertisements', 'echo [ADWARE_SIM] Would redirect search queries', 'echo [ADWARE_SIM] Adware active (simulated)', 'echo [ADWARE_SIM] Simulation complete']
+pe_info: {}
+yara_matches: []
+preliminary_threat_type: ADWARE
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================

@@ -1,0 +1,121 @@
+{
+  "summary": {
+    "total_files": 12,
+    "successful": 12,
+    "failed": 0,
+    "analysis_date": "2026-04-09T14:59:17.995872",
+    "max_workers_used": 2,
+    "risk_statistics": {
+      "average": 0.0,
+      "max": 0,
+      "min": 0
+    }
+  },
+  "threats_detected": [],
+  "files_analyzed": [
+    {
+      "path": "test_samples/generated/sim_keylogger.bat",
+      "hash": "a816b3a65e22f7eca25b1df927e5d8cac53695a42f2b45f03b98c8d54331ee9c",
+      "size": 432,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.544983386993408
+    },
+    {
+      "path": "test_samples/generated/sim_botnet.bat",
+      "hash": "647899e9ed5de0dc5f9982399dd9c5b7021fedcbcab2807465180132ef04a136",
+      "size": 371,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5451855659484863
+    },
+    {
+      "path": "test_samples/generated/sim_spyware.bat",
+      "hash": "fa44ed0df84f311a8ce0c56930acbd1069d28126d1b8dafeddb598ec489eec49",
+      "size": 435,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5413706302642822
+    },
+    {
+      "path": "test_samples/generated/sim_stealer.bat",
+      "hash": "f8bda07b7a3ec79f6d3985dfb233452ab3429ec161b0947537d77cb3fba58f9b",
+      "size": 445,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5571365356445312
+    },
+    {
+      "path": "test_samples/generated/sim_rat.bat",
+      "hash": "1b906b9ed290ff1f99b79d49dbf946f3827e80584840cdf2ee13a37d80a01702",
+      "size": 372,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.529287338256836
+    },
+    {
+      "path": "test_samples/generated/sim_worm.bat",
+      "hash": "60144f5dc9b539e236cff101d8f3cd7cbf99b54c63fddcdd3a1d5fddf6ebf788",
+      "size": 381,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5254619121551514
+    },
+    {
+      "path": "test_samples/generated/sim_dropper.bat",
+      "hash": "59fdc6ae478bac64ebc1bff0cba00830532b868c3b7f1cfd940b89c2a9937f09",
+      "size": 428,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5285072326660156
+    },
+    {
+      "path": "test_samples/generated/sim_trojan.bat",
+      "hash": "7f1afa188a26964f82f190330fe513329963bc36de699d17588d3078c6df5248",
+      "size": 420,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.534492254257202
+    },
+    {
+      "path": "test_samples/generated/sim_ransomware.bat",
+      "hash": "b882a2d716e316b576e22c1b98079965932da26befe633e25fc3dfd46f62a5fc",
+      "size": 487,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5272135734558105
+    },
+    {
+      "path": "test_samples/generated/sim_adware.bat",
+      "hash": "de6e0a049caa45097b478431ef191ffbaee425b011f4500703ce4efc251a15da",
+      "size": 411,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.526998996734619
+    },
+    {
+      "path": "test_samples/generated/sim_miner.bat",
+      "hash": "95fbe7c27217577469b297577bd9325332329b4cb13d23d92669632ae66f7c5c",
+      "size": 405,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5270748138427734
+    },
+    {
+      "path": "test_samples/generated/sim_rootkit.bat",
+      "hash": "7940b428de468132a4ee28927896d4c936db179371621a14c526b789f1f27903",
+      "size": 425,
+      "success": true,
+      "error": null,
+      "analysis_time": 3.5337436199188232
+    }
+  ],
+  "threat_statistics": {
+    "by_type": {
+      "CLEAN": 12
+    },
+    "by_family": {
+      "None": 12
+    }
+  }
+}

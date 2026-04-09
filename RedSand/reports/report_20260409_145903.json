@@ -1,0 +1,75 @@
+{
+  "file": {
+    "path": "test_samples/generated/sim_stealer.bat",
+    "name": "sim_stealer.bat",
+    "size": 445
+  },
+  "static_analysis": {
+    "file_info": {
+      "name": "sim_stealer.bat",
+      "size": 445,
+      "path": "test_samples/generated/sim_stealer.bat",
+      "extension": ".bat"
+    },
+    "hashes": {
+      "md5": "f5069d1d804b609206329a72269352e4",
+      "sha1": "0a3e055b93802291693ed0a07ce98cd891f68a46",
+      "sha256": "f8bda07b7a3ec79f6d3985dfb233452ab3429ec161b0947537d77cb3fba58f9b",
+      "sha512": "05c8b6938d389fba19b021ed49ac9b11657433c10a70d4b96a965cd510390b04163110aa81f907edadc964b9224824671049b9fc25554a362323915a24beba39"
+    },
+    "strings": [
+      "@echo off",
+      "REM ",
+      " stealer ",
+      "echo [STEALER_SIM] Starting credential theft simulation...",
+      "echo [STEALER_SIM] Would access browser data...",
+      "echo [STEALER_SIM] Would steal cookies from Chrome/Firefox",
+      "echo [STEALER_SIM] Would extract saved passwords",
+      "echo [STEALER_SIM] Would collect crypto wallets",
+      "echo [STEALER_SIM] Sending data to C2 server (simulated)...",
+      "echo [STEALER_SIM] Simulation complete"
+    ],
+    "pe_info": {},
+    "yara_matches": [],
+    "preliminary_threat_type": "STEALER"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "BAT file on Linux - static analysis only"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "None",
+    "risk_score": 0,
+    "confidence": "HIGH",
+    "mitre_tactics": [],
+    "all_scores": {
+      "RANSOMWARE": 0,
+      "STEALER": 7,
+      "MINER": 0,
+      "RAT": 0,
+      "WORM": 0,
+      "BOTNET": 0,
+      "ROOTKIT": 0,
+      "SPYWARE": 0,
+      "ADWARE": 0,
+      "TROJAN": 0,
+      "DROPPER": 0,
+      "KEYLOGGER": 0
+    },
+    "behaviors_detected": [],
+    "is_clean": true,
+    "analysis_notes": "Risk score below threshold"
+  },
+  "analysis_time": {
+    "start": "2026-04-09T14:59:03.865905",
+    "end": "2026-04-09T14:59:03.866102",
+    "duration": 0.0002
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

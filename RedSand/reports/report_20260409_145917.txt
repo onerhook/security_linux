@@ -1,0 +1,42 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-09 14:59:17
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: sim_rootkit.bat
+Путь: test_samples/generated/sim_rootkit.bat
+Размер: 425 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: CLEAN
+Семейство: None
+Уровень риска: 0/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_info: {'name': 'sim_rootkit.bat', 'size': 425, 'path': 'test_samples/generated/sim_rootkit.bat', 'extension': '.bat'}
+hashes: {'md5': '4db574bd607faeb169e6df32c5b4977a', 'sha1': '7ebdbb1b5076f79c136317a40f6840d81f481283', 'sha256': '7940b428de468132a4ee28927896d4c936db179371621a14c526b789f1f27903', 'sha512': 'd125c0fd891df8bda8453c3df4232479fcbf0b8dc3668c0d7185c3c1d35b512a6d57a29841870814581274d49328364779522260b9284d1b959256a2e6ca7063'}
+strings: ['@echo off', 'REM ', ' rootkit ', 'echo [ROOTKIT_SIM] Starting rootkit installation simulation...', 'echo [ROOTKIT_SIM] Would load kernel driver...', 'echo [ROOTKIT_SIM] Would hook SSDT functions...', 'echo [ROOTKIT_SIM] Would hide processes and files...', 'echo [ROOTKIT_SIM] Would disable antivirus...', 'echo [ROOTKIT_SIM] Rootkit active (simulated)', 'echo [ROOTKIT_SIM] Simulation complete']
+pe_info: {}
+yara_matches: []
+preliminary_threat_type: ROOTKIT
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================

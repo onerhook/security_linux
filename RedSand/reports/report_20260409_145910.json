@@ -1,0 +1,62 @@
+{
+  "file": {
+    "path": "test_samples/generated/sim_trojan.bat",
+    "name": "sim_trojan.bat",
+    "size": 420
+  },
+  "static_analysis": {
+    "file_info": {
+      "name": "sim_trojan.bat",
+      "size": 420,
+      "path": "test_samples/generated/sim_trojan.bat",
+      "extension": ".bat"
+    },
+    "hashes": {
+      "md5": "c09d1a0975b2988c48372ed9a43c1a0b",
+      "sha1": "ab9e0ff617e66b6338ed8b35b2ff84a3646a75a4",
+      "sha256": "7f1afa188a26964f82f190330fe513329963bc36de699d17588d3078c6df5248",
+      "sha512": "99aa0258085f8086cb30f435a05ebfc940a034c44225359f7bc0e1b62e4a02b65265773c2ae06ca99b254ab56c80c385d8688ff0c994b8bd5d57cf97cb10d37e"
+    },
+    "strings": [
+      "@echo off",
+      "REM ",
+      " trojan ",
+      "echo [TROJAN_SIM] Starting trojan simulation...",
+      "echo [TROJAN_SIM] Disguised as legitimate software...",
+      "echo [TROJAN_SIM] Would download additional payload...",
+      "echo [TROJAN_SIM] Would inject into system processes",
+      "echo [TROJAN_SIM] Would establish persistence",
+      "echo [TROJAN_SIM] Trojan active (simulated)",
+      "echo [TROJAN_SIM] Simulation complete"
+    ],
+    "pe_info": {},
+    "yara_matches": [],
+    "preliminary_threat_type": "CLEAN"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "BAT file on Linux - static analysis only"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "None",
+    "risk_score": 0,
+    "confidence": "HIGH",
+    "mitre_tactics": [],
+    "all_scores": {},
+    "behaviors_detected": [],
+    "is_clean": true,
+    "analysis_notes": "File passed static and dynamic analysis checks"
+  },
+  "analysis_time": {
+    "start": "2026-04-09T14:59:10.927824",
+    "end": "2026-04-09T14:59:10.927936",
+    "duration": 0.000114
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

@@ -1,0 +1,42 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-09 14:58:43
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: sim_worm.bat
+Путь: test_samples/generated/sim_worm.bat
+Размер: 381 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: CLEAN
+Семейство: None
+Уровень риска: 0/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_info: {'name': 'sim_worm.bat', 'size': 381, 'path': 'test_samples/generated/sim_worm.bat', 'extension': '.bat'}
+hashes: {'md5': 'd76424bdb5a8fd0118fd24178cc74dd1', 'sha1': 'e4cc8d32c2b24bac9c1672627d113396ed17bdc6', 'sha256': '60144f5dc9b539e236cff101d8f3cd7cbf99b54c63fddcdd3a1d5fddf6ebf788', 'sha512': 'f2cf8c18cf4ba5a3f96d77245e5b5f42534c8c93ce03b12e7928e6a46277433f342cc86b251093bfc8bdc0ca168c8b76e79435dfaa21b18dd3ac060b090b2160'}
+strings: ['@echo off', 'REM ', ' worm ', 'echo [WORM_SIM] Starting worm propagation simulation...', 'echo [WORM_SIM] Scanning for USB drives...', 'echo [WORM_SIM] Would copy to removable media', 'echo [WORM_SIM] Creating autorun.inf...', 'echo [WORM_SIM] Scanning network shares...', 'echo [WORM_SIM] Would spread via SMB', 'echo [WORM_SIM] Simulation complete']
+pe_info: {}
+yara_matches: []
+preliminary_threat_type: WORM
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================
