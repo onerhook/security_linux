@@ -2040,7 +2040,12 @@ class RedSandGUIv4(QMainWindow):
                 threat_classifier = ThreatClassifier()
                 threat_result = threat_classifier.classify_static(static_results)
                 
-                self.log_message(f"Предполагаемый тип угрозы: {threat_result}", 'WARNING')
+                if threat_result == 'CLEAN':
+                    self.log_message("✓ Классификатор: Файл не содержит признаков известных угроз", 'INFO')
+                elif threat_result == 'UNKNOWN':
+                    self.log_message("? Классификатор: Тип угрозы не определён (требуется дополнительный анализ)", 'WARNING')
+                else:
+                    self.log_message(f"⚠ Классификатор: Предполагаемый тип угрозы - {threat_result}", 'WARNING')
                 
                 # Поиск подозрительных строк
                 suspicious_strings = []
@@ -2311,19 +2316,80 @@ class RedSandGUIv4(QMainWindow):
         self.log_message(self.language_manager.get_text('msg_analysis_complete'))
         self.statusBar().showMessage(self.language_manager.get_text('status_complete'))
 
-        # Добавляем пример результатов
-        self.results_table.setRowCount(3)
-        threats = [
-            ('Suspicious API Call', 'Behavioral', 'High', 'VirtualAlloc with PAGE_EXECUTE_READWRITE'),
-            ('Network Connection', 'Network', 'Medium', 'Attempted connection to suspicious IP'),
-            ('Registry Modification', 'Persistence', 'High', 'Added autorun entry'),
-        ]
-        for i, threat in enumerate(threats):
+        # Получаем реальные результаты из логов
+        threats_detected = []
+        
+        # Анализируем логи на наличие угроз
+        log_text = self.log_display.toPlainText()
+        
+        # Проверяем YARA совпадения
+        if "YARA СКАНИРОВАНИЕ - ОБНАРУЖЕНЫ СОВПАДЕНИЯ" in log_text:
+            threats_detected.append(('YARA Match', 'Signature', 'Critical', 'Malware signature detected'))
+        
+        # Проверяем подозрительные строки
+        if "Найдено подозрительных строк:" in log_text:
+            count = log_text.count("⚠ Строка:")
+            if count > 0:
+                severity = 'High' if count > 10 else 'Medium'
+                threats_detected.append(('Suspicious Strings', 'Static', severity, f'{count} suspicious strings found'))
+        
+        # Проверяем опасные расширения
+        if "ОПАСНОЕ РАСШИРЕНИЕ" in log_text:
+            threats_detected.append(('Dangerous Extension', 'File Type', 'Medium', 'Executable or script file detected'))
+        
+        # Проверяем аномалии размера
+        if "АНOМАЛИЯ РАЗМЕРА" in log_text or "АНOMАЛИЯ РАЗМЕРА" in log_text:
+            threats_detected.append(('Size Anomaly', 'Heuristic', 'Low', 'Unusual file size detected'))
+        
+        # Проверяем полиморфные признаки
+        if "ПОЛИМОРФНЫЕ ПРИЗНАКИ" in log_text:
+            threats_detected.append(('Polymorphic Code', 'Advanced', 'Critical', 'Code mutation detected'))
+        
+        # Проверяем упаковщики
+        if "УПАКОВЩИК" in log_text or "PACKER" in log_text.upper():
+            threats_detected.append(('Packer Detected', 'Obfuscation', 'High', 'File appears to be packed'))
+        
+        # Проверяем анти-отладку
+        if "ANTI-DEBUG" in log_text.upper() or "анти-отладка" in log_text.lower():
+            threats_detected.append(('Anti-Debug', 'Evasion', 'High', 'Anti-debugging techniques detected'))
+        
+        # Проверяем сетевую активность
+        if "сетевая активность" in log_text.lower() or "network" in log_text.lower():
+            if "подозрительн" in log_text.lower() or "suspicious" in log_text.lower():
+                threats_detected.append(('Network Activity', 'Behavioral', 'Medium', 'Suspicious network behavior'))
+        
+        # Проверяем результат классификатора
+        if "Предполагаемый тип угрозы:" in log_text:
+            for line in log_text.split('\n'):
+                if "Предполагаемый тип угрозы:" in line:
+                    threat_type = line.split(':')[1].strip()
+                    if threat_type != 'CLEAN' and threat_type != 'UNKNOWN':
+                        threats_detected.append((f'Threat Type: {threat_type}', 'Classification', 'High', 'AI classification result'))
+                    break
+        
+        # Если угроз нет - пишем что файл чист
+        if not threats_detected:
+            self.log_message("=" * 80, 'INFO')
+            self.log_message("ЗАКЛЮЧЕНИЕ: Файл не содержит известных угроз", 'INFO')
+            self.log_message("Статус: CLEAN (чистый файл)", 'INFO')
+            self.log_message("=" * 80, 'INFO')
+        
+        # Обновляем таблицу результатов
+        self.results_table.setRowCount(len(threats_detected))
+        for i, threat in enumerate(threats_detected):
             for j, val in enumerate(threat):
                 self.results_table.setItem(i, j, QTableWidgetItem(val))
 
         # Обновляем счётчик угроз
-        self.threat_count.setText(str(len(threats)))
+        self.threat_count.setText(str(len(threats_detected)))
+        
+        # Логируем итог
+        if threats_detected:
+            self.log_message(f"\nВСЕГО ОБНАРУЖЕНО УГРОЗ: {len(threats_detected)}", 'ERROR')
+            for threat in threats_detected:
+                self.log_message(f"  • {threat[0]} [{threat[2]}] - {threat[3]}", 'ERROR')
+        else:
+            self.log_message("\n✓ Анализ завершён. Угроз не обнаружено.", 'INFO')
 
         # Добавляем IOC
         self.ioc_tree.clear()
