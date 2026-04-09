@@ -1908,7 +1908,13 @@ class RedSandGUIv4(QMainWindow):
         self.log_message(f"Starting analysis: {self.file_path}", 'INFO')
         self.statusBar().showMessage(self.language_manager.get_text('status_analyzing'))
 
-        # Эмуляция прогресса
+        # Детальная проверка файла перед анализом
+        self.log_file_check(self.file_path)
+        
+        # Запуск реального анализа через модули
+        self.run_advanced_analysis()
+
+        # Эмуляция прогресса для визуализации
         self.simulated_progress = 0
         self.progress_timer = QTimer()
         self.progress_timer.timeout.connect(self.update_progress)
@@ -1916,6 +1922,343 @@ class RedSandGUIv4(QMainWindow):
 
         # Пример данных для визуализации
         self.update_visualization()
+
+    def run_advanced_analysis(self):
+        """Запуск продвинутого анализа файла через модули."""
+        try:
+            self.log_message("=" * 80, 'INFO')
+            self.log_message("ЗАПУСК ПРОДВИНУТОГО АНАЛИЗА УГРОЗ", 'INFO')
+            self.log_message("=" * 80, 'INFO')
+            
+            # Импортируем модули анализа
+            from modules.static_analyzer import StaticAnalyzer
+            from modules.threat_classifier import ThreatClassifier
+            
+            # Статический анализ
+            self.log_message("Шаг 1/6: Статический анализ файла...", 'INFO')
+            static_analyzer = StaticAnalyzer()
+            static_results = static_analyzer.analyze(self.file_path)
+            
+            # Логируем результаты статического анализа
+            self.log_message("-" * 80, 'INFO')
+            self.log_message("РЕЗУЛЬТАТЫ СТАТИЧЕСКОГО АНАЛИЗА:", 'INFO')
+            self.log_message(f"Имя файла: {static_results['file_info']['name']}", 'INFO')
+            self.log_message(f"Размер: {static_results['file_info']['size']} байт", 'INFO')
+            self.log_message(f"Расширение: {static_results['file_info']['extension']}", 'INFO')
+            self.log_message(f"MD5: {static_results['hashes']['md5']}", 'INFO')
+            self.log_message(f"SHA1: {static_results['hashes']['sha1']}", 'INFO')
+            self.log_message(f"SHA256: {static_results['hashes']['sha256']}", 'INFO')
+            self.log_message(f"SHA512: {static_results['hashes']['sha512']}", 'INFO')
+            
+            # PE анализ если доступен
+            if static_results.get('pe_info'):
+                pe_info = static_results['pe_info']
+                if 'error' not in pe_info:
+                    self.log_message("-" * 80, 'INFO')
+                    self.log_message("PE АНАЛИЗ (Windows Executable):", 'INFO')
+                    self.log_message(f"Архитектура: {pe_info.get('machine', 'Unknown')}", 'INFO')
+                    self.log_message(f"Подсистема: {pe_info.get('subsystem', 'Unknown')}", 'INFO')
+                    self.log_message(f"Точка входа: {pe_info.get('entry_point', 'Unknown')}", 'INFO')
+                    self.log_message(f"Базовый адрес: {pe_info.get('image_base', 'Unknown')}", 'INFO')
+                    
+                    # Анализ секций
+                    sections = pe_info.get('sections', [])
+                    self.log_message(f"Количество секций: {len(sections)}", 'INFO')
+                    for i, section in enumerate(sections):
+                        section_name = section.get('name', 'Unknown')
+                        virtual_size = section.get('virtual_size', 0)
+                        raw_size = section.get('raw_size', 0)
+                        
+                        # Проверка на подозрительные секции
+                        suspicious_sections = ['.upx', '.aspack', '.themida', '.vmp']
+                        is_suspicious = any(sus in section_name.lower() for sus in suspicious_sections)
+                        
+                        if is_suspicious:
+                            self.log_message(f"  СЕКЦИЯ {i+1}: {section_name} - ПОДОЗРИТЕЛЬНАЯ (упаковщик/протектор)", 'WARNING')
+                            self.log_message(f"    Причина: Имя секции указывает на использование упаковщика или протектора", 'WARNING')
+                            self.log_message(f"    Опасность: Упаковщики часто используются для сокрытия вредоносного кода", 'WARNING')
+                        else:
+                            self.log_message(f"  СЕКЦИЯ {i+1}: {section_name} (VirtualSize: {virtual_size}, RawSize: {raw_size})", 'INFO')
+                    
+                    # Анализ импортов
+                    imports = pe_info.get('imports', [])
+                    self.log_message(f"Импортируемые DLL: {len(imports)}", 'INFO')
+                    
+                    # Проверка на опасные API функции
+                    dangerous_apis = {
+                        'VirtualAlloc': 'Выделение памяти с правами исполнения - возможно внедрение кода',
+                        'WriteProcessMemory': 'Запись в память другого процесса - инъекция кода',
+                        'CreateRemoteThread': 'Создание потока в другом процессе - инъекция',
+                        'NtUnmapViewOfSection': 'Отбражение памяти процесса - Process Hollowing',
+                        'SetWindowsHookEx': 'Установка хуков - кейлоггинг или перехват',
+                        'GetAsyncKeyState': 'Получение состояния клавиш - кейлоггинг',
+                        'InternetOpen': 'Инициализация интернет-соединения - связь с C&C сервером',
+                        'URLDownloadToFile': 'Загрузка файлов из интернета - дроппер',
+                        'RegSetValueEx': 'Модификация реестра - персистентность',
+                        'CreateService': 'Создание службы - персистентность',
+                        'CryptEncrypt': 'Шифрование данных - возможно ransomware',
+                        'CryptDecrypt': 'Дешифрование данных - возможно ransomware',
+                        'ShellExecute': 'Запуск внешних программ - выполнение команд',
+                        'WinExec': 'Выполнение программы - запуск вредоносного ПО',
+                        'CreateFile': 'Создание/открытие файла - доступ к файлам',
+                        'ReadFile': 'Чтение файла - кража данных',
+                        'DeleteFile': 'Удаление файла - разрушение данных',
+                        'FindFirstFile': 'Поиск файлов - разведка системы',
+                        'GetSystemDirectory': 'Получение системной директории - разведка',
+                        'IsDebuggerPresent': 'Проверка отладчика - анти-анализ',
+                        'CheckRemoteDebuggerPresent': 'Проверка удаленного отладчика - анти-анализ',
+                        'OutputDebugString': 'Вывод отладочной строки - анти-анализ',
+                    }
+                    
+                    dangerous_found = []
+                    for dll in imports:
+                        dll_lower = dll.lower()
+                        for api, danger_desc in dangerous_apis.items():
+                            if api.lower() in dll_lower:
+                                dangerous_found.append((api, danger_desc))
+                    
+                    if dangerous_found:
+                        self.log_message("-" * 80, 'WARNING')
+                        self.log_message("ОБНАРУЖЕНЫ ОПАСНЫЕ API ФУНКЦИИ:", 'ERROR')
+                        for api, desc in dangerous_found:
+                            self.log_message(f"  ⚠ {api}", 'ERROR')
+                            self.log_message(f"     Опасность: {desc}", 'ERROR')
+                            self.log_message(f"     Рекомендация: Требуется дополнительный анализ поведения", 'ERROR')
+                    else:
+                        self.log_message("Опасные API функции не обнаружены", 'INFO')
+                
+                else:
+                    self.log_message(f"PE анализ не удался: {pe_info.get('error', 'Unknown error')}", 'WARNING')
+            
+            # Анализ строк
+            strings = static_results.get('strings', [])
+            if strings:
+                self.log_message("-" * 80, 'INFO')
+                self.log_message(f"АНАЛИЗ СТРОК (найдено: {len(strings)}):", 'INFO')
+                
+                # Классификатор угроз
+                threat_classifier = ThreatClassifier()
+                threat_result = threat_classifier.classify_static(static_results)
+                
+                self.log_message(f"Предполагаемый тип угрозы: {threat_result}", 'WARNING')
+                
+                # Поиск подозрительных строк
+                suspicious_strings = []
+                malware_keywords = [
+                    'password', 'admin', 'login', 'cmd.exe', 'powershell',
+                    'bitcoin', 'wallet', 'encrypt', 'decrypt', '.locked',
+                    'mimikatz', 'sekurlsa', 'lsass', 'dump', 'inject',
+                    'shellcode', 'payload', 'exploit', 'vulnerability',
+                    'http://', 'https://', 'ftp://', 'tcp://', 'udp://',
+                    '.exe', '.dll', '.bat', '.ps1', '.vbs', '.js',
+                    'reg add', 'schtasks', 'net user', 'net localgroup',
+                    'whoami', 'systeminfo', 'tasklist', 'netstat',
+                    'RtlMoveMemory', 'VirtualProtect', 'GetProcAddress',
+                    'LoadLibrary', 'CreateThread', 'WaitForSingleObject'
+                ]
+                
+                for s in strings[:200]:  # Анализируем первые 200 строк
+                    s_lower = s.lower()
+                    for keyword in malware_keywords:
+                        if keyword in s_lower:
+                            suspicious_strings.append((s, keyword))
+                            break
+                
+                if suspicious_strings:
+                    self.log_message(f"Найдено подозрительных строк: {len(suspicious_strings)}", 'WARNING')
+                    for s, keyword in suspicious_strings[:20]:  # Показываем первые 20
+                        self.log_message(f"  ⚠ Строка: {s[:100]}...", 'WARNING')
+                        self.log_message(f"     Ключевое слово: {keyword}", 'WARNING')
+                else:
+                    self.log_message("Подозрительные строки не найдены", 'INFO')
+            
+            # YARA сканирование
+            yara_matches = static_results.get('yara_matches', [])
+            if yara_matches:
+                self.log_message("-" * 80, 'ERROR')
+                self.log_message("YARA СКАНИРОВАНИЕ - ОБНАРУЖЕНЫ СОВПАДЕНИЯ!", 'ERROR')
+                for match in yara_matches:
+                    self.log_message(f"  Правило: {match.get('rule_name', 'Unknown')}", 'ERROR')
+                    self.log_message(f"  Namespace: {match.get('namespace', 'N/A')}", 'ERROR')
+                    strings_matched = match.get('strings', [])
+                    if strings_matched:
+                        self.log_message(f"  Совпадения строк: {strings_matched}", 'ERROR')
+            else:
+                self.log_message("YARA правила не нашли совпадений", 'INFO')
+            
+            # Расширенная проверка на опасности
+            self.log_message("=" * 80, 'INFO')
+            self.log_message("РАСШИРЕННЫЙ АНАЛИЗ ОПАСНОСТЕЙ:", 'WARNING')
+            
+            # Проверка расширения
+            ext = static_results['file_info']['extension']
+            dangerous_extensions = {
+                '.exe': 'Исполняемый файл Windows - может запускать код',
+                '.dll': 'Библиотека DLL - может быть загружена в процесс',
+                '.sys': 'Системный драйвер - работает на уровне ядра',
+                '.bat': 'BAT скрипт - выполняет команды cmd',
+                '.cmd': 'CMD скрипт - выполняет команды cmd',
+                '.ps1': 'PowerShell скрипт - мощный инструмент администрирования',
+                '.vbs': 'VBScript - скрипт Windows Script Host',
+                '.js': 'JavaScript - может выполняться в WSH или браузере',
+                '.jse': 'Зашифрованный JavaScript',
+                '.wsf': 'Windows Script File',
+                '.wsh': 'Windows Script Host',
+                '.msc': 'Microsoft Management Console',
+                '.msi': 'Windows Installer - установка программ',
+                '.msp': 'Windows Installer Patch',
+                '.scr': 'Screen saver - исполняемый файл',
+                '.pif': 'Program Information File',
+                '.com': 'DOS исполняемый файл',
+                '.cpl': 'Control Panel Item',
+                '.drv': 'Драйвер устройства',
+                '.ocx': 'ActiveX Control',
+                '.hta': 'HTML Application - выполняется как приложение',
+            }
+            
+            if ext in dangerous_extensions:
+                self.log_message(f"ОПАСНОСТЬ: Расширение {ext}", 'ERROR')
+                self.log_message(f"  Описание: {dangerous_extensions[ext]}", 'ERROR')
+                self.log_message(f"  Рекомендация: Запускать ТОЛЬКО в изолированной песочнице", 'ERROR')
+                self.log_message(f"  Уровень риска: ВЫСОКИЙ", 'ERROR')
+            else:
+                self.log_message(f"Расширение {ext} - относительно безопасно", 'INFO')
+            
+            # Проверка размера
+            file_size = static_results['file_info']['size']
+            if file_size < 512:
+                self.log_message(f"ОПАСНОСТЬ: Очень маленький файл ({file_size} байт)", 'WARNING')
+                self.log_message(f"  Причина: Может быть загрузчиком (dropper) или шелл-кодом", 'WARNING')
+                self.log_message(f"  Рекомендация: Проверить содержимое на наличие шелл-кода", 'WARNING')
+            elif file_size > 500 * 1024 * 1024:  # > 500 MB
+                self.log_message(f"ОПАСНОСТЬ: Очень большой файл ({file_size / (1024*1024):.2f} MB)", 'WARNING')
+                self.log_message(f"  Причина: Может содержать скрытые данные или быть упакованным", 'WARNING')
+                self.log_message(f"  Рекомендация: Проверить на наличие стеганографии", 'WARNING')
+            
+            # Проверка на упаковщики
+            packer_signatures = {
+                'UPX': ['UPX0', 'UPX1', 'UPX!'],
+                'ASPack': ['.aspack', '.adata'],
+                'Themida': ['.themida', '.themida_start'],
+                'VMProtect': ['.vmp0', '.vmp1', '.vmp2'],
+                'PECompact': ['PEC2', 'PEC2_HEADER'],
+                'MPRESS': ['MPRESS1', 'MPRESS2'],
+                'Petite': ['.petite'],
+                'RLPack': ['.rlpack'],
+            }
+            
+            detected_packer = None
+            if static_results.get('pe_info') and 'sections' in static_results['pe_info']:
+                section_names = [s.get('name', '') for s in static_results['pe_info']['sections']]
+                for packer, signatures in packer_signatures.items():
+                    for section in section_names:
+                        for sig in signatures:
+                            if sig.lower() in section.lower():
+                                detected_packer = packer
+                                break
+                        if detected_packer:
+                            break
+                    if detected_packer:
+                        break
+            
+            if detected_packer:
+                self.log_message(f"ОПАСНОСТЬ: Обнаружен упаковщик {detected_packer}", 'ERROR')
+                self.log_message(f"  Причина: Код упакован и не может быть проанализирован напрямую", 'ERROR')
+                self.log_message(f"  Опасность: Высокая вероятность вредоносного ПО", 'ERROR')
+                self.log_message(f"  Рекомендация: Распаковать файл перед анализом", 'ERROR')
+            else:
+                self.log_message("Упаковщики не обнаружены", 'INFO')
+            
+            # Проверка на анти-анализ техники
+            anti_analysis_techniques = [
+                ('IsDebuggerPresent', 'Проверка наличия отладчика'),
+                ('CheckRemoteDebuggerPresent', 'Проверка удаленного отладчика'),
+                ('NtQueryInformationProcess', 'Получение информации о процессе'),
+                ('OutputDebugString', 'Вывод отладочной строки'),
+                ('GetTickCount', 'Измерение времени выполнения'),
+                ('QueryPerformanceCounter', 'Высокоточное измерение времени'),
+                ('Sleep', 'Задержка выполнения (может быть обфускация)'),
+            ]
+            
+            if static_results.get('strings'):
+                strings_text = ' '.join(static_results['strings']).lower()
+                detected_anti_analysis = []
+                for technique, description in anti_analysis_techniques:
+                    if technique.lower() in strings_text:
+                        detected_anti_analysis.append((technique, description))
+                
+                if detected_anti_analysis:
+                    self.log_message(f"ОПАСНОСТЬ: Обнаружены анти-анализ техники ({len(detected_anti_analysis)}):", 'ERROR')
+                    for technique, desc in detected_anti_analysis:
+                        self.log_message(f"  ⚠ {technique}: {desc}", 'ERROR')
+                    self.log_message(f"  Рекомендация: Использовать отладчик с функциями скрытия", 'ERROR')
+                else:
+                    self.log_message("Анти-анализ техники не обнаружены", 'INFO')
+            
+            # Итоговая оценка риска
+            self.log_message("=" * 80, 'INFO')
+            self.log_message("ИТОГОВАЯ ОЦЕНКА РИСКА:", 'WARNING')
+            
+            risk_score = 0
+            risk_factors = []
+            
+            if ext in dangerous_extensions:
+                risk_score += 30
+                risk_factors.append("Опасное расширение")
+            
+            if detected_packer:
+                risk_score += 25
+                risk_factors.append("Наличие упаковщика")
+            
+            if detected_anti_analysis:
+                risk_score += 20
+                risk_factors.append("Анти-анализ техники")
+            
+            if dangerous_found:
+                risk_score += min(len(dangerous_found) * 5, 25)
+                risk_factors.append(f"Опасные API ({len(dangerous_found)})")
+            
+            if suspicious_strings:
+                risk_score += min(len(suspicious_strings) * 2, 20)
+                risk_factors.append(f"Подозрительные строки ({len(suspicious_strings)})")
+            
+            if yara_matches:
+                risk_score += min(len(yara_matches) * 10, 30)
+                risk_factors.append(f"YARA совпадения ({len(yara_matches)})")
+            
+            risk_score = min(risk_score, 100)
+            
+            if risk_score >= 70:
+                risk_level = "КРИТИЧЕСКИЙ"
+                risk_color = 'ERROR'
+            elif risk_score >= 50:
+                risk_level = "ВЫСОКИЙ"
+                risk_color = 'ERROR'
+            elif risk_score >= 30:
+                risk_level = "СРЕДНИЙ"
+                risk_color = 'WARNING'
+            elif risk_score >= 10:
+                risk_level = "НИЗКИЙ"
+                risk_color = 'INFO'
+            else:
+                risk_level = "МИНИМАЛЬНЫЙ"
+                risk_color = 'INFO'
+            
+            self.log_message(f"Уровень риска: {risk_level} ({risk_score}/100)", risk_color)
+            self.log_message(f"Факторы риска: {', '.join(risk_factors) if risk_factors else 'Не обнаружено'}", risk_color)
+            self.log_message(f"Рекомендация: {'НЕ ЗАПУСКАТЬ файл без глубокого анализа!' if risk_score >= 50 else 'Требуется осторожность' if risk_score >= 30 else 'Можно продолжить анализ'}", risk_color)
+            
+            self.log_message("=" * 80, 'INFO')
+            self.log_message("АНАЛИЗ ЗАВЕРШЕН", 'INFO')
+            self.log_message("=" * 80, 'INFO')
+            
+        except ImportError as e:
+            self.log_message(f"ОШИБКА: Модули анализа не найдены: {str(e)}", 'ERROR')
+            self.log_message("Убедитесь что файлы modules/static_analyzer.py и modules/threat_classifier.py существуют", 'ERROR')
+        except Exception as e:
+            self.log_message(f"ОШИБКА при выполнении анализа: {str(e)}", 'ERROR')
+            import traceback
+            self.log_message(traceback.format_exc(), 'ERROR')
 
     def update_progress(self):
         """Обновление прогресса."""
