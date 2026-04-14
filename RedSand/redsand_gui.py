@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v2.0 - Профессиональный интерфейс анализа вредоносного ПО
-Строгий корпоративный дизайн на PyQt5
+RedSand Secure GUI v3.0 - Профессиональный интерфейс с темами и настройками
+Современный дизайн на PyQt5 с поддержкой тем, анимаций и расширенных настроек
 Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
 
@@ -14,6 +14,7 @@ from typing import Optional, Dict, Any
 import json
 import logging
 from threading import Thread, Lock
+import configparser
 
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
@@ -23,16 +24,20 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QDialog,
     QDialogButtonBox, QFormLayout, QLineEdit, QStatusBar,
     QToolBar, QAction, QMenu, QMenuBar, QSystemTrayIcon,
-    QTreeWidget, QTreeWidgetItem
+    QTreeWidget, QTreeWidgetItem, QSlider, QColorDialog,
+    QFontDialog, QListWidget, QListWidgetItem, QStackedWidget,
+    QRadioButton, QButtonGroup, QSpacerItem, QSizePolicy
 )
 from PyQt5.QtCore import (
     Qt, QTimer, pyqtSignal, QObject, QThread, QMetaObject,
-    Q_ARG, QPropertyAnimation, QEasingCurve, QSize, QUrl
+    Q_ARG, QPropertyAnimation, QEasingCurve, QSize, QUrl,
+    QPoint, QRect, QSettings, QTranslator, QLocale
 )
 from PyQt5.QtGui import (
     QFont, QColor, QPalette, QIcon, QPixmap, QPainter,
     QBrush, QPen, QLinearGradient, QDesktopServices,
-    QTextCursor, QTextDocument
+    QTextCursor, QTextDocument, QMovie, QKeySequence,
+    QShortcut, QCursor
 )
 
 # Добавляем модули в путь
@@ -46,342 +51,88 @@ except ImportError:
 
 
 # ============================================================================
-# СТИЛИ И ТЕМЫ
+# ЦВЕТОВЫЕ ТЕМЫ
 # ============================================================================
 
-STYLESHEET = """
-/* Основной стиль приложения */
-QMainWindow {
-    background-color: #1a1a2e;
-    color: #eaeaea;
-}
-
-QWidget {
-    font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-    font-size: 13px;
-    background-color: #1a1a2e;
-    color: #eaeaea;
-}
-
-/* Заголовки */
-QLabel#titleLabel {
-    font-size: 24px;
-    font-weight: bold;
-    color: #e94560;
-    padding: 10px;
-}
-
-QLabel#sectionTitle {
-    font-size: 16px;
-    font-weight: bold;
-    color: #0f3460;
-    background-color: #e94560;
-    padding: 8px;
-    border-radius: 4px;
-}
-
-/* Группы */
-QGroupBox {
-    font-weight: bold;
-    border: 2px solid #0f3460;
-    border-radius: 8px;
-    margin-top: 12px;
-    padding-top: 10px;
-    background-color: #16213e;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 15px;
-    padding: 0 8px;
-    color: #e94560;
-}
-
-/* Кнопки */
-QPushButton {
-    background-color: #0f3460;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 6px;
-    font-weight: bold;
-    min-width: 120px;
-}
-
-QPushButton:hover {
-    background-color: #1a4a7a;
-}
-
-QPushButton:pressed {
-    background-color: #0a2444;
-}
-
-QPushButton:disabled {
-    background-color: #3a3a5a;
-    color: #8a8a8a;
-}
-
-QPushButton#primaryBtn {
-    background-color: #e94560;
-    font-size: 14px;
-    padding: 12px 30px;
-}
-
-QPushButton#primaryBtn:hover {
-    background-color: #ff6b7a;
-}
-
-QPushButton#dangerBtn {
-    background-color: #dc3545;
-}
-
-QPushButton#dangerBtn:hover {
-    background-color: #ff4d5a;
-}
-
-QPushButton#successBtn {
-    background-color: #28a745;
-}
-
-QPushButton#successBtn:hover {
-    background-color: #34ce57;
-}
-
-/* Прогресс бар */
-QProgressBar {
-    border: 2px solid #0f3460;
-    border-radius: 8px;
-    text-align: center;
-    font-weight: bold;
-    background-color: #16213e;
-    height: 25px;
-}
-
-QProgressBar::chunk {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                                stop:0 #e94560, stop:1 #ff6b7a);
-    border-radius: 6px;
-}
-
-/* Текстовые поля */
-QTextEdit, QPlainTextEdit {
-    background-color: #0f3460;
-    color: #eaeaea;
-    border: 2px solid #1a4a7a;
-    border-radius: 6px;
-    padding: 8px;
-    font-family: 'Consolas', 'Courier New', monospace;
-    font-size: 12px;
-}
-
-QTextEdit:focus, QPlainTextEdit:focus {
-    border: 2px solid #e94560;
-}
-
-/* Таблицы */
-QTableWidget {
-    background-color: #16213e;
-    alternate-background-color: #0f3460;
-    border: 2px solid #0f3460;
-    border-radius: 6px;
-    gridline-color: #1a4a7a;
-}
-
-QTableWidget::item {
-    padding: 8px;
-    border-bottom: 1px solid #1a4a7a;
-}
-
-QTableWidget::item:selected {
-    background-color: #e94560;
-    color: white;
-}
-
-QHeaderView::section {
-    background-color: #0f3460;
-    color: #e94560;
-    padding: 8px;
-    border: none;
-    font-weight: bold;
-}
-
-/* Вкладки */
-QTabWidget::pane {
-    border: 2px solid #0f3460;
-    border-radius: 6px;
-    background-color: #16213e;
-}
-
-QTabBar::tab {
-    background-color: #0f3460;
-    color: #eaeaea;
-    padding: 10px 20px;
-    margin-right: 2px;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-}
-
-QTabBar::tab:selected {
-    background-color: #e94560;
-    font-weight: bold;
-}
-
-QTabBar::tab:hover:!selected {
-    background-color: #1a4a7a;
-}
-
-/* Дерево */
-QTreeWidget {
-    background-color: #16213e;
-    border: 2px solid #0f3460;
-    border-radius: 6px;
-    padding: 5px;
-}
-
-QTreeWidget::item {
-    padding: 5px;
-    border-bottom: 1px solid #1a4a7a;
-}
-
-QTreeWidget::item:selected {
-    background-color: #e94560;
-}
-
-QTreeWidget::item:hover {
-    background-color: #0f3460;
-}
-
-/* SpinBox, ComboBox */
-QSpinBox, QComboBox, QLineEdit {
-    background-color: #0f3460;
-    color: #eaeaea;
-    border: 2px solid #1a4a7a;
-    border-radius: 6px;
-    padding: 8px;
-    min-width: 100px;
-}
-
-QSpinBox:focus, QComboBox:focus, QLineEdit:focus {
-    border: 2px solid #e94560;
-}
-
-QComboBox::drop-down {
-    border: none;
-    width: 30px;
-}
-
-QComboBox::down-arrow {
-    image: none;
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 8px solid #e94560;
-    margin-right: 10px;
-}
-
-/* Чекбоксы */
-QCheckBox {
-    spacing: 10px;
-    font-weight: normal;
-}
-
-QCheckBox::indicator {
-    width: 20px;
-    height: 20px;
-    border-radius: 4px;
-    border: 2px solid #0f3460;
-    background-color: #16213e;
-}
-
-QCheckBox::indicator:checked {
-    background-color: #e94560;
-    border: 2px solid #e94560;
-}
-
-/* Статус бар */
-QStatusBar {
-    background-color: #0f3460;
-    color: #eaeaea;
-    border-top: 2px solid #e94560;
-}
-
-/* Меню */
-QMenuBar {
-    background-color: #0f3460;
-    color: #eaeaea;
-    border-bottom: 2px solid #e94560;
-}
-
-QMenuBar::item:selected {
-    background-color: #e94560;
-}
-
-QMenu {
-    background-color: #16213e;
-    border: 2px solid #0f3460;
-    border-radius: 6px;
-}
-
-QMenu::item:selected {
-    background-color: #e94560;
-}
-
-/* Scrollbar */
-QScrollBar:vertical {
-    background-color: #0f3460;
-    width: 12px;
-    border-radius: 6px;
-}
-
-QScrollBar::handle:vertical {
-    background-color: #e94560;
-    border-radius: 6px;
-    min-height: 30px;
-}
-
-QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
-    height: 0px;
-}
-
-QScrollBar:horizontal {
-    background-color: #0f3460;
-    height: 12px;
-    border-radius: 6px;
-}
-
-QScrollBar::handle:horizontal {
-    background-color: #e94560;
-    border-radius: 6px;
-    min-width: 30px;
-}
-
-QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
-    width: 0px;
-}
-
-/* Tooltips */
-QToolTip {
-    background-color: #e94560;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 12px;
-}
-
-/* Divider */
-QFrame#line {
-    background-color: #0f3460;
-    max-height: 2px;
-}
-"""
-
-# Цветовые схемы для индикаторов риска
-RISK_COLORS = {
-    'critical': '#dc3545',
-    'high': '#fd7e14',
-    'medium': '#ffc107',
-    'low': '#28a745',
-    'safe': '#20c997'
+THEMES = {
+    "Dark Red": {
+        "bg_primary": "#1a1a2e",
+        "bg_secondary": "#16213e",
+        "bg_tertiary": "#0f3460",
+        "accent": "#e94560",
+        "accent_hover": "#ff6b7a",
+        "text_primary": "#eaeaea",
+        "text_secondary": "#a0a0a0",
+        "success": "#28a745",
+        "warning": "#ffc107",
+        "danger": "#dc3545",
+        "info": "#17a2b8"
+    },
+    "Cyber Blue": {
+        "bg_primary": "#0a0e1a",
+        "bg_secondary": "#111827",
+        "bg_tertiary": "#1e293b",
+        "accent": "#3b82f6",
+        "accent_hover": "#60a5fa",
+        "text_primary": "#f3f4f6",
+        "text_secondary": "#9ca3af",
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "danger": "#ef4444",
+        "info": "#8b5cf6"
+    },
+    "Matrix Green": {
+        "bg_primary": "#0d1117",
+        "bg_secondary": "#161b22",
+        "bg_tertiary": "#21262d",
+        "accent": "#00ff41",
+        "accent_hover": "#00cc33",
+        "text_primary": "#c9d1d9",
+        "text_secondary": "#8b949e",
+        "success": "#2ea043",
+        "warning": "#d29922",
+        "danger": "#f85149",
+        "info": "#58a6ff"
+    },
+    "Purple Haze": {
+        "bg_primary": "#1e1b2e",
+        "bg_secondary": "#2d2640",
+        "bg_tertiary": "#3d3452",
+        "accent": "#a855f7",
+        "accent_hover": "#c084fc",
+        "text_primary": "#f5f3ff",
+        "text_secondary": "#c4b5fd",
+        "success": "#22c55e",
+        "warning": "#fbbf24",
+        "danger": "#f43f5e",
+        "info": "#06b6d4"
+    },
+    "Ocean Depth": {
+        "bg_primary": "#0c1929",
+        "bg_secondary": "#0f2338",
+        "bg_tertiary": "#143446",
+        "accent": "#00bcd4",
+        "accent_hover": "#26c6da",
+        "text_primary": "#e0f7fa",
+        "text_secondary": "#80deea",
+        "success": "#4caf50",
+        "warning": "#ff9800",
+        "danger": "#f44336",
+        "info": "#2196f3"
+    },
+    "Light Modern": {
+        "bg_primary": "#ffffff",
+        "bg_secondary": "#f8f9fa",
+        "bg_tertiary": "#e9ecef",
+        "accent": "#dc3545",
+        "accent_hover": "#c82333",
+        "text_primary": "#212529",
+        "text_secondary": "#6c757d",
+        "success": "#28a745",
+        "warning": "#ffc107",
+        "danger": "#dc3545",
+        "info": "#17a2b8"
+    }
 }
 
 
