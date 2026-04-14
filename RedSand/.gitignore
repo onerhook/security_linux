@@ -1,0 +1,23 @@
+# Python cache
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Build directories
+build/
+dist/
+*.egg-info/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Reports
+reports/
+
+# Logs
+*.log

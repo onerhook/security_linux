@@ -1,40 +1,63 @@
-```gitignore
+```
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Test samples - assuming generated files should be ignored
-RedSand/test_samples/generated/
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
 
-# Logs
-*.log
-
-# Environment files
-.env
-.env.local
-*.env.*
-
-# Editor/IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-*.tmp
 
-# OS files
-.DS_Store
-Thumbs.db
+# Logs
+*.log
 
-# Coverage reports
+# Environment
+.env
+.env.local
+*.env.*
+
+# Coverage
+.coverage
 coverage/
 htmlcov/
-.coverage
 
-# MyPy cache
+# MyPy
 .mypy_cache/
+.dmypy.json
+dmypy.json
 
-# Pytest cache
+# PyTest
 .pytest_cache/
+
+# Temp files
+*.tmp
+*~
+.DS_Store
+Thumbs.db
 ```

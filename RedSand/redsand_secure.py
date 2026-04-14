@@ -31,7 +31,7 @@ from panic_button import PanicButton
 from poly_engine import PolyEngine
 from threat_classifier import ThreatClassifier
 from report_generator import ReportGenerator
-from static_analyzer import StaticAnalyzer
+from virus_scanner import VirusScanner
 from network_emulator import NetworkEmulator
 from anti_sandbox import AntiSandbox
 
@@ -103,7 +103,7 @@ class RedSandSecure:
         self.poly_engine = PolyEngine()
         self.classifier = ThreatClassifier()
         self.report_gen = ReportGenerator(str(self.output_dir))
-        self.static_analyzer = StaticAnalyzer()
+        self.virus_scanner = VirusScanner()
         self.net_emulator: Optional[NetworkEmulator] = None
         self.anti_sandbox = AntiSandbox()
         
@@ -224,12 +224,18 @@ class RedSandSecure:
         print("[+] Анти-песочница активирована")
     
     def analyze_static(self, file_path):
-        """Статический анализ файла"""
+        """Статический анализ файла с помощью VirusScanner"""
         print(f"[*] Статический анализ: {file_path}")
-        results = self.static_analyzer.analyze(file_path)
+        results = self.virus_scanner.scan_file(file_path)
         
-        # Предварительная классификация
-        threat_type = self.classifier.classify_static(results)
+        # Предварительная классификация на основе результатов сканера
+        if results['threat_level'] == 'MALICIOUS':
+            threat_type = 'MALWARE'
+        elif results['threat_level'] == 'SUSPICIOUS':
+            threat_type = 'SUSPICIOUS'
+        else:
+            threat_type = 'CLEAN'
+        
         results['preliminary_threat_type'] = threat_type
         
         return results
