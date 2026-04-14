@@ -1,0 +1,9 @@
+@echo off
+REM Симулятор ransomware поведения (БЕЗОПАСНЫЙ)
+echo [RANSOMWARE_SIM] Starting file encryption simulation...
+echo [RANSOMWARE_SIM] Scanning for documents...
+echo [RANSOMWARE_SIM] Would encrypt: *.docx, *.xlsx, *.pdf
+echo [RANSOMWARE_SIM] Creating ransom note: READ_ME.txt
+echo RANSOMWARE SIMULATION - Your files would be encrypted! > "%TEMP%\READ_ME.txt"
+echo [RANSOMWARE_SIM] Requesting bitcoin payment...
+echo [RANSOMWARE_SIM] Simulation complete

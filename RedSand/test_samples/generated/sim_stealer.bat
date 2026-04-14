@@ -1,0 +1,9 @@
+@echo off
+REM Симулятор stealer поведения (БЕЗОПАСНЫЙ)
+echo [STEALER_SIM] Starting credential theft simulation...
+echo [STEALER_SIM] Would access browser data...
+echo [STEALER_SIM] Would steal cookies from Chrome/Firefox
+echo [STEALER_SIM] Would extract saved passwords
+echo [STEALER_SIM] Would collect crypto wallets
+echo [STEALER_SIM] Sending data to C2 server (simulated)...
+echo [STEALER_SIM] Simulation complete
