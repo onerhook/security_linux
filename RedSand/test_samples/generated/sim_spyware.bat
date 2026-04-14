@@ -1,9 +1,0 @@
-@echo off
-REM Симулятор spyware поведения (БЕЗОПАСНЫЙ)
-echo [SPYWARE_SIM] Starting spyware simulation...
-echo [SPYWARE_SIM] Would monitor user activity...
-echo [SPYWARE_SIM] Would capture screenshots every 10 seconds
-echo [SPYWARE_SIM] Would track clipboard contents
-echo [SPYWARE_SIM] Would record browsing history
-echo [SPYWARE_SIM] Sending data to remote server...
-echo [SPYWARE_SIM] Simulation complete

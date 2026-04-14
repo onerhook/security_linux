@@ -1,1 +1,40 @@
-Nothing needs to be added to the .gitignore file based on the provided file changes. The deletion of a Python source file (`RedSand/modules/virus_scanner.py`) does not warrant any new ignore rules.
+```gitignore
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Test samples - assuming generated files should be ignored
+RedSand/test_samples/generated/
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Editor/IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
+
+# MyPy cache
+.mypy_cache/
+
+# Pytest cache
+.pytest_cache/
+```
