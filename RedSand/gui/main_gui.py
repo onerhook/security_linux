@@ -625,7 +625,13 @@ class AnalysisWorker(QObject):
             )
 
             if result:
-                self.finished.emit(result)
+                # Конвертируем AnalysisResult в dict для сигнала
+                if hasattr(result, '__dataclass_fields__'):
+                    from dataclasses import asdict
+                    result_dict = asdict(result)
+                else:
+                    result_dict = result
+                self.finished.emit(result_dict)
             else:
                 self.error.emit("Анализ не был завершен успешно")
 
@@ -765,9 +771,15 @@ class ReportViewerDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        threat_info = self.report_data.get('threat_classification', {})
-        file_info = self.report_data.get('file', {})
-        analysis_time = self.report_data.get('analysis_time', {})
+        # Адаптация структуры данных от Orchestrator
+        threat_info = self.report_data.get('threat_info', {})
+        static_data = self.report_data.get('static_results', {})
+        analysis_time = self.report_data.get('analysis_time', 0)
+        
+        # Извлекаем информацию о файле из static_results
+        file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
+        file_size = static_data.get('file_size', 0) if static_data else 0
+        file_path = static_data.get('file_path', 'N/A') if static_data else 'N/A'
 
         # Индикатор риска
         risk_score = threat_info.get('risk_score', 0)
@@ -797,7 +809,11 @@ class ReportViewerDialog(QDialog):
         info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое')), 2, 1)
 
         info_layout.addWidget(QLabel("MITRE ATT&CK:"), 3, 0)
-        mitre_text = QLabel(', '.join(threat_info.get('mitre_tactics', [])))
+        mitre_tactics = threat_info.get('mitre_tactics', [])
+        if isinstance(mitre_tactics, list):
+            mitre_text = QLabel(', '.join(mitre_tactics))
+        else:
+            mitre_text = QLabel(str(mitre_tactics))
         mitre_text.setWordWrap(True)
         info_layout.addWidget(mitre_text, 3, 1)
 
@@ -809,13 +825,13 @@ class ReportViewerDialog(QDialog):
         file_layout = QGridLayout()
 
         file_layout.addWidget(QLabel("Имя:"), 0, 0)
-        file_layout.addWidget(QLabel(file_info.get('name', 'N/A')), 0, 1)
+        file_layout.addWidget(QLabel(file_name), 0, 1)
 
         file_layout.addWidget(QLabel("Размер:"), 1, 0)
-        file_layout.addWidget(QLabel(f"{file_info.get('size', 0)} байт"), 1, 1)
+        file_layout.addWidget(QLabel(f"{file_size} байт"), 1, 1)
 
         file_layout.addWidget(QLabel("Путь:"), 2, 0)
-        path_label = QLabel(file_info.get('path', 'N/A'))
+        path_label = QLabel(file_path)
         path_label.setWordWrap(True)
         file_layout.addWidget(path_label, 2, 1)
 
@@ -842,12 +858,13 @@ class ReportViewerDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        static_data = self.report_data.get('static_analysis', {})
+        # Адаптация структуры данных от Orchestrator
+        static_data = self.report_data.get('static_results', {})
 
         # Хеши
         hashes_group = QGroupBox("Хеши файла")
         hashes_layout = QGridLayout()
-        hashes = static_data.get('hashes', {})
+        hashes = static_data.get('hashes', {}) if static_data else {}
 
         for i, (hash_type, hash_value) in enumerate(hashes.items()):
             label = QLabel(f"{hash_type.upper()}:")
@@ -863,7 +880,7 @@ class ReportViewerDialog(QDialog):
         layout.addWidget(hashes_group)
 
         # PE информация
-        if static_data.get('pe_info'):
+        if static_data and static_data.get('pe_info'):
             pe_group = QGroupBox("PE Информация")
             pe_layout = QVBoxLayout()
 
@@ -880,7 +897,7 @@ class ReportViewerDialog(QDialog):
             layout.addWidget(pe_group)
 
         # Строки
-        if static_data.get('strings'):
+        if static_data and static_data.get('strings'):
             strings_group = QGroupBox("Извлеченные строки (первые 50)")
             strings_layout = QVBoxLayout()
 
@@ -900,7 +917,8 @@ class ReportViewerDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        dynamic_events = self.report_data.get('dynamic_analysis', [])
+        # Адаптация структуры данных от Orchestrator
+        dynamic_events = self.report_data.get('dynamic_events', [])
 
         events_table = QTableWidget()
         events_table.setColumnCount(3)
@@ -934,8 +952,9 @@ class ReportViewerDialog(QDialog):
         widget = QWidget()
         layout = QVBoxLayout(widget)
 
-        static_data = self.report_data.get('static_analysis', {})
-        hashes = static_data.get('hashes', {})
+        # Адаптация структуры данных от Orchestrator
+        static_data = self.report_data.get('static_results', {})
+        hashes = static_data.get('hashes', {}) if static_data else {}
 
         ioc_text = QTextEdit()
         ioc_text.setReadOnly(True)
@@ -1530,9 +1549,12 @@ class RedSandSecureGUI(QMainWindow):
 
     def update_results_display(self, result: dict):
         """Обновление отображения результатов."""
-        threat_info = result.get('threat_classification', {})
-        file_info = result.get('file', {})
-
+        # Адаптация структуры данных: Orchestrator использует threat_info, static_results, dynamic_events
+        threat_info = result.get('threat_info', {})
+        static_data = result.get('static_results', {})
+        file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
+        file_size = static_data.get('file_size', 0) if static_data else 0
+        
         # Скрываем заглушку, показываем таблицу
         self.results_summary.setVisible(False)
         self.results_table.setVisible(True)
@@ -1544,8 +1566,8 @@ class RedSandSecureGUI(QMainWindow):
             ("Семейство", threat_info.get('family', 'Неизвестно')),
             ("Уровень риска", f"{threat_info.get('risk_score', 0)}/100"),
             ("Доверие", threat_info.get('confidence', 'Низкое')),
-            ("Имя файла", file_info.get('name', 'N/A')),
-            ("Размер файла", f"{file_info.get('size', 0)} байт"),
+            ("Имя файла", file_name),
+            ("Размер файла", f"{file_size} байт"),
         ]
 
         for param, value in data:
@@ -1556,8 +1578,8 @@ class RedSandSecureGUI(QMainWindow):
 
     def update_ioc_display(self, result: dict):
         """Обновление отображения IOC."""
-        static_data = result.get('static_analysis', {})
-        hashes = static_data.get('hashes', {})
+        static_data = result.get('static_results', {})
+        hashes = static_data.get('hashes', {}) if static_data else {}
 
         content = "=== INDICATORS OF COMPROMISE (IOC) ===\n\n"
 
@@ -1567,7 +1589,7 @@ class RedSandSecureGUI(QMainWindow):
                 content += f"  {hash_type.upper()}: {hash_value}\n"
 
         content += "\n=========================================\n"
-        content += "💡 Совет: Используйте эти IOC для поиска угроз в вашей инфраструктуре"
+        content += "Совет: Используйте эти IOC для поиска угроз в вашей инфраструктуре"
 
         self.ioc_text.setPlainText(content)
 
