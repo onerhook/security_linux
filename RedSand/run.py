@@ -24,10 +24,10 @@ def main():
     # По умолчанию запускаем GUI
     if args.gui or not (args.gui or args.cli):
         try:
-            from gui.main_gui import RedSandGUI
+            from gui.main_gui import RedSandSecureGUI
             from PyQt5.QtWidgets import QApplication
             app = QApplication(sys.argv)
-            window = RedSandGUI()
+            window = RedSandSecureGUI()
             window.show()
             sys.exit(app.exec_())
         except ImportError as e:
