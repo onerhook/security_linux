@@ -1740,12 +1740,17 @@ class RedSandSecureGUI(QMainWindow):
         self.results_table.setVisible(True)
         self.results_table.setRowCount(0)
 
-        # Данные для таблицы
+        # Данные для таблицы (с проверкой на None)
+        threat_type = threat_info.get('type', 'Неизвестно') if threat_info else 'Неизвестно'
+        threat_family = threat_info.get('family', 'Неизвестно') if threat_info else 'Неизвестно'
+        risk_score = f"{threat_info.get('risk_score', 0)}/100" if threat_info else 'N/A'
+        confidence = threat_info.get('confidence', 'Низкое') if threat_info else 'Низкое'
+        
         data = [
-            ("Тип угрозы", threat_info.get('type', 'Неизвестно')),
-            ("Семейство", threat_info.get('family', 'Неизвестно')),
-            ("Уровень риска", f"{threat_info.get('risk_score', 0)}/100"),
-            ("Доверие", threat_info.get('confidence', 'Низкое')),
+            ("Тип угрозы", threat_type),
+            ("Семейство", threat_family),
+            ("Уровень риска", risk_score),
+            ("Доверие", confidence),
             ("Имя файла", file_name),
             ("Размер файла", f"{file_size} байт"),
         ]
@@ -1758,7 +1763,7 @@ class RedSandSecureGUI(QMainWindow):
 
     def update_ioc_display(self, result: dict):
         """Обновление отображения IOC."""
-        static_data = result.get('static_results', {})
+        static_data = result.get('static_results', {}) or {}
         hashes = static_data.get('hashes', {}) if static_data else {}
 
         content = "=== INDICATORS OF COMPROMISE (IOC) ===\n\n"
@@ -1767,6 +1772,8 @@ class RedSandSecureGUI(QMainWindow):
             content += "ХЕШИ ФАЙЛА:\n"
             for hash_type, hash_value in hashes.items():
                 content += f"  {hash_type.upper()}: {hash_value}\n"
+        else:
+            content += "Хеши файла недоступны\n"
 
         content += "\n=========================================\n"
         content += "Совет: Используйте эти IOC для поиска угроз в вашей инфраструктуре"

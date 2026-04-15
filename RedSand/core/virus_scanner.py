@@ -93,6 +93,7 @@ class VirusScanner:
             'file_name': os.path.basename(file_path),
             'file_size': 0,
             'file_hash': '',
+            'hashes': {},  # Добавляем hashes для совместимости с threat_classifier
             'is_malicious': False,
             'is_suspicious': False,
             'threat_level': 'CLEAN',  # CLEAN, SUSPICIOUS, MALICIOUS
@@ -100,7 +101,8 @@ class VirusScanner:
             'detected_threats': [],
             'matched_signatures': [],
             'matched_patterns': [],
-            'recommendations': []
+            'recommendations': [],
+            'strings': []  # Добавляем strings для совместимости с threat_classifier
         }
         
         try:
@@ -111,6 +113,13 @@ class VirusScanner:
             
             result['file_size'] = os.path.getsize(file_path)
             result['file_hash'] = self._calculate_hash(file_path)
+            
+            # Заполняем hashes для совместимости
+            result['hashes'] = {
+                'sha256': result['file_hash'],
+                'md5': 'N/A',
+                'sha1': 'N/A'
+            }
             
             # Проверка хеша по базе известных угроз
             if result['file_hash'] in self.malware_signatures['known_bad_hashes']:
@@ -125,6 +134,9 @@ class VirusScanner:
             content = self._read_file_content(file_path)
             if not content:
                 return result
+            
+            # Извлекаем строки для классификатора
+            result['strings'] = self._extract_strings(content)
             
             # Анализ содержимого
             self._analyze_content(content, result)
@@ -165,12 +177,24 @@ class VirusScanner:
             except Exception:
                 return None
     
+    def _extract_strings(self, content: str) -> list:
+        """Извлечение строк из содержимого для классификатора."""
+        if not content:
+            return []
+        
+        # Разбиваем на строки и фильтруем пустые
+        strings = [line.strip() for line in content.split('\n') if line.strip()]
+        
+        # Ограничиваем количество строк для производительности
+        return strings[:500]
+    
     def _analyze_content(self, content: str, result: Dict):
         """Анализ содержимого файла."""
         malicious_count = 0
         suspicious_count = 0
         
         # Проверяем, является ли файл легитимным Python кодом или тестовым файлом
+
         is_legitimate_python = self._is_legitimate_python_code(content)
         is_test_file = self._is_test_file(content)
         

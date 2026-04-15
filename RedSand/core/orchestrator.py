@@ -138,7 +138,8 @@ class RedSandSecure:
             # Сохраняем текущее состояние
             result = subprocess.run(
                 ['netsh', 'interface', 'show', 'interface'],
-                capture_output=True, text=True, shell=True, check=False
+                capture_output=True, text=True, shell=True, check=False,
+                encoding='utf-8', errors='ignore'
             )
             self.original_network_state['output'] = result.stdout
 
@@ -147,17 +148,20 @@ class RedSandSecure:
             for adapter in adapters:
                 subprocess.run(
                     f'netsh interface set interface "{adapter}" admin=disabled',
-                    shell=True, capture_output=True, check=False
+                    shell=True, capture_output=True, check=False,
+                    encoding='utf-8', errors='ignore'
                 )
 
             # Блокируем весь трафик через фаервол
             subprocess.run(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
-                shell=True, capture_output=True, check=False
+                shell=True, capture_output=True, check=False,
+                encoding='utf-8', errors='ignore'
             )
             subprocess.run(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
-                shell=True, capture_output=True, check=False
+                shell=True, capture_output=True, check=False,
+                encoding='utf-8', errors='ignore'
             )
 
             self.is_network_disabled = True
@@ -182,17 +186,20 @@ class RedSandSecure:
             for adapter in adapters:
                 subprocess.run(
                     f'netsh interface set interface "{adapter}" admin=enabled',
-                    shell=True, capture_output=True, check=False
+                    shell=True, capture_output=True, check=False,
+                    encoding='utf-8', errors='ignore'
                 )
 
             # Удаляем правила фаервола
             subprocess.run(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
-                shell=True, capture_output=True, check=False
+                shell=True, capture_output=True, check=False,
+                encoding='utf-8', errors='ignore'
             )
             subprocess.run(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
-                shell=True, capture_output=True, check=False
+                shell=True, capture_output=True, check=False,
+                encoding='utf-8', errors='ignore'
             )
 
             self.is_network_disabled = False
