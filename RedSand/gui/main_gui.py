@@ -137,6 +137,441 @@ THEMES = {
 }
 
 
+def generate_stylesheet(theme_name: str = "Dark Red") -> str:
+    """Генерация таблицы стилей на основе выбранной темы."""
+    theme = THEMES.get(theme_name, THEMES["Dark Red"])
+    
+    return f"""
+    QMainWindow, QDialog {{
+        background-color: {theme['bg_primary']};
+        color: {theme['text_primary']};
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 14px;
+    }}
+    
+    QToolBar {{
+        background-color: {theme['bg_secondary']};
+        border-bottom: 2px solid {theme['accent']};
+        padding: 5px;
+        spacing: 10px;
+    }}
+    
+    QToolBar QToolButton {{
+        background-color: transparent;
+        color: {theme['text_primary']};
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+    }}
+    
+    QToolBar QToolButton:hover {{
+        background-color: {theme['bg_tertiary']};
+    }}
+    
+    QToolBar QToolButton:pressed {{
+        background-color: {theme['accent']};
+    }}
+    
+    QPushButton {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: bold;
+        min-width: 100px;
+    }}
+    
+    QPushButton:hover {{
+        background-color: {theme['accent_hover']};
+    }}
+    
+    QPushButton:pressed {{
+        background-color: {theme['bg_tertiary']};
+    }}
+    
+    QPushButton:disabled {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+    }}
+    
+    QGroupBox {{
+        background-color: {theme['bg_secondary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        margin-top: 15px;
+        padding-top: 15px;
+        font-weight: bold;
+        color: {theme['text_primary']};
+    }}
+    
+    QGroupBox::title {{
+        subcontrol-origin: margin;
+        left: 15px;
+        padding: 0 8px;
+        color: {theme['accent']};
+    }}
+    
+    QTabWidget::pane {{
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        background-color: {theme['bg_secondary']};
+    }}
+    
+    QTabBar::tab {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+        padding: 10px 20px;
+        margin-right: 3px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+    }}
+    
+    QTabBar::tab:selected {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+        font-weight: bold;
+    }}
+    
+    QTabBar::tab:hover:!selected {{
+        background-color: {theme['bg_primary']};
+    }}
+    
+    QTextEdit, QPlainTextEdit {{
+        background-color: {theme['bg_primary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 10px;
+        font-family: 'Consolas', 'Courier New', monospace;
+        font-size: 13px;
+    }}
+    
+    QProgressBar {{
+        background-color: {theme['bg_tertiary']};
+        border: none;
+        border-radius: 8px;
+        height: 20px;
+        text-align: center;
+        color: {theme['text_primary']};
+        font-weight: bold;
+    }}
+    
+    QProgressBar::chunk {{
+        background-color: {theme['accent']};
+        border-radius: 8px;
+    }}
+    
+    QSlider::groove:horizontal {{
+        background-color: {theme['bg_tertiary']};
+        height: 8px;
+        border-radius: 4px;
+    }}
+    
+    QSlider::handle:horizontal {{
+        background-color: {theme['accent']};
+        width: 18px;
+        margin: -5px 0;
+        border-radius: 9px;
+    }}
+    
+    QSlider::handle:horizontal:hover {{
+        background-color: {theme['accent_hover']};
+    }}
+    
+    QComboBox {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 8px 12px;
+    }}
+    
+    QComboBox:hover {{
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QComboBox::drop-down {{
+        border: none;
+        width: 30px;
+    }}
+    
+    QComboBox::down-arrow {{
+        image: none;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 8px solid {theme['accent']};
+        margin-right: 10px;
+    }}
+    
+    QComboBox QAbstractItemView {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        selection-background-color: {theme['accent']};
+    }}
+    
+    QSpinBox, QDoubleSpinBox {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 8px 12px;
+    }}
+    
+    QSpinBox:hover, QDoubleSpinBox:hover {{
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QLineEdit {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 8px 12px;
+    }}
+    
+    QLineEdit:hover {{
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QLineEdit:focus {{
+        border: 2px solid {theme['accent']};
+        background-color: {theme['bg_primary']};
+    }}
+    
+    QCheckBox {{
+        color: {theme['text_primary']};
+        spacing: 8px;
+    }}
+    
+    QCheckBox::indicator {{
+        width: 18px;
+        height: 18px;
+        border-radius: 4px;
+        border: 2px solid {theme['bg_tertiary']};
+        background-color: {theme['bg_secondary']};
+    }}
+    
+    QCheckBox::indicator:checked {{
+        background-color: {theme['accent']};
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QCheckBox::indicator:hover {{
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QRadioButton {{
+        color: {theme['text_primary']};
+        spacing: 8px;
+    }}
+    
+    QRadioButton::indicator {{
+        width: 18px;
+        height: 18px;
+        border-radius: 9px;
+        border: 2px solid {theme['bg_tertiary']};
+        background-color: {theme['bg_secondary']};
+    }}
+    
+    QRadioButton::indicator:checked {{
+        background-color: {theme['accent']};
+        border: 2px solid {theme['accent']};
+    }}
+    
+    QTableWidget {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        gridline-color: {theme['bg_tertiary']};
+    }}
+    
+    QTableWidget::item {{
+        padding: 8px;
+    }}
+    
+    QTableWidget::item:selected {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+    }}
+    
+    QHeaderView::section {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+        padding: 10px;
+        border: none;
+        font-weight: bold;
+    }}
+    
+    QTreeWidget {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+    }}
+    
+    QTreeWidget::item {{
+        padding: 5px;
+    }}
+    
+    QTreeWidget::item:selected {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+    }}
+    
+    QTreeWidget::branch:has-children:!has-siblings:closed,
+    QTreeWidget::branch:closed:has-children:has-siblings {{
+        border-image: none;
+        image: none;
+    }}
+    
+    QTreeWidget::branch:open:has-children:!has-siblings,
+    QTreeWidget::branch:open:has-children:has-siblings {{
+        border-image: none;
+        image: none;
+    }}
+    
+    QScrollArea {{
+        border: none;
+        background-color: transparent;
+    }}
+    
+    QScrollBar:vertical {{
+        background-color: {theme['bg_primary']};
+        width: 12px;
+        border-radius: 6px;
+    }}
+    
+    QScrollBar::handle:vertical {{
+        background-color: {theme['bg_tertiary']};
+        min-height: 30px;
+        border-radius: 6px;
+    }}
+    
+    QScrollBar::handle:vertical:hover {{
+        background-color: {theme['accent']};
+    }}
+    
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+        height: 0px;
+    }}
+    
+    QScrollBar:horizontal {{
+        background-color: {theme['bg_primary']};
+        height: 12px;
+        border-radius: 6px;
+    }}
+    
+    QScrollBar::handle:horizontal {{
+        background-color: {theme['bg_tertiary']};
+        min-width: 30px;
+        border-radius: 6px;
+    }}
+    
+    QScrollBar::handle:horizontal:hover {{
+        background-color: {theme['accent']};
+    }}
+    
+    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
+        width: 0px;
+    }}
+    
+    QMessageBox {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+    }}
+    
+    QMessageBox QLabel {{
+        color: {theme['text_primary']};
+    }}
+    
+    QMessageBox QPushButton {{
+        min-width: 80px;
+    }}
+    
+    QMenu {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 5px;
+    }}
+    
+    QMenu::item {{
+        padding: 8px 20px;
+        border-radius: 4px;
+    }}
+    
+    QMenu::item:selected {{
+        background-color: {theme['accent']};
+    }}
+    
+    QMenu::separator {{
+        height: 2px;
+        background-color: {theme['bg_tertiary']};
+        margin: 5px 10px;
+    }}
+    
+    QStatusBar {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_secondary']};
+        border-top: 1px solid {theme['bg_tertiary']};
+    }}
+    
+    QListWidget {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+    }}
+    
+    QListWidget::item {{
+        padding: 8px;
+        border-radius: 4px;
+    }}
+    
+    QListWidget::item:selected {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+    }}
+    
+    QListWidget::item:hover {{
+        background-color: {theme['bg_tertiary']};
+    }}
+    
+    QSplitter::handle {{
+        background-color: {theme['bg_tertiary']};
+        width: 3px;
+    }}
+    
+    QSplitter::handle:horizontal {{
+        width: 3px;
+    }}
+    
+    QSplitter::handle:vertical {{
+        height: 3px;
+    }}
+    
+    QToolTip {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+        border: 1px solid {theme['accent']};
+        border-radius: 4px;
+        padding: 5px 10px;
+    }}
+    
+    QWhatsThis {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 10px;
+    }}
+    """
+
+
 # ============================================================================
 # РАБОЧИЙ ПОТОК АНАЛИЗА
 # ============================================================================
@@ -891,7 +1326,9 @@ class RedSandSecureGUI(QMainWindow):
 
     def apply_stylesheet(self):
         """Применение таблицы стилей."""
-        self.setStyleSheet(STYLESHEET)
+        theme_name = self.settings.get('theme', 'Dark Red')
+        stylesheet = generate_stylesheet(theme_name)
+        self.setStyleSheet(stylesheet)
 
     def load_settings(self):
         """Загрузка настроек из файла."""
