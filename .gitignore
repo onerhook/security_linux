@@ -1,1 +1,47 @@
-Nothing should be ignored based on the provided file changes. The modification of 'RedSand/redsand_gui.py' is a source code file that should not be added to .gitignore.
+```
+# Test samples (executable files)
+RedSand/test_samples/*.exe
+RedSand/test_samples/*.sys
+
+# Generated test samples
+RedSand/test_samples/clean_file_*.txt
+RedSand/test_samples/fake_*.exe
+RedSand/test_samples/fake_*.sys
+RedSand/test_samples/poly_variant_*.exe
+RedSand/test_samples/samples_info.json
+
+# Python compiled files
+*.pyc
+__pycache__/
+
+# Backup and swap files
+*.bak
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+*.env.*
+
+# Coverage reports
+.coverage
+coverage/
+htmlcov/
+
+# IDE specific
+.vscode/
+.idea/
+*.iml
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*~
+```

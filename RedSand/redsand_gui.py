@@ -1,4 +1,3 @@
---- RedSand/redsand_gui.py (原始)
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
