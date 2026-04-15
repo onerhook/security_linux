@@ -618,7 +618,7 @@ class AnalysisWorker(QObject):
                 QThread.msleep(200)
 
             # Запуск реального анализа
-            result = sandbox.analyze(
+            result = sandbox.analyze_file(
                 self.file_path,
                 use_poly=self.use_poly,
                 timeout=self.timeout

@@ -247,6 +247,13 @@ class RedSandSecure:
         self.analysis_start_time = datetime.now()
         events_log = []
 
+        # Проверка типа файла - не запускаем текстовые файлы и другие не-executable
+        if not (file_path.endswith('.exe') or file_path.endswith('.bat') or 
+                file_path.endswith('.cmd') or file_path.endswith('.sh') or
+                file_path.endswith('.py')):
+            print(f"[!] Пропуск динамического анализа для не-executable файла: {file_path}")
+            return [{'info': 'Dynamic analysis skipped for non-executable file'}]
+
         # Запускаем образец
         try:
             process = subprocess.Popen(
@@ -378,7 +385,8 @@ class RedSandSecure:
                 'static_results': static_results,
                 'dynamic_events': dynamic_events,
                 'threat_info': threat_info,
-                'report_data': report_data
+                'report_data': report_data,
+                'success': True
             }
 
         except Exception as e:
