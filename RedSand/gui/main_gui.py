@@ -774,15 +774,15 @@ class ReportViewerDialog(QDialog):
         # Адаптация структуры данных от Orchestrator
         threat_info = self.report_data.get('threat_info', {})
         static_data = self.report_data.get('static_results', {})
-        analysis_time = self.report_data.get('analysis_time', 0)
+        analysis_time = self.report_data.get('analysis_time', 0.0)
         
-        # Извлекаем информацию о файле из static_results
+        # Извлекаем информацию о файле из static_results или верхнего уровня
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
         file_size = static_data.get('file_size', 0) if static_data else 0
         file_path = static_data.get('file_path', 'N/A') if static_data else 'N/A'
 
         # Индикатор риска
-        risk_score = threat_info.get('risk_score', 0)
+        risk_score = threat_info.get('risk_score', 0) if threat_info else 0
         risk_label = QLabel(f"Уровень риска: {risk_score}/100")
         risk_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
 
@@ -800,16 +800,16 @@ class ReportViewerDialog(QDialog):
         info_layout = QGridLayout()
 
         info_layout.addWidget(QLabel("Тип:"), 0, 0)
-        info_layout.addWidget(QLabel(threat_info.get('type', 'Неизвестно')), 0, 1)
+        info_layout.addWidget(QLabel(threat_info.get('type', 'Неизвестно') if threat_info else 'Неизвестно'), 0, 1)
 
         info_layout.addWidget(QLabel("Семейство:"), 1, 0)
-        info_layout.addWidget(QLabel(threat_info.get('family', 'Неизвестно')), 1, 1)
+        info_layout.addWidget(QLabel(threat_info.get('family', 'Неизвестно') if threat_info else 'Неизвестно'), 1, 1)
 
         info_layout.addWidget(QLabel("Доверие:"), 2, 0)
-        info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое')), 2, 1)
+        info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое') if threat_info else 'Низкое'), 2, 1)
 
         info_layout.addWidget(QLabel("MITRE ATT&CK:"), 3, 0)
-        mitre_tactics = threat_info.get('mitre_tactics', [])
+        mitre_tactics = threat_info.get('mitre_tactics', []) if threat_info else []
         if isinstance(mitre_tactics, list):
             mitre_text = QLabel(', '.join(mitre_tactics))
         else:
@@ -838,15 +838,24 @@ class ReportViewerDialog(QDialog):
         file_group.setLayout(file_layout)
         layout.addWidget(file_group)
 
-        # Время анализа
+        # Время анализа - обработка как float или dict
         time_group = QGroupBox("Время анализа")
         time_layout = QGridLayout()
 
         time_layout.addWidget(QLabel("Начало:"), 0, 0)
-        time_layout.addWidget(QLabel(analysis_time.get('start', 'N/A')), 0, 1)
+        # analysis_time может быть float (секунды) или dict с полями start/end/duration
+        if isinstance(analysis_time, dict):
+            start_time_str = analysis_time.get('start', 'N/A')
+            duration_val = analysis_time.get('duration', 0.0)
+        else:
+            # Если float - показываем только длительность
+            start_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            duration_val = float(analysis_time)
+        
+        time_layout.addWidget(QLabel(start_time_str), 0, 1)
 
         time_layout.addWidget(QLabel("Длительность:"), 1, 0)
-        time_layout.addWidget(QLabel(f"{analysis_time.get('duration', 0):.2f} сек"), 1, 1)
+        time_layout.addWidget(QLabel(f"{duration_val:.2f} сек"), 1, 1)
 
         time_group.setLayout(time_layout)
         layout.addWidget(time_group)

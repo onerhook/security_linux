@@ -350,6 +350,7 @@ class RedSandSecure:
 
         file_hash = calculate_file_hash(file_path)
         file_size = os.path.getsize(file_path)
+        analysis_start_time = datetime.now()
 
         try:
             # Отключение сети
@@ -386,6 +387,11 @@ class RedSandSecure:
                 'dynamic_events': dynamic_events,
                 'threat_info': threat_info,
                 'report_data': report_data,
+                'analysis_time': {
+                    'start': analysis_start_time.isoformat(),
+                    'end': datetime.now().isoformat(),
+                    'duration': (datetime.now() - analysis_start_time).total_seconds()
+                },
                 'success': True
             }
 
