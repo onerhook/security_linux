@@ -46,6 +46,19 @@ class ReportGenerator:
             risk_color = '#28a745'
             risk_label = 'SAFE'
         
+        # Обработка analysis_time - может быть dict или float
+        analysis_time = report_data.get('analysis_time', {})
+        if isinstance(analysis_time, dict):
+            start_time = analysis_time.get('start', 'N/A')
+            end_time = analysis_time.get('end', 'N/A')
+            duration = analysis_time.get('duration', 0)
+        else:
+            # Если это float, используем текущее время
+            now = datetime.now()
+            start_time = now.isoformat()
+            end_time = now.isoformat()
+            duration = float(analysis_time) if isinstance(analysis_time, (int, float)) else 0
+        
         html_content = f'''<!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -101,9 +114,9 @@ class ReportGenerator:
             
             <div class="info-card">
                 <h3>⏱️ Время анализа</h3>
-                <p><strong>Начало:</strong> {report_data.get('analysis_time', {}).get('start', 'N/A')}</p>
-                <p><strong>Окончание:</strong> {report_data.get('analysis_time', {}).get('end', 'N/A')}</p>
-                <p><strong>Длительность:</strong> {report_data.get('analysis_time', {}).get('duration', 0):.2f} сек</p>
+                <p><strong>Начало:</strong> {start_time}</p>
+                <p><strong>Окончание:</strong> {end_time}</p>
+                <p><strong>Длительность:</strong> {duration:.2f} сек</p>
             </div>
         </div>
         
