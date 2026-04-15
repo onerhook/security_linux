@@ -654,47 +654,82 @@ class SettingsDialog(QDialog):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
 
         form = QFormLayout()
+        form.setSpacing(12)
+        form.setLabelAlignment(Qt.AlignRight)
+
+        # Выбор темы
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems(list(THEMES.keys()))
+        self.theme_combo.setMinimumWidth(200)
+        form.addRow("🎨 Тема оформления:", self.theme_combo)
+
+        separator1 = QFrame()
+        separator1.setFrameShape(QFrame.HLine)
+        separator1.setStyleSheet("background-color: #444;")
+        separator1.setMaximumHeight(2)
+        layout.addWidget(separator1)
 
         # Таймаут анализа
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setSuffix(" сек")
-        form.addRow("Таймаут анализа:", self.timeout_spin)
+        self.timeout_spin.setMinimumWidth(150)
+        form.addRow("⏱️ Таймаут анализа:", self.timeout_spin)
 
         # Директория отчетов
         self.output_dir_edit = QLineEdit("reports")
-        btn_browse = QPushButton("Обзор...")
+        self.output_dir_edit.setMinimumWidth(250)
+        btn_browse = QPushButton("📂 Обзор...")
+        btn_browse.setMaximumWidth(100)
         btn_browse.clicked.connect(self.browse_output_dir)
 
         output_layout = QHBoxLayout()
         output_layout.addWidget(self.output_dir_edit)
         output_layout.addWidget(btn_browse)
-        form.addRow("Директория отчетов:", output_layout)
+        form.addRow("📁 Директория отчетов:", output_layout)
+
+        separator2 = QFrame()
+        separator2.setFrameShape(QFrame.HLine)
+        separator2.setStyleSheet("background-color: #444;")
+        separator2.setMaximumHeight(2)
+        layout.addWidget(separator2)
 
         # Поли морфный анализ по умолчанию
         self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
+        self.poly_check.setStyleSheet("font-weight: bold;")
         form.addRow("", self.poly_check)
 
         # Автозакрытие сети
         self.network_check = QCheckBox("Автоматически отключать сеть при анализе")
         self.network_check.setChecked(True)
+        self.network_check.setStyleSheet("font-weight: bold; color: #e94560;")
         form.addRow("", self.network_check)
 
         # Уровень логирования
         self.log_level_combo = QComboBox()
         self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
         self.log_level_combo.setCurrentText("INFO")
-        form.addRow("Уровень логирования:", self.log_level_combo)
+        self.log_level_combo.setMinimumWidth(150)
+        form.addRow("📝 Уровень логирования:", self.log_level_combo)
 
         layout.addLayout(form)
+        layout.addStretch()
 
         # Кнопки
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel
         )
+        buttons.setStyleSheet("""
+            QDialogButtonBox QPushButton {
+                min-width: 100px;
+                padding: 10px 20px;
+            }
+        """)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -712,8 +747,20 @@ class SettingsDialog(QDialog):
             'output_dir': self.output_dir_edit.text(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
-            'log_level': self.log_level_combo.currentText()
+            'log_level': self.log_level_combo.currentText(),
+            'theme': self.theme_combo.currentText()
         }
+
+    def load_settings(self, settings: dict):
+        """Загрузка настроек в диалог."""
+        self.timeout_spin.setValue(settings.get('timeout', 60))
+        self.output_dir_edit.setText(settings.get('output_dir', 'reports'))
+        self.poly_check.setChecked(settings.get('use_poly_default', False))
+        self.network_check.setChecked(settings.get('auto_disable_network', True))
+        self.log_level_combo.setCurrentText(settings.get('log_level', 'INFO'))
+        theme = settings.get('theme', 'Dark Red')
+        if theme in THEMES:
+            self.theme_combo.setCurrentText(theme)
 
 
 class ReportViewerDialog(QDialog):
@@ -770,6 +817,8 @@ class ReportViewerDialog(QDialog):
     def create_summary_tab(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setSpacing(15)
+        layout.setContentsMargins(15, 15, 15, 15)
 
         # Адаптация структуры данных от Orchestrator
         threat_info = self.report_data.get('threat_info', {})
@@ -781,81 +830,135 @@ class ReportViewerDialog(QDialog):
         file_size = static_data.get('file_size', 0) if static_data else 0
         file_path = static_data.get('file_path', 'N/A') if static_data else 'N/A'
 
-        # Индикатор риска
+        # Индикатор риска с улучшенным оформлением
+        risk_group = QGroupBox("🎯 Оценка риска")
+        risk_layout = QVBoxLayout()
         risk_score = threat_info.get('risk_score', 0) if threat_info else 0
         risk_label = QLabel(f"Уровень риска: {risk_score}/100")
-        risk_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
-
+        risk_label.setFont(QFont("Segoe UI", 20, QFont.Bold))
+        risk_label.setAlignment(Qt.AlignCenter)
+        
         if risk_score >= 70:
-            risk_label.setStyleSheet("color: #dc3545;")
+            risk_label.setStyleSheet("color: #dc3545; background-color: rgba(220, 53, 69, 0.1); padding: 15px; border-radius: 8px;")
         elif risk_score >= 40:
-            risk_label.setStyleSheet("color: #ffc107;")
+            risk_label.setStyleSheet("color: #ffc107; background-color: rgba(255, 193, 7, 0.1); padding: 15px; border-radius: 8px;")
         else:
-            risk_label.setStyleSheet("color: #28a745;")
-
-        layout.addWidget(risk_label, alignment=Qt.AlignCenter)
+            risk_label.setStyleSheet("color: #28a745; background-color: rgba(40, 167, 69, 0.1); padding: 15px; border-radius: 8px;")
+        
+        risk_layout.addWidget(risk_label)
+        risk_group.setLayout(risk_layout)
+        layout.addWidget(risk_group)
 
         # Информация об угрозе
-        info_group = QGroupBox("Информация об угрозе")
+        info_group = QGroupBox("📋 Информация об угрозе")
         info_layout = QGridLayout()
+        info_layout.setHorizontalSpacing(20)
+        info_layout.setVerticalSpacing(12)
 
-        info_layout.addWidget(QLabel("Тип:"), 0, 0)
-        info_layout.addWidget(QLabel(threat_info.get('type', 'Неизвестно') if threat_info else 'Неизвестно'), 0, 1)
+        label_style = "font-weight: bold; color: #e94560;"
+        value_style = "padding: 5px;"
 
-        info_layout.addWidget(QLabel("Семейство:"), 1, 0)
-        info_layout.addWidget(QLabel(threat_info.get('family', 'Неизвестно') if threat_info else 'Неизвестно'), 1, 1)
+        type_label = QLabel("Тип:")
+        type_label.setStyleSheet(label_style)
+        type_value = QLabel(threat_info.get('type', 'Неизвестно') if threat_info else 'Неизвестно')
+        type_value.setStyleSheet(value_style)
+        type_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        info_layout.addWidget(type_label, 0, 0)
+        info_layout.addWidget(type_value, 0, 1)
 
-        info_layout.addWidget(QLabel("Доверие:"), 2, 0)
-        info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое') if threat_info else 'Низкое'), 2, 1)
+        family_label = QLabel("Семейство:")
+        family_label.setStyleSheet(label_style)
+        family_value = QLabel(threat_info.get('family', 'Неизвестно') if threat_info else 'Неизвестно')
+        family_value.setStyleSheet(value_style)
+        family_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        info_layout.addWidget(family_label, 1, 0)
+        info_layout.addWidget(family_value, 1, 1)
 
-        info_layout.addWidget(QLabel("MITRE ATT&CK:"), 3, 0)
+        confidence_label = QLabel("Доверие:")
+        confidence_label.setStyleSheet(label_style)
+        confidence_value = QLabel(threat_info.get('confidence', 'Низкое') if threat_info else 'Низкое')
+        confidence_value.setStyleSheet(value_style)
+        info_layout.addWidget(confidence_label, 2, 0)
+        info_layout.addWidget(confidence_value, 2, 1)
+
+        mitre_label = QLabel("MITRE ATT&CK:")
+        mitre_label.setStyleSheet(label_style)
         mitre_tactics = threat_info.get('mitre_tactics', []) if threat_info else []
         if isinstance(mitre_tactics, list):
-            mitre_text = QLabel(', '.join(mitre_tactics))
+            mitre_text = QLabel(', '.join(mitre_tactics) if mitre_tactics else 'Не обнаружено')
         else:
             mitre_text = QLabel(str(mitre_tactics))
         mitre_text.setWordWrap(True)
+        mitre_text.setStyleSheet(value_style)
+        mitre_text.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        info_layout.addWidget(mitre_label, 3, 0)
         info_layout.addWidget(mitre_text, 3, 1)
 
         info_group.setLayout(info_layout)
         layout.addWidget(info_group)
 
         # Информация о файле
-        file_group = QGroupBox("Информация о файле")
+        file_group = QGroupBox("📄 Информация о файле")
         file_layout = QGridLayout()
+        file_layout.setHorizontalSpacing(20)
+        file_layout.setVerticalSpacing(12)
 
-        file_layout.addWidget(QLabel("Имя:"), 0, 0)
-        file_layout.addWidget(QLabel(file_name), 0, 1)
+        name_label = QLabel("Имя:")
+        name_label.setStyleSheet(label_style)
+        name_value = QLabel(file_name)
+        name_value.setStyleSheet(value_style)
+        name_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        file_layout.addWidget(name_label, 0, 0)
+        file_layout.addWidget(name_value, 0, 1)
 
-        file_layout.addWidget(QLabel("Размер:"), 1, 0)
-        file_layout.addWidget(QLabel(f"{file_size} байт"), 1, 1)
+        size_label = QLabel("Размер:")
+        size_label.setStyleSheet(label_style)
+        size_value = QLabel(f"{file_size:,} байт")
+        size_value.setStyleSheet(value_style)
+        file_layout.addWidget(size_label, 1, 0)
+        file_layout.addWidget(size_value, 1, 1)
 
-        file_layout.addWidget(QLabel("Путь:"), 2, 0)
+        path_label_title = QLabel("Путь:")
+        path_label_title.setStyleSheet(label_style)
         path_label = QLabel(file_path)
         path_label.setWordWrap(True)
+        path_label.setStyleSheet(value_style + " color: #8a8a8a;")
+        path_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        file_layout.addWidget(path_label_title, 2, 0)
         file_layout.addWidget(path_label, 2, 1)
 
         file_group.setLayout(file_layout)
         layout.addWidget(file_group)
 
         # Время анализа - обработка как float или dict
-        time_group = QGroupBox("Время анализа")
+        time_group = QGroupBox("⏱️ Время анализа")
         time_layout = QGridLayout()
+        time_layout.setHorizontalSpacing(20)
+        time_layout.setVerticalSpacing(12)
 
-        time_layout.addWidget(QLabel("Начало:"), 0, 0)
+        start_label = QLabel("Начало:")
+        start_label.setStyleSheet(label_style)
         # analysis_time может быть float (секунды) или dict с полями start/end/duration
         if isinstance(analysis_time, dict):
-            start_time_str = analysis_time.get('start', 'N/A')
+            start_time_str = str(analysis_time.get('start', 'N/A'))
             duration_val = analysis_time.get('duration', 0.0)
         else:
             # Если float - показываем только длительность
             start_time_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             duration_val = float(analysis_time)
         
-        time_layout.addWidget(QLabel(start_time_str), 0, 1)
+        start_value = QLabel(start_time_str)
+        start_value.setStyleSheet(value_style)
+        start_value.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        time_layout.addWidget(start_label, 0, 0)
+        time_layout.addWidget(start_value, 0, 1)
 
-        time_layout.addWidget(QLabel("Длительность:"), 1, 0)
-        time_layout.addWidget(QLabel(f"{duration_val:.2f} сек"), 1, 1)
+        duration_label_title = QLabel("Длительность:")
+        duration_label_title.setStyleSheet(label_style)
+        duration_value = QLabel(f"{duration_val:.2f} сек")
+        duration_value.setStyleSheet(value_style)
+        time_layout.addWidget(duration_label_title, 1, 0)
+        time_layout.addWidget(duration_value, 1, 1)
 
         time_group.setLayout(time_layout)
         layout.addWidget(time_group)
@@ -866,21 +969,31 @@ class ReportViewerDialog(QDialog):
     def create_static_tab(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setSpacing(15)
+        layout.setContentsMargins(15, 15, 15, 15)
 
         # Адаптация структуры данных от Orchestrator
         static_data = self.report_data.get('static_results', {})
 
         # Хеши
-        hashes_group = QGroupBox("Хеши файла")
+        hashes_group = QGroupBox("🔐 Хеши файла")
         hashes_layout = QGridLayout()
+        hashes_layout.setHorizontalSpacing(20)
+        hashes_layout.setVerticalSpacing(12)
         hashes = static_data.get('hashes', {}) if static_data else {}
+
+        label_style = "font-weight: bold; color: #e94560;"
+        value_style = "padding: 5px; font-family: 'Consolas', monospace;"
 
         for i, (hash_type, hash_value) in enumerate(hashes.items()):
             label = QLabel(f"{hash_type.upper()}:")
-            label.setFont(QFont("Consolas", 10))
+            label.setStyleSheet(label_style)
+            label.setFont(QFont("Segoe UI", 10, QFont.Bold))
             value_label = QLabel(hash_value)
+            value_label.setStyleSheet(value_style)
             value_label.setFont(QFont("Consolas", 10))
             value_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
+            value_label.setWordWrap(True)
 
             hashes_layout.addWidget(label, i // 2, (i % 2) * 2)
             hashes_layout.addWidget(value_label, i // 2, (i % 2) * 2 + 1)
@@ -890,12 +1003,13 @@ class ReportViewerDialog(QDialog):
 
         # PE информация
         if static_data and static_data.get('pe_info'):
-            pe_group = QGroupBox("PE Информация")
+            pe_group = QGroupBox("📦 PE Информация")
             pe_layout = QVBoxLayout()
 
             pe_text = QTextEdit()
             pe_text.setReadOnly(True)
-            pe_text.setMaximumHeight(200)
+            pe_text.setMaximumHeight(250)
+            pe_text.setStyleSheet("font-family: 'Consolas', monospace; font-size: 12px;")
 
             pe_info = static_data['pe_info']
             pe_content = json.dumps(pe_info, indent=2, ensure_ascii=False)
@@ -907,12 +1021,13 @@ class ReportViewerDialog(QDialog):
 
         # Строки
         if static_data and static_data.get('strings'):
-            strings_group = QGroupBox("Извлеченные строки (первые 50)")
+            strings_group = QGroupBox("📝 Извлеченные строки (первые 50)")
             strings_layout = QVBoxLayout()
 
             strings_text = QTextEdit()
             strings_text.setReadOnly(True)
-            strings_text.setMaximumHeight(200)
+            strings_text.setMaximumHeight(250)
+            strings_text.setStyleSheet("font-family: 'Consolas', monospace; font-size: 12px;")
             strings_text.setPlainText('\n'.join(static_data['strings'][:50]))
 
             strings_layout.addWidget(strings_text)
@@ -925,26 +1040,54 @@ class ReportViewerDialog(QDialog):
     def create_dynamic_tab(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setSpacing(15)
+        layout.setContentsMargins(15, 15, 15, 15)
 
         # Адаптация структуры данных от Orchestrator
         dynamic_events = self.report_data.get('dynamic_events', [])
 
+        if not dynamic_events:
+            no_events_label = QLabel("⚠️ Нет данных динамического анализа")
+            no_events_label.setAlignment(Qt.AlignCenter)
+            no_events_label.setStyleSheet("font-size: 16px; color: #8a8a8a; padding: 50px;")
+            layout.addWidget(no_events_label)
+            return widget
+
         events_table = QTableWidget()
         events_table.setColumnCount(3)
-        events_table.setHorizontalHeaderLabels(["Время", "Тип", "Событие"])
+        events_table.setHorizontalHeaderLabels(["⏱️ Время", "📋 Тип", "📝 Событие"])
         events_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        events_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        events_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        events_table.setAlternatingRowColors(True)
+        events_table.setStyleSheet("""
+            QTableWidget::item {
+                padding: 8px;
+            }
+            QHeaderView::section {
+                background-color: #e94560;
+                color: white;
+                padding: 10px;
+                font-weight: bold;
+                border: none;
+            }
+        """)
 
         for event in dynamic_events:
             row = events_table.rowCount()
             events_table.insertRow(row)
 
-            timestamp = event.get('timestamp', 'N/A')
-            event_type = event.get('type', 'INFO')
-            message = event.get('message', 'N/A')
+            timestamp = str(event.get('timestamp', 'N/A'))
+            event_type = str(event.get('type', 'INFO'))
+            message = str(event.get('message', 'N/A'))
 
-            events_table.setItem(row, 0, QTableWidgetItem(timestamp))
-            events_table.setItem(row, 1, QTableWidgetItem(event_type))
-            events_table.setItem(row, 2, QTableWidgetItem(message))
+            time_item = QTableWidgetItem(timestamp)
+            type_item = QTableWidgetItem(event_type)
+            message_item = QTableWidgetItem(message)
+            
+            events_table.setItem(row, 0, time_item)
+            events_table.setItem(row, 1, type_item)
+            events_table.setItem(row, 2, message_item)
 
             # Цвет для критических событий
             if event_type == 'CRITICAL':
@@ -953,6 +1096,13 @@ class ReportViewerDialog(QDialog):
                     if item:
                         item.setBackground(QColor("#dc3545"))
                         item.setForeground(QColor("white"))
+                        item.setFont(QFont("Segoe UI", 10, QFont.Bold))
+            elif event_type == 'WARNING':
+                for col in range(3):
+                    item = events_table.item(row, col)
+                    if item:
+                        item.setBackground(QColor("#ffc107"))
+                        item.setForeground(QColor("black"))
 
         layout.addWidget(events_table)
         return widget
@@ -960,25 +1110,46 @@ class ReportViewerDialog(QDialog):
     def create_ioc_tab(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setSpacing(15)
+        layout.setContentsMargins(15, 15, 15, 15)
 
         # Адаптация структуры данных от Orchestrator
         static_data = self.report_data.get('static_results', {})
         hashes = static_data.get('hashes', {}) if static_data else {}
 
+        ioc_group = QGroupBox("🎯 Indicators of Compromise (IOC)")
+        ioc_layout = QVBoxLayout()
+        
         ioc_text = QTextEdit()
         ioc_text.setReadOnly(True)
+        ioc_text.setStyleSheet("font-family: 'Consolas', monospace; font-size: 13px;")
 
         content = "=== INDICATORS OF COMPROMISE (IOC) ===\n\n"
 
         if hashes:
-            content += "ХЕШИ ФАЙЛА:\n"
+            content += "🔐 ХЕШИ ФАЙЛА:\n"
+            content += "-" * 50 + "\n"
             for hash_type, hash_value in hashes.items():
                 content += f"  {hash_type.upper()}: {hash_value}\n"
+            content += "\n"
+
+        # Добавляем информацию об угрозе если есть
+        threat_info = self.report_data.get('threat_info', {})
+        if threat_info:
+            content += "📋 ИНФОРМАЦИЯ ОБ УГРОЗЕ:\n"
+            content += "-" * 50 + "\n"
+            content += f"  Тип: {threat_info.get('type', 'Неизвестно')}\n"
+            content += f"  Семейство: {threat_info.get('family', 'Неизвестно')}\n"
+            content += f"  Уровень риска: {threat_info.get('risk_score', 0)}/100\n"
+            content += f"  Доверие: {threat_info.get('confidence', 'Низкое')}\n"
 
         content += "\n=========================================\n"
+        content += "Сгенерировано RedSand Secure Sandbox\n"
 
         ioc_text.setPlainText(content)
-        layout.addWidget(ioc_text)
+        ioc_layout.addWidget(ioc_text)
+        ioc_group.setLayout(ioc_layout)
+        layout.addWidget(ioc_group)
 
         return widget
 
@@ -1617,10 +1788,17 @@ class RedSandSecureGUI(QMainWindow):
     def open_settings(self):
         """Открытие диалога настроек."""
         dialog = SettingsDialog(self)
+        # Загружаем текущие настройки в диалог
+        dialog.load_settings(self.settings)
         if dialog.exec_() == QDialog.Accepted:
             settings = dialog.get_settings()
+            old_theme = self.settings.get('theme', 'Dark Red')
+            new_theme = settings.get('theme', 'Dark Red')
             self.settings.update(settings)
             self.save_settings()
+            # Применяем новую тему если она изменилась
+            if old_theme != new_theme:
+                self.apply_stylesheet()
             self.log_message('INFO', "Настройки сохранены")
 
     def open_reports_folder(self):

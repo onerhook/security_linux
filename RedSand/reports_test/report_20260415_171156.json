@@ -1,0 +1,64 @@
+{
+  "file": {
+    "path": "/tmp/tmpqjpwk8sz.txt",
+    "name": "tmpqjpwk8sz.txt",
+    "size": 12
+  },
+  "static_analysis": {
+    "file_path": "/tmp/tmpqjpwk8sz.txt",
+    "file_name": "tmpqjpwk8sz.txt",
+    "file_size": 12,
+    "file_hash": "6ae8a75555209fd6c44157c0aed8016e763ff435a19cf186f76863140143ff72",
+    "is_malicious": false,
+    "is_suspicious": false,
+    "threat_level": "CLEAN",
+    "risk_score": 0,
+    "detected_threats": [],
+    "matched_signatures": [],
+    "matched_patterns": [],
+    "recommendations": [
+      "✅ Файл не содержит известных угроз",
+      "📌 Продолжайте соблюдать меры безопасности"
+    ],
+    "preliminary_threat_type": "CLEAN"
+  },
+  "dynamic_analysis": [
+    {
+      "info": "Dynamic analysis skipped for non-executable file"
+    }
+  ],
+  "threat_classification": {
+    "type": "CLEAN",
+    "family": "Unknown",
+    "risk_score": 4,
+    "confidence": "LOW",
+    "mitre_tactics": [
+      "Unknown"
+    ],
+    "all_scores": {
+      "RANSOMWARE": 9,
+      "STEALER": 9,
+      "MINER": 7,
+      "RAT": 9,
+      "WORM": 8,
+      "BOTNET": 8,
+      "ROOTKIT": 9,
+      "SPYWARE": 8,
+      "ADWARE": 4,
+      "TROJAN": 8,
+      "DROPPER": 7,
+      "KEYLOGGER": 8
+    },
+    "behaviors_detected": []
+  },
+  "analysis_time": {
+    "start": "2026-04-15T17:11:56.516418",
+    "end": "2026-04-15T17:11:56.516596",
+    "duration": 0.00018
+  },
+  "system_info": {
+    "network_disabled": true,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}
