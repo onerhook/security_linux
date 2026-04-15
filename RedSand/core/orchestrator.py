@@ -393,6 +393,45 @@ class RedSandSecure:
             self.stop_network_emulation()
             self.restore_network()
 
+    def analyze_file(self, file_path: str, use_poly: bool = False, timeout: int = 60) -> AnalysisResult:
+        """
+        Публичный метод анализа одного файла.
+        Возвращает объект AnalysisResult.
+        """
+        if not os.path.exists(file_path):
+            return AnalysisResult(
+                file_path=file_path,
+                file_hash='N/A',
+                file_size=0,
+                success=False,
+                error='File not found'
+            )
+        
+        try:
+            # Вызываем внутренний метод анализа
+            result_dict = self.analyze_single_file_internal(file_path, use_poly, timeout)
+            
+            # Преобразуем словарь в объект AnalysisResult
+            return AnalysisResult(
+                file_path=result_dict.get('file_path', file_path),
+                file_hash=result_dict.get('file_hash', 'N/A'),
+                file_size=result_dict.get('file_size', 0),
+                success=result_dict.get('success', False),
+                static_results=result_dict.get('static_results'),
+                dynamic_events=result_dict.get('dynamic_events'),
+                threat_info=result_dict.get('threat_info'),
+                error=result_dict.get('error'),
+                analysis_time=result_dict.get('analysis_time', 0.0)
+            )
+        except Exception as e:
+            return AnalysisResult(
+                file_path=file_path,
+                file_hash='N/A',
+                file_size=os.path.getsize(file_path) if os.path.exists(file_path) else 0,
+                success=False,
+                error=str(e)
+            )
+
     def analyze_batch_multiprocessing(self, file_paths: List[str], use_poly: bool = False,
                                        timeout: int = 60, show_progress: bool = True) -> List[Dict[str, Any]]:
         """

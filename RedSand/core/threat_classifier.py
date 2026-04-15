@@ -165,7 +165,7 @@ class ThreatClassifier:
             'family': self._determine_family(primary_threat, static_results),
             'risk_score': risk_score,
             'confidence': 'HIGH' if risk_score > 70 else 'MEDIUM' if risk_score > 40 else 'LOW',
-            'mitre_tactics': self.threat_types[primary_threat]['mitre_tactics'],
+            'mitre_tactics': self.threat_types.get(primary_threat, {}).get('mitre_tactics', ['Unknown']),
             'all_scores': threat_scores,
             'behaviors_detected': behaviors_detected
         }

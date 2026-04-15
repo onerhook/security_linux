@@ -1,0 +1,13 @@
+DRIVER_HEADER_SIMULATION
+TYPE: ROOTKIT_MOCK
+GENERATED: 2026-04-15T14:39:35.882432
+RANDOM_ID: 4PKKPCBFP1DF
+
+[MOCK_BEHAVIOR]
+- Kernel hooks: false
+- SSDT modifications: false
+- Hidden files: false
+
+[NOTE]
+This is a SAFE test file for RedSand Sandbox testing.
+NOT A REAL ROOTKIT!

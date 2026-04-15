@@ -1,0 +1,14 @@
+MZ_HEADER_SIMULATION
+THREAT_TYPE: SPYWARE
+GENERATED: 2026-04-15T14:39:35.881906
+RANDOM_ID: UU2EGHOW3KMR
+
+[MOCK_BEHAVIOR]
+- Network: false
+- Filesystem: false
+- Registry: false
+- Process: false
+
+[SIGNATURE]
+This is a SAFE test file for RedSand Sandbox testing.
+NOT A REAL MALWARE!

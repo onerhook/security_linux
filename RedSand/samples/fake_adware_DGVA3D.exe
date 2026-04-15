@@ -1,0 +1,14 @@
+MZ_HEADER_SIMULATION
+THREAT_TYPE: ADWARE
+GENERATED: 2026-04-15T14:39:35.882086
+RANDOM_ID: GASD87V5LSK0
+
+[MOCK_BEHAVIOR]
+- Network: false
+- Filesystem: false
+- Registry: false
+- Process: false
+
+[SIGNATURE]
+This is a SAFE test file for RedSand Sandbox testing.
+NOT A REAL MALWARE!
