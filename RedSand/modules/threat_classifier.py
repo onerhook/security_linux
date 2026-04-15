@@ -82,67 +82,83 @@ class ThreatClassifier:
                 'risk_base': 87
             }
         }
-        
+
     def classify_static(self, static_results):
         """Классификация на основе статического анализа"""
         scores = {}
-        
+
         strings_found = static_results.get('strings', [])
         pe_info = static_results.get('pe_info', {})
-        
+
         all_text = ' '.join(strings_found).lower()
         if pe_info:
             all_text += ' ' + str(pe_info).lower()
-        
+
         for threat_type, config in self.threat_types.items():
             score = 0
-            
+
             # Поиск ключевых слов
             for keyword in config['keywords']:
                 if keyword.lower() in all_text:
                     score += 15
-            
+
             scores[threat_type] = min(score, 100)
-        
+
         # Возвращаем тип с максимальным скором
         if max(scores.values()) > 0:
             return max(scores, key=scores.get)
         return 'UNKNOWN'
-    
+
     def classify(self, static_results, dynamic_events):
         """Полная классификация угрозы"""
         threat_scores = {}
-        
+
         # Статический анализ
         static_type = self.classify_static(static_results)
-        
+
         # Динамический анализ
         behaviors_detected = self._analyze_behaviors(dynamic_events)
-        
+
+        # Получаем уровень угрозы из статического анализатора
+        static_threat_level = static_results.get('threat_level', 'CLEAN')
+
         for threat_type, config in self.threat_types.items():
-            score = config['risk_base'] * 0.3  # Базовый риск
-            
-            # Статические совпадения
-            if static_type == threat_type:
-                score += 30
-            
+            score = 0  # Начинаем с 0 для чистых файлов
+
+            # Если статический анализ показал CLEAN - даем минимальный скор
+            if static_threat_level == 'CLEAN':
+                score = config['risk_base'] * 0.1  # 10% от базового риска
+            elif static_threat_level == 'SUSPICIOUS':
+                score = config['risk_base'] * 0.3  # 30% от базового риска
+            else:  # MALICIOUS
+                score = config['risk_base'] * 0.5  # 50% от базового риска
+
+            # Статические совпадения (только если найдены реальные индикаторы)
+            if static_type == threat_type and static_threat_level != 'CLEAN':
+                score += 20
+
             # Поведенческие совпадения
             for behavior in behaviors_detected:
                 if behavior in config['behaviors']:
-                    score += 20
-            
-            # Ключевые слова в событиях
+                    score += 15
+
+            # Ключевые слова в событиях (только специфичные)
             events_text = str(dynamic_events).lower()
-            for keyword in config['keywords']:
+            for keyword in config['keywords'][:3]:  # Только первые 3 ключевых слова
                 if keyword.lower() in events_text:
-                    score += 10
-            
+                    score += 5
+
             threat_scores[threat_type] = min(int(score), 100)
-        
+
         # Определяем основной тип
         primary_threat = max(threat_scores, key=threat_scores.get)
         risk_score = threat_scores[primary_threat]
-        
+
+        # Если все скоры низкие (< 20), считаем файл чистым
+        if max(threat_scores.values()) < 20:
+            primary_threat = 'CLEAN'
+            risk_score = min(threat_scores.values())
+
         # Формируем результат
         result = {
             'type': primary_threat,
@@ -153,14 +169,14 @@ class ThreatClassifier:
             'all_scores': threat_scores,
             'behaviors_detected': behaviors_detected
         }
-        
+
         return result
-    
+
     def _analyze_behaviors(self, events):
         """Анализ поведения по событиям"""
         behaviors = []
         events_str = str(events).lower()
-        
+
         if 'file' in events_str and ('encrypt' in events_str or 'rename' in events_str):
             behaviors.append('file_modification')
         if 'registry' in events_str:
@@ -173,14 +189,14 @@ class ThreatClassifier:
             behaviors.append('high_cpu_usage')
         if 'password' in events_str or 'credential' in events_str:
             behaviors.append('credential_access')
-            
+
         return behaviors
-    
+
     def _determine_family(self, threat_type, static_results):
         """Определение семейства вируса"""
         # Упрощенная логика определения семейства
         strings_found = ' '.join(static_results.get('strings', [])).lower()
-        
+
         families = {
             'RANSOMWARE': ['WannaCry', 'Petya', 'LockBit', 'Ryuk'],
             'STEALER': ['Azorult', 'RedLine', 'Raccoon', 'Vidar'],
@@ -195,12 +211,12 @@ class ThreatClassifier:
             'DROPPER': ['Geodo', 'Dridex'],
             'KEYLOGGER': ['Ardamax', 'Reflexion', 'KidLogger']
         }
-        
+
         type_families = families.get(threat_type, ['Unknown'])
-        
+
         # Простой эвристический выбор
         for family in type_families:
             if family.lower() in strings_found:
                 return family
-        
+
         return type_families[0] if type_families else 'Unknown'
