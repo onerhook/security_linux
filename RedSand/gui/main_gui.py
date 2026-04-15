@@ -41,10 +41,10 @@ from PyQt5.QtGui import (
 )
 
 # Добавляем модули в путь
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'modules'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    from redsand_secure import RedSandSecure
+    from core.orchestrator import RedSandSecure
     REDSAND_AVAILABLE = True
 except ImportError:
     REDSAND_AVAILABLE = False
@@ -1339,10 +1339,10 @@ from PyQt5.QtGui import (
 from PyQt5.QtWidgets import QShortcut
 
 # Добавляем модули в путь
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'modules'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 try:
-    from redsand_secure import RedSandSecure
+    from core.orchestrator import RedSandSecure
     REDSAND_AVAILABLE = True
 except ImportError:
     REDSAND_AVAILABLE = False

@@ -1,47 +1,58 @@
 ```
-# Test samples (executable files)
-RedSand/test_samples/*.exe
-RedSand/test_samples/*.sys
-
-# Generated test samples
-RedSand/test_samples/clean_file_*.txt
-RedSand/test_samples/fake_*.exe
-RedSand/test_samples/fake_*.sys
-RedSand/test_samples/poly_variant_*.exe
-RedSand/test_samples/samples_info.json
-
-# Python compiled files
-*.pyc
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# Backup and swap files
-*.bak
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
 *.swp
 *.swo
 
 # Logs
 *.log
 
+# OS
+.DS_Store
+Thumbs.db
+
+# Coverage
+.coverage
+htmlcov/
+coverage/
+
+# Samples (since they appear to be test files)
+RedSand/samples/*.exe
+RedSand/samples/*.sys
+RedSand/samples/poly_variant_*.exe
+
 # Environment files
 .env
 .env.local
 *.env.*
-
-# Coverage reports
-.coverage
-coverage/
-htmlcov/
-
-# IDE specific
-.vscode/
-.idea/
-*.iml
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Temporary files
-*.tmp
-*~
 ```
