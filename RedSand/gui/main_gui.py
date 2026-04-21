@@ -1550,8 +1550,8 @@ class RedSandSecureGUI(QMainWindow):
     def update_results_display(self, result: dict):
         """Обновление отображения результатов."""
         # Адаптация структуры данных: Orchestrator использует threat_info, static_results, dynamic_events
-        threat_info = result.get('threat_info', {})
-        static_data = result.get('static_results', {})
+        threat_info = result.get('threat_info') or {}
+        static_data = result.get('static_results') or {}
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
         file_size = static_data.get('file_size', 0) if static_data else 0
         
@@ -1578,7 +1578,7 @@ class RedSandSecureGUI(QMainWindow):
 
     def update_ioc_display(self, result: dict):
         """Обновление отображения IOC."""
-        static_data = result.get('static_results', {})
+        static_data = result.get('static_results') or {}
         hashes = static_data.get('hashes', {}) if static_data else {}
 
         content = "=== INDICATORS OF COMPROMISE (IOC) ===\n\n"

@@ -260,7 +260,10 @@ class RedSandSecure:
                 [file_path],
                 cwd=os.path.dirname(file_path),
                 stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE
+                stderr=subprocess.PIPE,
+                universal_newlines=True,
+                encoding='utf-8',
+                errors='replace'
             )
             self.processes_monitored.append(process.pid)
 

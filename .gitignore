@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes. The modification of 'RedSand/gui/main_gui.py' is a source code file that should be tracked in version control.
+Nothing should be ignored since the changes only include source code files (.py) without any build artifacts, dependencies, or temporary files.
