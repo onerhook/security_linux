@@ -353,6 +353,7 @@ class RedSandSecure:
 
         file_hash = calculate_file_hash(file_path)
         file_size = os.path.getsize(file_path)
+        analysis_start = time.time()
 
         try:
             # Отключение сети
@@ -381,6 +382,8 @@ class RedSandSecure:
             # Генерация отчетов
             report_data = self.generate_reports(file_path, static_results, dynamic_events, threat_info)
 
+            analysis_duration = time.time() - analysis_start
+
             return {
                 'file_path': file_path,
                 'file_hash': file_hash,
@@ -389,16 +392,19 @@ class RedSandSecure:
                 'dynamic_events': dynamic_events,
                 'threat_info': threat_info,
                 'report_data': report_data,
+                'analysis_time': {'start': self.analysis_start_time.isoformat() if self.analysis_start_time else None, 'duration': analysis_duration},
                 'success': True
             }
 
         except Exception as e:
+            analysis_duration = time.time() - analysis_start
             return {
                 'file_path': file_path,
                 'file_hash': file_hash,
                 'file_size': file_size,
                 'success': False,
-                'error': str(e)
+                'error': str(e),
+                'analysis_time': {'start': None, 'duration': analysis_duration}
             }
         finally:
             self.stop_network_emulation()
@@ -433,7 +439,7 @@ class RedSandSecure:
                 dynamic_events=result_dict.get('dynamic_events'),
                 threat_info=result_dict.get('threat_info'),
                 error=result_dict.get('error'),
-                analysis_time=result_dict.get('report_data', {}).get('analysis_time', {'start': None, 'duration': 0.0})
+                analysis_time=result_dict.get('analysis_time', {'start': None, 'duration': 0.0})
             )
         except Exception as e:
             return AnalysisResult(

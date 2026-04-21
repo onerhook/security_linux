@@ -4,51 +4,35 @@
 __pycache__/
 *.o
 *.obj
-*.so
-*.dylib
-*.dll
 *.exe
-*.out
+*.sys
+*.tmp
 
 # Dependencies
 .venv/
 venv/
-env/
-.env
-.env.local
-.env.*
-
-# Build directories
-build/
-dist/
-*.egg-info/
+node_modules/
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
-*.swo
+
+# Environment
+.env
+.env.local
+*.env.*
 
 # Editors
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Coverage reports
+# Coverage
 .coverage
-htmlcov/
 coverage/
+htmlcov/
 
-# Python specific
-*.py[cod]
-*$py.class
-*.so
-.Python
-*.sqlite3
-*.db
-
-# OS generated files
-.DS_Store
-Thumbs.db
+# Sample malware files (keeping in case they're needed for testing but ignoring by default)
+RedSand/samples/*.exe
+RedSand/samples/*.sys
 ```

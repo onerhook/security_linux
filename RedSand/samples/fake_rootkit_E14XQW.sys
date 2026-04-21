@@ -4,10 +4,22 @@ GENERATED: 2026-04-15T14:39:35.882432
 RANDOM_ID: 4PKKPCBFP1DF
 
 [MOCK_BEHAVIOR]
-- Kernel hooks: false
-- SSDT modifications: false
-- Hidden files: false
+- Kernel hooks: active
+- SSDT modifications: enabled
+- Hidden files: hidden
+- Process hiding: enabled
 
-[NOTE]
-This is a SAFE test file for RedSand Sandbox testing.
-NOT A REAL ROOTKIT!
+[SIGNATURE]
+kernel_driver
+ssdt_hook
+process_hide
+file_hide
+rootkit_stealth
+
+[MALICIOUS_INDICATORS]
+NtCreateFile("\\\\.\\RootkitDriver", GENERIC_WRITE)
+KeStackAttachProcess(target_process, &apc_state)
+MmGetSystemRoutineAddress("PsSetCreateProcessNotifyRoutine")
+ZwQueryDirectoryFile(..., FileInformation, ...); // Hooked to hide files
+ObReferenceObjectByName("\\Device\\PhysicalMemory", OBJ_KERNELHANDLE, NULL, FILE_ALL_ACCESS)
+

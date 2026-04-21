@@ -4,11 +4,22 @@ GENERATED: 2026-04-15T14:39:35.882613
 RANDOM_ID: 1VFY1YFQX3YU
 
 [MOCK_BEHAVIOR]
-- Network: false
-- Filesystem: false
-- Registry: false
-- Process: false
+- Network: pool_connection
+- Filesystem: config_write
+- Registry: startup_persistence
+- Process: cpu_hijack
 
 [SIGNATURE]
-This is a SAFE test file for RedSand Sandbox testing.
-NOT A REAL MALWARE!
+pool_mining
+cryptonight_hash
+stratum_protocol
+hashrate_submit
+coin_wallet
+
+[MALICIOUS_INDICATORS]
+connect("pool.minexmr.com:4444")
+submit_job(cryptonight, wallet_address)
+SetThreadPriority(THREAD_PRIORITY_LOWEST)
+CreateProcess("xmrig.exe", "-o pool.supportxmr.com:3333")
+RegSetValueEx("HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", "MinerService")
+

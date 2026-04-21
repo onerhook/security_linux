@@ -4,11 +4,22 @@ GENERATED: 2026-04-15T14:39:35.881824
 RANDOM_ID: PCJKNA5599G7
 
 [MOCK_BEHAVIOR]
-- Network: false
-- Filesystem: false
-- Registry: false
-- Process: false
+- Network: data_exfiltration
+- Filesystem: keylog_capture
+- Registry: autorun_persistence
+- Process: screen_capture
 
 [SIGNATURE]
-This is a SAFE test file for RedSand Sandbox testing.
-NOT A REAL MALWARE!
+keylogger_input
+screenshot_capture
+clipboard_monitor
+webcam_access
+password_steal
+
+[MALICIOUS_INDICATORS]
+SetWindowsHookEx(WH_KEYBOARD_LL, lpfn)
+GetAsyncKeyState(VK_RETURN)
+BitBlt(hdcDest, nXSrc, nYSrc, GetDesktopWindow())
+OpenClipboard() && GetClipboardData(CF_TEXT)
+capCreateCaptureWindow("webcam", WS_CHILD, 0, 0, 320, 240)
+

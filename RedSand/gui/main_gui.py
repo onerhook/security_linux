@@ -776,9 +776,11 @@ class ReportViewerDialog(QDialog):
         static_data = self.report_data.get('static_results', {}) or {}
         analysis_time = self.report_data.get('analysis_time', {}) or {}
         
-        # Если analysis_time - это float (старый формат), преобразуем его
+        # Если analysis_time - это float/int (старый формат), преобразуем его
         if isinstance(analysis_time, (int, float)):
             analysis_time = {'start': None, 'duration': float(analysis_time)}
+        elif not isinstance(analysis_time, dict):
+            analysis_time = {'start': None, 'duration': 0.0}
         
         # Извлекаем информацию о файле из static_results
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
@@ -786,7 +788,7 @@ class ReportViewerDialog(QDialog):
         file_path = static_data.get('file_path', 'N/A') if static_data else 'N/A'
 
         # Индикатор риска
-        risk_score = threat_info.get('risk_score', 0)
+        risk_score = threat_info.get('risk_score', 0) if isinstance(threat_info, dict) else 0
         risk_label = QLabel(f"Уровень риска: {risk_score}/100")
         risk_label.setFont(QFont("Segoe UI", 18, QFont.Bold))
 
@@ -804,16 +806,16 @@ class ReportViewerDialog(QDialog):
         info_layout = QGridLayout()
 
         info_layout.addWidget(QLabel("Тип:"), 0, 0)
-        info_layout.addWidget(QLabel(threat_info.get('type', 'Неизвестно')), 0, 1)
+        info_layout.addWidget(QLabel(threat_info.get('type', 'Неизвестно') if isinstance(threat_info, dict) else 'Неизвестно'), 0, 1)
 
         info_layout.addWidget(QLabel("Семейство:"), 1, 0)
-        info_layout.addWidget(QLabel(threat_info.get('family', 'Неизвестно')), 1, 1)
+        info_layout.addWidget(QLabel(threat_info.get('family', 'Неизвестно') if isinstance(threat_info, dict) else 'Неизвестно'), 1, 1)
 
         info_layout.addWidget(QLabel("Доверие:"), 2, 0)
-        info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое')), 2, 1)
+        info_layout.addWidget(QLabel(threat_info.get('confidence', 'Низкое') if isinstance(threat_info, dict) else 'Низкое'), 2, 1)
 
         info_layout.addWidget(QLabel("MITRE ATT&CK:"), 3, 0)
-        mitre_tactics = threat_info.get('mitre_tactics', [])
+        mitre_tactics = threat_info.get('mitre_tactics', []) if isinstance(threat_info, dict) else []
         if isinstance(mitre_tactics, list):
             mitre_text = QLabel(', '.join(mitre_tactics))
         else:
@@ -847,10 +849,12 @@ class ReportViewerDialog(QDialog):
         time_layout = QGridLayout()
 
         time_layout.addWidget(QLabel("Начало:"), 0, 0)
-        time_layout.addWidget(QLabel(analysis_time.get('start', 'N/A')), 0, 1)
+        start_time = analysis_time.get('start', 'N/A') if isinstance(analysis_time, dict) else 'N/A'
+        time_layout.addWidget(QLabel(start_time if start_time else 'N/A'), 0, 1)
 
         time_layout.addWidget(QLabel("Длительность:"), 1, 0)
-        time_layout.addWidget(QLabel(f"{analysis_time.get('duration', 0):.2f} сек"), 1, 1)
+        duration = analysis_time.get('duration', 0) if isinstance(analysis_time, dict) else 0
+        time_layout.addWidget(QLabel(f"{float(duration):.2f} сек"), 1, 1)
 
         time_group.setLayout(time_layout)
         layout.addWidget(time_group)
@@ -1555,6 +1559,8 @@ class RedSandSecureGUI(QMainWindow):
         """Обновление отображения результатов."""
         # Адаптация структуры данных: Orchestrator использует threat_info, static_results, dynamic_events
         threat_info = result.get('threat_info') or {}
+        if not isinstance(threat_info, dict):
+            threat_info = {}
         static_data = result.get('static_results') or {}
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
         file_size = static_data.get('file_size', 0) if static_data else 0

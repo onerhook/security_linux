@@ -233,8 +233,9 @@ class VirusScanner:
             if re.search(indicator, content, re.IGNORECASE):
                 indicator_count += 1
         
-        # Если найдено 2 или более индикатора, считаем файл тестовым
-        return indicator_count >= 2
+        # Если найдено 3 или более индикатора И есть THREAT_TYPE: NONE, считаем файл тестовым
+        has_none_threat = bool(re.search(r'THREAT_TYPE:\s*NONE', content, re.IGNORECASE))
+        return indicator_count >= 3 and has_none_threat
     
     def _is_legitimate_python_code(self, content: str) -> bool:
         """

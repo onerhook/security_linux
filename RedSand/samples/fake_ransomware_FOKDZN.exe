@@ -4,11 +4,22 @@ GENERATED: 2026-04-15T14:39:35.881737
 RANDOM_ID: XJ94ZYFDX3OL
 
 [MOCK_BEHAVIOR]
-- Network: false
-- Filesystem: false
-- Registry: false
-- Process: false
+- Network: c2_communication
+- Filesystem: mass_encryption
+- Registry: persistence_key
+- Process: shadow_copy_delete
 
 [SIGNATURE]
-This is a SAFE test file for RedSand Sandbox testing.
-NOT A REAL MALWARE!
+encrypt_files
+decrypt_payment
+bitcoin_ransom
+locked_extension
+crypto_wallet
+
+[MALICIOUS_INDICATORS]
+CryptEncrypt(hCrypt, file_data)
+CreateFileW("*.locked", GENERIC_WRITE)
+RegSetValueEx("HKLM\\SYSTEM\\CurrentControlSet\\Services\\RansomwareService")
+WinExec("vssadmin.exe delete shadows /all /quiet", SW_HIDE)
+MessageBox("Your files are encrypted! Send bitcoin to decrypt!")
+
