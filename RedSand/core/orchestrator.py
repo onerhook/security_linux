@@ -135,34 +135,46 @@ class RedSandSecure:
         self.logger.info("Отключение всех сетевых адаптеров")
         print("[*] Отключение всех сетевых адаптеров...")
         try:
-            # Сохраняем текущее состояние
-            result = subprocess.run(
+            # Сохраняем текущее состояние - используем Popen вместо shell=True с read()
+            proc = subprocess.Popen(
                 ['netsh', 'interface', 'show', 'interface'],
-                capture_output=True, text=True, shell=True, check=False,
-                encoding='utf-8', errors='replace'
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
-            self.original_network_state['output'] = result.stdout
+            stdout, stderr = proc.communicate(timeout=5)
+            self.original_network_state['output'] = stdout.decode('utf-8', errors='replace')
 
             # Отключаем все адаптеры
             adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
             for adapter in adapters:
-                subprocess.run(
+                proc = subprocess.Popen(
                     f'netsh interface set interface "{adapter}" admin=disabled',
-                    shell=True, capture_output=True, check=False,
-                    encoding='utf-8', errors='replace'
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
                 )
+                proc.communicate(timeout=5)
 
             # Блокируем весь трафик через фаервол
-            subprocess.run(
+            proc = subprocess.Popen(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All" dir=out action=block enable=yes',
-                shell=True, capture_output=True, check=False,
-                encoding='utf-8', errors='replace'
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
-            subprocess.run(
+            proc.communicate(timeout=5)
+            
+            proc = subprocess.Popen(
                 'netsh advfirewall firewall add rule name="RedSand_Block_All_In" dir=in action=block enable=yes',
-                shell=True, capture_output=True, check=False,
-                encoding='utf-8', errors='replace'
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
+            proc.communicate(timeout=5)
 
             self.is_network_disabled = True
             self.logger.info("Сеть успешно отключена")
@@ -181,26 +193,36 @@ class RedSandSecure:
         self.logger.info("Восстановление сетевого подключения")
         print("[*] Восстановление сетевого подключения...")
         try:
-            # Включаем адаптеры
+            # Включаем адаптеры - используем Popen для избежания проблем с кодировкой
             adapters = ['Wi-Fi', 'Ethernet', 'Беспроводная сеть', 'Подключение по локальной сети']
             for adapter in adapters:
-                subprocess.run(
+                proc = subprocess.Popen(
                     f'netsh interface set interface "{adapter}" admin=enabled',
-                    shell=True, capture_output=True, check=False,
-                    encoding='utf-8', errors='replace'
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    shell=True,
+                    creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
                 )
+                proc.communicate(timeout=5)
 
             # Удаляем правила фаервола
-            subprocess.run(
+            proc = subprocess.Popen(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All"',
-                shell=True, capture_output=True, check=False,
-                encoding='utf-8', errors='replace'
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
-            subprocess.run(
+            proc.communicate(timeout=5)
+            
+            proc = subprocess.Popen(
                 'netsh advfirewall firewall delete rule name="RedSand_Block_All_In"',
-                shell=True, capture_output=True, check=False,
-                encoding='utf-8', errors='replace'
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                shell=True,
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
+            proc.communicate(timeout=5)
 
             self.is_network_disabled = False
             self.logger.info("Сеть восстановлена")

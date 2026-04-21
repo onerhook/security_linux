@@ -18,70 +18,68 @@ class AntiSandbox:
         """Эмуляция активности пользователя"""
         print("[*] Эмуляция активности пользователя...")
         
-        # Движение мыши (симуляция)
-        try:
-            for _ in range(5):
-                # Симуляция движения мыши через PowerShell
-                subprocess.run(
-                    'powershell -command "Add-Type -AssemblyName System.Windows.Forms; $pos = [System.Windows.Forms.Cursor]::Position; $pos.X += {}; $pos.Y += {}; [System.Windows.Forms.Cursor]::Position = $pos"'.format(
-                        random.randint(-50, 50),
-                        random.randint(-50, 50)
-                    ),
-                    shell=True, capture_output=True, timeout=2
-                )
-                time.sleep(0.5)
-        except:
-            pass
+        # ЗАКОММЕНТИРОВАНО: Не используем PowerShell для эмуляции мыши/клавиатуры
+        # Это может вызвать проблемы с кодировкой и нежелательное поведение
+        # Движение мыши (симуляция) - отключено
+        # try:
+        #     for _ in range(5):
+        #         subprocess.run(
+        #             'powershell -command "Add-Type -AssemblyName System.Windows.Forms; $pos = [System.Windows.Forms.Cursor]::Position; $pos.X += {}; $pos.Y += {}; [System.Windows.Forms.Cursor]::Position = $pos".format(...),
+        #             shell=True, capture_output=True, timeout=2
+        #         )
+        #         time.sleep(0.5)
+        # except:
+        #     pass
         
-        # Эмуляция нажатий клавиш
-        try:
-            subprocess.run(
-                'powershell -command "Add-Type -AssemblyName System.Windows.Forms; [System.Windows.Forms.SendKeys]::SendWait(\'{TAB}\')"',
-                shell=True, capture_output=True, timeout=2
-            )
-        except:
-            pass
+        # Эмуляция нажатий клавиш - отключена
+        # try:
+        #     subprocess.run(...)
+        # except:
+        #     pass
+        
+        print("[*] Эмуляция активности пользователя завершена (симуляция)")
     
     def fake_registry_entries(self):
         """Создание фейковых записей в реестре"""
         print("[*] Создание фейковых записей реестра...")
         
-        registry_entries = [
-            ('HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'Hidden', 1),
-            ('HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced', 'HideFileExt', 0),
-            ('HKCU\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Theme\\Personalize', 'AppsUseLightTheme', 1),
-        ]
+        # ЗАКОММЕНТИРОВАНО: Не изменяем реестр, чтобы избежать проблем
+        # registry_entries = [...]
+        # for key, name, value in registry_entries:
+        #     try:
+        #         subprocess.run(...)
+        #     except:
+        #         pass
         
-        for key, name, value in registry_entries:
-            try:
-                subprocess.run(
-                    f'reg add "{key}" /v "{name}" /t REG_DWORD /d {value} /f',
-                    shell=True, capture_output=True, timeout=2
-                )
-            except:
-                pass
+        print("[*] Фейковые записи реестра эмулированы (без реального изменения)")
     
     def spawn_fake_processes(self):
         """Запуск фейковых процессов для маскировки"""
         print("[*] Запуск фейковых процессов...")
         
-        fake_commands = [
-            'notepad.exe',
-            'calc.exe',
-            'mspaint.exe',
-        ]
+        # ЗАКОММЕНТИРОВАНО: Не запускаем реальные приложения (notepad, mspaint, calc)
+        # Это вызывает нежелательное открытие окон после анализа
+        # fake_commands = [
+        #     'notepad.exe',
+        #     'calc.exe',
+        #     'mspaint.exe',
+        # ]
+        # 
+        # for cmd in fake_commands:
+        #     try:
+        #         proc = subprocess.Popen(
+        #             cmd,
+        #             stdout=subprocess.PIPE,
+        #             stderr=subprocess.PIPE
+        #         )
+        #         self.fake_processes.append(proc)
+        #         time.sleep(0.2)
+        #     except:
+        #         pass
         
-        for cmd in fake_commands:
-            try:
-                proc = subprocess.Popen(
-                    cmd,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE
-                )
-                self.fake_processes.append(proc)
-                time.sleep(0.2)
-            except:
-                pass
+        # Эмулируем только наличие процессов без реального запуска
+        print("[*] Фейковые процессы эмулированы (без реального запуска)")
+        self.fake_processes = []
     
     def stop_fake_processes(self):
         """Остановка фейковых процессов"""

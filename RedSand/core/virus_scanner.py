@@ -301,6 +301,22 @@ class VirusScanner:
         if self._is_test_file(content):
             return False
         
+        # Также проверяем на наличие маркеров симуляции вредоносного ПО
+        simulation_markers = [
+            r'MZ_HEADER_SIMULATION',
+            r'DRIVER_HEADER_SIMULATION',
+            r'THREAT_TYPE:',
+            r'\[MOCK_BEHAVIOR\]',
+            r'\[SIGNATURE\]',
+            r'\[MALICIOUS_INDICATORS\]',
+            r'RANDOM_ID:',
+            r'GENERATED:',
+        ]
+        
+        for marker in simulation_markers:
+            if re.search(marker, content, re.IGNORECASE):
+                return False  # Это симуляция малвари, а не легитимный код
+        
         # Признаки легитимного Python кода
         python_indicators = [
             r'^#!/usr/bin/env python',  # Shebang

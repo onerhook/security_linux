@@ -775,20 +775,25 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Настройки")
-        self.setMinimumWidth(500)
+        self.setMinimumWidth(600)
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
 
-        form = QFormLayout()
+        # Создаем вкладки для настроек
+        tabs = QTabWidget()
+        
+        # Вкладка основных настроек
+        basic_tab = QWidget()
+        basic_layout = QFormLayout(basic_tab)
 
         # Таймаут анализа
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setSuffix(" сек")
-        form.addRow("Таймаут анализа:", self.timeout_spin)
+        basic_layout.addRow("Таймаут анализа:", self.timeout_spin)
 
         # Директория отчетов
         self.output_dir_edit = QLineEdit("reports")
@@ -798,32 +803,173 @@ class SettingsDialog(QDialog):
         output_layout = QHBoxLayout()
         output_layout.addWidget(self.output_dir_edit)
         output_layout.addWidget(btn_browse)
-        form.addRow("Директория отчетов:", output_layout)
+        basic_layout.addRow("Директория отчетов:", output_layout)
 
         # Поли морфный анализ по умолчанию
         self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
-        form.addRow("", self.poly_check)
+        basic_layout.addRow("", self.poly_check)
 
         # Автозакрытие сети
         self.network_check = QCheckBox("Автоматически отключать сеть при анализе")
         self.network_check.setChecked(True)
-        form.addRow("", self.network_check)
+        basic_layout.addRow("", self.network_check)
 
         # Уровень логирования
         self.log_level_combo = QComboBox()
         self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
         self.log_level_combo.setCurrentText("INFO")
-        form.addRow("Уровень логирования:", self.log_level_combo)
+        basic_layout.addRow("Уровень логирования:", self.log_level_combo)
 
-        layout.addLayout(form)
+        tabs.addTab(basic_tab, "Основные")
+
+        # Вкладка темы и внешнего вида
+        theme_tab = QWidget()
+        theme_layout = QFormLayout(theme_tab)
+
+        # Выбор темы
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems(list(THEMES.keys()))
+        self.theme_combo.setCurrentText("Dark Red")
+        theme_layout.addRow("Цветовая тема:", self.theme_combo)
+
+        # Кастомизация цветов
+        custom_group = QGroupBox("Кастомизация цветов (для Custom темы)")
+        custom_layout = QGridLayout(custom_group)
+
+        self.color_pickers = {}
+        color_labels = [
+            ("bg_primary", "Основной фон:"),
+            ("bg_secondary", "Вторичный фон:"),
+            ("bg_tertiary", "Третичный фон:"),
+            ("accent", "Акцентный цвет:"),
+            ("accent_hover", "Акцент (наведение):"),
+            ("text_primary", "Основной текст:"),
+            ("text_secondary", "Вторичный текст:"),
+            ("success", "Успех:"),
+            ("warning", "Предупреждение:"),
+            ("danger", "Ошибка:"),
+            ("info", "Информация:"),
+        ]
+
+        for i, (key, label) in enumerate(color_labels):
+            color_label = QLabel(label)
+            color_btn = QPushButton()
+            color_btn.setFixedSize(50, 25)
+            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 1px solid gray;")
+            color_btn.clicked.connect(lambda checked, k=key, b=color_btn: self.pick_color(k, b))
+            self.color_pickers[key] = {'button': color_btn, 'color': THEMES['Custom'][key]}
+            custom_layout.addWidget(color_label, i // 2, (i % 2) * 2)
+            custom_layout.addWidget(color_btn, i // 2, (i % 2) * 2 + 1)
+
+        theme_layout.addRow(custom_group)
+
+        # Кнопка сброса темы
+        reset_theme_btn = QPushButton("Сбросить тему к значениям по умолчанию")
+        reset_theme_btn.clicked.connect(self.reset_theme)
+        theme_layout.addRow("", reset_theme_btn)
+
+        tabs.addTab(theme_tab, "Тема и внешний вид")
+
+        # Вкладка безопасности
+        security_tab = QWidget()
+        security_layout = QFormLayout(security_tab)
+
+        # Отключение автозапуска процессов
+        self.disable_auto_run_check = QCheckBox("Отключить автозапуск процессов после анализа")
+        self.disable_auto_run_check.setChecked(True)
+        security_layout.addRow("", self.disable_auto_run_check)
+
+        # Блокировка опасных приложений
+        self.block_dangerous_apps_check = QCheckBox("Блокировать запуск опасных приложений (paint, notepad и т.д.)")
+        self.block_dangerous_apps_check.setChecked(True)
+        security_layout.addRow("", self.block_dangerous_apps_check)
+
+        # Принудительное завершение процессов
+        self.force_kill_check = QCheckBox("Принудительно завершать все процессы после анализа")
+        self.force_kill_check.setChecked(False)
+        security_layout.addRow("", self.force_kill_check)
+
+        # Максимальное количество потоков
+        self.max_workers_spin = QSpinBox()
+        self.max_workers_spin.setRange(1, 32)
+        self.max_workers_spin.setValue(16)
+        self.max_workers_spin.setSuffix(" потоков")
+        security_layout.addRow("Максимум потоков:", self.max_workers_spin)
+
+        tabs.addTab(security_tab, "Безопасность")
+
+        layout.addWidget(tabs)
 
         # Кнопки
         buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply
         )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
+        buttons.button(QDialogButtonBox.Apply).clicked.connect(self.apply_settings)
         layout.addWidget(buttons)
+
+    def pick_color(self, key, button):
+        """Открывает диалог выбора цвета."""
+        current_color = self.color_pickers[key]['color']
+        color = QColorDialog.getColor(QColor(current_color), self, f"Выберите цвет для {key}")
+        if color.isValid():
+            hex_color = color.name()
+            self.color_pickers[key]['color'] = hex_color
+            button.setStyleSheet(f"background-color: {hex_color}; border: 1px solid gray;")
+            # Обновляем тему Custom
+            THEMES['Custom'][key] = hex_color
+
+    def reset_theme(self):
+        """Сбрасывает тему Custom к значениям по умолчанию."""
+        default_colors = {
+            "bg_primary": "#1a1a2e",
+            "bg_secondary": "#16213e",
+            "bg_tertiary": "#0f3460",
+            "accent": "#e94560",
+            "accent_hover": "#ff6b7a",
+            "text_primary": "#eaeaea",
+            "text_secondary": "#a0a0a0",
+            "success": "#28a745",
+            "warning": "#ffc107",
+            "danger": "#dc3545",
+            "info": "#17a2b8"
+        }
+        for key, color in default_colors.items():
+            THEMES['Custom'][key] = color
+            self.color_pickers[key]['color'] = color
+            self.color_pickers[key]['button'].setStyleSheet(f"background-color: {color}; border: 1px solid gray;")
+
+    def apply_settings(self):
+        """Применяет настройки без закрытия диалога."""
+        # Сохраняем настройки в конфиг файл
+        config = configparser.ConfigParser()
+        config.read('config.ini')
+        
+        if 'Settings' not in config:
+            config['Settings'] = {}
+        
+        config['Settings']['theme'] = self.theme_combo.currentText()
+        config['Settings']['timeout'] = str(self.timeout_spin.value())
+        config['Settings']['output_dir'] = self.output_dir_edit.text()
+        config['Settings']['use_poly_default'] = str(self.poly_check.isChecked())
+        config['Settings']['auto_disable_network'] = str(self.network_check.isChecked())
+        config['Settings']['log_level'] = self.log_level_combo.currentText()
+        config['Settings']['max_workers'] = str(self.max_workers_spin.value())
+        config['Settings']['disable_auto_run'] = str(self.disable_auto_run_check.isChecked())
+        config['Settings']['block_dangerous_apps'] = str(self.block_dangerous_apps_check.isChecked())
+        config['Settings']['force_kill'] = str(self.force_kill_check.isChecked())
+        
+        # Сохраняем кастомные цвета
+        if 'Colors' not in config:
+            config['Colors'] = {}
+        for key, value in THEMES['Custom'].items():
+            config['Colors'][key] = value
+        
+        with open('config.ini', 'w') as f:
+            config.write(f)
+        
+        QMessageBox.information(self, "Настройки", "Настройки применены и сохранены!")
 
     def browse_output_dir(self):
         directory = QFileDialog.getExistingDirectory(
@@ -838,7 +984,13 @@ class SettingsDialog(QDialog):
             'output_dir': self.output_dir_edit.text(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
-            'log_level': self.log_level_combo.currentText()
+            'log_level': self.log_level_combo.currentText(),
+            'theme': self.theme_combo.currentText(),
+            'max_workers': self.max_workers_spin.value(),
+            'disable_auto_run': self.disable_auto_run_check.isChecked(),
+            'block_dangerous_apps': self.block_dangerous_apps_check.isChecked(),
+            'force_kill': self.force_kill_check.isChecked(),
+            'custom_colors': dict(THEMES['Custom'])
         }
 
 
