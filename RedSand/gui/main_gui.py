@@ -262,23 +262,24 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QMainWindow, QDialog {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        font-family: 'Segoe UI', Arial, sans-serif;
-        font-size: 14px;
+        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        font-size: 13px;
+        line-height: 1.4;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
-        border-bottom: 2px solid {theme['accent']};
-        padding: 5px;
-        spacing: 10px;
+        border-bottom: 1px solid {theme['accent']};
+        padding: 4px;
+        spacing: 8px;
     }}
     
     QToolBar QToolButton {{
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 15px;
-        border-radius: 5px;
+        padding: 6px 12px;
+        border-radius: 4px;
     }}
     
     QToolBar QToolButton:hover {{
@@ -293,10 +294,10 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: {theme['accent']};
         color: {theme['text_primary']};
         border: none;
-        padding: 10px 20px;
-        border-radius: 6px;
+        padding: 8px 16px;
+        border-radius: 4px;
         font-weight: bold;
-        min-width: 100px;
+        min-width: 80px;
     }}
     
     QPushButton:hover {{
@@ -314,34 +315,34 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QGroupBox {{
         background-color: {theme['bg_secondary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        margin-top: 15px;
-        padding-top: 15px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        margin-top: 12px;
+        padding-top: 12px;
         font-weight: bold;
         color: {theme['text_primary']};
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 15px;
-        padding: 0 8px;
+        left: 12px;
+        padding: 0 6px;
         color: {theme['accent']};
     }}
     
     QTabWidget::pane {{
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 6px;
         background-color: {theme['bg_secondary']};
     }}
     
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_secondary']};
-        padding: 10px 20px;
-        margin-right: 3px;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
+        padding: 8px 16px;
+        margin-right: 2px;
+        border-top-left-radius: 4px;
+        border-top-right-radius: 4px;
     }}
     
     QTabBar::tab:selected {{
@@ -357,18 +358,19 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QTextEdit, QPlainTextEdit {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 10px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 4px;
+        padding: 8px;
         font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 13px;
+        font-size: 12px;
+        line-height: 1.3;
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
         border: none;
-        border-radius: 8px;
-        height: 20px;
+        border-radius: 6px;
+        height: 16px;
         text-align: center;
         color: {theme['text_primary']};
         font-weight: bold;
@@ -376,20 +378,20 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QProgressBar::chunk {{
         background-color: {theme['accent']};
-        border-radius: 8px;
+        border-radius: 6px;
     }}
     
     QSlider::groove:horizontal {{
         background-color: {theme['bg_tertiary']};
-        height: 8px;
-        border-radius: 4px;
+        height: 6px;
+        border-radius: 3px;
     }}
     
     QSlider::handle:horizontal {{
         background-color: {theme['accent']};
-        width: 18px;
-        margin: -5px 0;
-        border-radius: 9px;
+        width: 14px;
+        margin: -4px 0;
+        border-radius: 7px;
     }}
     
     QSlider::handle:horizontal:hover {{
@@ -399,62 +401,69 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QComboBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 8px 12px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 4px;
+        padding: 6px 10px;
+        outline: none;
     }}
     
     QComboBox:hover {{
-        border: 2px solid {theme['accent']};
+        border: 1px solid {theme['accent']};
+    }}
+    
+    QComboBox:focus {{
+        border: 1px solid {theme['accent']};
+        outline: none;
     }}
     
     QComboBox::drop-down {{
         border: none;
-        width: 30px;
+        width: 24px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 8px solid {theme['accent']};
-        margin-right: 10px;
+        border-left: 4px solid transparent;
+        border-right: 4px solid transparent;
+        border-top: 6px solid {theme['accent']};
+        margin-right: 8px;
     }}
     
     QComboBox QAbstractItemView {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
+        border: 1px solid {theme['bg_tertiary']};
         selection-background-color: {theme['accent']};
     }}
     
     QSpinBox, QDoubleSpinBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 8px 12px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 4px;
+        padding: 6px 10px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
-        border: 2px solid {theme['accent']};
+        border: 1px solid {theme['accent']};
     }}
     
     QLineEdit {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 8px 12px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 4px;
+        padding: 6px 10px;
     }}
     
     QLineEdit:hover {{
-        border: 2px solid {theme['accent']};
+        border: 1px solid {theme['accent']};
     }}
     
     QLineEdit:focus {{
-        border: 2px solid {theme['accent']};
+        border: 1px solid {theme['accent']};
         background-color: {theme['bg_primary']};
+        outline: none;
     }}
     
     QCheckBox {{
@@ -1033,19 +1042,19 @@ class ReportViewerDialog(QDialog):
 
         # Вкладка сводки
         summary_widget = self.create_summary_tab()
-        tabs.addTab(summary_widget, "📊 Сводка")
+        tabs.addTab(summary_widget, "Сводка")
 
         # Вкладка статического анализа
         static_widget = self.create_static_tab()
-        tabs.addTab(static_widget, "🔍 Статический анализ")
+        tabs.addTab(static_widget, "Статический анализ")
 
         # Вкладка динамического анализа
         dynamic_widget = self.create_dynamic_tab()
-        tabs.addTab(dynamic_widget, "🎬 Динамический анализ")
+        tabs.addTab(dynamic_widget, "Динамический анализ")
 
         # Вкладка IOC
         ioc_widget = self.create_ioc_tab()
-        tabs.addTab(ioc_widget, "🎯 IOC")
+        tabs.addTab(ioc_widget, "IOC")
 
         layout.addWidget(tabs)
 
@@ -1329,7 +1338,7 @@ class RedSandSecureGUI(QMainWindow):
 
     def setup_ui(self):
         """Настройка пользовательского интерфейса."""
-        self.setWindowTitle("🛡️ RedSand Secure v2.0 - Анализ вредоносного ПО")
+        self.setWindowTitle("RedSand Secure v2.0 - Анализ вредоносного ПО")
         self.setMinimumSize(1200, 800)
         self.resize(1400, 900)
 
@@ -1341,7 +1350,7 @@ class RedSandSecureGUI(QMainWindow):
         main_layout.setContentsMargins(20, 20, 20, 20)
 
         # Заголовок
-        title_label = QLabel("🛡️ RedSand Secure v2.0")
+        title_label = QLabel("RedSand Secure v2.0")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
@@ -1391,7 +1400,7 @@ class RedSandSecureGUI(QMainWindow):
         layout.setSpacing(15)
 
         # Группа выбора файла
-        file_group = QGroupBox("📁 Выбор файла для анализа")
+        file_group = QGroupBox("Выбор файла для анализа")
         file_layout = QVBoxLayout()
 
         self.file_path_edit = QLineEdit()
@@ -1399,7 +1408,7 @@ class RedSandSecureGUI(QMainWindow):
         self.file_path_edit.setReadOnly(True)
         file_layout.addWidget(self.file_path_edit)
 
-        btn_select_file = QPushButton("📂 Выбрать файл")
+        btn_select_file = QPushButton("Выбрать файл")
         btn_select_file.setObjectName("primaryBtn")
         btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(btn_select_file)
@@ -1408,7 +1417,7 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(file_group)
 
         # Группа настроек анализа
-        settings_group = QGroupBox("⚙️ Настройки анализа")
+        settings_group = QGroupBox("Настройки анализа")
         settings_layout = QGridLayout()
 
         # Таймаут
@@ -1433,7 +1442,7 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(settings_group)
 
         # Кнопка запуска анализа
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton("ЗАПУСТИТЬ АНАЛИЗ")
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.setMinimumHeight(60)
         self.btn_analyze.setFont(QFont("Segoe UI", 14, QFont.Bold))
@@ -1441,7 +1450,7 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(self.btn_analyze)
 
         # Кнопка экстренной остановки
-        self.btn_panic = QPushButton("🔴 ЭКСТРЕННАЯ ОСТАНОВКА")
+        self.btn_panic = QPushButton("ЭКСТРЕННАЯ ОСТАНОВКА")
         self.btn_panic.setObjectName("dangerBtn")
         self.btn_panic.setMinimumHeight(50)
         self.btn_panic.setFont(QFont("Segoe UI", 12, QFont.Bold))
@@ -1450,7 +1459,7 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(self.btn_panic)
 
         # Прогресс бар
-        progress_group = QGroupBox("📊 Прогресс анализа")
+        progress_group = QGroupBox("Прогресс анализа")
         progress_layout = QVBoxLayout()
 
         self.progress_bar = QProgressBar()
@@ -1467,18 +1476,18 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(progress_group)
 
         # Быстрые действия
-        actions_group = QGroupBox("⚡ Быстрые действия")
+        actions_group = QGroupBox("Быстрые действия")
         actions_layout = QVBoxLayout()
 
-        btn_settings = QPushButton("⚙️ Настройки")
+        btn_settings = QPushButton("Настройки")
         btn_settings.clicked.connect(self.open_settings)
         actions_layout.addWidget(btn_settings)
 
-        btn_reports_folder = QPushButton("📂 Открыть папку отчетов")
+        btn_reports_folder = QPushButton("Открыть папку отчетов")
         btn_reports_folder.clicked.connect(self.open_reports_folder)
         actions_layout.addWidget(btn_reports_folder)
 
-        btn_clear_logs = QPushButton("🗑️ Очистить логи")
+        btn_clear_logs = QPushButton("Очистить логи")
         btn_clear_logs.clicked.connect(self.clear_logs)
         actions_layout.addWidget(btn_clear_logs)
 
@@ -1499,15 +1508,15 @@ class RedSandSecureGUI(QMainWindow):
 
         # Вкладка логов
         logs_widget = self.create_logs_tab()
-        self.tabs.addTab(logs_widget, "📝 Логи анализа")
+        self.tabs.addTab(logs_widget, "Логи анализа")
 
         # Вкладка результатов
         results_widget = self.create_results_tab()
-        self.tabs.addTab(results_widget, "📊 Результаты")
+        self.tabs.addTab(results_widget, "Результаты")
 
         # Вкладка IOC
         ioc_widget = self.create_ioc_quick_tab()
-        self.tabs.addTab(ioc_widget, "🎯 IOC")
+        self.tabs.addTab(ioc_widget, "IOC")
 
         layout.addWidget(self.tabs)
         return widget
@@ -1569,60 +1578,60 @@ class RedSandSecureGUI(QMainWindow):
         menubar = self.menuBar()
 
         # Файл
-        file_menu = menubar.addMenu("📁 Файл")
+        file_menu = menubar.addMenu("Файл")
 
-        open_action = QAction("📂 Открыть файл", self)
+        open_action = QAction("Открыть файл", self)
         open_action.setShortcut("Ctrl+O")
         open_action.triggered.connect(self.select_file)
         file_menu.addAction(open_action)
 
         file_menu.addSeparator()
 
-        exit_action = QAction("❌ Выход", self)
+        exit_action = QAction("Выход", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
         file_menu.addAction(exit_action)
 
         # Анализ
-        analysis_menu = menubar.addMenu("🔍 Анализ")
+        analysis_menu = menubar.addMenu("Анализ")
 
-        start_action = QAction("🚀 Запустить анализ", self)
+        start_action = QAction("Запустить анализ", self)
         start_action.setShortcut("F5")
         start_action.triggered.connect(self.start_analysis)
         analysis_menu.addAction(start_action)
 
-        stop_action = QAction("🔴 Остановить", self)
+        stop_action = QAction("Остановить", self)
         stop_action.setShortcut("F6")
         stop_action.triggered.connect(self.emergency_stop)
         analysis_menu.addAction(stop_action)
 
         # Отчеты
-        reports_menu = menubar.addMenu("📊 Отчеты")
+        reports_menu = menubar.addMenu("Отчеты")
 
-        view_action = QAction("👁️ Просмотреть последний отчет", self)
+        view_action = QAction("Просмотреть последний отчет", self)
         view_action.triggered.connect(self.view_last_report)
         reports_menu.addAction(view_action)
 
-        folder_action = QAction("📂 Открыть папку отчетов", self)
+        folder_action = QAction("Открыть папку отчетов", self)
         folder_action.triggered.connect(self.open_reports_folder)
         reports_menu.addAction(folder_action)
 
         # Настройки
-        settings_menu = menubar.addMenu("⚙️ Настройки")
+        settings_menu = menubar.addMenu("Настройки")
 
-        settings_action = QAction("⚙️ Параметры", self)
+        settings_action = QAction("Параметры", self)
         settings_action.setShortcut("Ctrl+,")
         settings_action.triggered.connect(self.open_settings)
         settings_menu.addAction(settings_action)
 
         # Справка
-        help_menu = menubar.addMenu("❓ Справка")
+        help_menu = menubar.addMenu("Справка")
 
-        about_action = QAction("ℹ️ О программе", self)
+        about_action = QAction("О программе", self)
         about_action.triggered.connect(self.show_about)
         help_menu.addAction(about_action)
 
-        warning_action = QAction("⚠️ Предупреждение о безопасности", self)
+        warning_action = QAction("Предупреждение о безопасности", self)
         warning_action.triggered.connect(self.show_security_warning)
         help_menu.addAction(warning_action)
 
@@ -1632,27 +1641,27 @@ class RedSandSecureGUI(QMainWindow):
         toolbar.setMovable(False)
         self.addToolBar(toolbar)
 
-        btn_open = QAction("📂 Открыть", self)
+        btn_open = QAction("Открыть", self)
         btn_open.triggered.connect(self.select_file)
         toolbar.addAction(btn_open)
 
         toolbar.addSeparator()
 
-        btn_analyze = QAction("🚀 Анализ", self)
+        btn_analyze = QAction("Анализ", self)
         btn_analyze.triggered.connect(self.start_analysis)
         toolbar.addAction(btn_analyze)
 
-        btn_stop = QAction("🔴 Стоп", self)
+        btn_stop = QAction("Стоп", self)
         btn_stop.triggered.connect(self.emergency_stop)
         toolbar.addAction(btn_stop)
 
         toolbar.addSeparator()
 
-        btn_reports = QAction("📊 Отчеты", self)
+        btn_reports = QAction("Отчеты", self)
         btn_reports.triggered.connect(self.open_reports_folder)
         toolbar.addAction(btn_reports)
 
-        btn_settings = QAction("⚙️ Настройки", self)
+        btn_settings = QAction("Настройки", self)
         btn_settings.triggered.connect(self.open_settings)
         toolbar.addAction(btn_settings)
 
@@ -1719,7 +1728,7 @@ class RedSandSecureGUI(QMainWindow):
         if not hasattr(self, '_warning_accepted'):
             reply = QMessageBox.question(
                 self,
-                "⚠️ Предупреждение о безопасности",
+                "Предупреждение о безопасности",
                 "Вы запускаете анализ потенциально опасного вредоносного ПО!\n\n"
                 "Убедитесь, что:\n"
                 "• Вы работаете в изолированной виртуальной машине\n"
@@ -1772,7 +1781,7 @@ class RedSandSecureGUI(QMainWindow):
         """Экстренная остановка анализа."""
         reply = QMessageBox.warning(
             self,
-            "🔴 ЭКСТРЕННАЯ ОСТАНОВКА",
+            "ЭКСТРЕННАЯ ОСТАНОВКА",
             "Вы уверены, что хотите немедленно остановить анализ?\n\n"
             "Это может оставить систему в нестабильном состоянии!",
             QMessageBox.Yes | QMessageBox.No,
@@ -1964,7 +1973,7 @@ class RedSandSecureGUI(QMainWindow):
         QMessageBox.about(
             self,
             "О программе RedSand Secure",
-            "<h2>🛡️ RedSand Secure v2.0</h2>"
+            "<h2>RedSand Secure v2.0</h2>"
             "<p>Профессиональная система анализа вредоносного ПО</p>"
             "<p><b>Версия:</b> 2.0 (GUI)</p>"
             "<p><b>Возможности:</b></p>"
@@ -1977,23 +1986,23 @@ class RedSandSecureGUI(QMainWindow):
             "<li>Анти-песочница техники</li>"
             "<li>Генерация отчетов (JSON, HTML, TXT)</li>"
             "</ul>"
-            "<p><b>⚠️ Внимание:</b> Запускайте только в изолированной VM!</p>"
+            "<p><b>Внимание:</b> Запускайте только в изолированной VM!</p>"
         )
 
     def show_security_warning(self):
         """Показ предупреждения о безопасности."""
         QMessageBox.warning(
             self,
-            "⚠️ Предупреждение о безопасности",
+            "Предупреждение о безопасности",
             "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2>"
             "<p>Вы используете инструмент для анализа <b>вредоносного программного обеспечения</b>.</p>"
             "<p><b>Обязательные требования:</b></p>"
             "<ul>"
-            "<li>✅ Работайте ТОЛЬКО в изолированной виртуальной машине</li>"
-            "<li>✅ Отключите общие папки с хост-системой</li>"
-            "<li>✅ Изолируйте сеть (отключите адаптеры или используйте host-only)</li>"
-            "<li>✅ Сделайте снапшот VM перед анализом</li>"
-            "<li>✅ Не анализируйте образцы на рабочей машине</li>"
+            "<li>Работайте ТОЛЬКО в изолированной виртуальной машине</li>"
+            "<li>Отключите общие папки с хост-системой</li>"
+            "<li>Изолируйте сеть (отключите адаптеры или используйте host-only)</li>"
+            "<li>Сделайте снапшот VM перед анализом</li>"
+            "<li>Не анализируйте образцы на рабочей машине</li>"
             "</ul>"
             "<p><b>Автор не несет ответственности за любой ущерб,</b></p>"
             "<p><b>причиненный неправильным использованием этого инструмента.</b></p>"
@@ -2037,7 +2046,7 @@ def main():
     """Точка входа приложения."""
     # Проверка наличия необходимых модулей
     if not REDSAND_AVAILABLE:
-        print("❌ Ошибка: Модуль redsand_secure.py не найден!")
+        print("Ошибка: Модуль redsand_secure.py не найден!")
         print("Убедитесь, что вы находитесь в директории RedSand/")
         sys.exit(1)
 
@@ -2057,7 +2066,7 @@ def main():
     if not Path('gui_settings.json').exists():
         QMessageBox.warning(
             window,
-            "⚠️ Предупреждение о безопасности",
+            "Предупреждение о безопасности",
             "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2>"
             "<p>Вы запускаете инструмент для анализа <b>вредоносного ПО</b>.</p>"
             "<p><b>Запускайте ТОЛЬКО в изолированной виртуальной машине!</b></p>"
