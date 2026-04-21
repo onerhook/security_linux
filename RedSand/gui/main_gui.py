@@ -772,9 +772,13 @@ class ReportViewerDialog(QDialog):
         layout = QVBoxLayout(widget)
 
         # Адаптация структуры данных от Orchestrator
-        threat_info = self.report_data.get('threat_info', {})
-        static_data = self.report_data.get('static_results', {})
-        analysis_time = self.report_data.get('analysis_time', 0)
+        threat_info = self.report_data.get('threat_info', {}) or {}
+        static_data = self.report_data.get('static_results', {}) or {}
+        analysis_time = self.report_data.get('analysis_time', {}) or {}
+        
+        # Если analysis_time - это float (старый формат), преобразуем его
+        if isinstance(analysis_time, (int, float)):
+            analysis_time = {'start': None, 'duration': float(analysis_time)}
         
         # Извлекаем информацию о файле из static_results
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'

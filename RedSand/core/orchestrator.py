@@ -47,7 +47,7 @@ class AnalysisResult:
     dynamic_events: Optional[List[Dict[str, Any]]] = None
     threat_info: Optional[Dict[str, Any]] = None
     error: Optional[str] = None
-    analysis_time: float = 0.0
+    analysis_time: Dict[str, Any] = None  # {'start': str, 'duration': float}
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -415,7 +415,8 @@ class RedSandSecure:
                 file_hash='N/A',
                 file_size=0,
                 success=False,
-                error='File not found'
+                error='File not found',
+                analysis_time={'start': None, 'duration': 0.0}
             )
         
         try:
@@ -432,7 +433,7 @@ class RedSandSecure:
                 dynamic_events=result_dict.get('dynamic_events'),
                 threat_info=result_dict.get('threat_info'),
                 error=result_dict.get('error'),
-                analysis_time=result_dict.get('analysis_time', 0.0)
+                analysis_time=result_dict.get('report_data', {}).get('analysis_time', {'start': None, 'duration': 0.0})
             )
         except Exception as e:
             return AnalysisResult(
@@ -440,7 +441,8 @@ class RedSandSecure:
                 file_hash='N/A',
                 file_size=os.path.getsize(file_path) if os.path.exists(file_path) else 0,
                 success=False,
-                error=str(e)
+                error=str(e),
+                analysis_time={'start': None, 'duration': 0.0}
             )
 
     def analyze_batch_multiprocessing(self, file_paths: List[str], use_poly: bool = False,
