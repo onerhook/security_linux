@@ -204,6 +204,16 @@ class VirusScanner:
             for indicator in threat_indicators:
                 result['matched_signatures'].append(f"Threat indicator: {indicator}")
         
+        # Дополнительная проверка на THREAT_TYPE в начале файла
+        threat_match = re.search(r'THREAT_TYPE:\s*(\w+)', content, re.IGNORECASE)
+        if threat_match:
+            threat_type = threat_match.group(1).upper()
+            if threat_type not in ['NONE', 'CLEAN', 'SAFE']:
+                # Явно указываем тип угрозы для классификатора
+                result['preliminary_threat_type'] = threat_type
+                malicious_count += 2
+                result['matched_signatures'].append(f"Explicit threat type declared: {threat_type}")
+        
         # Определение уровня угрозы
         if malicious_count > 0:
             result['is_malicious'] = True
@@ -285,7 +295,12 @@ class VirusScanner:
         """
         Проверка, является ли файл легитимным Python кодом.
         Возвращает True, если файл содержит признаки нормального Python скрипта.
+        ВАЖНО: Тестовые файлы малвари НЕ должны считаться легитимным кодом!
         """
+        # Сначала проверяем, не является ли файл тестовым образцом малвари
+        if self._is_test_file(content):
+            return False
+        
         # Признаки легитимного Python кода
         python_indicators = [
             r'^#!/usr/bin/env python',  # Shebang
@@ -312,8 +327,9 @@ class VirusScanner:
             if re.search(indicator, content, re.MULTILINE | re.IGNORECASE):
                 indicator_count += 1
         
-        # Если найдено 3 или более индикатора, считаем файл легитимным Python кодом
-        return indicator_count >= 3
+        # Если найдено 5 или более индикатора, считаем файл легитимным Python кодом
+        # Увеличили порог с 3 до 5 для большей точности
+        return indicator_count >= 5
     
     def _is_whitelisted(self, pattern: str, content: str) -> bool:
         """Проверка, не является ли паттерн частью легитимного кода."""

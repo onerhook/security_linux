@@ -898,9 +898,15 @@ class ReportViewerDialog(QDialog):
         layout = QVBoxLayout(widget)
 
         # Адаптация структуры данных от Orchestrator
-        threat_info = self.report_data.get('threat_info', {}) or {}
-        static_data = self.report_data.get('static_results', {}) or {}
-        analysis_time = self.report_data.get('analysis_time', {}) or {}
+        threat_info = self.report_data.get('threat_info') or {}
+        if not isinstance(threat_info, dict):
+            threat_info = {}
+        
+        static_data = self.report_data.get('static_results') or {}
+        if not isinstance(static_data, dict):
+            static_data = {}
+            
+        analysis_time = self.report_data.get('analysis_time') or {}
         
         # Если analysis_time - это float/int (старый формат), преобразуем его
         if isinstance(analysis_time, (int, float)):
