@@ -170,12 +170,11 @@ class VirusScanner:
         malicious_count = 0
         suspicious_count = 0
         
-        # Проверяем, является ли файл легитимным Python кодом или тестовым файлом
+        # Проверяем, является ли файл легитимным Python кодом
         is_legitimate_python = self._is_legitimate_python_code(content)
-        is_test_file = self._is_test_file(content)
         
-        # Если это легитимный Python код или тестовый файл, пропускаем проверку на вредоносные паттерны
-        if is_legitimate_python or is_test_file:
+        # Если это легитимный Python код, пропускаем проверку на вредоносные паттерны
+        if is_legitimate_python:
             result['threat_level'] = 'CLEAN'
             result['risk_score'] = 0
             return
@@ -198,6 +197,13 @@ class VirusScanner:
             except re.error:
                 continue
         
+        # Проверка на индикаторы угроз в тестовых файлах (симуляция малвари)
+        threat_indicators = self._check_threat_indicators(content)
+        if threat_indicators:
+            malicious_count += len(threat_indicators)
+            for indicator in threat_indicators:
+                result['matched_signatures'].append(f"Threat indicator: {indicator}")
+        
         # Определение уровня угрозы
         if malicious_count > 0:
             result['is_malicious'] = True
@@ -213,18 +219,57 @@ class VirusScanner:
             result['threat_level'] = 'CLEAN'
             result['risk_score'] = 0
     
+    def _check_threat_indicators(self, content: str) -> List[str]:
+        """Проверка на индикаторы угроз в тестовых файлах."""
+        indicators = []
+        
+        # Проверка на THREAT_TYPE
+        threat_match = re.search(r'THREAT_TYPE:\s*(\w+)', content, re.IGNORECASE)
+        if threat_match:
+            threat_type = threat_match.group(1).upper()
+            if threat_type not in ['NONE', 'CLEAN', 'SAFE']:
+                indicators.append(f"THREAT_TYPE: {threat_type}")
+        
+        # Проверка секции MALICIOUS_INDICATORS
+        if re.search(r'\[MALICIOUS_INDICATORS\]', content, re.IGNORECASE):
+            # Извлекаем индикаторы из секции
+            mal_section = re.search(r'\[MALICIOUS_INDICATORS\](.*?)(?:\[|$)', content, re.IGNORECASE | re.DOTALL)
+            if mal_section:
+                mal_content = mal_section.group(1).strip()
+                lines = mal_content.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        indicators.append(f"Mock indicator: {line[:50]}")
+        
+        # Проверка секции SIGNATURE на наличие сигнатур малвари
+        if re.search(r'\[SIGNATURE\]', content, re.IGNORECASE):
+            sig_section = re.search(r'\[SIGNATURE\](.*?)(?:\[|$)', content, re.IGNORECASE | re.DOTALL)
+            if sig_section:
+                sig_content = sig_section.group(1).strip()
+                lines = sig_content.split('\n')
+                for line in lines:
+                    line = line.strip()
+                    if line and not line.startswith('#'):
+                        indicators.append(f"Signature: {line}")
+        
+        return indicators
+    
     def _is_test_file(self, content: str) -> bool:
         """
         Проверка, является ли файл тестовым образцом (не настоящим вредоносом).
         Возвращает True, если файл содержит признаки тестового файла.
         """
         test_indicators = [
-            r'THREAT_TYPE:\s*NONE',  # Маркер типа угрозы в тестовых файлах (только если NONE)
             r'MOCK_BEHAVIOR',  # Маркер мок-поведения
-            r'This is a SAFE test file',  # Явное указание на тестовый файл
+            r'THIS IS A SAFE TEST FILE',  # Явное указание на тестовый файл
             r'NOT A REAL MALWARE',  # Явное указание на безопасность
             r'RANDOM_ID:',  # Маркер случайного ID
             r'_SIMULATION',  # Маркер симуляции
+            r'GENERATED:\s*\d{4}-\d{2}-\d{2}',  # Маркер генерации
+            r'\[MOCK_BEHAVIOR\]',  # Секция мок-поведения
+            r'\[SIGNATURE\]',  # Секция сигнатур
+            r'\[MALICIOUS_INDICATORS\]',  # Секция индикаторов
         ]
         
         # Считаем количество индикаторов тестового файла
@@ -233,9 +278,8 @@ class VirusScanner:
             if re.search(indicator, content, re.IGNORECASE):
                 indicator_count += 1
         
-        # Если найдено 3 или более индикатора И есть THREAT_TYPE: NONE, считаем файл тестовым
-        has_none_threat = bool(re.search(r'THREAT_TYPE:\s*NONE', content, re.IGNORECASE))
-        return indicator_count >= 3 and has_none_threat
+        # Если найдено 3 или более индикатора, считаем файл тестовым
+        return indicator_count >= 3
     
     def _is_legitimate_python_code(self, content: str) -> bool:
         """

@@ -263,7 +263,8 @@ class RedSandSecure:
                 stderr=subprocess.PIPE,
                 universal_newlines=True,
                 encoding='utf-8',
-                errors='replace'
+                errors='replace',
+                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
             )
             self.processes_monitored.append(process.pid)
 
@@ -284,7 +285,10 @@ class RedSandSecure:
             # Завершаем процесс если еще работает
             if process.poll() is None:
                 process.terminate()
-                process.wait(timeout=5)
+                try:
+                    process.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    process.kill()
 
             events_log = self.panic_button.get_events_log()
 

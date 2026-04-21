@@ -133,6 +133,123 @@ THEMES = {
         "warning": "#ffc107",
         "danger": "#dc3545",
         "info": "#17a2b8"
+    },
+    "Neon Night": {
+        "bg_primary": "#0a0a0f",
+        "bg_secondary": "#12121a",
+        "bg_tertiary": "#1a1a2e",
+        "accent": "#ff00ff",
+        "accent_hover": "#ff33ff",
+        "text_primary": "#ffffff",
+        "text_secondary": "#b0b0b0",
+        "success": "#00ff88",
+        "warning": "#ffcc00",
+        "danger": "#ff3366",
+        "info": "#00ffff"
+    },
+    "Fire Storm": {
+        "bg_primary": "#1a0a0a",
+        "bg_secondary": "#2e1111",
+        "bg_tertiary": "#3d1a1a",
+        "accent": "#ff4500",
+        "accent_hover": "#ff6347",
+        "text_primary": "#ffe4e1",
+        "text_secondary": "#cd5c5c",
+        "success": "#32cd32",
+        "warning": "#ffa500",
+        "danger": "#ff0000",
+        "info": "#ffd700"
+    },
+    "Arctic Frost": {
+        "bg_primary": "#f0f8ff",
+        "bg_secondary": "#e6f3ff",
+        "bg_tertiary": "#d4e9ff",
+        "accent": "#0078d7",
+        "accent_hover": "#005a9e",
+        "text_primary": "#1a1a1a",
+        "text_secondary": "#5a5a5a",
+        "success": "#107c10",
+        "warning": "#ffb900",
+        "danger": "#d13438",
+        "info": "#0078d7"
+    },
+    "Toxic Waste": {
+        "bg_primary": "#0f140f",
+        "bg_secondary": "#1a241a",
+        "bg_tertiary": "#233023",
+        "accent": "#39ff14",
+        "accent_hover": "#52ff33",
+        "text_primary": "#e8ffe8",
+        "text_secondary": "#90ee90",
+        "success": "#00ff00",
+        "warning": "#adff2f",
+        "danger": "#ff4500",
+        "info": "#7fff00"
+    },
+    "Midnight Sun": {
+        "bg_primary": "#191970",
+        "bg_secondary": "#1a1a3e",
+        "bg_tertiary": "#252550",
+        "accent": "#ffd700",
+        "accent_hover": "#ffec8b",
+        "text_primary": "#f0f8ff",
+        "text_secondary": "#b0c4de",
+        "success": "#98fb98",
+        "warning": "#ffe4b5",
+        "danger": "#ff6b6b",
+        "info": "#87ceeb"
+    },
+    "Rose Quartz": {
+        "bg_primary": "#2d242e",
+        "bg_secondary": "#3d323e",
+        "bg_tertiary": "#4d424e",
+        "accent": "#f7cac9",
+        "accent_hover": "#ffe5e4",
+        "text_primary": "#fff5f5",
+        "text_secondary": "#e6c7c7",
+        "success": "#98dd98",
+        "warning": "#ffe082",
+        "danger": "#ef9a9a",
+        "info": "#80deea"
+    },
+    "Solar Flare": {
+        "bg_primary": "#1a1510",
+        "bg_secondary": "#2e2418",
+        "bg_tertiary": "#3d3020",
+        "accent": "#ff8c00",
+        "accent_hover": "#ffa500",
+        "text_primary": "#fff8dc",
+        "text_secondary": "#deb887",
+        "success": "#90ee90",
+        "warning": "#ffd700",
+        "danger": "#ff6347",
+        "info": "#87ceeb"
+    },
+    "Deep Space": {
+        "bg_primary": "#0b0c15",
+        "bg_secondary": "#151621",
+        "bg_tertiary": "#1f2030",
+        "accent": "#6c5ce7",
+        "accent_hover": "#a29bfe",
+        "text_primary": "#dfe6e9",
+        "text_secondary": "#b2bec3",
+        "success": "#00b894",
+        "warning": "#fdcb6e",
+        "danger": "#d63031",
+        "info": "#0984e3"
+    },
+    "Custom": {
+        "bg_primary": "#1a1a2e",
+        "bg_secondary": "#16213e",
+        "bg_tertiary": "#0f3460",
+        "accent": "#e94560",
+        "accent_hover": "#ff6b7a",
+        "text_primary": "#eaeaea",
+        "text_secondary": "#a0a0a0",
+        "success": "#28a745",
+        "warning": "#ffc107",
+        "danger": "#dc3545",
+        "info": "#17a2b8"
     }
 }
 
@@ -631,6 +748,15 @@ class AnalysisWorker(QObject):
                     result_dict = asdict(result)
                 else:
                     result_dict = result
+                
+                # Добавляем недостающие поля для GUI
+                if 'static_results' not in result_dict and hasattr(result, 'static_results'):
+                    result_dict['static_results'] = result.static_results or {}
+                if 'dynamic_events' not in result_dict and hasattr(result, 'dynamic_events'):
+                    result_dict['dynamic_events'] = result.dynamic_events or []
+                if 'threat_info' not in result_dict and hasattr(result, 'threat_info'):
+                    result_dict['threat_info'] = result.threat_info or {}
+                
                 self.finished.emit(result_dict)
             else:
                 self.error.emit("Анализ не был завершен успешно")
