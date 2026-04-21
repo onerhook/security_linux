@@ -757,6 +757,20 @@ class AnalysisWorker(QObject):
                 if 'threat_info' not in result_dict and hasattr(result, 'threat_info'):
                     result_dict['threat_info'] = result.threat_info or {}
                 
+                # Гарантируем корректный формат analysis_time (должен быть dict)
+                if 'analysis_time' in result_dict:
+                    at = result_dict['analysis_time']
+                    if isinstance(at, (int, float)):
+                        result_dict['analysis_time'] = {'start': None, 'duration': float(at)}
+                    elif not isinstance(at, dict):
+                        result_dict['analysis_time'] = {'start': None, 'duration': 0.0}
+                else:
+                    result_dict['analysis_time'] = {'start': None, 'duration': 0.0}
+                
+                # Гарантируем что threat_info это dict
+                if result_dict.get('threat_info') is None or not isinstance(result_dict['threat_info'], dict):
+                    result_dict['threat_info'] = {}
+                
                 self.finished.emit(result_dict)
             else:
                 self.error.emit("Анализ не был завершен успешно")
@@ -969,7 +983,14 @@ class SettingsDialog(QDialog):
         with open('config.ini', 'w') as f:
             config.write(f)
         
-        QMessageBox.information(self, "Настройки", "Настройки применены и сохранены!")
+        # Обновляем настройки в главном окне и применяем тему
+        if self.parent():
+            settings = self.get_settings()
+            self.parent().settings.update(settings)
+            self.parent().save_settings()
+            self.parent().apply_stylesheet()
+        
+        QMessageBox.information(self, "Настройки", "Настройки применены и сохранены!\nТема обновлена.")
 
     def browse_output_dir(self):
         directory = QFileDialog.getExistingDirectory(
@@ -1906,7 +1927,9 @@ class RedSandSecureGUI(QMainWindow):
             settings = dialog.get_settings()
             self.settings.update(settings)
             self.save_settings()
-            self.log_message('INFO', "Настройки сохранены")
+            # Применяем новую тему сразу после закрытия диалога
+            self.apply_stylesheet()
+            self.log_message('INFO', "Настройки сохранены и применены")
 
     def open_reports_folder(self):
         """Открытие папки с отчетами."""

@@ -439,7 +439,7 @@ class RedSandSecure:
                 'file_size': file_size,
                 'static_results': static_results,
                 'dynamic_events': dynamic_events,
-                'threat_info': threat_info,
+                'threat_info': threat_info if threat_info else {},
                 'report_data': report_data,
                 'analysis_time': {'start': self.analysis_start_time.isoformat() if self.analysis_start_time else None, 'duration': analysis_duration},
                 'success': True
@@ -453,6 +453,7 @@ class RedSandSecure:
                 'file_size': file_size,
                 'success': False,
                 'error': str(e),
+                'threat_info': {},
                 'analysis_time': {'start': None, 'duration': analysis_duration}
             }
         finally:
