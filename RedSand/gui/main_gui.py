@@ -270,7 +270,7 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QToolBar {{
         background-color: {theme['bg_secondary']};
         border-bottom: 1px solid {theme['accent']};
-        padding: 4px;
+        padding: 6px;
         spacing: 8px;
     }}
     
@@ -278,8 +278,9 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 6px 12px;
-        border-radius: 4px;
+        padding: 8px 14px;
+        border-radius: 5px;
+        font-weight: 500;
     }}
     
     QToolBar QToolButton:hover {{
@@ -290,14 +291,40 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: {theme['accent']};
     }}
     
+    QPushButton#primaryBtn {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        color: {theme['text_primary']};
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-weight: bold;
+        font-size: 13px;
+        min-width: 120px;
+    }}
+    
+    QPushButton#primaryBtn:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['accent_hover']}, stop:1 {theme['accent']});
+    }}
+    
+    QPushButton#primaryBtn:pressed {{
+        background: {theme['bg_tertiary']};
+    }}
+    
+    QPushButton#primaryBtn:disabled {{
+        background: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+    }}
+    
     QPushButton {{
         background-color: {theme['accent']};
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-weight: bold;
-        min-width: 80px;
+        padding: 8px 18px;
+        border-radius: 5px;
+        font-weight: 600;
+        min-width: 90px;
     }}
     
     QPushButton:hover {{
@@ -316,37 +343,41 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QGroupBox {{
         background-color: {theme['bg_secondary']};
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        margin-top: 12px;
-        padding-top: 12px;
+        border-radius: 8px;
+        margin-top: 14px;
+        padding-top: 14px;
         font-weight: bold;
         color: {theme['text_primary']};
+        font-size: 13px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 12px;
-        padding: 0 6px;
+        left: 14px;
+        padding: 0 8px;
         color: {theme['accent']};
+        font-size: 13px;
     }}
     
     QTabWidget::pane {{
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 6px;
+        border-radius: 8px;
         background-color: {theme['bg_secondary']};
     }}
     
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_secondary']};
-        padding: 8px 16px;
-        margin-right: 2px;
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
+        padding: 10px 20px;
+        margin-right: 3px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        font-weight: 500;
     }}
     
     QTabBar::tab:selected {{
-        background-color: {theme['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+            stop:0 {theme['accent']}, stop:1 {theme['bg_tertiary']});
         color: {theme['text_primary']};
         font-weight: bold;
     }}
@@ -359,52 +390,57 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 4px;
-        padding: 8px;
+        border-radius: 6px;
+        padding: 10px;
         font-family: 'Consolas', 'Courier New', monospace;
         font-size: 12px;
         line-height: 1.3;
+        selection-background-color: {theme['accent']};
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
         border: none;
-        border-radius: 6px;
-        height: 16px;
+        border-radius: 8px;
+        height: 20px;
         text-align: center;
         color: {theme['text_primary']};
         font-weight: bold;
+        font-size: 12px;
     }}
     
     QProgressBar::chunk {{
-        background-color: {theme['accent']};
-        border-radius: 6px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['success']}, stop:0.5 {theme['accent']}, stop:1 {theme['accent_hover']});
+        border-radius: 8px;
     }}
     
     QSlider::groove:horizontal {{
         background-color: {theme['bg_tertiary']};
-        height: 6px;
-        border-radius: 3px;
+        height: 8px;
+        border-radius: 4px;
     }}
     
     QSlider::handle:horizontal {{
-        background-color: {theme['accent']};
-        width: 14px;
-        margin: -4px 0;
-        border-radius: 7px;
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        width: 18px;
+        margin: -5px 0;
+        border-radius: 9px;
     }}
     
     QSlider::handle:horizontal:hover {{
-        background-color: {theme['accent_hover']};
+        background: {theme['accent_hover']};
     }}
     
     QComboBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 4px;
-        padding: 6px 10px;
+        border-radius: 5px;
+        padding: 7px 12px;
         outline: none;
+        min-height: 28px;
     }}
     
     QComboBox:hover {{
@@ -418,15 +454,15 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QComboBox::drop-down {{
         border: none;
-        width: 24px;
+        width: 26px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
-        border-left: 4px solid transparent;
-        border-right: 4px solid transparent;
-        border-top: 6px solid {theme['accent']};
-        margin-right: 8px;
+        border-left: 5px solid transparent;
+        border-right: 5px solid transparent;
+        border-top: 7px solid {theme['accent']};
+        margin-right: 10px;
     }}
     
     QComboBox QAbstractItemView {{
@@ -434,14 +470,16 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['bg_tertiary']};
         selection-background-color: {theme['accent']};
+        border-radius: 5px;
     }}
     
     QSpinBox, QDoubleSpinBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 4px;
-        padding: 6px 10px;
+        border-radius: 5px;
+        padding: 7px 12px;
+        min-height: 28px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
@@ -452,8 +490,9 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['bg_tertiary']};
-        border-radius: 4px;
-        padding: 6px 10px;
+        border-radius: 5px;
+        padding: 8px 12px;
+        min-height: 28px;
     }}
     
     QLineEdit:hover {{
@@ -468,19 +507,21 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 8px;
+        spacing: 10px;
+        font-size: 13px;
     }}
     
     QCheckBox::indicator {{
-        width: 18px;
-        height: 18px;
-        border-radius: 4px;
+        width: 20px;
+        height: 20px;
+        border-radius: 5px;
         border: 2px solid {theme['bg_tertiary']};
         background-color: {theme['bg_secondary']};
     }}
     
     QCheckBox::indicator:checked {{
-        background-color: {theme['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         border: 2px solid {theme['accent']};
     }}
     
@@ -490,32 +531,35 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QRadioButton {{
         color: {theme['text_primary']};
-        spacing: 8px;
+        spacing: 10px;
+        font-size: 13px;
     }}
     
     QRadioButton::indicator {{
-        width: 18px;
-        height: 18px;
-        border-radius: 9px;
+        width: 20px;
+        height: 20px;
+        border-radius: 10px;
         border: 2px solid {theme['bg_tertiary']};
         background-color: {theme['bg_secondary']};
     }}
     
     QRadioButton::indicator:checked {{
-        background-color: {theme['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         border: 2px solid {theme['accent']};
     }}
     
     QTableWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 8px;
         gridline-color: {theme['bg_tertiary']};
+        alternate-background-color: {theme['bg_primary']};
     }}
     
     QTableWidget::item {{
-        padding: 8px;
+        padding: 10px;
     }}
     
     QTableWidget::item:selected {{
@@ -523,28 +567,38 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         color: {theme['text_primary']};
     }}
     
-    QHeaderView::section {{
+    QTableWidget::item:hover {{
         background-color: {theme['bg_tertiary']};
+    }}
+    
+    QHeaderView::section {{
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+            stop:0 {theme['bg_tertiary']}, stop:1 {theme['bg_secondary']});
         color: {theme['text_primary']};
-        padding: 10px;
+        padding: 12px;
         border: none;
         font-weight: bold;
+        border-bottom: 2px solid {theme['accent']};
     }}
     
     QTreeWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 8px;
     }}
     
     QTreeWidget::item {{
-        padding: 5px;
+        padding: 6px;
     }}
     
     QTreeWidget::item:selected {{
         background-color: {theme['accent']};
         color: {theme['text_primary']};
+    }}
+    
+    QTreeWidget::item:hover {{
+        background-color: {theme['bg_tertiary']};
     }}
     
     QTreeWidget::branch:has-children:!has-siblings:closed,
@@ -566,18 +620,20 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:vertical {{
         background-color: {theme['bg_primary']};
-        width: 12px;
-        border-radius: 6px;
+        width: 14px;
+        border-radius: 7px;
+        margin: 2px;
     }}
     
     QScrollBar::handle:vertical {{
-        background-color: {theme['bg_tertiary']};
-        min-height: 30px;
-        border-radius: 6px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
+        min-height: 40px;
+        border-radius: 7px;
     }}
     
     QScrollBar::handle:vertical:hover {{
-        background-color: {theme['accent']};
+        background: {theme['accent']};
     }}
     
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -586,18 +642,20 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:horizontal {{
         background-color: {theme['bg_primary']};
-        height: 12px;
-        border-radius: 6px;
+        height: 14px;
+        border-radius: 7px;
+        margin: 2px;
     }}
     
     QScrollBar::handle:horizontal {{
-        background-color: {theme['bg_tertiary']};
-        min-width: 30px;
-        border-radius: 6px;
+        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
+            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
+        min-width: 40px;
+        border-radius: 7px;
     }}
     
     QScrollBar::handle:horizontal:hover {{
-        background-color: {theme['accent']};
+        background: {theme['accent']};
     }}
     
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -611,55 +669,64 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QMessageBox QLabel {{
         color: {theme['text_primary']};
+        font-size: 13px;
     }}
     
     QMessageBox QPushButton {{
-        min-width: 80px;
+        min-width: 90px;
+        padding: 8px 16px;
     }}
     
     QMenu {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 5px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        padding: 6px;
     }}
     
     QMenu::item {{
-        padding: 8px 20px;
-        border-radius: 4px;
+        padding: 9px 24px;
+        border-radius: 5px;
+        margin: 2px 4px;
     }}
     
     QMenu::item:selected {{
-        background-color: {theme['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
     }}
     
     QMenu::separator {{
         height: 2px;
-        background-color: {theme['bg_tertiary']};
-        margin: 5px 10px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 transparent, stop:0.5 {theme['bg_tertiary']}, stop:1 transparent);
+        margin: 6px 12px;
     }}
     
     QStatusBar {{
-        background-color: {theme['bg_secondary']};
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['bg_secondary']}, stop:1 {theme['bg_primary']});
         color: {theme['text_secondary']};
         border-top: 1px solid {theme['bg_tertiary']};
+        font-size: 12px;
     }}
     
     QListWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 8px;
     }}
     
     QListWidget::item {{
-        padding: 8px;
-        border-radius: 4px;
+        padding: 10px;
+        border-radius: 5px;
+        margin: 2px 4px;
     }}
     
     QListWidget::item:selected {{
-        background-color: {theme['accent']};
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         color: {theme['text_primary']};
     }}
     
@@ -668,32 +735,70 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     }}
     
     QSplitter::handle {{
-        background-color: {theme['bg_tertiary']};
-        width: 3px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
+        width: 4px;
     }}
     
     QSplitter::handle:horizontal {{
-        width: 3px;
+        width: 4px;
     }}
     
     QSplitter::handle:vertical {{
-        height: 3px;
+        height: 4px;
     }}
     
     QToolTip {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['accent']};
-        border-radius: 4px;
-        padding: 5px 10px;
+        border-radius: 6px;
+        padding: 6px 12px;
+        font-size: 12px;
     }}
     
     QWhatsThis {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
+        border: 1px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        padding: 12px;
+    }}
+    
+    QLabel#titleLabel {{
+        font-size: 28px;
+        font-weight: bold;
+        color: {theme['accent']};
         padding: 10px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        -qt-background-clip: text;
+        color: transparent;
+    }}
+    
+    QFrame#line {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
+        max-height: 2px;
+    }}
+    
+    QFrame#riskFrame {{
+        background-color: {theme['bg_secondary']};
+        border: 2px solid {theme['accent']};
+        border-radius: 10px;
+        padding: 15px;
+    }}
+    
+    QLabel#riskLabel {{
+        font-size: 36px;
+        font-weight: bold;
+        color: {theme['danger']};
+    }}
+    
+    QLabel#threatTypeLabel {{
+        font-size: 20px;
+        font-weight: bold;
+        color: {theme['accent']};
     }}
     """
 
