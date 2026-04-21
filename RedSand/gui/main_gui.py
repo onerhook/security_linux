@@ -262,25 +262,27 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QMainWindow, QDialog {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-        font-size: 13px;
-        line-height: 1.4;
+        font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
-        border-bottom: 1px solid {theme['accent']};
-        padding: 6px;
-        spacing: 8px;
+        border-bottom: 2px solid {theme['accent']};
+        padding: 8px;
+        spacing: 10px;
+        min-height: 50px;
     }}
     
     QToolBar QToolButton {{
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 14px;
-        border-radius: 5px;
-        font-weight: 500;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
     }}
     
     QToolBar QToolButton:hover {{
@@ -296,11 +298,12 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
             stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         color: {theme['text_primary']};
         border: none;
-        padding: 10px 24px;
-        border-radius: 6px;
+        padding: 14px 32px;
+        border-radius: 8px;
         font-weight: bold;
-        font-size: 13px;
-        min-width: 120px;
+        font-size: 15px;
+        min-width: 160px;
+        min-height: 50px;
     }}
     
     QPushButton#primaryBtn:hover {{
@@ -317,14 +320,64 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         color: {theme['text_secondary']};
     }}
     
+    QPushButton#dangerBtn {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['danger']}, stop:1 #ff6b6b);
+        color: #ffffff;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        min-width: 160px;
+        min-height: 50px;
+    }}
+    
+    QPushButton#dangerBtn:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 #ff6b6b, stop:1 {theme['danger']});
+    }}
+    
+    QPushButton#dangerBtn:pressed {{
+        background: {theme['bg_tertiary']};
+    }}
+    
+    QPushButton#dangerBtn:disabled {{
+        background: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+    }}
+    
+    QPushButton#secondaryBtn {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['accent']};
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 14px;
+        min-width: 140px;
+        min-height: 45px;
+    }}
+    
+    QPushButton#secondaryBtn:hover {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+    }}
+    
+    QPushButton#secondaryBtn:pressed {{
+        background-color: {theme['bg_primary']};
+    }}
+    
     QPushButton {{
         background-color: {theme['accent']};
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 18px;
-        border-radius: 5px;
+        padding: 10px 20px;
+        border-radius: 6px;
         font-weight: 600;
-        min-width: 90px;
+        font-size: 13px;
+        min-width: 100px;
+        min-height: 38px;
     }}
     
     QPushButton:hover {{
@@ -342,37 +395,42 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QGroupBox {{
         background-color: {theme['bg_secondary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        margin-top: 14px;
-        padding-top: 14px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 12px;
+        margin-top: 18px;
+        padding-top: 18px;
         font-weight: bold;
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
+        spacing: 12px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 14px;
-        padding: 0 8px;
+        left: 16px;
+        padding: 0 12px;
         color: {theme['accent']};
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: bold;
     }}
     
     QTabWidget::pane {{
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 12px;
         background-color: {theme['bg_secondary']};
+        padding: 4px;
     }}
     
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_secondary']};
-        padding: 10px 20px;
-        margin-right: 3px;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
-        font-weight: 500;
+        padding: 12px 24px;
+        margin-right: 4px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 120px;
     }}
     
     QTabBar::tab:selected {{
@@ -389,44 +447,48 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QTextEdit, QPlainTextEdit {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 10px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        padding: 12px;
         font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 12px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         selection-background-color: {theme['accent']};
+    }}
+    
+    QTextEdit:focus, QPlainTextEdit:focus {{
+        border: 2px solid {theme['accent']};
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
         border: none;
-        border-radius: 8px;
-        height: 20px;
+        border-radius: 10px;
+        height: 28px;
         text-align: center;
         color: {theme['text_primary']};
         font-weight: bold;
-        font-size: 12px;
+        font-size: 13px;
     }}
     
     QProgressBar::chunk {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 {theme['success']}, stop:0.5 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border-radius: 8px;
+        border-radius: 10px;
     }}
     
     QSlider::groove:horizontal {{
         background-color: {theme['bg_tertiary']};
-        height: 8px;
-        border-radius: 4px;
+        height: 10px;
+        border-radius: 5px;
     }}
     
     QSlider::handle:horizontal {{
         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
             stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        width: 18px;
-        margin: -5px 0;
-        border-radius: 9px;
+        width: 22px;
+        margin: -6px 0;
+        border-radius: 11px;
     }}
     
     QSlider::handle:horizontal:hover {{
@@ -436,85 +498,90 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QComboBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 9px 14px;
         outline: none;
-        min-height: 28px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QComboBox:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QComboBox:focus {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
         outline: none;
     }}
     
     QComboBox::drop-down {{
         border: none;
-        width: 26px;
+        width: 30px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 7px solid {theme['accent']};
-        margin-right: 10px;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid {theme['accent']};
+        margin-right: 12px;
     }}
     
     QComboBox QAbstractItemView {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
+        border: 2px solid {theme['bg_tertiary']};
         selection-background-color: {theme['accent']};
-        border-radius: 5px;
+        border-radius: 6px;
+        padding: 4px;
     }}
     
     QSpinBox, QDoubleSpinBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
-        min-height: 28px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 9px 14px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QLineEdit {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 8px 12px;
-        min-height: 28px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 10px 14px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QLineEdit:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QLineEdit:focus {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
         background-color: {theme['bg_primary']};
         outline: none;
     }}
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 10px;
-        font-size: 13px;
+        spacing: 12px;
+        font-size: 14px;
+        padding: 4px;
     }}
     
     QCheckBox::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 5px;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
         border: 2px solid {theme['bg_tertiary']};
         background-color: {theme['bg_secondary']};
     }}
@@ -531,14 +598,15 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QRadioButton {{
         color: {theme['text_primary']};
-        spacing: 10px;
-        font-size: 13px;
+        spacing: 12px;
+        font-size: 14px;
+        padding: 4px;
     }}
     
     QRadioButton::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 10px;
+        width: 22px;
+        height: 22px;
+        border-radius: 11px;
         border: 2px solid {theme['bg_tertiary']};
         background-color: {theme['bg_secondary']};
     }}
@@ -552,14 +620,15 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QTableWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
         gridline-color: {theme['bg_tertiary']};
         alternate-background-color: {theme['bg_primary']};
+        font-size: 13px;
     }}
     
     QTableWidget::item {{
-        padding: 10px;
+        padding: 12px;
     }}
     
     QTableWidget::item:selected {{
@@ -575,21 +644,23 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
             stop:0 {theme['bg_tertiary']}, stop:1 {theme['bg_secondary']});
         color: {theme['text_primary']};
-        padding: 12px;
+        padding: 14px;
         border: none;
         font-weight: bold;
-        border-bottom: 2px solid {theme['accent']};
+        border-bottom: 3px solid {theme['accent']};
+        font-size: 13px;
     }}
     
     QTreeWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        font-size: 13px;
     }}
     
     QTreeWidget::item {{
-        padding: 6px;
+        padding: 8px;
     }}
     
     QTreeWidget::item:selected {{
@@ -601,18 +672,6 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: {theme['bg_tertiary']};
     }}
     
-    QTreeWidget::branch:has-children:!has-siblings:closed,
-    QTreeWidget::branch:closed:has-children:has-siblings {{
-        border-image: none;
-        image: none;
-    }}
-    
-    QTreeWidget::branch:open:has-children:!has-siblings,
-    QTreeWidget::branch:open:has-children:has-siblings {{
-        border-image: none;
-        image: none;
-    }}
-    
     QScrollArea {{
         border: none;
         background-color: transparent;
@@ -620,16 +679,16 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:vertical {{
         background-color: {theme['bg_primary']};
-        width: 14px;
-        border-radius: 7px;
-        margin: 2px;
+        width: 16px;
+        border-radius: 8px;
+        margin: 3px;
     }}
     
     QScrollBar::handle:vertical {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
-        min-height: 40px;
-        border-radius: 7px;
+        min-height: 50px;
+        border-radius: 8px;
     }}
     
     QScrollBar::handle:vertical:hover {{
@@ -642,16 +701,16 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:horizontal {{
         background-color: {theme['bg_primary']};
-        height: 14px;
-        border-radius: 7px;
-        margin: 2px;
+        height: 16px;
+        border-radius: 8px;
+        margin: 3px;
     }}
     
     QScrollBar::handle:horizontal {{
         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
             stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
-        min-width: 40px;
-        border-radius: 7px;
+        min-width: 50px;
+        border-radius: 8px;
     }}
     
     QScrollBar::handle:horizontal:hover {{
@@ -669,26 +728,28 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QMessageBox QLabel {{
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QMessageBox QPushButton {{
-        min-width: 90px;
-        padding: 8px 16px;
+        min-width: 100px;
+        padding: 10px 20px;
+        border-radius: 6px;
     }}
     
     QMenu {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 6px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        padding: 8px;
     }}
     
     QMenu::item {{
-        padding: 9px 24px;
-        border-radius: 5px;
-        margin: 2px 4px;
+        padding: 10px 28px;
+        border-radius: 6px;
+        margin: 3px 6px;
+        font-size: 13px;
     }}
     
     QMenu::item:selected {{
@@ -697,31 +758,33 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     }}
     
     QMenu::separator {{
-        height: 2px;
+        height: 3px;
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 transparent, stop:0.5 {theme['bg_tertiary']}, stop:1 transparent);
-        margin: 6px 12px;
+        margin: 8px 14px;
     }}
     
     QStatusBar {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 {theme['bg_secondary']}, stop:1 {theme['bg_primary']});
         color: {theme['text_secondary']};
-        border-top: 1px solid {theme['bg_tertiary']};
-        font-size: 12px;
+        border-top: 2px solid {theme['bg_tertiary']};
+        font-size: 13px;
+        padding: 6px;
     }}
     
     QListWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        font-size: 13px;
     }}
     
     QListWidget::item {{
-        padding: 10px;
-        border-radius: 5px;
-        margin: 2px 4px;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 3px 6px;
     }}
     
     QListWidget::item:selected {{
@@ -737,39 +800,39 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QSplitter::handle {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        width: 4px;
+        width: 6px;
     }}
     
     QSplitter::handle:horizontal {{
-        width: 4px;
+        width: 6px;
     }}
     
     QSplitter::handle:vertical {{
-        height: 4px;
+        height: 6px;
     }}
     
     QToolTip {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['accent']};
-        border-radius: 6px;
-        padding: 6px 12px;
-        font-size: 12px;
+        border: 2px solid {theme['accent']};
+        border-radius: 8px;
+        padding: 8px 14px;
+        font-size: 13px;
     }}
     
     QWhatsThis {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 12px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        padding: 14px;
     }}
     
     QLabel#titleLabel {{
-        font-size: 28px;
+        font-size: 32px;
         font-weight: bold;
         color: {theme['accent']};
-        padding: 10px;
+        padding: 12px;
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         -qt-background-clip: text;
@@ -779,24 +842,24 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QFrame#line {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        max-height: 2px;
+        max-height: 3px;
     }}
     
     QFrame#riskFrame {{
         background-color: {theme['bg_secondary']};
-        border: 2px solid {theme['accent']};
-        border-radius: 10px;
-        padding: 15px;
+        border: 3px solid {theme['accent']};
+        border-radius: 12px;
+        padding: 18px;
     }}
     
     QLabel#riskLabel {{
-        font-size: 36px;
+        font-size: 42px;
         font-weight: bold;
         color: {theme['danger']};
     }}
     
     QLabel#threatTypeLabel {{
-        font-size: 20px;
+        font-size: 24px;
         font-weight: bold;
         color: {theme['accent']};
     }}
@@ -903,11 +966,13 @@ class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Настройки")
-        self.setMinimumWidth(600)
+        self.setMinimumSize(750, 650)
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(12)
+        layout.setContentsMargins(16, 16, 16, 16)
 
         # Создаем вкладки для настроек
         tabs = QTabWidget()
@@ -915,17 +980,22 @@ class SettingsDialog(QDialog):
         # Вкладка основных настроек
         basic_tab = QWidget()
         basic_layout = QFormLayout(basic_tab)
+        basic_layout.setSpacing(10)
+        basic_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         # Таймаут анализа
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setSuffix(" сек")
+        self.timeout_spin.setMinimumHeight(36)
         basic_layout.addRow("Таймаут анализа:", self.timeout_spin)
 
         # Директория отчетов
         self.output_dir_edit = QLineEdit("reports")
+        self.output_dir_edit.setMinimumHeight(36)
         btn_browse = QPushButton("Обзор...")
+        btn_browse.setObjectName("secondaryBtn")
         btn_browse.clicked.connect(self.browse_output_dir)
 
         output_layout = QHBoxLayout()
@@ -933,36 +1003,57 @@ class SettingsDialog(QDialog):
         output_layout.addWidget(btn_browse)
         basic_layout.addRow("Директория отчетов:", output_layout)
 
-        # Поли морфный анализ по умолчанию
+        # Полиморфный анализ по умолчанию
         self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
+        self.poly_check.setToolTip("Генерировать полиморфные варианты образца для лучшего обнаружения")
         basic_layout.addRow("", self.poly_check)
 
         # Автозакрытие сети
         self.network_check = QCheckBox("Автоматически отключать сеть при анализе")
         self.network_check.setChecked(True)
+        self.network_check.setToolTip("Блокирует все сетевые подключения во время анализа")
         basic_layout.addRow("", self.network_check)
 
         # Уровень логирования
         self.log_level_combo = QComboBox()
         self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
         self.log_level_combo.setCurrentText("INFO")
+        self.log_level_combo.setMinimumHeight(36)
         basic_layout.addRow("Уровень логирования:", self.log_level_combo)
 
-        tabs.addTab(basic_tab, "Основные")
+        # Максимальное количество потоков
+        self.max_workers_spin = QSpinBox()
+        self.max_workers_spin.setRange(1, 32)
+        self.max_workers_spin.setValue(16)
+        self.max_workers_spin.setSuffix(" потоков")
+        self.max_workers_spin.setMinimumHeight(36)
+        self.max_workers_spin.setToolTip("Количество параллельных потоков для анализа")
+        basic_layout.addRow("Максимум потоков:", self.max_workers_spin)
+
+        tabs.addTab(basic_tab, "📋 Основные")
 
         # Вкладка темы и внешнего вида
         theme_tab = QWidget()
-        theme_layout = QFormLayout(theme_tab)
+        theme_layout = QVBoxLayout(theme_tab)
+        theme_layout.setSpacing(12)
 
         # Выбор темы
+        theme_group = QGroupBox("Цветовая схема")
+        theme_group_layout = QFormLayout(theme_group)
+        
         self.theme_combo = QComboBox()
         self.theme_combo.addItems(list(THEMES.keys()))
         self.theme_combo.setCurrentText("Dark Red")
-        theme_layout.addRow("Цветовая тема:", self.theme_combo)
+        self.theme_combo.setMinimumHeight(36)
+        self.theme_combo.setToolTip("Выберите цветовую тему интерфейса")
+        theme_group_layout.addRow("Тема:", self.theme_combo)
+        
+        theme_layout.addWidget(theme_group)
 
         # Кастомизация цветов
         custom_group = QGroupBox("Кастомизация цветов (для Custom темы)")
         custom_layout = QGridLayout(custom_group)
+        custom_layout.setSpacing(8)
 
         self.color_pickers = {}
         color_labels = [
@@ -982,49 +1073,62 @@ class SettingsDialog(QDialog):
         for i, (key, label) in enumerate(color_labels):
             color_label = QLabel(label)
             color_btn = QPushButton()
-            color_btn.setFixedSize(50, 25)
-            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 1px solid gray;")
+            color_btn.setFixedSize(60, 32)
+            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 2px solid gray; border-radius: 4px;")
             color_btn.clicked.connect(lambda checked, k=key, b=color_btn: self.pick_color(k, b))
             self.color_pickers[key] = {'button': color_btn, 'color': THEMES['Custom'][key]}
             custom_layout.addWidget(color_label, i // 2, (i % 2) * 2)
             custom_layout.addWidget(color_btn, i // 2, (i % 2) * 2 + 1)
 
-        theme_layout.addRow(custom_group)
+        theme_layout.addWidget(custom_group)
 
         # Кнопка сброса темы
-        reset_theme_btn = QPushButton("Сбросить тему к значениям по умолчанию")
+        reset_theme_btn = QPushButton("🔄 Сбросить тему к значениям по умолчанию")
+        reset_theme_btn.setObjectName("secondaryBtn")
         reset_theme_btn.clicked.connect(self.reset_theme)
-        theme_layout.addRow("", reset_theme_btn)
+        theme_layout.addWidget(reset_theme_btn)
 
-        tabs.addTab(theme_tab, "Тема и внешний вид")
+        tabs.addTab(theme_tab, "🎨 Тема и внешний вид")
 
         # Вкладка безопасности
         security_tab = QWidget()
         security_layout = QFormLayout(security_tab)
+        security_layout.setSpacing(10)
 
         # Отключение автозапуска процессов
         self.disable_auto_run_check = QCheckBox("Отключить автозапуск процессов после анализа")
         self.disable_auto_run_check.setChecked(True)
+        self.disable_auto_run_check.setToolTip("Предотвращает автоматический запуск процессов после завершения анализа")
         security_layout.addRow("", self.disable_auto_run_check)
 
         # Блокировка опасных приложений
-        self.block_dangerous_apps_check = QCheckBox("Блокировать запуск опасных приложений (paint, notepad и т.д.)")
+        self.block_dangerous_apps_check = QCheckBox("Блокировать запуск опасных приложений")
         self.block_dangerous_apps_check.setChecked(True)
+        self.block_dangerous_apps_check.setToolTip("Блокирует запуск paint, notepad и других потенциально опасных приложений")
         security_layout.addRow("", self.block_dangerous_apps_check)
 
         # Принудительное завершение процессов
         self.force_kill_check = QCheckBox("Принудительно завершать все процессы после анализа")
         self.force_kill_check.setChecked(False)
+        self.force_kill_check.setToolTip("Гарантирует завершение всех запущенных процессов")
         security_layout.addRow("", self.force_kill_check)
 
-        # Максимальное количество потоков
-        self.max_workers_spin = QSpinBox()
-        self.max_workers_spin.setRange(1, 32)
-        self.max_workers_spin.setValue(16)
-        self.max_workers_spin.setSuffix(" потоков")
-        security_layout.addRow("Максимум потоков:", self.max_workers_spin)
+        # Автоматическое создание бэкапов
+        self.auto_backup_check = QCheckBox("Создавать резервные копии отчетов")
+        self.auto_backup_check.setChecked(True)
+        self.auto_backup_check.setToolTip("Автоматически создавать копии отчетов в backup папке")
+        security_layout.addRow("", self.auto_backup_check)
 
-        tabs.addTab(security_tab, "Безопасность")
+        # Лимит размера файла
+        self.file_size_limit_spin = QSpinBox()
+        self.file_size_limit_spin.setRange(1, 1000)
+        self.file_size_limit_spin.setValue(100)
+        self.file_size_limit_spin.setSuffix(" МБ")
+        self.file_size_limit_spin.setMinimumHeight(36)
+        self.file_size_limit_spin.setToolTip("Максимальный размер файла для анализа")
+        security_layout.addRow("Лимит размера файла:", self.file_size_limit_spin)
+
+        tabs.addTab(security_tab, "🔒 Безопасность")
 
         layout.addWidget(tabs)
 
@@ -1032,6 +1136,7 @@ class SettingsDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply
         )
+        buttons.setMinimumHeight(45)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         buttons.button(QDialogButtonBox.Apply).clicked.connect(self.apply_settings)
@@ -1125,7 +1230,9 @@ class SettingsDialog(QDialog):
             'disable_auto_run': self.disable_auto_run_check.isChecked(),
             'block_dangerous_apps': self.block_dangerous_apps_check.isChecked(),
             'force_kill': self.force_kill_check.isChecked(),
-            'custom_colors': dict(THEMES['Custom'])
+            'custom_colors': dict(THEMES['Custom']),
+            'auto_backup': self.auto_backup_check.isChecked(),
+            'file_size_limit': self.file_size_limit_spin.value()
         }
 
 
