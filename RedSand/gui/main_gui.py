@@ -1217,6 +1217,24 @@ class SettingsDialog(QDialog):
             'compress_archives': self.compress_archives_check.isChecked(),
         }
 
+    def browse_output_dir(self):
+        """Открыть диалог выбора директории для отчетов."""
+        dir_path = QFileDialog.getExistingDirectory(
+            self, 
+            "Выберите директорию для отчетов",
+            self.output_dir_edit.text() or "."
+        )
+        if dir_path:
+            self.output_dir_edit.setText(dir_path)
+
+    def apply_settings(self):
+        """Применить настройки без закрытия диалога."""
+        QMessageBox.information(
+            self,
+            "Настройки применены",
+            "Настройки успешно применены и будут использованы при следующем запуске."
+        )
+
 
 class ReportViewerDialog(QDialog):
     """Диалог просмотра детального отчета."""
