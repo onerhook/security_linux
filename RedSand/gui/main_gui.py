@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v3.0 - Профессиональный интерфейс с темами и настройками
-Современный дизайн на PyQt5 с поддержкой тем, анимаций и расширенных настроек
+RedSand Secure GUI v4.0 - Полностью переработанный профессиональный интерфейс
+Современный минималистичный дизайн на PyQt5 с улучшенной эргономикой
 Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
 
@@ -26,18 +26,19 @@ from PyQt5.QtWidgets import (
     QToolBar, QAction, QMenu, QMenuBar, QSystemTrayIcon,
     QTreeWidget, QTreeWidgetItem, QSlider, QColorDialog,
     QFontDialog, QListWidget, QListWidgetItem, QStackedWidget,
-    QRadioButton, QButtonGroup, QSpacerItem, QSizePolicy
+    QRadioButton, QButtonGroup, QSpacerItem, QSizePolicy,
+    QDoubleSpinBox, QDateEdit, QTimeEdit
 )
 from PyQt5.QtCore import (
     Qt, QTimer, pyqtSignal, QObject, QThread, QMetaObject,
     Q_ARG, QPropertyAnimation, QEasingCurve, QSize, QUrl,
-    QPoint, QRect, QSettings, QTranslator, QLocale
+    QPoint, QRect, QSettings, QTranslator, QLocale, QMargins
 )
 from PyQt5.QtGui import (
     QFont, QColor, QPalette, QIcon, QPixmap, QPainter,
     QBrush, QPen, QLinearGradient, QDesktopServices,
     QTextCursor, QTextDocument, QMovie, QKeySequence,
-    QCursor
+    QCursor, QIntValidator
 )
 from PyQt5.QtWidgets import QShortcut
 
@@ -56,279 +57,200 @@ except ImportError:
 # ============================================================================
 
 THEMES = {
-    "Dark Red": {
-        "bg_primary": "#1a1a2e",
-        "bg_secondary": "#16213e",
-        "bg_tertiary": "#0f3460",
-        "accent": "#e94560",
-        "accent_hover": "#ff6b7a",
-        "text_primary": "#eaeaea",
-        "text_secondary": "#a0a0a0",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
+    "Dark Professional": {
+        "bg_primary": "#1a1d23",
+        "bg_secondary": "#242832",
+        "bg_tertiary": "#2d3240",
+        "bg_hover": "#363c4a",
+        "accent": "#4a9eff",
+        "accent_hover": "#6bb3ff",
+        "text_primary": "#e8eaed",
+        "text_secondary": "#9aa0a6",
+        "text_muted": "#5f6368",
+        "success": "#34a853",
+        "warning": "#fbbc04",
+        "danger": "#ea4335",
+        "info": "#4285f4",
+        "border": "#3c4043",
+        "panel_bg": "#20242a"
     },
-    "Cyber Blue": {
-        "bg_primary": "#0a0e1a",
-        "bg_secondary": "#111827",
-        "bg_tertiary": "#1e293b",
-        "accent": "#3b82f6",
-        "accent_hover": "#60a5fa",
-        "text_primary": "#f3f4f6",
-        "text_secondary": "#9ca3af",
-        "success": "#10b981",
-        "warning": "#f59e0b",
-        "danger": "#ef4444",
-        "info": "#8b5cf6"
-    },
-    "Matrix Green": {
-        "bg_primary": "#0d1117",
-        "bg_secondary": "#161b22",
-        "bg_tertiary": "#21262d",
-        "accent": "#00ff41",
-        "accent_hover": "#00cc33",
-        "text_primary": "#c9d1d9",
-        "text_secondary": "#8b949e",
-        "success": "#2ea043",
-        "warning": "#d29922",
-        "danger": "#f85149",
-        "info": "#58a6ff"
-    },
-    "Purple Haze": {
-        "bg_primary": "#1e1b2e",
-        "bg_secondary": "#2d2640",
-        "bg_tertiary": "#3d3452",
-        "accent": "#a855f7",
-        "accent_hover": "#c084fc",
-        "text_primary": "#f5f3ff",
-        "text_secondary": "#c4b5fd",
-        "success": "#22c55e",
+    "Midnight Blue": {
+        "bg_primary": "#0f141f",
+        "bg_secondary": "#1a2332",
+        "bg_tertiary": "#243045",
+        "bg_hover": "#2d3a52",
+        "accent": "#5c87ff",
+        "accent_hover": "#7a9eff",
+        "text_primary": "#e6e9f0",
+        "text_secondary": "#8b95a5",
+        "text_muted": "#5a6478",
+        "success": "#4ade80",
         "warning": "#fbbf24",
-        "danger": "#f43f5e",
-        "info": "#06b6d4"
+        "danger": "#f87171",
+        "info": "#60a5fa",
+        "border": "#334155",
+        "panel_bg": "#151b28"
     },
-    "Ocean Depth": {
-        "bg_primary": "#0c1929",
-        "bg_secondary": "#0f2338",
-        "bg_tertiary": "#143446",
-        "accent": "#00bcd4",
-        "accent_hover": "#26c6da",
-        "text_primary": "#e0f7fa",
-        "text_secondary": "#80deea",
-        "success": "#4caf50",
-        "warning": "#ff9800",
-        "danger": "#f44336",
-        "info": "#2196f3"
-    },
-    "Light Modern": {
-        "bg_primary": "#ffffff",
-        "bg_secondary": "#f8f9fa",
-        "bg_tertiary": "#e9ecef",
-        "accent": "#dc3545",
-        "accent_hover": "#c82333",
-        "text_primary": "#212529",
-        "text_secondary": "#6c757d",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
-    },
-    "Neon Night": {
-        "bg_primary": "#0a0a0f",
-        "bg_secondary": "#12121a",
-        "bg_tertiary": "#1a1a2e",
-        "accent": "#ff00ff",
-        "accent_hover": "#ff33ff",
+    "Carbon Dark": {
+        "bg_primary": "#121212",
+        "bg_secondary": "#1e1e1e",
+        "bg_tertiary": "#2a2a2a",
+        "bg_hover": "#333333",
+        "accent": "#bb86fc",
+        "accent_hover": "#cf9dff",
         "text_primary": "#ffffff",
         "text_secondary": "#b0b0b0",
-        "success": "#00ff88",
-        "warning": "#ffcc00",
-        "danger": "#ff3366",
-        "info": "#00ffff"
+        "text_muted": "#666666",
+        "success": "#03dac6",
+        "warning": "#ffb74d",
+        "danger": "#cf6679",
+        "info": "#64b5f6",
+        "border": "#333333",
+        "panel_bg": "#181818"
     },
-    "Fire Storm": {
-        "bg_primary": "#1a0a0a",
-        "bg_secondary": "#2e1111",
-        "bg_tertiary": "#3d1a1a",
-        "accent": "#ff4500",
-        "accent_hover": "#ff6347",
-        "text_primary": "#ffe4e1",
-        "text_secondary": "#cd5c5c",
-        "success": "#32cd32",
-        "warning": "#ffa500",
-        "danger": "#ff0000",
-        "info": "#ffd700"
+    "Arctic White": {
+        "bg_primary": "#ffffff",
+        "bg_secondary": "#f5f7fa",
+        "bg_tertiary": "#ebeef2",
+        "bg_hover": "#e2e6eb",
+        "accent": "#2563eb",
+        "accent_hover": "#1d4ed8",
+        "text_primary": "#1f2937",
+        "text_secondary": "#6b7280",
+        "text_muted": "#9ca3af",
+        "success": "#059669",
+        "warning": "#d97706",
+        "danger": "#dc2626",
+        "info": "#2563eb",
+        "border": "#e5e7eb",
+        "panel_bg": "#fafbfc"
     },
-    "Arctic Frost": {
-        "bg_primary": "#f0f8ff",
-        "bg_secondary": "#e6f3ff",
-        "bg_tertiary": "#d4e9ff",
-        "accent": "#0078d7",
-        "accent_hover": "#005a9e",
-        "text_primary": "#1a1a1a",
-        "text_secondary": "#5a5a5a",
-        "success": "#107c10",
-        "warning": "#ffb900",
-        "danger": "#d13438",
-        "info": "#0078d7"
+    "Forest Green": {
+        "bg_primary": "#0d1f14",
+        "bg_secondary": "#14291c",
+        "bg_tertiary": "#1a3525",
+        "bg_hover": "#20402d",
+        "accent": "#4ade80",
+        "accent_hover": "#6ee78a",
+        "text_primary": "#e8f5e9",
+        "text_secondary": "#86a890",
+        "text_muted": "#4a6b55",
+        "success": "#22c55e",
+        "warning": "#facc15",
+        "danger": "#ef4444",
+        "info": "#3b82f6",
+        "border": "#2d4a36",
+        "panel_bg": "#102217"
     },
-    "Toxic Waste": {
-        "bg_primary": "#0f140f",
-        "bg_secondary": "#1a241a",
-        "bg_tertiary": "#233023",
-        "accent": "#39ff14",
-        "accent_hover": "#52ff33",
-        "text_primary": "#e8ffe8",
-        "text_secondary": "#90ee90",
-        "success": "#00ff00",
-        "warning": "#adff2f",
-        "danger": "#ff4500",
-        "info": "#7fff00"
-    },
-    "Midnight Sun": {
-        "bg_primary": "#191970",
-        "bg_secondary": "#1a1a3e",
-        "bg_tertiary": "#252550",
-        "accent": "#ffd700",
-        "accent_hover": "#ffec8b",
-        "text_primary": "#f0f8ff",
-        "text_secondary": "#b0c4de",
-        "success": "#98fb98",
-        "warning": "#ffe4b5",
-        "danger": "#ff6b6b",
-        "info": "#87ceeb"
-    },
-    "Rose Quartz": {
-        "bg_primary": "#2d242e",
-        "bg_secondary": "#3d323e",
-        "bg_tertiary": "#4d424e",
-        "accent": "#f7cac9",
-        "accent_hover": "#ffe5e4",
-        "text_primary": "#fff5f5",
-        "text_secondary": "#e6c7c7",
-        "success": "#98dd98",
-        "warning": "#ffe082",
-        "danger": "#ef9a9a",
-        "info": "#80deea"
-    },
-    "Solar Flare": {
-        "bg_primary": "#1a1510",
-        "bg_secondary": "#2e2418",
-        "bg_tertiary": "#3d3020",
-        "accent": "#ff8c00",
-        "accent_hover": "#ffa500",
-        "text_primary": "#fff8dc",
-        "text_secondary": "#deb887",
-        "success": "#90ee90",
-        "warning": "#ffd700",
-        "danger": "#ff6347",
-        "info": "#87ceeb"
-    },
-    "Deep Space": {
-        "bg_primary": "#0b0c15",
-        "bg_secondary": "#151621",
-        "bg_tertiary": "#1f2030",
-        "accent": "#6c5ce7",
-        "accent_hover": "#a29bfe",
-        "text_primary": "#dfe6e9",
-        "text_secondary": "#b2bec3",
-        "success": "#00b894",
-        "warning": "#fdcb6e",
-        "danger": "#d63031",
-        "info": "#0984e3"
-    },
-    "Custom": {
-        "bg_primary": "#1a1a2e",
-        "bg_secondary": "#16213e",
-        "bg_tertiary": "#0f3460",
-        "accent": "#e94560",
-        "accent_hover": "#ff6b7a",
-        "text_primary": "#eaeaea",
-        "text_secondary": "#a0a0a0",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
+    "Crimson Night": {
+        "bg_primary": "#1a0f12",
+        "bg_secondary": "#2a181c",
+        "bg_tertiary": "#3a2026",
+        "bg_hover": "#4a2830",
+        "accent": "#f43f5e",
+        "accent_hover": "#fb7185",
+        "text_primary": "#fef2f2",
+        "text_secondary": "#fca5a5",
+        "text_muted": "#991b1b",
+        "success": "#22c55e",
+        "warning": "#fbbf24",
+        "danger": "#ef4444",
+        "info": "#60a5fa",
+        "border": "#4a2830",
+        "panel_bg": "#1f1216"
     }
 }
 
 
-def generate_stylesheet(theme_name: str = "Dark Red") -> str:
+def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     """Генерация таблицы стилей на основе выбранной темы."""
-    theme = THEMES.get(theme_name, THEMES["Dark Red"])
+    theme = THEMES.get(theme_name, THEMES["Dark Professional"])
     
     return f"""
     QMainWindow, QDialog {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
+        font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
         font-size: 13px;
-        line-height: 1.4;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
-        border-bottom: 1px solid {theme['accent']};
-        padding: 6px;
-        spacing: 8px;
+        border-bottom: 1px solid {theme['border']};
+        padding: 8px 12px;
+        spacing: 10px;
+        min-height: 48px;
     }}
     
     QToolBar QToolButton {{
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 14px;
-        border-radius: 5px;
+        padding: 10px 16px;
+        border-radius: 6px;
         font-weight: 500;
+        font-size: 13px;
     }}
     
     QToolBar QToolButton:hover {{
-        background-color: {theme['bg_tertiary']};
+        background-color: {theme['bg_hover']};
     }}
     
     QToolBar QToolButton:pressed {{
-        background-color: {theme['accent']};
+        background-color: {theme['bg_tertiary']};
     }}
     
     QPushButton#primaryBtn {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        color: {theme['text_primary']};
+        background-color: {theme['accent']};
+        color: #ffffff;
         border: none;
-        padding: 10px 24px;
-        border-radius: 6px;
-        font-weight: bold;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-weight: 600;
         font-size: 13px;
-        min-width: 120px;
+        min-width: 140px;
     }}
     
     QPushButton#primaryBtn:hover {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent_hover']}, stop:1 {theme['accent']});
+        background-color: {theme['accent_hover']};
     }}
     
     QPushButton#primaryBtn:pressed {{
-        background: {theme['bg_tertiary']};
+        background-color: {theme['bg_tertiary']};
     }}
     
     QPushButton#primaryBtn:disabled {{
-        background: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_muted']};
+    }}
+    
+    QPushButton#dangerBtn {{
+        background-color: {theme['danger']};
+        color: #ffffff;
+        border: none;
+        padding: 12px 28px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+    }}
+    
+    QPushButton#dangerBtn:hover {{
+        background-color: #dc2626;
     }}
     
     QPushButton {{
-        background-color: {theme['accent']};
+        background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        border: none;
-        padding: 8px 18px;
-        border-radius: 5px;
-        font-weight: 600;
-        min-width: 90px;
+        border: 1px solid {theme['border']};
+        padding: 10px 20px;
+        border-radius: 6px;
+        font-weight: 500;
+        min-width: 100px;
     }}
     
     QPushButton:hover {{
-        background-color: {theme['accent_hover']};
+        background-color: {theme['bg_hover']};
+        border-color: {theme['accent']};
     }}
     
     QPushButton:pressed {{
@@ -336,83 +258,88 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     }}
     
     QPushButton:disabled {{
-        background-color: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_muted']};
+        border-color: {theme['border']};
     }}
     
     QGroupBox {{
-        background-color: {theme['bg_secondary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        margin-top: 14px;
-        padding-top: 14px;
-        font-weight: bold;
+        background-color: {theme['panel_bg']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        margin-top: 16px;
+        padding-top: 16px;
+        font-weight: 600;
         color: {theme['text_primary']};
         font-size: 13px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 14px;
-        padding: 0 8px;
+        left: 16px;
+        padding: 0 10px;
         color: {theme['accent']};
-        font-size: 13px;
+        font-size: 12px;
+        font-weight: 600;
     }}
     
     QTabWidget::pane {{
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        background-color: {theme['bg_secondary']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        background-color: {theme['panel_bg']};
     }}
     
     QTabBar::tab {{
-        background-color: {theme['bg_tertiary']};
+        background-color: transparent;
         color: {theme['text_secondary']};
-        padding: 10px 20px;
-        margin-right: 3px;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
+        padding: 12px 24px;
+        margin-right: 4px;
+        border-bottom: 2px solid transparent;
         font-weight: 500;
+        font-size: 13px;
     }}
     
     QTabBar::tab:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['bg_tertiary']});
-        color: {theme['text_primary']};
-        font-weight: bold;
+        color: {theme['accent']};
+        border-bottom: 2px solid {theme['accent']};
+        font-weight: 600;
     }}
     
     QTabBar::tab:hover:!selected {{
-        background-color: {theme['bg_primary']};
+        color: {theme['text_primary']};
+        background-color: {theme['bg_hover']};
     }}
     
     QTextEdit, QPlainTextEdit {{
-        background-color: {theme['bg_primary']};
+        background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 10px;
+        border: 1px solid {theme['border']};
+        border-radius: 8px;
+        padding: 12px;
         font-family: 'Consolas', 'Courier New', monospace;
         font-size: 12px;
-        line-height: 1.3;
-        selection-background-color: {theme['accent']};
+        selection-background-color: {theme['accent']}40;
+    }}
+    
+    QTextEdit:focus, QPlainTextEdit:focus {{
+        border: 1px solid {theme['accent']};
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
         border: none;
-        border-radius: 8px;
-        height: 20px;
+        border-radius: 10px;
+        height: 24px;
         text-align: center;
         color: {theme['text_primary']};
-        font-weight: bold;
+        font-weight: 600;
         font-size: 12px;
     }}
     
     QProgressBar::chunk {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['success']}, stop:0.5 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border-radius: 8px;
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        border-radius: 10px;
     }}
     
     QSlider::groove:horizontal {{
@@ -422,25 +349,23 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     }}
     
     QSlider::handle:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        width: 18px;
-        margin: -5px 0;
-        border-radius: 9px;
+        background-color: {theme['accent']};
+        width: 20px;
+        margin: -6px 0;
+        border-radius: 10px;
     }}
     
     QSlider::handle:horizontal:hover {{
-        background: {theme['accent_hover']};
+        background-color: {theme['accent_hover']};
     }}
     
     QComboBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
-        outline: none;
-        min-height: 28px;
+        border: 1px solid {theme['border']};
+        border-radius: 6px;
+        padding: 10px 14px;
+        min-height: 36px;
     }}
     
     QComboBox:hover {{
@@ -454,32 +379,34 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QComboBox::drop-down {{
         border: none;
-        width: 26px;
+        width: 30px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
         border-left: 5px solid transparent;
         border-right: 5px solid transparent;
-        border-top: 7px solid {theme['accent']};
-        margin-right: 10px;
+        border-top: 7px solid {theme['text_secondary']};
+        margin-right: 12px;
     }}
     
     QComboBox QAbstractItemView {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        selection-background-color: {theme['accent']};
-        border-radius: 5px;
+        border: 1px solid {theme['border']};
+        selection-background-color: {theme['bg_hover']};
+        border-radius: 6px;
+        outline: none;
+        padding: 4px;
     }}
     
     QSpinBox, QDoubleSpinBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
-        min-height: 28px;
+        border: 1px solid {theme['border']};
+        border-radius: 6px;
+        padding: 10px 14px;
+        min-height: 36px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
@@ -489,14 +416,15 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QLineEdit {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 8px 12px;
-        min-height: 28px;
+        border: 1px solid {theme['border']};
+        border-radius: 6px;
+        padding: 10px 14px;
+        min-height: 36px;
+        selection-background-color: {theme['accent']}40;
     }}
     
     QLineEdit:hover {{
-        border: 1px solid {theme['accent']};
+        border: 1px solid {theme['border']};
     }}
     
     QLineEdit:focus {{
@@ -507,7 +435,7 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 10px;
+        spacing: 12px;
         font-size: 13px;
     }}
     
@@ -515,13 +443,12 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         width: 20px;
         height: 20px;
         border-radius: 5px;
-        border: 2px solid {theme['bg_tertiary']};
+        border: 2px solid {theme['border']};
         background-color: {theme['bg_secondary']};
     }}
     
     QCheckBox::indicator:checked {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        background-color: {theme['accent']};
         border: 2px solid {theme['accent']};
     }}
     
@@ -531,7 +458,7 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QRadioButton {{
         color: {theme['text_primary']};
-        spacing: 10px;
+        spacing: 12px;
         font-size: 13px;
     }}
     
@@ -539,78 +466,69 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         width: 20px;
         height: 20px;
         border-radius: 10px;
-        border: 2px solid {theme['bg_tertiary']};
+        border: 2px solid {theme['border']};
         background-color: {theme['bg_secondary']};
     }}
     
     QRadioButton::indicator:checked {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        background-color: {theme['accent']};
         border: 2px solid {theme['accent']};
     }}
     
     QTableWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        gridline-color: {theme['bg_tertiary']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        gridline-color: {theme['border']};
         alternate-background-color: {theme['bg_primary']};
     }}
     
     QTableWidget::item {{
-        padding: 10px;
+        padding: 12px;
+        border-bottom: 1px solid {theme['border']};
     }}
     
     QTableWidget::item:selected {{
-        background-color: {theme['accent']};
+        background-color: {theme['bg_hover']};
         color: {theme['text_primary']};
     }}
     
     QTableWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
+        background-color: {theme['bg_hover']};
     }}
     
     QHeaderView::section {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['bg_secondary']});
-        color: {theme['text_primary']};
-        padding: 12px;
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+        padding: 14px;
         border: none;
-        font-weight: bold;
-        border-bottom: 2px solid {theme['accent']};
+        font-weight: 600;
+        border-bottom: 2px solid {theme['border']};
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.5px;
     }}
     
     QTreeWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
     }}
     
     QTreeWidget::item {{
-        padding: 6px;
+        padding: 8px;
+        border-bottom: 1px solid {theme['border']};
     }}
     
     QTreeWidget::item:selected {{
-        background-color: {theme['accent']};
+        background-color: {theme['bg_hover']};
         color: {theme['text_primary']};
     }}
     
     QTreeWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
-    QTreeWidget::branch:has-children:!has-siblings:closed,
-    QTreeWidget::branch:closed:has-children:has-siblings {{
-        border-image: none;
-        image: none;
-    }}
-    
-    QTreeWidget::branch:open:has-children:!has-siblings,
-    QTreeWidget::branch:open:has-children:has-siblings {{
-        border-image: none;
-        image: none;
+        background-color: {theme['bg_hover']};
     }}
     
     QScrollArea {{
@@ -620,20 +538,19 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:vertical {{
         background-color: {theme['bg_primary']};
-        width: 14px;
-        border-radius: 7px;
+        width: 12px;
+        border-radius: 6px;
         margin: 2px;
     }}
     
     QScrollBar::handle:vertical {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
+        background-color: {theme['bg_tertiary']};
         min-height: 40px;
-        border-radius: 7px;
+        border-radius: 6px;
     }}
     
     QScrollBar::handle:vertical:hover {{
-        background: {theme['accent']};
+        background-color: {theme['bg_hover']};
     }}
     
     QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
@@ -642,20 +559,19 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QScrollBar:horizontal {{
         background-color: {theme['bg_primary']};
-        height: 14px;
-        border-radius: 7px;
+        height: 12px;
+        border-radius: 6px;
         margin: 2px;
     }}
     
     QScrollBar::handle:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
+        background-color: {theme['bg_tertiary']};
         min-width: 40px;
-        border-radius: 7px;
+        border-radius: 6px;
     }}
     
     QScrollBar::handle:horizontal:hover {{
-        background: {theme['accent']};
+        background-color: {theme['bg_hover']};
     }}
     
     QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
@@ -673,132 +589,136 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     }}
     
     QMessageBox QPushButton {{
-        min-width: 90px;
-        padding: 8px 16px;
+        min-width: 100px;
+        padding: 10px 20px;
     }}
     
     QMenu {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
+        border: 1px solid {theme['border']};
         border-radius: 8px;
-        padding: 6px;
+        padding: 8px;
     }}
     
     QMenu::item {{
-        padding: 9px 24px;
-        border-radius: 5px;
-        margin: 2px 4px;
+        padding: 10px 28px;
+        border-radius: 6px;
+        margin: 2px 6px;
     }}
     
     QMenu::item:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        background-color: {theme['bg_hover']};
+        color: {theme['text_primary']};
     }}
     
     QMenu::separator {{
-        height: 2px;
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['bg_tertiary']}, stop:1 transparent);
+        height: 1px;
+        background-color: {theme['border']};
         margin: 6px 12px;
     }}
     
     QStatusBar {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['bg_secondary']}, stop:1 {theme['bg_primary']});
+        background-color: {theme['bg_secondary']};
         color: {theme['text_secondary']};
-        border-top: 1px solid {theme['bg_tertiary']};
+        border-top: 1px solid {theme['border']};
         font-size: 12px;
+        padding: 6px 12px;
     }}
     
     QListWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
     }}
     
     QListWidget::item {{
-        padding: 10px;
-        border-radius: 5px;
-        margin: 2px 4px;
+        padding: 12px;
+        border-radius: 6px;
+        margin: 4px;
+        border-bottom: 1px solid {theme['border']};
     }}
     
     QListWidget::item:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
+        background-color: {theme['bg_hover']};
         color: {theme['text_primary']};
     }}
     
     QListWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
+        background-color: {theme['bg_hover']};
     }}
     
     QSplitter::handle {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        width: 4px;
+        background-color: {theme['border']};
+        width: 2px;
     }}
     
     QSplitter::handle:horizontal {{
-        width: 4px;
+        width: 2px;
     }}
     
     QSplitter::handle:vertical {{
-        height: 4px;
+        height: 2px;
     }}
     
     QToolTip {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['accent']};
+        border: 1px solid {theme['border']};
         border-radius: 6px;
-        padding: 6px 12px;
+        padding: 8px 14px;
         font-size: 12px;
     }}
     
-    QWhatsThis {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 12px;
-    }}
-    
     QLabel#titleLabel {{
-        font-size: 28px;
-        font-weight: bold;
-        color: {theme['accent']};
-        padding: 10px;
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        -qt-background-clip: text;
-        color: transparent;
+        font-size: 24px;
+        font-weight: 700;
+        color: {theme['text_primary']};
+        padding: 8px;
     }}
     
-    QFrame#line {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        max-height: 2px;
+    QLabel#subtitleLabel {{
+        font-size: 13px;
+        color: {theme['text_secondary']};
+    }}
+    
+    QFrame#separatorLine {{
+        background-color: {theme['border']};
+        max-height: 1px;
     }}
     
     QFrame#riskFrame {{
-        background-color: {theme['bg_secondary']};
+        background-color: {theme['panel_bg']};
         border: 2px solid {theme['accent']};
-        border-radius: 10px;
-        padding: 15px;
+        border-radius: 12px;
+        padding: 20px;
     }}
     
     QLabel#riskLabel {{
-        font-size: 36px;
-        font-weight: bold;
+        font-size: 42px;
+        font-weight: 700;
         color: {theme['danger']};
     }}
     
     QLabel#threatTypeLabel {{
-        font-size: 20px;
-        font-weight: bold;
+        font-size: 18px;
+        font-weight: 600;
         color: {theme['accent']};
+    }}
+    
+    QFrame#cardFrame {{
+        background-color: {theme['panel_bg']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        padding: 16px;
+    }}
+    
+    QFrame#infoPanel {{
+        background-color: {theme['bg_secondary']};
+        border: 1px solid {theme['border']};
+        border-radius: 8px;
+        padding: 14px;
     }}
     """
 
@@ -957,44 +877,20 @@ class SettingsDialog(QDialog):
         # Выбор темы
         self.theme_combo = QComboBox()
         self.theme_combo.addItems(list(THEMES.keys()))
-        self.theme_combo.setCurrentText("Dark Red")
+        self.theme_combo.setCurrentText("Dark Professional")
         theme_layout.addRow("Цветовая тема:", self.theme_combo)
 
-        # Кастомизация цветов
-        custom_group = QGroupBox("Кастомизация цветов (для Custom темы)")
-        custom_layout = QGridLayout(custom_group)
+        # Размер шрифта
+        self.font_size_spin = QSpinBox()
+        self.font_size_spin.setRange(10, 18)
+        self.font_size_spin.setValue(13)
+        self.font_size_spin.setSuffix(" px")
+        theme_layout.addRow("Размер шрифта:", self.font_size_spin)
 
-        self.color_pickers = {}
-        color_labels = [
-            ("bg_primary", "Основной фон:"),
-            ("bg_secondary", "Вторичный фон:"),
-            ("bg_tertiary", "Третичный фон:"),
-            ("accent", "Акцентный цвет:"),
-            ("accent_hover", "Акцент (наведение):"),
-            ("text_primary", "Основной текст:"),
-            ("text_secondary", "Вторичный текст:"),
-            ("success", "Успех:"),
-            ("warning", "Предупреждение:"),
-            ("danger", "Ошибка:"),
-            ("info", "Информация:"),
-        ]
-
-        for i, (key, label) in enumerate(color_labels):
-            color_label = QLabel(label)
-            color_btn = QPushButton()
-            color_btn.setFixedSize(50, 25)
-            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 1px solid gray;")
-            color_btn.clicked.connect(lambda checked, k=key, b=color_btn: self.pick_color(k, b))
-            self.color_pickers[key] = {'button': color_btn, 'color': THEMES['Custom'][key]}
-            custom_layout.addWidget(color_label, i // 2, (i % 2) * 2)
-            custom_layout.addWidget(color_btn, i // 2, (i % 2) * 2 + 1)
-
-        theme_layout.addRow(custom_group)
-
-        # Кнопка сброса темы
-        reset_theme_btn = QPushButton("Сбросить тему к значениям по умолчанию")
-        reset_theme_btn.clicked.connect(self.reset_theme)
-        theme_layout.addRow("", reset_theme_btn)
+        # Анимации интерфейса
+        self.animations_check = QCheckBox("Включить анимации интерфейса")
+        self.animations_check.setChecked(True)
+        theme_layout.addRow("", self.animations_check)
 
         tabs.addTab(theme_tab, "Тема и внешний вид")
 
@@ -1037,82 +933,6 @@ class SettingsDialog(QDialog):
         buttons.button(QDialogButtonBox.Apply).clicked.connect(self.apply_settings)
         layout.addWidget(buttons)
 
-    def pick_color(self, key, button):
-        """Открывает диалог выбора цвета."""
-        current_color = self.color_pickers[key]['color']
-        color = QColorDialog.getColor(QColor(current_color), self, f"Выберите цвет для {key}")
-        if color.isValid():
-            hex_color = color.name()
-            self.color_pickers[key]['color'] = hex_color
-            button.setStyleSheet(f"background-color: {hex_color}; border: 1px solid gray;")
-            # Обновляем тему Custom
-            THEMES['Custom'][key] = hex_color
-
-    def reset_theme(self):
-        """Сбрасывает тему Custom к значениям по умолчанию."""
-        default_colors = {
-            "bg_primary": "#1a1a2e",
-            "bg_secondary": "#16213e",
-            "bg_tertiary": "#0f3460",
-            "accent": "#e94560",
-            "accent_hover": "#ff6b7a",
-            "text_primary": "#eaeaea",
-            "text_secondary": "#a0a0a0",
-            "success": "#28a745",
-            "warning": "#ffc107",
-            "danger": "#dc3545",
-            "info": "#17a2b8"
-        }
-        for key, color in default_colors.items():
-            THEMES['Custom'][key] = color
-            self.color_pickers[key]['color'] = color
-            self.color_pickers[key]['button'].setStyleSheet(f"background-color: {color}; border: 1px solid gray;")
-
-    def apply_settings(self):
-        """Применяет настройки без закрытия диалога."""
-        # Сохраняем настройки в конфиг файл
-        config = configparser.ConfigParser()
-        config.read('config.ini')
-        
-        if 'Settings' not in config:
-            config['Settings'] = {}
-        
-        config['Settings']['theme'] = self.theme_combo.currentText()
-        config['Settings']['timeout'] = str(self.timeout_spin.value())
-        config['Settings']['output_dir'] = self.output_dir_edit.text()
-        config['Settings']['use_poly_default'] = str(self.poly_check.isChecked())
-        config['Settings']['auto_disable_network'] = str(self.network_check.isChecked())
-        config['Settings']['log_level'] = self.log_level_combo.currentText()
-        config['Settings']['max_workers'] = str(self.max_workers_spin.value())
-        config['Settings']['disable_auto_run'] = str(self.disable_auto_run_check.isChecked())
-        config['Settings']['block_dangerous_apps'] = str(self.block_dangerous_apps_check.isChecked())
-        config['Settings']['force_kill'] = str(self.force_kill_check.isChecked())
-        
-        # Сохраняем кастомные цвета
-        if 'Colors' not in config:
-            config['Colors'] = {}
-        for key, value in THEMES['Custom'].items():
-            config['Colors'][key] = value
-        
-        with open('config.ini', 'w') as f:
-            config.write(f)
-        
-        # Обновляем настройки в главном окне и применяем тему
-        if self.parent():
-            settings = self.get_settings()
-            self.parent().settings.update(settings)
-            self.parent().save_settings()
-            self.parent().apply_stylesheet()
-        
-        QMessageBox.information(self, "Настройки", "Настройки применены и сохранены!\nТема обновлена.")
-
-    def browse_output_dir(self):
-        directory = QFileDialog.getExistingDirectory(
-            self, "Выберите директорию для отчетов"
-        )
-        if directory:
-            self.output_dir_edit.setText(directory)
-
     def get_settings(self):
         return {
             'timeout': self.timeout_spin.value(),
@@ -1121,11 +941,12 @@ class SettingsDialog(QDialog):
             'auto_disable_network': self.network_check.isChecked(),
             'log_level': self.log_level_combo.currentText(),
             'theme': self.theme_combo.currentText(),
+            'font_size': self.font_size_spin.value(),
+            'enable_animations': self.animations_check.isChecked(),
             'max_workers': self.max_workers_spin.value(),
             'disable_auto_run': self.disable_auto_run_check.isChecked(),
             'block_dangerous_apps': self.block_dangerous_apps_check.isChecked(),
             'force_kill': self.force_kill_check.isChecked(),
-            'custom_colors': dict(THEMES['Custom'])
         }
 
 
@@ -1443,47 +1264,57 @@ class RedSandSecureGUI(QMainWindow):
 
     def setup_ui(self):
         """Настройка пользовательского интерфейса."""
-        self.setWindowTitle("RedSand Secure v2.0 - Анализ вредоносного ПО")
-        self.setMinimumSize(1200, 800)
-        self.resize(1400, 900)
+        self.setWindowTitle("RedSand Secure v4.0 - Анализ вредоносного ПО")
+        self.setMinimumSize(1280, 850)
+        self.resize(1450, 950)
 
         # Центральное виджет
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(15)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(24, 24, 24, 24)
 
         # Заголовок
-        title_label = QLabel("RedSand Secure v2.0")
+        header_frame = QFrame()
+        header_layout = QHBoxLayout(header_frame)
+        header_layout.setContentsMargins(0, 0, 0, 0)
+        
+        title_label = QLabel("RedSand Secure v4.0")
         title_label.setObjectName("titleLabel")
-        title_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(title_label)
+        header_layout.addWidget(title_label)
+        
+        header_layout.addStretch()
+        
+        main_layout.addWidget(header_frame)
 
         subtitle_label = QLabel("Профессиональная система анализа вредоносного ПО")
+        subtitle_label.setObjectName("subtitleLabel")
         subtitle_label.setAlignment(Qt.AlignCenter)
-        subtitle_label.setStyleSheet("color: #8a8a8a; font-size: 14px;")
         main_layout.addWidget(subtitle_label)
 
         # Разделитель
-        line = QFrame()
-        line.setObjectName("line")
-        line.setFrameShape(QFrame.HLine)
-        main_layout.addWidget(line)
+        separator = QFrame()
+        separator.setObjectName("separatorLine")
+        separator.setFrameShape(QFrame.HLine)
+        main_layout.addWidget(separator)
 
         # Основной сплиттер
         splitter = QSplitter(Qt.Horizontal)
 
         # Левая панель - Управление
         left_panel = self.create_left_panel()
+        left_panel.setMinimumWidth(320)
+        left_panel.setMaximumWidth(450)
         splitter.addWidget(left_panel)
 
         # Правая панель - Результаты и логи
         right_panel = self.create_right_panel()
         splitter.addWidget(right_panel)
 
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
+        splitter.setStretchFactor(0, 0)
+        splitter.setStretchFactor(1, 1)
+        splitter.setHandleWidth(3)
 
         main_layout.addWidget(splitter)
 
@@ -1502,19 +1333,23 @@ class RedSandSecureGUI(QMainWindow):
         """Создание левой панели управления."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
+        layout.setSpacing(18)
+        layout.setContentsMargins(16, 16, 16, 16)
 
         # Группа выбора файла
-        file_group = QGroupBox("Выбор файла для анализа")
+        file_group = QGroupBox("Файл для анализа")
         file_layout = QVBoxLayout()
+        file_layout.setSpacing(10)
 
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText("Выберите файл для анализа...")
+        self.file_path_edit.setPlaceholderText("Путь к файлу...")
         self.file_path_edit.setReadOnly(True)
+        self.file_path_edit.setMinimumHeight(40)
         file_layout.addWidget(self.file_path_edit)
 
         btn_select_file = QPushButton("Выбрать файл")
         btn_select_file.setObjectName("primaryBtn")
+        btn_select_file.setMinimumHeight(42)
         btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(btn_select_file)
 
@@ -1522,26 +1357,33 @@ class RedSandSecureGUI(QMainWindow):
         layout.addWidget(file_group)
 
         # Группа настроек анализа
-        settings_group = QGroupBox("Настройки анализа")
-        settings_layout = QGridLayout()
+        settings_group = QGroupBox("Параметры анализа")
+        settings_layout = QVBoxLayout()
+        settings_layout.setSpacing(12)
 
-        # Таймаут
-        settings_layout.addWidget(QLabel("Таймаут (сек):"), 0, 0)
+        # Таймаут с подписью
+        timeout_layout = QHBoxLayout()
+        timeout_label = QLabel("Таймаут:")
+        timeout_label.setMinimumWidth(80)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
-        settings_layout.addWidget(self.timeout_spin, 0, 1)
+        self.timeout_spin.setSuffix(" сек")
+        self.timeout_spin.setMinimumHeight(36)
+        timeout_layout.addWidget(timeout_label)
+        timeout_layout.addWidget(self.timeout_spin)
+        settings_layout.addLayout(timeout_layout)
 
         # Полиморфный анализ
         self.poly_check = QCheckBox("Полиморфный анализ")
         self.poly_check.setToolTip("Генерировать полиморфные варианты образца")
-        settings_layout.addWidget(self.poly_check, 1, 0, 1, 2)
+        settings_layout.addWidget(self.poly_check)
 
         # Отключение сети
-        self.network_check = QCheckBox("Отключать сеть")
+        self.network_check = QCheckBox("Отключать сеть при анализе")
         self.network_check.setChecked(True)
         self.network_check.setToolTip("Автоматически отключать сетевые адаптеры")
-        settings_layout.addWidget(self.network_check, 2, 0, 1, 2)
+        settings_layout.addWidget(self.network_check)
 
         settings_group.setLayout(settings_layout)
         layout.addWidget(settings_group)
@@ -1549,50 +1391,55 @@ class RedSandSecureGUI(QMainWindow):
         # Кнопка запуска анализа
         self.btn_analyze = QPushButton("ЗАПУСТИТЬ АНАЛИЗ")
         self.btn_analyze.setObjectName("primaryBtn")
-        self.btn_analyze.setMinimumHeight(60)
-        self.btn_analyze.setFont(QFont("Segoe UI", 14, QFont.Bold))
+        self.btn_analyze.setMinimumHeight(54)
+        self.btn_analyze.setFont(QFont("Segoe UI", 13, QFont.Bold))
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
 
         # Кнопка экстренной остановки
         self.btn_panic = QPushButton("ЭКСТРЕННАЯ ОСТАНОВКА")
         self.btn_panic.setObjectName("dangerBtn")
-        self.btn_panic.setMinimumHeight(50)
+        self.btn_panic.setMinimumHeight(48)
         self.btn_panic.setFont(QFont("Segoe UI", 12, QFont.Bold))
         self.btn_panic.clicked.connect(self.emergency_stop)
         self.btn_panic.setEnabled(False)
         layout.addWidget(self.btn_panic)
 
         # Прогресс бар
-        progress_group = QGroupBox("Прогресс анализа")
+        progress_group = QGroupBox("Прогресс")
         progress_layout = QVBoxLayout()
+        progress_layout.setSpacing(8)
 
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
-        self.progress_bar.setMinimumHeight(25)
+        self.progress_bar.setMinimumHeight(28)
         progress_layout.addWidget(self.progress_bar)
 
-        self.progress_label = QLabel("Ожидание запуска...")
+        self.progress_label = QLabel("Ожидание...")
         self.progress_label.setAlignment(Qt.AlignCenter)
-        self.progress_label.setStyleSheet("color: #8a8a8a;")
+        self.progress_label.setStyleSheet(f"color: {THEMES['Dark Professional']['text_secondary']}; font-size: 12px;")
         progress_layout.addWidget(self.progress_label)
 
         progress_group.setLayout(progress_layout)
         layout.addWidget(progress_group)
 
         # Быстрые действия
-        actions_group = QGroupBox("Быстрые действия")
+        actions_group = QGroupBox("Действия")
         actions_layout = QVBoxLayout()
+        actions_layout.setSpacing(8)
 
-        btn_settings = QPushButton("Настройки")
+        btn_settings = QPushButton("Настройки приложения")
+        btn_settings.setMinimumHeight(38)
         btn_settings.clicked.connect(self.open_settings)
         actions_layout.addWidget(btn_settings)
 
-        btn_reports_folder = QPushButton("Открыть папку отчетов")
+        btn_reports_folder = QPushButton("Папка отчетов")
+        btn_reports_folder.setMinimumHeight(38)
         btn_reports_folder.clicked.connect(self.open_reports_folder)
         actions_layout.addWidget(btn_reports_folder)
 
         btn_clear_logs = QPushButton("Очистить логи")
+        btn_clear_logs.setMinimumHeight(38)
         btn_clear_logs.clicked.connect(self.clear_logs)
         actions_layout.addWidget(btn_clear_logs)
 
@@ -1606,14 +1453,16 @@ class RedSandSecureGUI(QMainWindow):
         """Создание правой панели результатов."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
+        layout.setSpacing(20)
+        layout.setContentsMargins(16, 16, 16, 16)
 
         # Вкладки результатов
         self.tabs = QTabWidget()
+        self.tabs.setMinimumHeight(500)
 
         # Вкладка логов
         logs_widget = self.create_logs_tab()
-        self.tabs.addTab(logs_widget, "Логи анализа")
+        self.tabs.addTab(logs_widget, "Логи")
 
         # Вкладка результатов
         results_widget = self.create_results_tab()
@@ -1630,6 +1479,7 @@ class RedSandSecureGUI(QMainWindow):
         """Создание вкладки логов."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
@@ -1643,19 +1493,24 @@ class RedSandSecureGUI(QMainWindow):
         """Создание вкладки результатов."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         # Сводная информация
         self.results_summary = QLabel("Результаты анализа появятся здесь после завершения...")
         self.results_summary.setAlignment(Qt.AlignCenter)
-        self.results_summary.setFont(QFont("Segoe UI", 14))
-        self.results_summary.setStyleSheet("color: #8a8a8a; padding: 50px;")
+        self.results_summary.setFont(QFont("Segoe UI", 13))
+        self.results_summary.setStyleSheet(f"color: {THEMES['Dark Professional']['text_secondary']}; padding: 50px;")
         layout.addWidget(self.results_summary)
 
         # Детальная таблица (скрыта по умолчанию)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
         self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
+        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.results_table.verticalHeader().setVisible(False)
+        self.results_table.setAlternatingRowColors(True)
+        self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.results_table.setVisible(False)
         layout.addWidget(self.results_table)
 
@@ -1665,6 +1520,7 @@ class RedSandSecureGUI(QMainWindow):
         """Создание быстрой вкладки IOC."""
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setContentsMargins(0, 0, 0, 0)
 
         self.ioc_text = QTextEdit()
         self.ioc_text.setReadOnly(True)
@@ -1672,7 +1528,8 @@ class RedSandSecureGUI(QMainWindow):
         self.ioc_text.setPlaceholderText("Indicators of Compromise появятся здесь после анализа...")
         layout.addWidget(self.ioc_text)
 
-        btn_copy_ioc = QPushButton("📋 Копировать IOC")
+        btn_copy_ioc = QPushButton("Копировать IOC")
+        btn_copy_ioc.setMinimumHeight(40)
         btn_copy_ioc.clicked.connect(self.copy_ioc_to_clipboard)
         layout.addWidget(btn_copy_ioc)
 
@@ -1692,6 +1549,13 @@ class RedSandSecureGUI(QMainWindow):
 
         file_menu.addSeparator()
 
+        recent_files_menu = file_menu.addMenu("Недавние файлы")
+        for i in range(5):
+            action = QAction(f"Файл {i+1}", self)
+            recent_files_menu.addAction(action)
+
+        file_menu.addSeparator()
+
         exit_action = QAction("Выход", self)
         exit_action.setShortcut("Ctrl+Q")
         exit_action.triggered.connect(self.close)
@@ -1705,10 +1569,20 @@ class RedSandSecureGUI(QMainWindow):
         start_action.triggered.connect(self.start_analysis)
         analysis_menu.addAction(start_action)
 
-        stop_action = QAction("Остановить", self)
+        stop_action = QAction("Остановить анализ", self)
         stop_action.setShortcut("F6")
         stop_action.triggered.connect(self.emergency_stop)
         analysis_menu.addAction(stop_action)
+
+        analysis_menu.addSeparator()
+
+        quick_scan_action = QAction("Быстрый скан", self)
+        quick_scan_action.setShortcut("Ctrl+F5")
+        analysis_menu.addAction(quick_scan_action)
+
+        deep_scan_action = QAction("Глубокий анализ", self)
+        deep_scan_action.setShortcut("Ctrl+Shift+F5")
+        analysis_menu.addAction(deep_scan_action)
 
         # Отчеты
         reports_menu = menubar.addMenu("Отчеты")
@@ -1717,6 +1591,14 @@ class RedSandSecureGUI(QMainWindow):
         view_action.triggered.connect(self.view_last_report)
         reports_menu.addAction(view_action)
 
+        export_json_action = QAction("Экспорт в JSON", self)
+        reports_menu.addAction(export_json_action)
+
+        export_html_action = QAction("Экспорт в HTML", self)
+        reports_menu.addAction(export_html_action)
+
+        reports_menu.addSeparator()
+
         folder_action = QAction("Открыть папку отчетов", self)
         folder_action.triggered.connect(self.open_reports_folder)
         reports_menu.addAction(folder_action)
@@ -1724,13 +1606,31 @@ class RedSandSecureGUI(QMainWindow):
         # Настройки
         settings_menu = menubar.addMenu("Настройки")
 
-        settings_action = QAction("Параметры", self)
+        settings_action = QAction("Параметры приложения", self)
         settings_action.setShortcut("Ctrl+,")
         settings_action.triggered.connect(self.open_settings)
         settings_menu.addAction(settings_action)
 
+        theme_menu = settings_menu.addMenu("Тема")
+        for theme_name in list(THEMES.keys()):
+            theme_action = QAction(theme_name, self)
+            theme_menu.addAction(theme_action)
+
+        settings_menu.addSeparator()
+
+        reset_action = QAction("Сбросить настройки", self)
+        settings_menu.addAction(reset_action)
+
         # Справка
         help_menu = menubar.addMenu("Справка")
+
+        docs_action = QAction("Документация", self)
+        help_menu.addAction(docs_action)
+
+        shortcuts_action = QAction("Горячие клавиши", self)
+        help_menu.addAction(shortcuts_action)
+
+        help_menu.addSeparator()
 
         about_action = QAction("О программе", self)
         about_action.triggered.connect(self.show_about)
@@ -1744,19 +1644,23 @@ class RedSandSecureGUI(QMainWindow):
         """Создание панели инструментов."""
         toolbar = QToolBar("Главная панель")
         toolbar.setMovable(False)
+        toolbar.setIconSize(QSize(20, 20))
         self.addToolBar(toolbar)
 
         btn_open = QAction("Открыть", self)
+        btn_open.setShortcut("Ctrl+O")
         btn_open.triggered.connect(self.select_file)
         toolbar.addAction(btn_open)
 
         toolbar.addSeparator()
 
         btn_analyze = QAction("Анализ", self)
+        btn_analyze.setShortcut("F5")
         btn_analyze.triggered.connect(self.start_analysis)
         toolbar.addAction(btn_analyze)
 
         btn_stop = QAction("Стоп", self)
+        btn_stop.setShortcut("F6")
         btn_stop.triggered.connect(self.emergency_stop)
         toolbar.addAction(btn_stop)
 
