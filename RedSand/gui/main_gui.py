@@ -171,22 +171,23 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
         font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
-        font-size: 13px;
+        font-size: 14px;
+        line-height: 1.5;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
         border-bottom: 1px solid {theme['border']};
-        padding: 8px 12px;
-        spacing: 10px;
-        min-height: 48px;
+        padding: 6px 10px;
+        spacing: 8px;
+        min-height: 52px;
     }}
     
     QToolBar QToolButton {{
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 10px 16px;
+        padding: 10px 18px;
         border-radius: 6px;
         font-weight: 500;
         font-size: 13px;
@@ -204,11 +205,11 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['accent']};
         color: #ffffff;
         border: none;
-        padding: 12px 28px;
+        padding: 14px 32px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 13px;
-        min-width: 140px;
+        font-size: 14px;
+        min-width: 160px;
     }}
     
     QPushButton#primaryBtn:hover {{
@@ -228,10 +229,10 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['danger']};
         color: #ffffff;
         border: none;
-        padding: 12px 28px;
+        padding: 14px 32px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QPushButton#dangerBtn:hover {{
@@ -242,10 +243,10 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
-        padding: 10px 20px;
+        padding: 12px 24px;
         border-radius: 6px;
         font-weight: 500;
-        min-width: 100px;
+        min-width: 120px;
     }}
     
     QPushButton:hover {{
@@ -267,19 +268,19 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['panel_bg']};
         border: 1px solid {theme['border']};
         border-radius: 10px;
-        margin-top: 16px;
-        padding-top: 16px;
+        margin-top: 20px;
+        padding-top: 20px;
         font-weight: 600;
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
         left: 16px;
-        padding: 0 10px;
+        padding: 0 12px;
         color: {theme['accent']};
-        font-size: 12px;
+        font-size: 13px;
         font-weight: 600;
     }}
     
@@ -292,16 +293,16 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     QTabBar::tab {{
         background-color: transparent;
         color: {theme['text_secondary']};
-        padding: 12px 24px;
+        padding: 14px 28px;
         margin-right: 4px;
-        border-bottom: 2px solid transparent;
+        border-bottom: 3px solid transparent;
         font-weight: 500;
         font-size: 13px;
     }}
     
     QTabBar::tab:selected {{
         color: {theme['accent']};
-        border-bottom: 2px solid {theme['accent']};
+        border-bottom: 3px solid {theme['accent']};
         font-weight: 600;
     }}
     
@@ -315,9 +316,9 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
         border-radius: 8px;
-        padding: 12px;
+        padding: 14px;
         font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 12px;
+        font-size: 13px;
         selection-background-color: {theme['accent']}40;
     }}
     
@@ -328,31 +329,31 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
         border: none;
-        border-radius: 10px;
-        height: 24px;
+        border-radius: 12px;
+        height: 28px;
         text-align: center;
         color: {theme['text_primary']};
         font-weight: 600;
-        font-size: 12px;
+        font-size: 13px;
     }}
     
     QProgressBar::chunk {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
             stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border-radius: 10px;
+        border-radius: 12px;
     }}
     
     QSlider::groove:horizontal {{
         background-color: {theme['bg_tertiary']};
-        height: 8px;
-        border-radius: 4px;
+        height: 10px;
+        border-radius: 5px;
     }}
     
     QSlider::handle:horizontal {{
         background-color: {theme['accent']};
-        width: 20px;
-        margin: -6px 0;
-        border-radius: 10px;
+        width: 24px;
+        margin: -7px 0;
+        border-radius: 12px;
     }}
     
     QSlider::handle:horizontal:hover {{
@@ -364,8 +365,8 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
         border-radius: 6px;
-        padding: 10px 14px;
-        min-height: 36px;
+        padding: 12px 16px;
+        min-height: 42px;
     }}
     
     QComboBox:hover {{
@@ -379,15 +380,15 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QComboBox::drop-down {{
         border: none;
-        width: 30px;
+        width: 36px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 7px solid {theme['text_secondary']};
-        margin-right: 12px;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid {theme['text_secondary']};
+        margin-right: 14px;
     }}
     
     QComboBox QAbstractItemView {{
@@ -397,7 +398,7 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         selection-background-color: {theme['bg_hover']};
         border-radius: 6px;
         outline: none;
-        padding: 4px;
+        padding: 6px;
     }}
     
     QSpinBox, QDoubleSpinBox {{
@@ -405,8 +406,8 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
         border-radius: 6px;
-        padding: 10px 14px;
-        min-height: 36px;
+        padding: 12px 16px;
+        min-height: 42px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
@@ -418,8 +419,8 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
         border-radius: 6px;
-        padding: 10px 14px;
-        min-height: 36px;
+        padding: 12px 16px;
+        min-height: 42px;
         selection-background-color: {theme['accent']}40;
     }}
     
@@ -435,14 +436,14 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 12px;
-        font-size: 13px;
+        spacing: 14px;
+        font-size: 14px;
     }}
     
     QCheckBox::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 5px;
+        width: 22px;
+        height: 22px;
+        border-radius: 6px;
         border: 2px solid {theme['border']};
         background-color: {theme['bg_secondary']};
     }}
@@ -458,14 +459,14 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QRadioButton {{
         color: {theme['text_primary']};
-        spacing: 12px;
-        font-size: 13px;
+        spacing: 14px;
+        font-size: 14px;
     }}
     
     QRadioButton::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 10px;
+        width: 22px;
+        height: 22px;
+        border-radius: 11px;
         border: 2px solid {theme['border']};
         background-color: {theme['bg_secondary']};
     }}
@@ -485,7 +486,7 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     }}
     
     QTableWidget::item {{
-        padding: 12px;
+        padding: 14px;
         border-bottom: 1px solid {theme['border']};
     }}
     
@@ -501,12 +502,12 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     QHeaderView::section {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_secondary']};
-        padding: 14px;
+        padding: 16px;
         border: none;
         font-weight: 600;
         border-bottom: 2px solid {theme['border']};
         text-transform: uppercase;
-        font-size: 11px;
+        font-size: 12px;
         letter-spacing: 0.5px;
     }}
     
@@ -518,7 +519,7 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     }}
     
     QTreeWidget::item {{
-        padding: 8px;
+        padding: 10px;
         border-bottom: 1px solid {theme['border']};
     }}
     
@@ -538,15 +539,15 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QScrollBar:vertical {{
         background-color: {theme['bg_primary']};
-        width: 12px;
-        border-radius: 6px;
+        width: 14px;
+        border-radius: 7px;
         margin: 2px;
     }}
     
     QScrollBar::handle:vertical {{
         background-color: {theme['bg_tertiary']};
-        min-height: 40px;
-        border-radius: 6px;
+        min-height: 50px;
+        border-radius: 7px;
     }}
     
     QScrollBar::handle:vertical:hover {{
@@ -559,15 +560,15 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QScrollBar:horizontal {{
         background-color: {theme['bg_primary']};
-        height: 12px;
-        border-radius: 6px;
+        height: 14px;
+        border-radius: 7px;
         margin: 2px;
     }}
     
     QScrollBar::handle:horizontal {{
         background-color: {theme['bg_tertiary']};
-        min-width: 40px;
-        border-radius: 6px;
+        min-width: 50px;
+        border-radius: 7px;
     }}
     
     QScrollBar::handle:horizontal:hover {{
@@ -585,12 +586,12 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QMessageBox QLabel {{
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QMessageBox QPushButton {{
-        min-width: 100px;
-        padding: 10px 20px;
+        min-width: 110px;
+        padding: 12px 24px;
     }}
     
     QMenu {{
@@ -602,9 +603,9 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     }}
     
     QMenu::item {{
-        padding: 10px 28px;
+        padding: 12px 32px;
         border-radius: 6px;
-        margin: 2px 6px;
+        margin: 2px 8px;
     }}
     
     QMenu::item:selected {{
@@ -615,15 +616,15 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     QMenu::separator {{
         height: 1px;
         background-color: {theme['border']};
-        margin: 6px 12px;
+        margin: 8px 12px;
     }}
     
     QStatusBar {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_secondary']};
         border-top: 1px solid {theme['border']};
-        font-size: 12px;
-        padding: 6px 12px;
+        font-size: 13px;
+        padding: 8px 14px;
     }}
     
     QListWidget {{
@@ -634,7 +635,7 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     }}
     
     QListWidget::item {{
-        padding: 12px;
+        padding: 14px;
         border-radius: 6px;
         margin: 4px;
         border-bottom: 1px solid {theme['border']};
@@ -651,15 +652,15 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     
     QSplitter::handle {{
         background-color: {theme['border']};
-        width: 2px;
+        width: 3px;
     }}
     
     QSplitter::handle:horizontal {{
-        width: 2px;
+        width: 3px;
     }}
     
     QSplitter::handle:vertical {{
-        height: 2px;
+        height: 3px;
     }}
     
     QToolTip {{
@@ -667,19 +668,19 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         color: {theme['text_primary']};
         border: 1px solid {theme['border']};
         border-radius: 6px;
-        padding: 8px 14px;
-        font-size: 12px;
+        padding: 10px 16px;
+        font-size: 13px;
     }}
     
     QLabel#titleLabel {{
-        font-size: 24px;
+        font-size: 26px;
         font-weight: 700;
         color: {theme['text_primary']};
-        padding: 8px;
+        padding: 10px;
     }}
     
     QLabel#subtitleLabel {{
-        font-size: 13px;
+        font-size: 14px;
         color: {theme['text_secondary']};
     }}
     
@@ -696,13 +697,13 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
     }}
     
     QLabel#riskLabel {{
-        font-size: 42px;
+        font-size: 48px;
         font-weight: 700;
         color: {theme['danger']};
     }}
     
     QLabel#threatTypeLabel {{
-        font-size: 18px;
+        font-size: 20px;
         font-weight: 600;
         color: {theme['accent']};
     }}
@@ -711,14 +712,67 @@ def generate_stylesheet(theme_name: str = "Dark Professional") -> str:
         background-color: {theme['panel_bg']};
         border: 1px solid {theme['border']};
         border-radius: 10px;
-        padding: 16px;
+        padding: 18px;
     }}
     
     QFrame#infoPanel {{
         background-color: {theme['bg_secondary']};
         border: 1px solid {theme['border']};
         border-radius: 8px;
-        padding: 14px;
+        padding: 16px;
+    }}
+    
+    QFrame#settingsPanel {{
+        background-color: {theme['panel_bg']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        padding: 20px;
+    }}
+    
+    QFrame#actionPanel {{
+        background-color: {theme['bg_secondary']};
+        border: 1px solid {theme['border']};
+        border-radius: 10px;
+        padding: 16px;
+    }}
+    
+    QMenuBar {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border-bottom: 1px solid {theme['border']};
+        padding: 4px;
+    }}
+    
+    QMenuBar::item {{
+        padding: 8px 16px;
+        border-radius: 6px;
+        margin: 2px;
+    }}
+    
+    QMenuBar::item:selected {{
+        background-color: {theme['bg_hover']};
+    }}
+    
+    QMenuBar::item:pressed {{
+        background-color: {theme['bg_tertiary']};
+    }}
+    
+    QDockWidget {{
+        titlebar-close-icon: none;
+        titlebar-normal-icon: none;
+    }}
+    
+    QDockWidget::title {{
+        background-color: {theme['bg_tertiary']};
+        padding: 10px;
+        text-align: center;
+        font-weight: 600;
+    }}
+    
+    QDockWidget::close-button, QDockWidget::float-button {{
+        border: none;
+        padding: 4px;
+        margin: 4px;
     }}
     """
 
@@ -822,116 +876,319 @@ class SettingsDialog(QDialog):
 
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Настройки")
-        self.setMinimumWidth(600)
+        self.setWindowTitle("Настройки приложения")
+        self.setMinimumSize(750, 650)
         self.setup_ui()
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(24, 24, 24, 24)
+
+        # Заголовок
+        title_label = QLabel("Настройки приложения")
+        title_label.setObjectName("titleLabel")
+        layout.addWidget(title_label)
 
         # Создаем вкладки для настроек
         tabs = QTabWidget()
         
         # Вкладка основных настроек
         basic_tab = QWidget()
-        basic_layout = QFormLayout(basic_tab)
+        basic_layout = QVBoxLayout(basic_tab)
+        basic_layout.setSpacing(16)
+        basic_layout.setContentsMargins(16, 16, 16, 16)
+
+        # Группа: Параметры анализа
+        analysis_group = QGroupBox("Параметры анализа")
+        analysis_form = QFormLayout()
+        analysis_form.setSpacing(14)
 
         # Таймаут анализа
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setSuffix(" сек")
-        basic_layout.addRow("Таймаут анализа:", self.timeout_spin)
-
-        # Директория отчетов
-        self.output_dir_edit = QLineEdit("reports")
-        btn_browse = QPushButton("Обзор...")
-        btn_browse.clicked.connect(self.browse_output_dir)
-
-        output_layout = QHBoxLayout()
-        output_layout.addWidget(self.output_dir_edit)
-        output_layout.addWidget(btn_browse)
-        basic_layout.addRow("Директория отчетов:", output_layout)
-
-        # Поли морфный анализ по умолчанию
-        self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
-        basic_layout.addRow("", self.poly_check)
-
-        # Автозакрытие сети
-        self.network_check = QCheckBox("Автоматически отключать сеть при анализе")
-        self.network_check.setChecked(True)
-        basic_layout.addRow("", self.network_check)
-
-        # Уровень логирования
-        self.log_level_combo = QComboBox()
-        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
-        self.log_level_combo.setCurrentText("INFO")
-        basic_layout.addRow("Уровень логирования:", self.log_level_combo)
-
-        tabs.addTab(basic_tab, "Основные")
-
-        # Вкладка темы и внешнего вида
-        theme_tab = QWidget()
-        theme_layout = QFormLayout(theme_tab)
-
-        # Выбор темы
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems(list(THEMES.keys()))
-        self.theme_combo.setCurrentText("Dark Professional")
-        theme_layout.addRow("Цветовая тема:", self.theme_combo)
-
-        # Размер шрифта
-        self.font_size_spin = QSpinBox()
-        self.font_size_spin.setRange(10, 18)
-        self.font_size_spin.setValue(13)
-        self.font_size_spin.setSuffix(" px")
-        theme_layout.addRow("Размер шрифта:", self.font_size_spin)
-
-        # Анимации интерфейса
-        self.animations_check = QCheckBox("Включить анимации интерфейса")
-        self.animations_check.setChecked(True)
-        theme_layout.addRow("", self.animations_check)
-
-        tabs.addTab(theme_tab, "Тема и внешний вид")
-
-        # Вкладка безопасности
-        security_tab = QWidget()
-        security_layout = QFormLayout(security_tab)
-
-        # Отключение автозапуска процессов
-        self.disable_auto_run_check = QCheckBox("Отключить автозапуск процессов после анализа")
-        self.disable_auto_run_check.setChecked(True)
-        security_layout.addRow("", self.disable_auto_run_check)
-
-        # Блокировка опасных приложений
-        self.block_dangerous_apps_check = QCheckBox("Блокировать запуск опасных приложений (paint, notepad и т.д.)")
-        self.block_dangerous_apps_check.setChecked(True)
-        security_layout.addRow("", self.block_dangerous_apps_check)
-
-        # Принудительное завершение процессов
-        self.force_kill_check = QCheckBox("Принудительно завершать все процессы после анализа")
-        self.force_kill_check.setChecked(False)
-        security_layout.addRow("", self.force_kill_check)
+        self.timeout_spin.setMinimumHeight(42)
+        analysis_form.addRow("Таймаут анализа:", self.timeout_spin)
 
         # Максимальное количество потоков
         self.max_workers_spin = QSpinBox()
         self.max_workers_spin.setRange(1, 32)
         self.max_workers_spin.setValue(16)
         self.max_workers_spin.setSuffix(" потоков")
-        security_layout.addRow("Максимум потоков:", self.max_workers_spin)
+        self.max_workers_spin.setMinimumHeight(42)
+        analysis_form.addRow("Максимум потоков:", self.max_workers_spin)
 
+        # Уровень логирования
+        self.log_level_combo = QComboBox()
+        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        self.log_level_combo.setCurrentText("INFO")
+        self.log_level_combo.setMinimumHeight(42)
+        analysis_form.addRow("Уровень логирования:", self.log_level_combo)
+
+        analysis_group.setLayout(analysis_form)
+        basic_layout.addWidget(analysis_group)
+
+        # Группа: Пути и файлы
+        paths_group = QGroupBox("Пути и файлы")
+        paths_layout = QVBoxLayout()
+        paths_layout.setSpacing(12)
+
+        # Директория отчетов
+        dir_layout = QHBoxLayout()
+        dir_label = QLabel("Директория отчетов:")
+        dir_label.setMinimumWidth(150)
+        self.output_dir_edit = QLineEdit("reports")
+        self.output_dir_edit.setMinimumHeight(42)
+        btn_browse = QPushButton("Обзор...")
+        btn_browse.setMinimumHeight(42)
+        btn_browse.clicked.connect(self.browse_output_dir)
+        dir_layout.addWidget(dir_label)
+        dir_layout.addWidget(self.output_dir_edit)
+        dir_layout.addWidget(btn_browse)
+        paths_layout.addLayout(dir_layout)
+
+        # Поли морфный анализ по умолчанию
+        self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
+        self.poly_check.setMinimumHeight(36)
+        paths_layout.addWidget(self.poly_check)
+
+        paths_group.setLayout(paths_layout)
+        basic_layout.addWidget(paths_group)
+
+        # Группа: Сетевые настройки
+        network_group = QGroupBox("Сетевые настройки")
+        network_layout = QVBoxLayout()
+        network_layout.setSpacing(12)
+
+        # Автозакрытие сети
+        self.network_check = QCheckBox("Автоматически отключать сеть при анализе")
+        self.network_check.setChecked(True)
+        self.network_check.setMinimumHeight(36)
+        network_layout.addWidget(self.network_check)
+
+        # Блокировка сетевых вызовов
+        self.block_network_check = QCheckBox("Блокировать все сетевые вызовы образцов")
+        self.block_network_check.setChecked(True)
+        self.block_network_check.setMinimumHeight(36)
+        network_layout.addWidget(self.block_network_check)
+
+        network_group.setLayout(network_layout)
+        basic_layout.addWidget(network_group)
+
+        basic_layout.addStretch()
+        tabs.addTab(basic_tab, "Основные")
+
+        # Вкладка темы и внешнего вида
+        theme_tab = QWidget()
+        theme_layout = QVBoxLayout(theme_tab)
+        theme_layout.setSpacing(16)
+        theme_layout.setContentsMargins(16, 16, 16, 16)
+
+        # Группа: Цветовая схема
+        color_group = QGroupBox("Цветовая схема")
+        color_form = QFormLayout()
+        color_form.setSpacing(14)
+
+        # Выбор темы
+        self.theme_combo = QComboBox()
+        self.theme_combo.addItems(list(THEMES.keys()))
+        self.theme_combo.setCurrentText("Dark Professional")
+        self.theme_combo.setMinimumHeight(42)
+        color_form.addRow("Цветовая тема:", self.theme_combo)
+
+        # Размер шрифта
+        self.font_size_spin = QSpinBox()
+        self.font_size_spin.setRange(10, 20)
+        self.font_size_spin.setValue(14)
+        self.font_size_spin.setSuffix(" px")
+        self.font_size_spin.setMinimumHeight(42)
+        color_form.addRow("Размер шрифта:", self.font_size_spin)
+
+        color_group.setLayout(color_form)
+        theme_layout.addWidget(color_group)
+
+        # Группа: Интерфейс
+        ui_group = QGroupBox("Интерфейс")
+        ui_layout = QVBoxLayout()
+        ui_layout.setSpacing(12)
+
+        # Анимации интерфейса
+        self.animations_check = QCheckBox("Включить анимации интерфейса")
+        self.animations_check.setChecked(True)
+        self.animations_check.setMinimumHeight(36)
+        ui_layout.addWidget(self.animations_check)
+
+        # Плавная прокрутка
+        self.smooth_scroll_check = QCheckBox("Плавная прокрутка")
+        self.smooth_scroll_check.setChecked(True)
+        self.smooth_scroll_check.setMinimumHeight(36)
+        ui_layout.addWidget(self.smooth_scroll_check)
+
+        # Показывать подсказки
+        self.tooltips_check = QCheckBox("Показывать всплывающие подсказки")
+        self.tooltips_check.setChecked(True)
+        self.tooltips_check.setMinimumHeight(36)
+        ui_layout.addWidget(self.tooltips_check)
+
+        ui_group.setLayout(ui_layout)
+        theme_layout.addWidget(ui_group)
+
+        theme_layout.addStretch()
+        tabs.addTab(theme_tab, "Тема и внешний вид")
+
+        # Вкладка безопасности
+        security_tab = QWidget()
+        security_layout = QVBoxLayout(security_tab)
+        security_layout.setSpacing(16)
+        security_layout.setContentsMargins(16, 16, 16, 16)
+
+        # Группа: Изоляция
+        isolation_group = QGroupBox("Изоляция иsandbox")
+        isolation_form = QFormLayout()
+        isolation_form.setSpacing(14)
+
+        # Время жизни sandbox
+        self.sandbox_lifetime_spin = QSpinBox()
+        self.sandbox_lifetime_spin.setRange(1, 60)
+        self.sandbox_lifetime_spin.setValue(10)
+        self.sandbox_lifetime_spin.setSuffix(" мин")
+        self.sandbox_lifetime_spin.setMinimumHeight(42)
+        isolation_form.addRow("Время жизни sandbox:", self.sandbox_lifetime_spin)
+
+        # Интервал снимков
+        self.snapshot_interval_spin = QSpinBox()
+        self.snapshot_interval_spin.setRange(1, 300)
+        self.snapshot_interval_spin.setValue(30)
+        self.snapshot_interval_spin.setSuffix(" сек")
+        self.snapshot_interval_spin.setMinimumHeight(42)
+        isolation_form.addRow("Интервал снимков:", self.snapshot_interval_spin)
+
+        isolation_group.setLayout(isolation_form)
+        security_layout.addWidget(isolation_group)
+
+        # Группа: Защита
+        protection_group = QGroupBox("Защита системы")
+        protection_layout = QVBoxLayout()
+        protection_layout.setSpacing(12)
+
+        # Отключение автозапуска процессов
+        self.disable_auto_run_check = QCheckBox("Отключить автозапуск процессов после анализа")
+        self.disable_auto_run_check.setChecked(True)
+        self.disable_auto_run_check.setMinimumHeight(36)
+        protection_layout.addWidget(self.disable_auto_run_check)
+
+        # Блокировка опасных приложений
+        self.block_dangerous_apps_check = QCheckBox("Блокировать запуск опасных приложений (paint, notepad и т.д.)")
+        self.block_dangerous_apps_check.setChecked(True)
+        self.block_dangerous_apps_check.setMinimumHeight(36)
+        protection_layout.addWidget(self.block_dangerous_apps_check)
+
+        # Принудительное завершение процессов
+        self.force_kill_check = QCheckBox("Принудительно завершать все процессы после анализа")
+        self.force_kill_check.setChecked(False)
+        self.force_kill_check.setMinimumHeight(36)
+        protection_layout.addWidget(self.force_kill_check)
+
+        # Очистка временных файлов
+        self.cleanup_temp_check = QCheckBox("Очищать временные файлы после анализа")
+        self.cleanup_temp_check.setChecked(True)
+        self.cleanup_temp_check.setMinimumHeight(36)
+        protection_layout.addWidget(self.cleanup_temp_check)
+
+        protection_group.setLayout(protection_layout)
+        security_layout.addWidget(protection_group)
+
+        security_layout.addStretch()
         tabs.addTab(security_tab, "Безопасность")
+
+        # Вкладка дополнительных настроек
+        advanced_tab = QWidget()
+        advanced_layout = QVBoxLayout(advanced_tab)
+        advanced_layout.setSpacing(16)
+        advanced_layout.setContentsMargins(16, 16, 16, 16)
+
+        # Группа: Производительность
+        perf_group = QGroupBox("Производительность")
+        perf_form = QFormLayout()
+        perf_form.setSpacing(14)
+
+        # Размер буфера логов
+        self.log_buffer_spin = QSpinBox()
+        self.log_buffer_spin.setRange(100, 10000)
+        self.log_buffer_spin.setValue(1000)
+        self.log_buffer_spin.setSuffix(" строк")
+        self.log_buffer_spin.setMinimumHeight(42)
+        perf_form.addRow("Размер буфера логов:", self.log_buffer_spin)
+
+        # Интервал обновления UI
+        self.ui_update_spin = QSpinBox()
+        self.ui_update_spin.setRange(50, 1000)
+        self.ui_update_spin.setValue(100)
+        self.ui_update_spin.setSuffix(" мс")
+        self.ui_update_spin.setMinimumHeight(42)
+        perf_form.addRow("Интервал обновления UI:", self.ui_update_spin)
+
+        perf_group.setLayout(perf_form)
+        advanced_layout.addWidget(perf_group)
+
+        # Группа: Экспорт
+        export_group = QGroupBox("Экспорт данных")
+        export_layout = QVBoxLayout()
+        export_layout.setSpacing(12)
+
+        # Автоэкспорт в JSON
+        self.auto_export_json_check = QCheckBox("Автоматически экспортировать отчеты в JSON")
+        self.auto_export_json_check.setChecked(False)
+        self.auto_export_json_check.setMinimumHeight(36)
+        export_layout.addWidget(self.auto_export_json_check)
+
+        # Автоэкспорт в HTML
+        self.auto_export_html_check = QCheckBox("Автоматически экспортировать отчеты в HTML")
+        self.auto_export_html_check.setChecked(False)
+        self.auto_export_html_check.setMinimumHeight(36)
+        export_layout.addWidget(self.auto_export_html_check)
+
+        # Сжимать архивы
+        self.compress_archives_check = QCheckBox("Сжимать отчеты в ZIP-архивы")
+        self.compress_archives_check.setChecked(True)
+        self.compress_archives_check.setMinimumHeight(36)
+        export_layout.addWidget(self.compress_archives_check)
+
+        export_group.setLayout(export_layout)
+        advanced_layout.addWidget(export_group)
+
+        advanced_layout.addStretch()
+        tabs.addTab(advanced_tab, "Дополнительно")
 
         layout.addWidget(tabs)
 
         # Кнопки
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply
-        )
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        buttons.button(QDialogButtonBox.Apply).clicked.connect(self.apply_settings)
-        layout.addWidget(buttons)
+        buttons_frame = QFrame()
+        buttons_frame.setObjectName("actionPanel")
+        buttons_layout = QHBoxLayout(buttons_frame)
+        buttons_layout.setContentsMargins(16, 16, 16, 16)
+
+        self.btn_apply = QPushButton("Применить")
+        self.btn_apply.setMinimumHeight(44)
+        self.btn_apply.clicked.connect(self.apply_settings)
+
+        self.btn_ok = QPushButton("OK")
+        self.btn_ok.setObjectName("primaryBtn")
+        self.btn_ok.setMinimumHeight(44)
+        self.btn_ok.clicked.connect(self.accept)
+
+        self.btn_cancel = QPushButton("Отмена")
+        self.btn_cancel.setMinimumHeight(44)
+        self.btn_cancel.clicked.connect(self.reject)
+
+        buttons_layout.addStretch()
+        buttons_layout.addWidget(self.btn_apply)
+        buttons_layout.addWidget(self.btn_ok)
+        buttons_layout.addWidget(self.btn_cancel)
+
+        layout.addWidget(buttons_frame)
 
     def get_settings(self):
         return {
@@ -939,14 +1196,25 @@ class SettingsDialog(QDialog):
             'output_dir': self.output_dir_edit.text(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
+            'block_network': self.block_network_check.isChecked(),
             'log_level': self.log_level_combo.currentText(),
             'theme': self.theme_combo.currentText(),
             'font_size': self.font_size_spin.value(),
             'enable_animations': self.animations_check.isChecked(),
+            'smooth_scroll': self.smooth_scroll_check.isChecked(),
+            'show_tooltips': self.tooltips_check.isChecked(),
             'max_workers': self.max_workers_spin.value(),
+            'sandbox_lifetime': self.sandbox_lifetime_spin.value(),
+            'snapshot_interval': self.snapshot_interval_spin.value(),
             'disable_auto_run': self.disable_auto_run_check.isChecked(),
             'block_dangerous_apps': self.block_dangerous_apps_check.isChecked(),
             'force_kill': self.force_kill_check.isChecked(),
+            'cleanup_temp': self.cleanup_temp_check.isChecked(),
+            'log_buffer_size': self.log_buffer_spin.value(),
+            'ui_update_interval': self.ui_update_spin.value(),
+            'auto_export_json': self.auto_export_json_check.isChecked(),
+            'auto_export_html': self.auto_export_html_check.isChecked(),
+            'compress_archives': self.compress_archives_check.isChecked(),
         }
 
 
