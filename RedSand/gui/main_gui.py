@@ -908,23 +908,38 @@ class SettingsDialog(QDialog):
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
+        layout.setSpacing(16)
+        layout.setContentsMargins(20, 20, 20, 20)
+
+        # Заголовок диалога
+        title_label = QLabel("Настройки приложения")
+        title_label.setObjectName("titleLabel")
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
 
         # Создаем вкладки для настроек
         tabs = QTabWidget()
         
-        # Вкладка основных настроек
+        # ===== Вкладка основных настроек =====
         basic_tab = QWidget()
         basic_layout = QFormLayout(basic_tab)
+        basic_layout.setSpacing(14)
+        basic_layout.setFieldGrowthPolicy(QFormLayout.AllNonFixedFieldsGrow)
 
         # Таймаут анализа
+        timeout_layout = QHBoxLayout()
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
-        self.timeout_spin.setSuffix(" сек")
-        basic_layout.addRow("Таймаут анализа:", self.timeout_spin)
+        self.timeout_spin.setMinimumWidth(120)
+        timeout_layout.addWidget(self.timeout_spin)
+        timeout_layout.addWidget(QLabel("секунд"))
+        timeout_layout.addStretch()
+        basic_layout.addRow("Таймаут анализа:", timeout_layout)
 
         # Директория отчетов
         self.output_dir_edit = QLineEdit("reports")
+        self.output_dir_edit.setMinimumWidth(250)
         btn_browse = QPushButton("Обзор...")
         btn_browse.clicked.connect(self.browse_output_dir)
 
@@ -933,7 +948,7 @@ class SettingsDialog(QDialog):
         output_layout.addWidget(btn_browse)
         basic_layout.addRow("Директория отчетов:", output_layout)
 
-        # Поли морфный анализ по умолчанию
+        # Полиморфный анализ по умолчанию
         self.poly_check = QCheckBox("Включить полиморфный анализ по умолчанию")
         basic_layout.addRow("", self.poly_check)
 
@@ -944,25 +959,64 @@ class SettingsDialog(QDialog):
 
         # Уровень логирования
         self.log_level_combo = QComboBox()
-        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        self.log_level_combo.setMinimumWidth(150)
+        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"])
         self.log_level_combo.setCurrentText("INFO")
         basic_layout.addRow("Уровень логирования:", self.log_level_combo)
 
+        # Язык интерфейса
+        self.language_combo = QComboBox()
+        self.language_combo.setMinimumWidth(150)
+        self.language_combo.addItems(["Русский", "English"])
+        self.language_combo.setCurrentText("Русский")
+        basic_layout.addRow("Язык интерфейса:", self.language_combo)
+
+        # Автосохранение отчетов
+        self.auto_save_check = QCheckBox("Автосохранение отчетов после анализа")
+        self.auto_save_check.setChecked(True)
+        basic_layout.addRow("", self.auto_save_check)
+
+        # Формат отчета по умолчанию
+        self.report_format_combo = QComboBox()
+        self.report_format_combo.setMinimumWidth(150)
+        self.report_format_combo.addItems(["JSON", "HTML", "TXT", "Все форматы"])
+        self.report_format_combo.setCurrentText("JSON")
+        basic_layout.addRow("Формат отчета:", self.report_format_combo)
+
         tabs.addTab(basic_tab, "Основные")
 
-        # Вкладка темы и внешнего вида
+        # ===== Вкладка темы и внешнего вида =====
         theme_tab = QWidget()
-        theme_layout = QFormLayout(theme_tab)
+        theme_layout = QVBoxLayout(theme_tab)
+        theme_layout.setSpacing(14)
 
         # Выбор темы
+        theme_select_layout = QHBoxLayout()
+        theme_select_layout.addWidget(QLabel("Цветовая тема:"))
         self.theme_combo = QComboBox()
+        self.theme_combo.setMinimumWidth(200)
         self.theme_combo.addItems(list(THEMES.keys()))
         self.theme_combo.setCurrentText("Dark Red")
-        theme_layout.addRow("Цветовая тема:", self.theme_combo)
+        theme_select_layout.addWidget(self.theme_combo)
+        theme_select_layout.addStretch()
+        theme_layout.addLayout(theme_select_layout)
+
+        # Размер шрифта
+        font_size_layout = QHBoxLayout()
+        font_size_layout.addWidget(QLabel("Размер шрифта:"))
+        self.font_size_spin = QSpinBox()
+        self.font_size_spin.setRange(10, 20)
+        self.font_size_spin.setValue(14)
+        self.font_size_spin.setMinimumWidth(80)
+        font_size_layout.addWidget(self.font_size_spin)
+        font_size_layout.addWidget(QLabel("пикселей"))
+        font_size_layout.addStretch()
+        theme_layout.addLayout(font_size_layout)
 
         # Кастомизация цветов
         custom_group = QGroupBox("Кастомизация цветов (для Custom темы)")
         custom_layout = QGridLayout(custom_group)
+        custom_layout.setSpacing(10)
 
         self.color_pickers = {}
         color_labels = [
@@ -982,25 +1036,31 @@ class SettingsDialog(QDialog):
         for i, (key, label) in enumerate(color_labels):
             color_label = QLabel(label)
             color_btn = QPushButton()
-            color_btn.setFixedSize(50, 25)
-            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 1px solid gray;")
+            color_btn.setFixedSize(60, 30)
+            color_btn.setStyleSheet(f"background-color: {THEMES['Custom'][key]}; border: 2px solid gray; border-radius: 4px;")
             color_btn.clicked.connect(lambda checked, k=key, b=color_btn: self.pick_color(k, b))
             self.color_pickers[key] = {'button': color_btn, 'color': THEMES['Custom'][key]}
             custom_layout.addWidget(color_label, i // 2, (i % 2) * 2)
             custom_layout.addWidget(color_btn, i // 2, (i % 2) * 2 + 1)
 
-        theme_layout.addRow(custom_group)
+        theme_layout.addWidget(custom_group)
 
         # Кнопка сброса темы
         reset_theme_btn = QPushButton("Сбросить тему к значениям по умолчанию")
         reset_theme_btn.clicked.connect(self.reset_theme)
-        theme_layout.addRow("", reset_theme_btn)
+        theme_layout.addWidget(reset_theme_btn)
+
+        # Предпросмотр темы
+        preview_btn = QPushButton("Применить тему для предпросмотра")
+        preview_btn.clicked.connect(self.apply_settings)
+        theme_layout.addWidget(preview_btn)
 
         tabs.addTab(theme_tab, "Тема и внешний вид")
 
-        # Вкладка безопасности
+        # ===== Вкладка безопасности =====
         security_tab = QWidget()
         security_layout = QFormLayout(security_tab)
+        security_layout.setSpacing(14)
 
         # Отключение автозапуска процессов
         self.disable_auto_run_check = QCheckBox("Отключить автозапуск процессов после анализа")
@@ -1018,13 +1078,65 @@ class SettingsDialog(QDialog):
         security_layout.addRow("", self.force_kill_check)
 
         # Максимальное количество потоков
+        max_workers_layout = QHBoxLayout()
         self.max_workers_spin = QSpinBox()
         self.max_workers_spin.setRange(1, 32)
         self.max_workers_spin.setValue(16)
-        self.max_workers_spin.setSuffix(" потоков")
-        security_layout.addRow("Максимум потоков:", self.max_workers_spin)
+        self.max_workers_spin.setMinimumWidth(80)
+        max_workers_layout.addWidget(self.max_workers_spin)
+        max_workers_layout.addWidget(QLabel("потоков"))
+        max_workers_layout.addStretch()
+        security_layout.addRow("Максимум потоков:", max_workers_layout)
+
+        # Интервал мониторинга
+        monitor_layout = QHBoxLayout()
+        self.monitor_interval_spin = QSpinBox()
+        self.monitor_interval_spin.setRange(100, 5000)
+        self.monitor_interval_spin.setValue(500)
+        self.monitor_interval_spin.setMinimumWidth(80)
+        monitor_layout.addWidget(self.monitor_interval_spin)
+        monitor_layout.addWidget(QLabel("мс"))
+        monitor_layout.addStretch()
+        security_layout.addRow("Интервал мониторинга:", monitor_layout)
+
+        # Лимит памяти для анализа
+        memory_layout = QHBoxLayout()
+        self.memory_limit_spin = QSpinBox()
+        self.memory_limit_spin.setRange(64, 8192)
+        self.memory_limit_spin.setValue(512)
+        self.memory_limit_spin.setMinimumWidth(80)
+        memory_layout.addWidget(self.memory_limit_spin)
+        memory_layout.addWidget(QLabel("МБ"))
+        memory_layout.addStretch()
+        security_layout.addRow("Лимит памяти:", memory_layout)
 
         tabs.addTab(security_tab, "Безопасность")
+
+        # ===== Вкладка расширенных настроек =====
+        advanced_tab = QWidget()
+        advanced_layout = QFormLayout(advanced_tab)
+        advanced_layout.setSpacing(14)
+
+        # Режим отладки
+        self.debug_mode_check = QCheckBox("Режим отладки (подробное логирование)")
+        self.debug_mode_check.setChecked(False)
+        advanced_layout.addRow("", self.debug_mode_check)
+
+        # Очистка временных файлов
+        self.cleanup_temp_check = QCheckBox("Очищать временные файлы после анализа")
+        self.cleanup_temp_check.setChecked(True)
+        advanced_layout.addRow("", self.cleanup_temp_check)
+
+        # Резервное копирование настроек
+        self.backup_settings_check = QCheckBox("Резервное копирование настроек")
+        self.backup_settings_check.setChecked(True)
+        advanced_layout.addRow("", self.backup_settings_check)
+
+        # Путь к конфигурации
+        self.config_path_edit = QLineEdit("config.ini")
+        advanced_layout.addRow("Путь к конфигурации:", self.config_path_edit)
+
+        tabs.addTab(advanced_tab, "Дополнительно")
 
         layout.addWidget(tabs)
 
@@ -1032,6 +1144,7 @@ class SettingsDialog(QDialog):
         buttons = QDialogButtonBox(
             QDialogButtonBox.Ok | QDialogButtonBox.Cancel | QDialogButtonBox.Apply
         )
+        buttons.setFixedHeight(50)
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         buttons.button(QDialogButtonBox.Apply).clicked.connect(self.apply_settings)
@@ -1672,7 +1785,7 @@ class RedSandSecureGUI(QMainWindow):
         self.ioc_text.setPlaceholderText("Indicators of Compromise появятся здесь после анализа...")
         layout.addWidget(self.ioc_text)
 
-        btn_copy_ioc = QPushButton("📋 Копировать IOC")
+        btn_copy_ioc = QPushButton("Копировать IOC")
         btn_copy_ioc.clicked.connect(self.copy_ioc_to_clipboard)
         layout.addWidget(btn_copy_ioc)
 
