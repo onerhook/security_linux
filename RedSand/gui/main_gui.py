@@ -258,19 +258,22 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     """Генерация таблицы стилей на основе выбранной темы."""
     theme = THEMES.get(theme_name, THEMES["Dark Red"])
     
+    # Проверка контрастности для светлых тем
+    is_light_theme = theme['bg_primary'] in ['#ffffff', '#f0f8ff', '#f8f9fa', '#e9ecef', '#fff5f5', '#fff8dc']
+    
     return f"""
     QMainWindow, QDialog {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
         font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-        font-size: 13px;
-        line-height: 1.4;
+        font-size: 14px;
+        line-height: 1.5;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
-        border-bottom: 1px solid {theme['accent']};
-        padding: 6px;
+        border-bottom: 2px solid {theme['accent']};
+        padding: 8px;
         spacing: 8px;
     }}
     
@@ -278,9 +281,10 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background-color: transparent;
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 14px;
-        border-radius: 5px;
-        font-weight: 500;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
     }}
     
     QToolBar QToolButton:hover {{
@@ -296,11 +300,12 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
             stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
         color: {theme['text_primary']};
         border: none;
-        padding: 10px 24px;
-        border-radius: 6px;
+        padding: 14px 32px;
+        border-radius: 8px;
         font-weight: bold;
-        font-size: 13px;
-        min-width: 120px;
+        font-size: 14px;
+        min-width: 140px;
+        min-height: 50px;
     }}
     
     QPushButton#primaryBtn:hover {{
@@ -317,14 +322,64 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         color: {theme['text_secondary']};
     }}
     
+    QPushButton#dangerBtn {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 {theme['danger']}, stop:1 #ff6b6b);
+        color: #ffffff;
+        border: none;
+        padding: 14px 32px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 14px;
+        min-width: 140px;
+        min-height: 50px;
+    }}
+    
+    QPushButton#dangerBtn:hover {{
+        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
+            stop:0 #ff6b6b, stop:1 {theme['danger']});
+    }}
+    
+    QPushButton#dangerBtn:pressed {{
+        background: {theme['bg_tertiary']};
+    }}
+    
+    QPushButton#dangerBtn:disabled {{
+        background: {theme['bg_tertiary']};
+        color: {theme['text_secondary']};
+    }}
+    
+    QPushButton#actionBtn {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['accent']};
+        padding: 12px 24px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 120px;
+        min-height: 44px;
+    }}
+    
+    QPushButton#actionBtn:hover {{
+        background-color: {theme['accent']};
+        color: {theme['text_primary']};
+    }}
+    
+    QPushButton#actionBtn:pressed {{
+        background-color: {theme['bg_primary']};
+    }}
+    
     QPushButton {{
         background-color: {theme['accent']};
         color: {theme['text_primary']};
         border: none;
-        padding: 8px 18px;
-        border-radius: 5px;
+        padding: 10px 22px;
+        border-radius: 6px;
         font-weight: 600;
-        min-width: 90px;
+        font-size: 13px;
+        min-width: 100px;
+        min-height: 38px;
     }}
     
     QPushButton:hover {{
@@ -342,37 +397,40 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QGroupBox {{
         background-color: {theme['bg_secondary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        margin-top: 14px;
-        padding-top: 14px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        margin-top: 16px;
+        padding-top: 16px;
         font-weight: bold;
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 14px;
-        padding: 0 8px;
+        left: 16px;
+        padding: 0 10px;
         color: {theme['accent']};
-        font-size: 13px;
+        font-size: 14px;
+        font-weight: bold;
     }}
     
     QTabWidget::pane {{
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
         background-color: {theme['bg_secondary']};
     }}
     
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
-        padding: 10px 20px;
-        margin-right: 3px;
-        border-top-left-radius: 6px;
-        border-top-right-radius: 6px;
-        font-weight: 500;
+        color: {theme['text_primary']};
+        padding: 12px 24px;
+        margin-right: 4px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        font-weight: 600;
+        font-size: 13px;
+        min-width: 100px;
     }}
     
     QTabBar::tab:selected {{
@@ -389,24 +447,24 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QTextEdit, QPlainTextEdit {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 10px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 8px;
+        padding: 12px;
         font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 12px;
-        line-height: 1.3;
+        font-size: 13px;
+        line-height: 1.4;
         selection-background-color: {theme['accent']};
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
-        border: none;
-        border-radius: 8px;
-        height: 20px;
+        border: 2px solid {theme['bg_secondary']};
+        border-radius: 10px;
+        height: 26px;
         text-align: center;
         color: {theme['text_primary']};
         font-weight: bold;
-        font-size: 12px;
+        font-size: 13px;
     }}
     
     QProgressBar::chunk {{
@@ -436,79 +494,83 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QComboBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 9px 14px;
         outline: none;
-        min-height: 28px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QComboBox:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QComboBox:focus {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
         outline: none;
     }}
     
     QComboBox::drop-down {{
         border: none;
-        width: 26px;
+        width: 30px;
     }}
     
     QComboBox::down-arrow {{
         image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 7px solid {theme['accent']};
-        margin-right: 10px;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid {theme['accent']};
+        margin-right: 12px;
     }}
     
     QComboBox QAbstractItemView {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
+        border: 2px solid {theme['bg_tertiary']};
         selection-background-color: {theme['accent']};
-        border-radius: 5px;
+        border-radius: 6px;
+        font-size: 13px;
     }}
     
     QSpinBox, QDoubleSpinBox {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 7px 12px;
-        min-height: 28px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 9px 14px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QSpinBox:hover, QDoubleSpinBox:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QLineEdit {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 5px;
-        padding: 8px 12px;
-        min-height: 28px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 6px;
+        padding: 10px 14px;
+        min-height: 36px;
+        font-size: 13px;
     }}
     
     QLineEdit:hover {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
     }}
     
     QLineEdit:focus {{
-        border: 1px solid {theme['accent']};
+        border: 2px solid {theme['accent']};
         background-color: {theme['bg_primary']};
         outline: none;
     }}
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 10px;
-        font-size: 13px;
+        spacing: 12px;
+        font-size: 14px;
     }}
     
     QCheckBox::indicator {{
@@ -552,14 +614,15 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QTableWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
         gridline-color: {theme['bg_tertiary']};
         alternate-background-color: {theme['bg_primary']};
+        font-size: 13px;
     }}
     
     QTableWidget::item {{
-        padding: 10px;
+        padding: 12px;
     }}
     
     QTableWidget::item:selected {{
@@ -575,21 +638,23 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
         background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
             stop:0 {theme['bg_tertiary']}, stop:1 {theme['bg_secondary']});
         color: {theme['text_primary']};
-        padding: 12px;
+        padding: 14px;
         border: none;
         font-weight: bold;
-        border-bottom: 2px solid {theme['accent']};
+        font-size: 13px;
+        border-bottom: 3px solid {theme['accent']};
     }}
     
     QTreeWidget {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        font-size: 13px;
     }}
     
     QTreeWidget::item {{
-        padding: 6px;
+        padding: 8px;
     }}
     
     QTreeWidget::item:selected {{
@@ -669,26 +734,28 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     
     QMessageBox QLabel {{
         color: {theme['text_primary']};
-        font-size: 13px;
+        font-size: 14px;
     }}
     
     QMessageBox QPushButton {{
-        min-width: 90px;
-        padding: 8px 16px;
+        min-width: 100px;
+        padding: 10px 20px;
+        font-size: 13px;
     }}
     
     QMenu {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 6px;
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        padding: 8px;
     }}
     
     QMenu::item {{
-        padding: 9px 24px;
-        border-radius: 5px;
+        padding: 10px 28px;
+        border-radius: 6px;
         margin: 2px 4px;
+        font-size: 13px;
     }}
     
     QMenu::item:selected {{
@@ -706,9 +773,9 @@ def generate_stylesheet(theme_name: str = "Dark Red") -> str:
     QStatusBar {{
         background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
             stop:0 {theme['bg_secondary']}, stop:1 {theme['bg_primary']});
-        color: {theme['text_secondary']};
-        border-top: 1px solid {theme['bg_tertiary']};
-        font-size: 12px;
+        color: {theme['text_primary']};
+        border-top: 2px solid {theme['bg_tertiary']};
+        font-size: 13px;
     }}
     
     QListWidget {{
@@ -1662,16 +1729,12 @@ class RedSandSecureGUI(QMainWindow):
         # Кнопка запуска анализа
         self.btn_analyze = QPushButton("ЗАПУСТИТЬ АНАЛИЗ")
         self.btn_analyze.setObjectName("primaryBtn")
-        self.btn_analyze.setMinimumHeight(60)
-        self.btn_analyze.setFont(QFont("Segoe UI", 14, QFont.Bold))
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
 
         # Кнопка экстренной остановки
         self.btn_panic = QPushButton("ЭКСТРЕННАЯ ОСТАНОВКА")
         self.btn_panic.setObjectName("dangerBtn")
-        self.btn_panic.setMinimumHeight(50)
-        self.btn_panic.setFont(QFont("Segoe UI", 12, QFont.Bold))
         self.btn_panic.clicked.connect(self.emergency_stop)
         self.btn_panic.setEnabled(False)
         layout.addWidget(self.btn_panic)
@@ -1698,14 +1761,17 @@ class RedSandSecureGUI(QMainWindow):
         actions_layout = QVBoxLayout()
 
         btn_settings = QPushButton("Настройки")
+        btn_settings.setObjectName("actionBtn")
         btn_settings.clicked.connect(self.open_settings)
         actions_layout.addWidget(btn_settings)
 
         btn_reports_folder = QPushButton("Открыть папку отчетов")
+        btn_reports_folder.setObjectName("actionBtn")
         btn_reports_folder.clicked.connect(self.open_reports_folder)
         actions_layout.addWidget(btn_reports_folder)
 
         btn_clear_logs = QPushButton("Очистить логи")
+        btn_clear_logs.setObjectName("actionBtn")
         btn_clear_logs.clicked.connect(self.clear_logs)
         actions_layout.addWidget(btn_clear_logs)
 
