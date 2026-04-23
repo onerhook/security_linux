@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v3.0 - Профессиональный интерфейс с темами и настройками
-Современный дизайн на PyQt5 с поддержкой тем, анимаций и расширенных настроек
+RedSand Secure GUI v4.0 - Упрощенный интерфейс для пользователей
+Минималистичный дизайн с высоким контрастом для людей, не разбирающихся в компьютерах
 Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
 
@@ -31,7 +31,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import (
     Qt, QTimer, pyqtSignal, QObject, QThread, QMetaObject,
     Q_ARG, QPropertyAnimation, QEasingCurve, QSize, QUrl,
-    QPoint, QRect, QSettings, QTranslator, QLocale
+    QPoint, QRect, QSettings, QLocale
 )
 from PyQt5.QtGui import (
     QFont, QColor, QPalette, QIcon, QPixmap, QPainter,
@@ -52,827 +52,198 @@ except ImportError:
 
 
 # ============================================================================
-# ЦВЕТОВЫЕ ТЕМЫ
+# ЦВЕТОВЫЕ ТЕМЫ - Упрощенная высококонтрастная тема
 # ============================================================================
 
 THEMES = {
-    "Dark Red": {
-        "bg_primary": "#1a1a2e",
-        "bg_secondary": "#16213e",
-        "bg_tertiary": "#0f3460",
-        "accent": "#e94560",
-        "accent_hover": "#ff6b7a",
-        "text_primary": "#eaeaea",
-        "text_secondary": "#a0a0a0",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
-    },
-    "Cyber Blue": {
-        "bg_primary": "#0a0e1a",
-        "bg_secondary": "#111827",
-        "bg_tertiary": "#1e293b",
-        "accent": "#3b82f6",
-        "accent_hover": "#60a5fa",
-        "text_primary": "#f3f4f6",
-        "text_secondary": "#9ca3af",
-        "success": "#10b981",
-        "warning": "#f59e0b",
-        "danger": "#ef4444",
-        "info": "#8b5cf6"
-    },
-    "Matrix Green": {
-        "bg_primary": "#0d1117",
-        "bg_secondary": "#161b22",
-        "bg_tertiary": "#21262d",
-        "accent": "#00ff41",
-        "accent_hover": "#00cc33",
-        "text_primary": "#c9d1d9",
-        "text_secondary": "#8b949e",
-        "success": "#2ea043",
-        "warning": "#d29922",
-        "danger": "#f85149",
-        "info": "#58a6ff"
-    },
-    "Purple Haze": {
-        "bg_primary": "#1e1b2e",
-        "bg_secondary": "#2d2640",
-        "bg_tertiary": "#3d3452",
-        "accent": "#a855f7",
-        "accent_hover": "#c084fc",
-        "text_primary": "#f5f3ff",
-        "text_secondary": "#c4b5fd",
-        "success": "#22c55e",
-        "warning": "#fbbf24",
-        "danger": "#f43f5e",
-        "info": "#06b6d4"
-    },
-    "Ocean Depth": {
-        "bg_primary": "#0c1929",
-        "bg_secondary": "#0f2338",
-        "bg_tertiary": "#143446",
-        "accent": "#00bcd4",
-        "accent_hover": "#26c6da",
-        "text_primary": "#e0f7fa",
-        "text_secondary": "#80deea",
-        "success": "#4caf50",
-        "warning": "#ff9800",
-        "danger": "#f44336",
-        "info": "#2196f3"
-    },
-    "Light Modern": {
-        "bg_primary": "#ffffff",
-        "bg_secondary": "#f8f9fa",
-        "bg_tertiary": "#e9ecef",
-        "accent": "#dc3545",
-        "accent_hover": "#c82333",
-        "text_primary": "#212529",
-        "text_secondary": "#6c757d",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
-    },
-    "Neon Night": {
-        "bg_primary": "#0a0a0f",
-        "bg_secondary": "#12121a",
-        "bg_tertiary": "#1a1a2e",
-        "accent": "#ff00ff",
-        "accent_hover": "#ff33ff",
-        "text_primary": "#ffffff",
-        "text_secondary": "#b0b0b0",
-        "success": "#00ff88",
-        "warning": "#ffcc00",
-        "danger": "#ff3366",
-        "info": "#00ffff"
-    },
-    "Fire Storm": {
-        "bg_primary": "#1a0a0a",
-        "bg_secondary": "#2e1111",
-        "bg_tertiary": "#3d1a1a",
-        "accent": "#ff4500",
-        "accent_hover": "#ff6347",
-        "text_primary": "#ffe4e1",
-        "text_secondary": "#cd5c5c",
-        "success": "#32cd32",
-        "warning": "#ffa500",
-        "danger": "#ff0000",
-        "info": "#ffd700"
-    },
-    "Arctic Frost": {
-        "bg_primary": "#f0f8ff",
-        "bg_secondary": "#e6f3ff",
-        "bg_tertiary": "#d4e9ff",
-        "accent": "#0078d7",
-        "accent_hover": "#005a9e",
-        "text_primary": "#1a1a1a",
-        "text_secondary": "#5a5a5a",
-        "success": "#107c10",
-        "warning": "#ffb900",
-        "danger": "#d13438",
-        "info": "#0078d7"
-    },
-    "Toxic Waste": {
-        "bg_primary": "#0f140f",
-        "bg_secondary": "#1a241a",
-        "bg_tertiary": "#233023",
-        "accent": "#39ff14",
-        "accent_hover": "#52ff33",
-        "text_primary": "#e8ffe8",
-        "text_secondary": "#90ee90",
-        "success": "#00ff00",
-        "warning": "#adff2f",
-        "danger": "#ff4500",
-        "info": "#7fff00"
-    },
-    "Midnight Sun": {
-        "bg_primary": "#191970",
-        "bg_secondary": "#1a1a3e",
-        "bg_tertiary": "#252550",
-        "accent": "#ffd700",
-        "accent_hover": "#ffec8b",
-        "text_primary": "#f0f8ff",
-        "text_secondary": "#b0c4de",
-        "success": "#98fb98",
-        "warning": "#ffe4b5",
-        "danger": "#ff6b6b",
-        "info": "#87ceeb"
-    },
-    "Rose Quartz": {
-        "bg_primary": "#2d242e",
-        "bg_secondary": "#3d323e",
-        "bg_tertiary": "#4d424e",
-        "accent": "#f7cac9",
-        "accent_hover": "#ffe5e4",
-        "text_primary": "#fff5f5",
-        "text_secondary": "#e6c7c7",
-        "success": "#98dd98",
-        "warning": "#ffe082",
-        "danger": "#ef9a9a",
-        "info": "#80deea"
-    },
-    "Solar Flare": {
-        "bg_primary": "#1a1510",
-        "bg_secondary": "#2e2418",
-        "bg_tertiary": "#3d3020",
-        "accent": "#ff8c00",
-        "accent_hover": "#ffa500",
-        "text_primary": "#fff8dc",
-        "text_secondary": "#deb887",
-        "success": "#90ee90",
-        "warning": "#ffd700",
-        "danger": "#ff6347",
-        "info": "#87ceeb"
-    },
-    "Deep Space": {
-        "bg_primary": "#0b0c15",
-        "bg_secondary": "#151621",
-        "bg_tertiary": "#1f2030",
-        "accent": "#6c5ce7",
-        "accent_hover": "#a29bfe",
-        "text_primary": "#dfe6e9",
-        "text_secondary": "#b2bec3",
-        "success": "#00b894",
-        "warning": "#fdcb6e",
-        "danger": "#d63031",
-        "info": "#0984e3"
-    },
-    "Custom": {
-        "bg_primary": "#1a1a2e",
-        "bg_secondary": "#16213e",
-        "bg_tertiary": "#0f3460",
-        "accent": "#e94560",
-        "accent_hover": "#ff6b7a",
-        "text_primary": "#eaeaea",
-        "text_secondary": "#a0a0a0",
-        "success": "#28a745",
-        "warning": "#ffc107",
-        "danger": "#dc3545",
-        "info": "#17a2b8"
+    "High Contrast": {
+        "bg_primary": "#FFFFFF",
+        "bg_secondary": "#F5F5F5",
+        "bg_tertiary": "#E0E0E0",
+        "accent": "#0066CC",
+        "accent_hover": "#0052A3",
+        "text_primary": "#000000",
+        "text_secondary": "#333333",
+        "success": "#008000",
+        "warning": "#FF8C00",
+        "danger": "#CC0000",
+        "info": "#0066CC"
     }
 }
 
 
-def generate_stylesheet(theme_name: str = "Dark Red") -> str:
+def generate_stylesheet(theme_name: str = "High Contrast") -> str:
     """Генерация таблицы стилей на основе выбранной темы."""
-    theme = THEMES.get(theme_name, THEMES["Dark Red"])
-    
-    # Проверка контрастности для светлых тем
-    is_light_theme = theme['bg_primary'] in ['#ffffff', '#f0f8ff', '#f8f9fa', '#e9ecef', '#fff5f5', '#fff8dc']
+    theme = THEMES.get(theme_name, THEMES["High Contrast"])
     
     return f"""
     QMainWindow, QDialog {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        font-family: 'Roboto', 'Segoe UI', Arial, sans-serif;
-        font-size: 14px;
-        line-height: 1.5;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 16px;
     }}
     
     QToolBar {{
         background-color: {theme['bg_secondary']};
-        border-bottom: 2px solid {theme['accent']};
-        padding: 8px;
-        spacing: 8px;
-    }}
-    
-    QToolBar QToolButton {{
-        background-color: transparent;
-        color: {theme['text_primary']};
-        border: none;
-        padding: 10px 16px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 13px;
-    }}
-    
-    QToolBar QToolButton:hover {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
-    QToolBar QToolButton:pressed {{
-        background-color: {theme['accent']};
+        border-bottom: 3px solid {theme['accent']};
+        padding: 12px;
     }}
     
     QPushButton#primaryBtn {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        color: {theme['text_primary']};
-        border: none;
-        padding: 14px 32px;
-        border-radius: 8px;
+        background-color: {theme['success']};
+        color: #FFFFFF;
+        border: 3px solid {theme['success']};
+        padding: 18px 40px;
+        border-radius: 10px;
         font-weight: bold;
-        font-size: 14px;
-        min-width: 140px;
-        min-height: 50px;
+        font-size: 18px;
+        min-width: 200px;
+        min-height: 60px;
     }}
     
     QPushButton#primaryBtn:hover {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent_hover']}, stop:1 {theme['accent']});
-    }}
-    
-    QPushButton#primaryBtn:pressed {{
-        background: {theme['bg_tertiary']};
+        background-color: #00A000;
     }}
     
     QPushButton#primaryBtn:disabled {{
-        background: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
-    }}
-    
-    QPushButton#dangerBtn {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['danger']}, stop:1 #ff6b6b);
-        color: #ffffff;
-        border: none;
-        padding: 14px 32px;
-        border-radius: 8px;
-        font-weight: bold;
-        font-size: 14px;
-        min-width: 140px;
-        min-height: 50px;
-    }}
-    
-    QPushButton#dangerBtn:hover {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 #ff6b6b, stop:1 {theme['danger']});
-    }}
-    
-    QPushButton#dangerBtn:pressed {{
-        background: {theme['bg_tertiary']};
-    }}
-    
-    QPushButton#dangerBtn:disabled {{
-        background: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
+        background-color: {theme['bg_tertiary']};
+        border: 3px solid {theme['bg_tertiary']};
     }}
     
     QPushButton#actionBtn {{
-        background-color: {theme['bg_tertiary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['accent']};
-        padding: 12px 24px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 13px;
-        min-width: 120px;
-        min-height: 44px;
+        background-color: {theme['accent']};
+        color: #FFFFFF;
+        border: 3px solid {theme['accent']};
+        padding: 14px 28px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 16px;
+        min-width: 180px;
+        min-height: 50px;
     }}
     
     QPushButton#actionBtn:hover {{
-        background-color: {theme['accent']};
-        color: {theme['text_primary']};
-    }}
-    
-    QPushButton#actionBtn:pressed {{
-        background-color: {theme['bg_primary']};
+        background-color: {theme['accent_hover']};
     }}
     
     QPushButton {{
         background-color: {theme['accent']};
-        color: {theme['text_primary']};
+        color: #FFFFFF;
         border: none;
-        padding: 10px 22px;
-        border-radius: 6px;
-        font-weight: 600;
-        font-size: 13px;
-        min-width: 100px;
-        min-height: 38px;
+        padding: 12px 26px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
     }}
     
     QPushButton:hover {{
         background-color: {theme['accent_hover']};
     }}
     
-    QPushButton:pressed {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
     QPushButton:disabled {{
         background-color: {theme['bg_tertiary']};
-        color: {theme['text_secondary']};
     }}
     
     QGroupBox {{
         background-color: {theme['bg_secondary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 10px;
-        margin-top: 16px;
-        padding-top: 16px;
+        border: 3px solid {theme['accent']};
+        border-radius: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
         font-weight: bold;
-        color: {theme['text_primary']};
-        font-size: 14px;
+        font-size: 16px;
     }}
     
     QGroupBox::title {{
         subcontrol-origin: margin;
-        left: 16px;
-        padding: 0 10px;
+        left: 20px;
         color: {theme['accent']};
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
     }}
     
     QTabWidget::pane {{
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 10px;
-        background-color: {theme['bg_secondary']};
+        border: 3px solid {theme['accent']};
+        border-radius: 12px;
     }}
     
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        padding: 12px 24px;
-        margin-right: 4px;
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-        font-weight: 600;
-        font-size: 13px;
-        min-width: 100px;
+        padding: 14px 28px;
+        font-weight: bold;
+        font-size: 15px;
+        min-width: 120px;
     }}
     
     QTabBar::tab:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['bg_tertiary']});
-        color: {theme['text_primary']};
-        font-weight: bold;
-    }}
-    
-    QTabBar::tab:hover:!selected {{
-        background-color: {theme['bg_primary']};
+        background-color: {theme['accent']};
+        color: #FFFFFF;
     }}
     
     QTextEdit, QPlainTextEdit {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 12px;
-        font-family: 'Consolas', 'Courier New', monospace;
-        font-size: 13px;
-        line-height: 1.4;
-        selection-background-color: {theme['accent']};
+        border: 3px solid {theme['bg_tertiary']};
+        border-radius: 10px;
+        padding: 14px;
+        font-family: 'Consolas', monospace;
+        font-size: 14px;
     }}
     
     QProgressBar {{
         background-color: {theme['bg_tertiary']};
-        border: 2px solid {theme['bg_secondary']};
-        border-radius: 10px;
-        height: 26px;
-        text-align: center;
-        color: {theme['text_primary']};
+        border: 3px solid {theme['accent']};
+        border-radius: 12px;
+        height: 32px;
         font-weight: bold;
-        font-size: 13px;
+        font-size: 15px;
     }}
     
     QProgressBar::chunk {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['success']}, stop:0.5 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border-radius: 8px;
-    }}
-    
-    QSlider::groove:horizontal {{
-        background-color: {theme['bg_tertiary']};
-        height: 8px;
-        border-radius: 4px;
-    }}
-    
-    QSlider::handle:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        width: 18px;
-        margin: -5px 0;
+        background-color: {theme['success']};
         border-radius: 9px;
     }}
     
-    QSlider::handle:horizontal:hover {{
-        background: {theme['accent_hover']};
-    }}
-    
-    QComboBox {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 9px 14px;
-        outline: none;
-        min-height: 36px;
-        font-size: 13px;
-    }}
-    
-    QComboBox:hover {{
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QComboBox:focus {{
-        border: 2px solid {theme['accent']};
-        outline: none;
-    }}
-    
-    QComboBox::drop-down {{
-        border: none;
-        width: 30px;
-    }}
-    
-    QComboBox::down-arrow {{
-        image: none;
-        border-left: 6px solid transparent;
-        border-right: 6px solid transparent;
-        border-top: 8px solid {theme['accent']};
-        margin-right: 12px;
-    }}
-    
-    QComboBox QAbstractItemView {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        selection-background-color: {theme['accent']};
-        border-radius: 6px;
-        font-size: 13px;
-    }}
-    
-    QSpinBox, QDoubleSpinBox {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 9px 14px;
-        min-height: 36px;
-        font-size: 13px;
-    }}
-    
-    QSpinBox:hover, QDoubleSpinBox:hover {{
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QLineEdit {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 6px;
-        padding: 10px 14px;
-        min-height: 36px;
-        font-size: 13px;
-    }}
-    
-    QLineEdit:hover {{
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QLineEdit:focus {{
-        border: 2px solid {theme['accent']};
+    QComboBox, QSpinBox, QLineEdit {{
         background-color: {theme['bg_primary']};
-        outline: none;
+        color: {theme['text_primary']};
+        border: 3px solid {theme['accent']};
+        border-radius: 8px;
+        padding: 12px;
+        font-size: 15px;
+        font-weight: bold;
+        min-height: 44px;
     }}
     
     QCheckBox {{
         color: {theme['text_primary']};
-        spacing: 12px;
-        font-size: 14px;
+        font-size: 15px;
+        font-weight: bold;
     }}
     
     QCheckBox::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 5px;
-        border: 2px solid {theme['bg_tertiary']};
-        background-color: {theme['bg_secondary']};
+        width: 24px;
+        height: 24px;
+        border: 3px solid {theme['accent']};
     }}
     
     QCheckBox::indicator:checked {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QCheckBox::indicator:hover {{
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QRadioButton {{
-        color: {theme['text_primary']};
-        spacing: 10px;
-        font-size: 13px;
-    }}
-    
-    QRadioButton::indicator {{
-        width: 20px;
-        height: 20px;
-        border-radius: 10px;
-        border: 2px solid {theme['bg_tertiary']};
-        background-color: {theme['bg_secondary']};
-    }}
-    
-    QRadioButton::indicator:checked {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        border: 2px solid {theme['accent']};
-    }}
-    
-    QTableWidget {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 10px;
-        gridline-color: {theme['bg_tertiary']};
-        alternate-background-color: {theme['bg_primary']};
-        font-size: 13px;
-    }}
-    
-    QTableWidget::item {{
-        padding: 12px;
-    }}
-    
-    QTableWidget::item:selected {{
         background-color: {theme['accent']};
+    }}
+    
+    QLabel {{
         color: {theme['text_primary']};
-    }}
-    
-    QTableWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
-    QHeaderView::section {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['bg_secondary']});
-        color: {theme['text_primary']};
-        padding: 14px;
-        border: none;
-        font-weight: bold;
-        font-size: 13px;
-        border-bottom: 3px solid {theme['accent']};
-    }}
-    
-    QTreeWidget {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 10px;
-        font-size: 13px;
-    }}
-    
-    QTreeWidget::item {{
-        padding: 8px;
-    }}
-    
-    QTreeWidget::item:selected {{
-        background-color: {theme['accent']};
-        color: {theme['text_primary']};
-    }}
-    
-    QTreeWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
-    QTreeWidget::branch:has-children:!has-siblings:closed,
-    QTreeWidget::branch:closed:has-children:has-siblings {{
-        border-image: none;
-        image: none;
-    }}
-    
-    QTreeWidget::branch:open:has-children:!has-siblings,
-    QTreeWidget::branch:open:has-children:has-siblings {{
-        border-image: none;
-        image: none;
-    }}
-    
-    QScrollArea {{
-        border: none;
-        background-color: transparent;
-    }}
-    
-    QScrollBar:vertical {{
-        background-color: {theme['bg_primary']};
-        width: 14px;
-        border-radius: 7px;
-        margin: 2px;
-    }}
-    
-    QScrollBar::handle:vertical {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
-        min-height: 40px;
-        border-radius: 7px;
-    }}
-    
-    QScrollBar::handle:vertical:hover {{
-        background: {theme['accent']};
-    }}
-    
-    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
-        height: 0px;
-    }}
-    
-    QScrollBar:horizontal {{
-        background-color: {theme['bg_primary']};
-        height: 14px;
-        border-radius: 7px;
-        margin: 2px;
-    }}
-    
-    QScrollBar::handle:horizontal {{
-        background: qlineargradient(x1:0, y1:0, x2:0, y2:1, 
-            stop:0 {theme['bg_tertiary']}, stop:1 {theme['accent']});
-        min-width: 40px;
-        border-radius: 7px;
-    }}
-    
-    QScrollBar::handle:horizontal:hover {{
-        background: {theme['accent']};
-    }}
-    
-    QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {{
-        width: 0px;
-    }}
-    
-    QMessageBox {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-    }}
-    
-    QMessageBox QLabel {{
-        color: {theme['text_primary']};
-        font-size: 14px;
-    }}
-    
-    QMessageBox QPushButton {{
-        min-width: 100px;
-        padding: 10px 20px;
-        font-size: 13px;
-    }}
-    
-    QMenu {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 10px;
-        padding: 8px;
-    }}
-    
-    QMenu::item {{
-        padding: 10px 28px;
-        border-radius: 6px;
-        margin: 2px 4px;
-        font-size: 13px;
-    }}
-    
-    QMenu::item:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-    }}
-    
-    QMenu::separator {{
-        height: 2px;
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['bg_tertiary']}, stop:1 transparent);
-        margin: 6px 12px;
+        font-size: 15px;
     }}
     
     QStatusBar {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['bg_secondary']}, stop:1 {theme['bg_primary']});
-        color: {theme['text_primary']};
-        border-top: 2px solid {theme['bg_tertiary']};
-        font-size: 13px;
-    }}
-    
-    QListWidget {{
         background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-    }}
-    
-    QListWidget::item {{
-        padding: 10px;
-        border-radius: 5px;
-        margin: 2px 4px;
-    }}
-    
-    QListWidget::item:selected {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        color: {theme['text_primary']};
-    }}
-    
-    QListWidget::item:hover {{
-        background-color: {theme['bg_tertiary']};
-    }}
-    
-    QSplitter::handle {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        width: 4px;
-    }}
-    
-    QSplitter::handle:horizontal {{
-        width: 4px;
-    }}
-    
-    QSplitter::handle:vertical {{
-        height: 4px;
-    }}
-    
-    QToolTip {{
-        background-color: {theme['bg_tertiary']};
-        color: {theme['text_primary']};
-        border: 1px solid {theme['accent']};
-        border-radius: 6px;
-        padding: 6px 12px;
-        font-size: 12px;
-    }}
-    
-    QWhatsThis {{
-        background-color: {theme['bg_secondary']};
-        color: {theme['text_primary']};
-        border: 1px solid {theme['bg_tertiary']};
-        border-radius: 8px;
-        padding: 12px;
-    }}
-    
-    QLabel#titleLabel {{
-        font-size: 28px;
+        border-top: 2px solid {theme['accent']};
         font-weight: bold;
-        color: {theme['accent']};
-        padding: 10px;
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 {theme['accent']}, stop:1 {theme['accent_hover']});
-        -qt-background-clip: text;
-        color: transparent;
-    }}
-    
-    QFrame#line {{
-        background: qlineargradient(x1:0, y1:0, x2:1, y2:0, 
-            stop:0 transparent, stop:0.5 {theme['accent']}, stop:1 transparent);
-        max-height: 2px;
-    }}
-    
-    QFrame#riskFrame {{
-        background-color: {theme['bg_secondary']};
-        border: 2px solid {theme['accent']};
-        border-radius: 10px;
-        padding: 15px;
-    }}
-    
-    QLabel#riskLabel {{
-        font-size: 36px;
-        font-weight: bold;
-        color: {theme['danger']};
-    }}
-    
-    QLabel#threatTypeLabel {{
-        font-size: 20px;
-        font-weight: bold;
-        color: {theme['accent']};
     }}
     """
-
-
-# ============================================================================
-# РАБОЧИЙ ПОТОК АНАЛИЗА
-# ============================================================================
 
 class AnalysisWorker(QObject):
     """Рабочий поток для выполнения анализа без блокировки UI."""
@@ -1732,13 +1103,6 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
 
-        # Кнопка экстренной остановки
-        self.btn_panic = QPushButton("ЭКСТРЕННАЯ ОСТАНОВКА")
-        self.btn_panic.setObjectName("dangerBtn")
-        self.btn_panic.clicked.connect(self.emergency_stop)
-        self.btn_panic.setEnabled(False)
-        layout.addWidget(self.btn_panic)
-
         # Прогресс бар
         progress_group = QGroupBox("Прогресс анализа")
         progress_layout = QVBoxLayout()
@@ -1884,11 +1248,6 @@ class RedSandSecureGUI(QMainWindow):
         start_action.triggered.connect(self.start_analysis)
         analysis_menu.addAction(start_action)
 
-        stop_action = QAction("Остановить", self)
-        stop_action.setShortcut("F6")
-        stop_action.triggered.connect(self.emergency_stop)
-        analysis_menu.addAction(stop_action)
-
         # Отчеты
         reports_menu = menubar.addMenu("Отчеты")
 
@@ -1934,10 +1293,6 @@ class RedSandSecureGUI(QMainWindow):
         btn_analyze = QAction("Анализ", self)
         btn_analyze.triggered.connect(self.start_analysis)
         toolbar.addAction(btn_analyze)
-
-        btn_stop = QAction("Стоп", self)
-        btn_stop.triggered.connect(self.emergency_stop)
-        toolbar.addAction(btn_stop)
 
         toolbar.addSeparator()
 
@@ -2035,7 +1390,6 @@ class RedSandSecureGUI(QMainWindow):
 
         # Блокировка интерфейса
         self.set_ui_enabled(False)
-        self.btn_panic.setEnabled(True)
 
         # Создание рабочего
         self.worker = AnalysisWorker(
@@ -2061,37 +1415,12 @@ class RedSandSecureGUI(QMainWindow):
         self.log_message('INFO', f"Запуск анализа файла: {file_path}")
         self.status_bar.showMessage("Анализ запущен...")
 
-    def emergency_stop(self):
-        """Экстренная остановка анализа."""
-        reply = QMessageBox.warning(
-            self,
-            "ЭКСТРЕННАЯ ОСТАНОВКА",
-            "Вы уверены, что хотите немедленно остановить анализ?\n\n"
-            "Это может оставить систему в нестабильном состоянии!",
-            QMessageBox.Yes | QMessageBox.No,
-            QMessageBox.No
-        )
-
-        if reply == QMessageBox.Yes:
-            self.log_message('CRITICAL', "ЭКСТРЕННАЯ ОСТАНОВКА АКТИВИРОВАНА!")
-
-            if self.worker_thread and self.worker_thread.isRunning():
-                self.worker_thread.terminate()
-                self.worker_thread.wait(3000)
-
-            self.set_ui_enabled(True)
-            self.btn_panic.setEnabled(False)
-            self.progress_bar.setValue(0)
-            self.progress_label.setText("Анализ прерван пользователем")
-            self.status_bar.showMessage("Анализ прерван")
-
     def analysis_finished(self, result: dict):
         """Обработка завершения анализа."""
         self.current_report = result
 
         # Разблокировка интерфейса
         self.set_ui_enabled(True)
-        self.btn_panic.setEnabled(False)
 
         # Обновление прогресса
         self.progress_bar.setValue(100)
