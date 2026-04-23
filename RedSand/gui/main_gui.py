@@ -2008,6 +2008,14 @@ class RedSandSecureGUI(QMainWindow):
             QMessageBox.critical(self, "Ошибка", f"Файл не найден: {file_path}")
             return
 
+        # Проверка на уже запущенный анализ
+        if hasattr(self, 'worker_thread') and self.worker_thread and self.worker_thread.isRunning():
+            QMessageBox.warning(self, "Анализ выполняется", "Анализ уже запущен. Дождитесь завершения или остановите текущий анализ.")
+            return
+
+        # Полная очистка предыдущих объектов перед новым запуском
+        self._cleanup_worker(force=True)
+
         # Проверка предупреждения
         if not hasattr(self, '_warning_accepted'):
             reply = QMessageBox.question(
@@ -2056,8 +2064,8 @@ class RedSandSecureGUI(QMainWindow):
         self.worker.log_message.connect(self.log_message)
 
         # Очистка после завершения
-        self.worker.finished.connect(self._cleanup_worker)
-        self.worker.error.connect(self._cleanup_worker)
+        self.worker.finished.connect(lambda: self._cleanup_worker(force=False))
+        self.worker.error.connect(lambda: self._cleanup_worker(force=False))
 
         # Запуск
         self.worker_thread.start()
@@ -2128,15 +2136,21 @@ class RedSandSecureGUI(QMainWindow):
 
         QMessageBox.critical(self, "Ошибка анализа", error_msg)
         
-        # Очистка после ошибки
-        self._cleanup_worker()
 
-    def _cleanup_worker(self):
+    def _cleanup_worker(self, force=False):
         """Очистка worker объекта после завершения анализа."""
-        if hasattr(self, 'worker_thread') and self.worker_thread and self.worker_thread.isRunning():
-            self.worker_thread.quit()
-            self.worker_thread.wait(3000)
-        # Не удаляем worker, чтобы избежать проблем при повторном запуске
+        if hasattr(self, 'worker_thread') and self.worker_thread:
+            if self.worker_thread.isRunning():
+                self.worker_thread.quit()
+                self.worker_thread.wait(3000)
+                if self.worker_thread.isRunning():
+                    self.worker_thread.terminate()
+                    self.worker_thread.wait(1000)
+            
+            # Удаляем ссылки на worker и thread для предотвращения утечек
+            if hasattr(self, 'worker'):
+                self.worker = None
+            self.worker_thread = None
 
     def update_progress(self, value: int, message: str):
         """Обновление прогресс бара."""

@@ -1,1 +1,1 @@
-Nothing should be ignored based on the provided file changes, as they only include source code files (.py) without any build artifacts, dependencies, or temporary files.
+Nothing should be ignored in this case, as only a Python source file (`RedSand/gui/main_gui.py`) was modified and there are no build artifacts, dependencies, or temporary files in the changes.
