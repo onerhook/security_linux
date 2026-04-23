@@ -136,8 +136,9 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         border-radius: 12px;
         font-weight: bold;
         font-size: 16px;
-        min-width: 180px;
+        min-width: 200px;
         min-height: 50px;
+        max-width: 250px;
     }}
     QPushButton#actionBtn:hover {{
         background-color: {theme['accent_hover']};
@@ -456,13 +457,8 @@ class DetailedReportDialog(QDialog):
         risk_label.setAlignment(Qt.AlignCenter)
         risk_layout.addWidget(risk_label)
         
-        score_label = QLabel(f"Уровень риска: {risk_score}/100")
-        score_label.setStyleSheet(f"font-size: 20px; color: {risk_color};")
-        score_label.setAlignment(Qt.AlignCenter)
-        risk_layout.addWidget(score_label)
-        
         desc_label = QLabel(risk_desc)
-        desc_label.setStyleSheet("font-size: 16px; padding: 10px;")
+        desc_label.setStyleSheet("font-size: 18px; font-weight: bold; padding: 10px;")
         desc_label.setWordWrap(True)
         desc_label.setAlignment(Qt.AlignCenter)
         risk_layout.addWidget(desc_label)
@@ -479,7 +475,6 @@ class DetailedReportDialog(QDialog):
         items = [
             ("Тип угрозы:", threat_info.get('type', 'Неизвестно')),
             ("Семейство:", threat_info.get('family', 'Неизвестно')),
-            ("Доверие:", threat_info.get('confidence', 'Низкое')),
         ]
         
         for label_text, value in items:
@@ -491,6 +486,25 @@ class DetailedReportDialog(QDialog):
             info_layout.addWidget(lbl, row, 0)
             info_layout.addWidget(val, row, 1)
             row += 1
+        
+        # Добавляем подробное объяснение доверия
+        trust_label = QLabel("<b>Доверие к результату:</b>")
+        trust_label.setStyleSheet("font-weight: bold; font-size: 15px; margin-top: 10px;")
+        info_layout.addWidget(trust_label, row, 0, 1, 2)
+        row += 1
+        
+        confidence = threat_info.get('confidence', 'Низкое')
+        if confidence == 'Высокое' or confidence == 'высокое':
+            trust_desc = "<span style='color: #10B981;'>✅ Высокое доверие - результат анализа очень надежен, обнаружены четкие признаки угрозы</span>"
+        elif confidence == 'Среднее' or confidence == 'среднее':
+            trust_desc = "<span style='color: #F59E0B;'>⚠️ Среднее доверие - есть признаки угрозы, но требуются дополнительные проверки</span>"
+        else:
+            trust_desc = "<span style='color: #6B7280;'>ℹ️ Низкое доверие - признаков угрозы мало, файл скорее всего безопасен</span>"
+        
+        trust_val = QLabel(trust_desc)
+        trust_val.setStyleSheet("font-size: 14px; line-height: 1.6;")
+        trust_val.setWordWrap(True)
+        info_layout.addWidget(trust_val, row, 0, 1, 2)
         
         info_group.setLayout(info_layout)
         layout.addWidget(info_group)
@@ -864,6 +878,7 @@ class RedSandSecureGUI(QMainWindow):
         self.worker_thread: Optional[QThread] = None
         self.worker: Optional[AnalysisWorker] = None
         self.current_report: Optional[dict] = None
+        self.analysis_completed = False  # Флаг завершения анализа
         self.settings = {
             'timeout': 60, 'output_dir': 'reports', 'use_poly_default': False,
             'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная'
@@ -885,10 +900,7 @@ class RedSandSecureGUI(QMainWindow):
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
-        subtitle_label = QLabel("Простой анализ подозрительных файлов")
-        subtitle_label.setObjectName("subtitleLabel")
-        subtitle_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(subtitle_label)
+        # Убран подзаголовок для упрощения интерфейса
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
         line.setStyleSheet("background-color: #CCCCCC; min-height: 3px;")
@@ -957,16 +969,7 @@ class RedSandSecureGUI(QMainWindow):
         progress_layout.addWidget(self.progress_label)
         progress_group.setLayout(progress_layout)
         layout.addWidget(progress_group)
-        actions_layout = QHBoxLayout()
-        btn_settings = QPushButton("⚙ Настройки")
-        btn_settings.setObjectName("actionBtn")
-        btn_settings.clicked.connect(self.open_settings)
-        actions_layout.addWidget(btn_settings)
-        btn_reports = QPushButton("📂 Отчеты")
-        btn_reports.setObjectName("actionBtn")
-        btn_reports.clicked.connect(self.open_reports_folder)
-        actions_layout.addWidget(btn_reports)
-        layout.addLayout(actions_layout)
+        # Кнопки настроек и отчетов убраны для упрощения интерфейса
         layout.addStretch()
         return widget
 
@@ -1085,6 +1088,7 @@ class RedSandSecureGUI(QMainWindow):
 
     def analysis_finished(self, result: dict):
         self.current_report = result
+        self.analysis_completed = True  # Устанавливаем флаг завершения
         self.set_ui_enabled(True)
         self.progress_bar.setValue(100)
         self.progress_label.setText("Анализ завершен успешно!")
@@ -1181,16 +1185,16 @@ class RedSandSecureGUI(QMainWindow):
         self.network_check.setEnabled(enabled)
 
     def closeEvent(self, event):
-        # Проверяем, запущен ли анализ в данный момент
-        if self.worker_thread and self.worker_thread.isRunning():
-            # Если анализ завершен (progress_bar на 100%), не спрашиваем подтверждение
-            if self.progress_bar.value() >= 100:
-                # Останавливаем поток корректно
+        # Если анализ уже завершен, закрываем без вопросов
+        if self.analysis_completed:
+            if self.worker_thread and self.worker_thread.isRunning():
                 self.worker_thread.quit()
                 self.worker_thread.wait(1000)
-                event.accept()
-                return
-            
+            event.accept()
+            return
+        
+        # Проверяем, запущен ли анализ в данный момент
+        if self.worker_thread and self.worker_thread.isRunning():
             reply = QMessageBox.warning(
                 self, "Анализ выполняется",
                 "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
