@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v9.0 - Упрощенный интерфейс без системы доверия и баллов
-Современный дизайн с высоким контрастом, Drag&Drop, историей и мультиязычностью
-Запускать ТОЛЬКО в изолированной виртуальной машине!
+RedSand Secure GUI v10.0 - Исправленная версия
+- Исправлен вылет при повторном анализе
+- Черная строка состояния с белым текстом
+- Увеличенная таблица результатов
+- Исправлено перекрытие кнопок вкладок
+- Добавлен тип вируса Memory Injector
+- Запуск в полноэкранном режиме
 """
 
 import sys
@@ -201,12 +205,13 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        padding: 12px 24px;
+        padding: 16px 32px;
         font-weight: bold;
-        font-size: 15px;
+        font-size: 16px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-        margin-right: 3px;
+        margin-right: 5px;
+        min-width: 150px;
     }}
     QTabBar::tab:selected {{
         background-color: {theme['accent']};
@@ -300,9 +305,10 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         color: {theme['text_primary']};
     }}
     QStatusBar {{
-        background-color: {theme['bg_secondary']};
+        background-color: #000000;
+        color: #FFFFFF;
         border-top: 2px solid {theme['accent']};
-        font-weight: normal;
+        font-weight: bold;
         font-size: 14px;
     }}
     QTableWidget {{
@@ -311,10 +317,11 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         border: 2px solid {theme['bg_tertiary']};
         border-radius: 12px;
         gridline-color: {theme['bg_tertiary']};
-        font-size: 14px;
+        font-size: 16px;
     }}
     QTableWidget::item {{
-        padding: 10px;
+        padding: 14px;
+        min-height: 30px;
     }}
     QTableWidget::item:selected {{
         background-color: {theme['accent']};
@@ -362,6 +369,8 @@ class HistoryDialog(QDialog):
         self.history_file = Path(history_file)
         self.setWindowTitle("История сканирований" if parent and hasattr(parent, 'current_lang') and parent.current_lang == "Русский" else "Scan History")
         self.setMinimumSize(800, 600)
+        # Убираем вопросительный знак из заголовка окна
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
     
     def setup_ui(self):
@@ -482,6 +491,8 @@ class DetailedReportDialog(QDialog):
         self.report_data = report_data
         self.setWindowTitle("Результаты анализа безопасности")
         self.setMinimumSize(900, 700)
+        # Убираем вопросительный знак из заголовка окна
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
 
     def setup_ui(self):
@@ -847,6 +858,8 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.setWindowTitle("Настройки")
         self.setMinimumWidth(600)
+        # Убираем вопросительный знак из заголовка окна
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
 
     def setup_ui(self):
@@ -1199,6 +1212,10 @@ class RedSandSecureGUI(QMainWindow):
         if not os.path.exists(file_path):
             QMessageBox.critical(self, "Ошибка", f"Файл не найден: {file_path}")
             return
+        
+        # Сбрасываем флаг завершения перед новым анализом
+        self.analysis_completed = False
+        
         reply = QMessageBox.question(
             self, "Предупреждение о безопасности",
             "Вы запускаете анализ потенциально опасного файла!\n\n"
@@ -1207,6 +1224,14 @@ class RedSandSecureGUI(QMainWindow):
         )
         if reply == QMessageBox.No:
             return
+        
+        # Очищаем предыдущие результаты
+        self.current_report = None
+        self.results_table.setRowCount(0)
+        self.results_summary.setVisible(True)
+        self.results_table.setVisible(False)
+        self.log_text.clear()
+        
         self.settings['timeout'] = self.timeout_spin.value()
         self.settings['use_poly_default'] = self.poly_check.isChecked()
         self.settings['auto_disable_network'] = self.network_check.isChecked()
@@ -1367,10 +1392,10 @@ class RedSandSecureGUI(QMainWindow):
         self.update_status_bar()
 
     def update_status_bar(self):
-        """Обновить строку состояния - белый цвет текста"""
+        """Обновить строку состояния - черный цвет с белым текстом"""
         lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         msg = lang.get('file_placeholder', 'Ready')
-        self.status_bar.setStyleSheet("QStatusBar { background-color: #FFFFFF; color: #000000; font-weight: bold; font-size: 14px; }")
+        self.status_bar.setStyleSheet("QStatusBar { background-color: #000000; color: #FFFFFF; font-weight: bold; font-size: 14px; }")
         self.status_bar.showMessage(msg[:50] + "...")
 
     def set_ui_enabled(self, enabled: bool):
