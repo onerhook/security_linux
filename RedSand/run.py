@@ -50,7 +50,7 @@ def main():
             print(f"Вердикт: {result.threat_info.get('verdict', 'UNKNOWN')}")
             print(f"Тип угрозы: {result.threat_info.get('threat_type', 'N/A')}")
             print(f"Уровень опасности: {result.threat_info.get('severity', 'N/A')}")
-            print(f"Отчет сохранен в: {result.report_path}")
+            print(f"Отчеты сохранены в папке: {os.path.abspath(args.output)}")
         else:
             print(f"\n✗ Ошибка анализа: {result.error}")
             sys.exit(1)

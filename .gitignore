@@ -1,1 +1,6 @@
-Nothing should be ignored based on the provided file changes. The only modified file is a Python source file (`RedSand/gui/main_gui.py`), which should not be added to .gitignore.
+```
+# Reports and generated files
+RedSand/reports_gui/report_*.html
+RedSand/reports_gui/report_*.json
+RedSand/reports_gui/report_*.txt
+```
