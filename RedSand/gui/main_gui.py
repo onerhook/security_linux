@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v6.0 - Красивый и простой интерфейс для массового пользователя
-Современный дизайн с высоким контрастом, подробной справкой и интуитивным управлением
+RedSand Secure GUI v8.0 - Красивый и простой интерфейс для массового пользователя
+Современный дизайн с высоким контрастом, Drag&Drop, историей и мультиязычностью
 Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
 
@@ -20,37 +20,37 @@ from PyQt5.QtWidgets import (
     QMessageBox, QCheckBox, QSpinBox, QDialog,
     QDialogButtonBox, QLineEdit, QStatusBar,
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
-    QScrollArea, QGridLayout
+    QScrollArea, QGridLayout, QListWidget, QListWidgetItem
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl
-from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
+from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
 
 THEMES = {
     "Светлая": {
         "bg_primary": "#FFFFFF",
-        "bg_secondary": "#F5F7FA",
-        "bg_tertiary": "#E8ECF1",
-        "accent": "#2563EB",
-        "accent_hover": "#1D4ED8",
-        "text_primary": "#1F2937",
-        "text_secondary": "#6B7280",
+        "bg_secondary": "#F0F4F8",
+        "bg_tertiary": "#D9E2EC",
+        "accent": "#1E40AF",
+        "accent_hover": "#1E3A8A",
+        "text_primary": "#0F172A",
+        "text_secondary": "#475569",
+        "success": "#059669",
+        "warning": "#D97706",
+        "danger": "#DC2626",
+        "info": "#2563EB"
+    },
+    "Тёмная": {
+        "bg_primary": "#0F172A",
+        "bg_secondary": "#1E293B",
+        "bg_tertiary": "#334155",
+        "accent": "#3B82F6",
+        "accent_hover": "#2563EB",
+        "text_primary": "#F8FAFC",
+        "text_secondary": "#CBD5E1",
         "success": "#10B981",
         "warning": "#F59E0B",
         "danger": "#EF4444",
-        "info": "#3B82F6"
-    },
-    "Тёмная": {
-        "bg_primary": "#1F2937",
-        "bg_secondary": "#111827",
-        "bg_tertiary": "#374151",
-        "accent": "#3B82F6",
-        "accent_hover": "#2563EB",
-        "text_primary": "#F9FAFB",
-        "text_secondary": "#9CA3AF",
-        "success": "#34D399",
-        "warning": "#FBBF24",
-        "danger": "#F87171",
         "info": "#60A5FA"
     }
 }
@@ -58,45 +58,67 @@ THEMES = {
 LANGUAGES = {
     "Русский": {
         "title": "RedSand Secure",
-        "subtitle": "Простой анализ подозрительных файлов",
-        "step1": "Шаг 1: Выберите файл",
-        "step2": "Шаг 2: Настройки анализа",
         "select_file": "📁 Выбрать файл",
-        "file_placeholder": "Файл еще не выбран...",
+        "file_placeholder": "Файл еще не выбран... или перетащите его сюда",
         "analysis_time": "Время анализа:",
         "seconds": "сек",
-        "poly_check": "Создавать варианты файла для анализа",
-        "poly_tooltip": "Помогает обнаружить сложные вирусы путем создания модификаций файла",
-        "network_check": "Отключать сеть (рекомендуется)",
-        "network_tooltip": "Защищает вашу сеть во время анализа вредоносного ПО",
+        "poly_check": "Создавать варианты файла",
+        "network_check": "Отключать сеть",
         "analyze_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
-        "progress": "Прогресс анализа",
-        "waiting": "Ожидание запуска...",
         "settings": "⚙ Настройки",
         "reports": "📂 Отчеты",
-        "logs_tab": "📋 Журнал событий",
+        "history": "📜 История",
+        "logs_tab": "📋 Журнал",
         "results_tab": "📊 Результаты",
         "summary_tab": "🏠 Главная",
         "virus_info_tab": "🦠 О вирусе",
         "help_tab": "❓ Справка",
-        "logs_placeholder": "Здесь будет отображаться ход анализа в реальном времени...",
-        "results_placeholder": "Результаты анализа появятся здесь после завершения...",
-        "risk_level": "Уровень угрозы",
-        "virus_type": "Тип угрозы",
-        "family": "Семейство вируса",
-        "confidence": "Доверие к результату",
-        "file_name": "Имя файла",
-        "file_size": "Размер файла",
-        "detection_method": "Как мы обнаружили угрозу",
-        "recommendation": "Рекомендация",
         "safe": "БЕЗОПАСНО",
         "suspicious": "ПОДОЗРИТЕЛЬНО",
         "dangerous": "ОПАСНО",
-        "safe_desc": "Файл не содержит известных угроз. Можно использовать.",
-        "suspicious_desc": "ПОДОЗРИТЕЛЬНО, лучше не использовать. Файл содержит сомнительные элементы.",
-        "dangerous_desc": "ОПАСНО! Немедленно удалите файл. Обнаружен вирус.",
+        "safe_desc": "Файл не содержит угроз. Можно использовать.",
+        "suspicious_desc": "Лучше не использовать. Есть сомнения.",
+        "dangerous_desc": "Немедленно удалите! Обнаружен вирус.",
         "no_threat": "Угроз не обнаружено",
-        "unknown": "Неизвестно"
+        "unknown": "Неизвестно",
+        "drag_drop": "Перетащите файл сюда",
+        "scan_history": "История сканирований",
+        "date": "Дата",
+        "file": "Файл",
+        "verdict": "Вердикт",
+        "clear_history": "Очистить историю"
+    },
+    "English": {
+        "title": "RedSand Secure",
+        "select_file": "📁 Select File",
+        "file_placeholder": "No file selected... or drag and drop here",
+        "analysis_time": "Analysis time:",
+        "seconds": "sec",
+        "poly_check": "Create file variants",
+        "network_check": "Disable network",
+        "analyze_btn": "🚀 START ANALYSIS",
+        "settings": "⚙ Settings",
+        "reports": "📂 Reports",
+        "history": "📜 History",
+        "logs_tab": "📋 Logs",
+        "results_tab": "📊 Results",
+        "summary_tab": "🏠 Home",
+        "virus_info_tab": "🦠 About Virus",
+        "help_tab": "❓ Help",
+        "safe": "SAFE",
+        "suspicious": "SUSPICIOUS",
+        "dangerous": "DANGEROUS",
+        "safe_desc": "File contains no threats. Safe to use.",
+        "suspicious_desc": "Better not use. Some doubts exist.",
+        "dangerous_desc": "Delete immediately! Virus detected.",
+        "no_threat": "No threats detected",
+        "unknown": "Unknown",
+        "drag_drop": "Drag and drop file here",
+        "scan_history": "Scan History",
+        "date": "Date",
+        "file": "File",
+        "verdict": "Verdict",
+        "clear_history": "Clear History"
     }
 }
 
@@ -310,7 +332,97 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         border: none;
         background-color: transparent;
     }}
+    QListWidget {{
+        background-color: {theme['bg_primary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['bg_tertiary']};
+        border-radius: 12px;
+        padding: 10px;
+        font-size: 14px;
+    }}
+    QListWidget::item {{
+        padding: 12px;
+        border-bottom: 1px solid {theme['bg_tertiary']};
+    }}
+    QListWidget::item:selected {{
+        background-color: {theme['accent']};
+        color: #FFFFFF;
+    }}
+    QListWidget::item:hover {{
+        background-color: {theme['bg_tertiary']};
+    }}
     """
+
+
+class HistoryDialog(QDialog):
+    """Диалог истории сканирований"""
+    
+    def __init__(self, history_file: str = "scan_history.json", parent=None):
+        super().__init__(parent)
+        self.history_file = Path(history_file)
+        self.setWindowTitle("История сканирований" if parent and hasattr(parent, 'current_lang') and parent.current_lang == "Русский" else "Scan History")
+        self.setMinimumSize(800, 600)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        title = QLabel("📜 История сканирований")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        self.history_list = QListWidget()
+        self.load_history()
+        layout.addWidget(self.history_list)
+        
+        btn_layout = QHBoxLayout()
+        btn_clear = QPushButton("🗑 Очистить историю")
+        btn_clear.setObjectName("secondaryBtn")
+        btn_clear.clicked.connect(self.clear_history)
+        btn_layout.addWidget(btn_clear)
+        
+        btn_close = QPushButton("Закрыть")
+        btn_close.setObjectName("actionBtn")
+        btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(btn_close)
+        layout.addLayout(btn_layout)
+    
+    def load_history(self):
+        self.history_list.clear()
+        if self.history_file.exists():
+            try:
+                with open(self.history_file, 'r', encoding='utf-8') as f:
+                    history = json.load(f)
+                for entry in reversed(history[-50:]):  # Последние 50 записей
+                    date = entry.get('date', 'N/A')
+                    file_name = entry.get('file', 'N/A')
+                    verdict = entry.get('verdict', 'N/A')
+                    
+                    # Цвет вердикта
+                    if verdict == "ОПАСНО" or verdict == "DANGEROUS":
+                        color = "#EF4444"
+                    elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
+                        color = "#F59E0B"
+                    else:
+                        color = "#10B981"
+                    
+                    item_text = f"{date} | {os.path.basename(file_name)} | <span style='color:{color};font-weight:bold'>{verdict}</span>"
+                    item = QListWidgetItem(item_text)
+                    item.setData(Qt.UserRole, entry)
+                    self.history_list.addItem(item)
+            except Exception as e:
+                pass
+    
+    def clear_history(self):
+        reply = QMessageBox.question(self, "Подтверждение", "Удалить всю историю сканирований?", 
+                                     QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            if self.history_file.exists():
+                self.history_file.unlink()
+            self.load_history()
 
 
 class AnalysisWorker(QObject):
@@ -879,10 +991,13 @@ class RedSandSecureGUI(QMainWindow):
         self.worker: Optional[AnalysisWorker] = None
         self.current_report: Optional[dict] = None
         self.analysis_completed = False  # Флаг завершения анализа
+        self.current_lang = "Русский"  # Текущий язык
         self.settings = {
             'timeout': 60, 'output_dir': 'reports', 'use_poly_default': False,
-            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная'
+            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная',
+            'language': 'Русский'
         }
+        self.scan_history = []  # История сканирований
         self.setup_ui()
         self.apply_stylesheet()
         self.load_settings()
@@ -891,49 +1006,116 @@ class RedSandSecureGUI(QMainWindow):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
         self.setMinimumSize(1000, 700)
         self.resize(1100, 750)
+        
+        # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
+        central_widget.setAcceptDrops(True)
+        central_widget.dragEnterEvent = self.drag_enter_event
+        central_widget.dropEvent = self.drop_event
         self.setCentralWidget(central_widget)
+        
         main_layout = QVBoxLayout(central_widget)
         main_layout.setSpacing(20)
         main_layout.setContentsMargins(30, 30, 30, 30)
+        
+        # Верхняя панель с кнопками
+        top_panel = QHBoxLayout()
+        
+        # Выбор языка
+        lang_label = QLabel("Язык:")
+        top_panel.addWidget(lang_label)
+        self.lang_combo = QComboBox()
+        self.lang_combo.addItems(["Русский", "English"])
+        self.lang_combo.setCurrentText(self.current_lang)
+        self.lang_combo.currentTextChanged.connect(self.change_language)
+        self.lang_combo.setMinimumWidth(120)
+        top_panel.addWidget(self.lang_combo)
+        
+        top_panel.addStretch()
+        
+        # Кнопка настроек
+        btn_settings = QPushButton("⚙ Настройки")
+        btn_settings.setObjectName("secondaryBtn")
+        btn_settings.clicked.connect(self.open_settings)
+        top_panel.addWidget(btn_settings)
+        
+        # Кнопка отчетов
+        btn_reports = QPushButton("📂 Отчеты")
+        btn_reports.setObjectName("secondaryBtn")
+        btn_reports.clicked.connect(self.open_reports_folder)
+        top_panel.addWidget(btn_reports)
+        
+        # Кнопка истории
+        btn_history = QPushButton("📜 История")
+        btn_history.setObjectName("secondaryBtn")
+        btn_history.clicked.connect(self.open_history)
+        top_panel.addWidget(btn_history)
+        
+        main_layout.addLayout(top_panel)
+        
         title_label = QLabel("RedSand Secure")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         main_layout.addWidget(title_label)
-        # Убран подзаголовок для упрощения интерфейса
+        
         line = QFrame()
         line.setFrameShape(QFrame.HLine)
         line.setStyleSheet("background-color: #CCCCCC; min-height: 3px;")
         main_layout.addWidget(line)
+        
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(self.create_left_panel())
         splitter.addWidget(self.create_right_panel())
         splitter.setStretchFactor(0, 1)
         splitter.setStretchFactor(1, 2)
         main_layout.addWidget(splitter)
+        
         self.status_bar = QStatusBar()
         self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Готов к работе. Выберите файл для анализа.")
+        self.update_status_bar()
+
+    def drag_enter_event(self, event: QDragEnterEvent):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+    
+    def drop_event(self, event: QDropEvent):
+        for url in event.mimeData().urls():
+            file_path = url.toLocalFile()
+            if os.path.isfile(file_path):
+                self.file_path_edit.setText(file_path)
+                self.log_message('INFO', f"Файл перетащен: {file_path}")
+                break
 
     def create_left_panel(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setSpacing(20)
+        
         file_group = QGroupBox("Шаг 1: Выберите файл")
         file_layout = QVBoxLayout()
+        
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText("Файл еще не выбран...")
+        lang = self.settings.get('language', 'Русский')
+        if lang == 'Русский':
+            placeholder = "Файл еще не выбран... или перетащите сюда"
+        else:
+            placeholder = "No file selected... or drag and drop here"
+        self.file_path_edit.setPlaceholderText(placeholder)
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
+        
         btn_select_file = QPushButton("📁 Выбрать файл")
         btn_select_file.setObjectName("actionBtn")
         btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(btn_select_file)
+        
         file_group.setLayout(file_layout)
         layout.addWidget(file_group)
+        
         settings_group = QGroupBox("Шаг 2: Настройки (необязательно)")
         settings_layout = QVBoxLayout()
+        
         timeout_layout = QHBoxLayout()
         timeout_layout.addWidget(QLabel("Время анализа:"))
         self.timeout_spin = QSpinBox()
@@ -944,19 +1126,24 @@ class RedSandSecureGUI(QMainWindow):
         timeout_layout.addWidget(QLabel("сек"))
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
+        
         self.poly_check = QCheckBox("Создавать варианты файла для анализа")
         self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
         settings_layout.addWidget(self.poly_check)
+        
         self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
         self.network_check.setChecked(True)
         self.network_check.setToolTip("Защищает вашу сеть во время анализа")
         settings_layout.addWidget(self.network_check)
+        
         settings_group.setLayout(settings_layout)
         layout.addWidget(settings_group)
+        
         self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
+        
         progress_group = QGroupBox("Прогресс")
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
@@ -969,7 +1156,7 @@ class RedSandSecureGUI(QMainWindow):
         progress_layout.addWidget(self.progress_label)
         progress_group.setLayout(progress_layout)
         layout.addWidget(progress_group)
-        # Кнопки настроек и отчетов убраны для упрощения интерфейса
+        
         layout.addStretch()
         return widget
 
@@ -1095,7 +1282,23 @@ class RedSandSecureGUI(QMainWindow):
         self.update_results_display(result)
         self.log_message('SUCCESS', "Анализ завершен успешно!")
         self.status_bar.showMessage("Анализ завершен")
+        
+        # Сохраняем в историю
         if result:
+            threat_info = result.get('threat_info') or {}
+            risk_score = threat_info.get('risk_score', 0) if isinstance(threat_info, dict) else 0
+            
+            # Определяем вердикт
+            if risk_score >= 70:
+                verdict = "ОПАСНО" if self.current_lang == "Русский" else "DANGEROUS"
+            elif risk_score >= 40:
+                verdict = "ПОДОЗРИТЕЛЬНО" if self.current_lang == "Русский" else "SUSPICIOUS"
+            else:
+                verdict = "БЕЗОПАСНО" if self.current_lang == "Русский" else "SAFE"
+            
+            file_path = self.file_path_edit.text()
+            self.save_to_history(file_path, verdict)
+            
             dialog = DetailedReportDialog(result, self)
             dialog.exec_()
 
@@ -1153,12 +1356,12 @@ class RedSandSecureGUI(QMainWindow):
             dialog = SettingsDialog(self)
             if dialog.exec_() == QDialog.Accepted:
                 settings = dialog.get_settings()
-                old_theme = self.settings.get('theme', 'Светлая')
+                old_theme = self.settings.get('theme', 'Тёмная')
                 self.settings.update(settings)
                 self.save_settings()
                 
                 # Если тема изменилась, применяем новую
-                new_theme = self.settings.get('theme', 'Светлая')
+                new_theme = self.settings.get('theme', 'Тёмная')
                 if old_theme != new_theme:
                     self.setStyleSheet(generate_stylesheet(new_theme))
                     self.settings['_current_theme'] = new_theme
@@ -1177,12 +1380,61 @@ class RedSandSecureGUI(QMainWindow):
             self.log_message('ERROR', f"Ошибка открытия папки: {e}")
             QMessageBox.warning(self, "Предупреждение", f"Не удалось открыть папку.\nПуть: {reports_dir.absolute()}")
 
+    def open_history(self):
+        """Открыть диалог истории сканирований"""
+        try:
+            dialog = HistoryDialog(parent=self)
+            dialog.exec_()
+        except Exception as e:
+            self.log_message('ERROR', f"Ошибка открытия истории: {e}")
+
+    def change_language(self, language: str):
+        """Сменить язык интерфейса"""
+        self.current_lang = language
+        self.settings['language'] = language
+        self.save_settings()
+        # Здесь можно добавить полную локализацию интерфейса
+        self.log_message('INFO', f"Язык изменен на: {language}")
+
+    def update_status_bar(self):
+        """Обновить строку состояния"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        msg = lang.get('file_placeholder', 'Ready')
+        self.status_bar.showMessage(msg[:50] + "...")
+
     def set_ui_enabled(self, enabled: bool):
         self.btn_analyze.setEnabled(enabled)
         self.file_path_edit.setEnabled(enabled)
         self.timeout_spin.setEnabled(enabled)
         self.poly_check.setEnabled(enabled)
         self.network_check.setEnabled(enabled)
+
+    def save_to_history(self, file_path: str, verdict: str):
+        """Сохранить результат в историю"""
+        entry = {
+            'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'file': file_path,
+            'verdict': verdict
+        }
+        self.scan_history.append(entry)
+        
+        # Сохраняем в файл
+        history_file = Path("scan_history.json")
+        if history_file.exists():
+            try:
+                with open(history_file, 'r', encoding='utf-8') as f:
+                    history = json.load(f)
+            except:
+                history = []
+        else:
+            history = []
+        
+        history.append(entry)
+        # Храним только последние 100 записей
+        history = history[-100:]
+        
+        with open(history_file, 'w', encoding='utf-8') as f:
+            json.dump(history, f, indent=2, ensure_ascii=False)
 
     def closeEvent(self, event):
         # Если анализ уже завершен, закрываем без вопросов
