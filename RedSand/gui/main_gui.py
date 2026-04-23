@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v8.0 - Красивый и простой интерфейс для массового пользователя
+RedSand Secure GUI v9.0 - Упрощенный интерфейс без системы доверия и баллов
 Современный дизайн с высоким контрастом, Drag&Drop, историей и мультиязычностью
 Запускать ТОЛЬКО в изолированной виртуальной машине!
 """
@@ -599,25 +599,6 @@ class DetailedReportDialog(QDialog):
             info_layout.addWidget(val, row, 1)
             row += 1
         
-        # Добавляем подробное объяснение доверия
-        trust_label = QLabel("<b>Доверие к результату:</b>")
-        trust_label.setStyleSheet("font-weight: bold; font-size: 15px; margin-top: 10px;")
-        info_layout.addWidget(trust_label, row, 0, 1, 2)
-        row += 1
-        
-        confidence = threat_info.get('confidence', 'Низкое')
-        if confidence == 'Высокое' or confidence == 'высокое':
-            trust_desc = "<span style='color: #10B981;'>✅ Высокое доверие - результат анализа очень надежен, обнаружены четкие признаки угрозы</span>"
-        elif confidence == 'Среднее' or confidence == 'среднее':
-            trust_desc = "<span style='color: #F59E0B;'>⚠️ Среднее доверие - есть признаки угрозы, но требуются дополнительные проверки</span>"
-        else:
-            trust_desc = "<span style='color: #6B7280;'>ℹ️ Низкое доверие - признаков угрозы мало, файл скорее всего безопасен</span>"
-        
-        trust_val = QLabel(trust_desc)
-        trust_val.setStyleSheet("font-size: 14px; line-height: 1.6;")
-        trust_val.setWordWrap(True)
-        info_layout.addWidget(trust_val, row, 0, 1, 2)
-        
         info_group.setLayout(info_layout)
         layout.addWidget(info_group)
         
@@ -645,23 +626,24 @@ class DetailedReportDialog(QDialog):
         virus_name = threat_info.get('type', 'Неизвестно')
         virus_family = threat_info.get('family', 'Неизвестно')
         risk_score = threat_info.get('risk_score', 0)
-        confidence = threat_info.get('confidence', 'Низкое')
         
-        # Расшифровка уровня доверия
-        confidence_explanation = ""
-        if confidence == 'Высокое' or confidence == 'высокое':
-            confidence_explanation = "<span style='color: #10B981; font-weight: bold;'>Высокое доверие</span> - результат анализа очень надежен, обнаружены четкие признаки угрозы"
-        elif confidence == 'Среднее' or confidence == 'среднее':
-            confidence_explanation = "<span style='color: #F59E0B; font-weight: bold;'>Среднее доверие</span> - есть признаки угрозы, но требуются дополнительные проверки"
+        # Определяем вердикт без баллов
+        if risk_score >= 70:
+            verdict_text = "<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>🚨 ОПАСНО - Немедленно удалите файл!</span>"
+            verdict_desc = "Обнаружен вирус. Файл представляет серьезную угрозу для вашей системы."
+        elif risk_score >= 40:
+            verdict_text = "<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>⚠️ ПОДОЗРИТЕЛЬНО - Лучше не использовать</span>"
+            verdict_desc = "Файл содержит подозрительные элементы. Рекомендуется воздержаться от использования."
         else:
-            confidence_explanation = "<span style='color: #6B7280; font-weight: bold;'>Низкое доверие</span> - признаков угрозы мало, результат может быть ложноположительным"
+            verdict_text = "<span style='color: #10B981; font-size: 20px; font-weight: bold;'>✅ БЕЗОПАСНО - Можно использовать</span>"
+            verdict_desc = "Угроз не обнаружено. Файл прошел все проверки безопасности."
         
         info_text = f"""
         <div style='font-size: 16px; line-height: 2.0;'>
         <b>📛 Название угрозы:</b> {virus_name}<br><br>
         <b>🧬 Семейство вирусов:</b> {virus_family}<br><br>
-        <b>⚠️ Уровень опасности:</b> <span style='font-size: 18px; color: {"#EF4444" if risk_score >= 70 else "#F59E0B" if risk_score >= 40 else "#10B981"};'>{risk_score}/100</span><br><br>
-        <b>🎯 Доверие к результату:</b> {confidence_explanation}<br><br>
+        {verdict_text}<br><br>
+        <b>📝 Описание:</b> {verdict_desc}<br><br>
         </div>
         """
         info_label = QLabel(info_text)
@@ -671,38 +653,6 @@ class DetailedReportDialog(QDialog):
         
         virus_group.setLayout(virus_layout)
         layout.addWidget(virus_group)
-        
-        # Что такое доверие - подробное объяснение
-        trust_group = QGroupBox("❓ Что такое \"Доверие\"?")
-        trust_layout = QVBoxLayout()
-        trust_text = QLabel("""
-        <div style='font-size: 15px; line-height: 1.8;'>
-        <b>Доверие</b> - это показатель надежности результата анализа.<br><br>
-        
-        🔹 <b>Высокое доверие (70-100%)</b>:<br>
-        • Обнаружены четкие сигнатуры известного вируса<br>
-        • Поведенческий анализ подтвердил вредоносные действия<br>
-        • Множественные эвристические проверки указывают на угрозу<br>
-        • Можно с уверенностью считать файл опасным<br><br>
-        
-        🔸 <b>Среднее доверие (40-69%)</b>:<br>
-        • Обнаружены подозрительные элементы, но не все проверки положительны<br>
-        • Файл содержит необычный код, но не явные вирусы<br>
-        • Рекомендуется дополнительная проверка в другой среде<br>
-        • Может быть как угрозой, так и ложной тревогой<br><br>
-        
-        ⚪ <b>Низкое доверие (0-39%)</b>:<br>
-        • Минимальное количество подозрительных признаков<br>
-        • Скорее всего файл безопасен<br>
-        • Результат может быть ложноположительным<br>
-        • Стандартные меры предосторожности достаточны
-        </div>
-        """)
-        trust_text.setWordWrap(True)
-        trust_text.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        trust_layout.addWidget(trust_text)
-        trust_group.setLayout(trust_layout)
-        layout.addWidget(trust_group)
         
         # Как обнаружили - максимально подробно
         detection_group = QGroupBox("🔍 Как мы обнаружили эту угрозу")
@@ -858,13 +808,14 @@ class DetailedReportDialog(QDialog):
              "<b>ВАЖНО:</b> Всегда запускайте анализ потенциально опасных файлов только в изолированной виртуальной машине! Это защитит вашу основную систему от возможного заражения."),
             
             ("📊 Понимание результатов",
-             "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз<br>"
-             "<b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы, лучше не использовать<br>"
-             "<b>ОПАСНО (красный)</b> - Обнаружен вирус, немедленно удалите файл<br><br>"
-             "<b>Система оценки:</b> Программа оценивает угрозу по шкале от 0 до 100 баллов.<br>"
-             "• 0-39 баллов: БЕЗОПАСНО - файл прошел все проверки<br>"
-             "• 40-69 баллов: ПОДОЗРИТЕЛЬНО - есть сомнения в безопасности<br>"
-             "• 70-100 баллов: ОПАСНО - обнаружены явные признаки вируса"),
+             "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз. Можно использовать.<br>"
+             "<b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы. Лучше не использовать.<br>"
+             "<b>ОПАСНО (красный)</b> - Обнаружен вирус. Немедленно удалите файл!<br><br>"
+             "<b>Как мы определяем угрозу:</b><br>"
+             "• Статический анализ - проверка сигнатур вирусов в базе данных<br>"
+             "• Поведенческий анализ - наблюдение за действиями файла в изолированной среде<br>"
+             "• Эвристический анализ - поиск подозрительных паттернов в коде<br>"
+             "• Анализ метаданных - проверка информации о файле"),
             
             ("⚙️ Настройки анализа",
              "<b>Время анализа</b> - максимальное время проверки файла<br>"
@@ -1004,8 +955,8 @@ class RedSandSecureGUI(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
-        self.setMinimumSize(1000, 700)
-        self.resize(1100, 750)
+        # Запуск в полноэкранном режиме в окне (maximized)
+        self.setWindowState(Qt.WindowMaximized)
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1194,6 +1145,9 @@ class RedSandSecureGUI(QMainWindow):
         self.results_table.setColumnCount(2)
         self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        # Запрет редактирования таблицы
+        self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.results_table.setVisible(False)
         layout.addWidget(self.results_table)
         return widget
@@ -1340,8 +1294,6 @@ class RedSandSecureGUI(QMainWindow):
         data = [
             ("Тип угрозы", threat_info.get('type', 'Неизвестно')),
             ("Семейство", threat_info.get('family', 'Неизвестно')),
-            ("Уровень риска", f"{threat_info.get('risk_score', 0)}/100"),
-            ("Доверие", threat_info.get('confidence', 'Низкое')),
             ("Имя файла", file_name),
             ("Размер файла", f"{file_size} байт"),
         ]
@@ -1389,17 +1341,36 @@ class RedSandSecureGUI(QMainWindow):
             self.log_message('ERROR', f"Ошибка открытия истории: {e}")
 
     def change_language(self, language: str):
-        """Сменить язык интерфейса"""
+        """Сменить язык интерфейса - полная локализация"""
         self.current_lang = language
         self.settings['language'] = language
         self.save_settings()
-        # Здесь можно добавить полную локализацию интерфейса
+        
+        # Получаем переводы
+        lang_data = LANGUAGES.get(language, LANGUAGES["Русский"])
+        
+        # Обновляем все текстовые элементы
+        self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
+        self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
+        self.btn_analyze.setText(lang_data.get('analyze_btn', '🚀 START ANALYSIS'))
+        self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:') + " (sec)")
+        self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
+        self.network_check.setText(lang_data.get('network_check', 'Disable network'))
+        
+        # Обновляем заголовки вкладок
+        for i in range(self.tabs.count()):
+            tab = self.tabs.widget(i)
+            if hasattr(tab, '_tab_name'):
+                self.tabs.setTabText(i, tab._tab_name)
+        
         self.log_message('INFO', f"Язык изменен на: {language}")
+        self.update_status_bar()
 
     def update_status_bar(self):
-        """Обновить строку состояния"""
+        """Обновить строку состояния - белый цвет текста"""
         lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         msg = lang.get('file_placeholder', 'Ready')
+        self.status_bar.setStyleSheet("QStatusBar { background-color: #FFFFFF; color: #000000; font-weight: bold; font-size: 14px; }")
         self.status_bar.showMessage(msg[:50] + "...")
 
     def set_ui_enabled(self, enabled: bool):
