@@ -1,0 +1,143 @@
+{
+  "file": {
+    "path": "samples/poly_variant_3_DI726H.exe",
+    "name": "poly_variant_3_DI726H.exe",
+    "size": 353
+  },
+  "static_analysis": {
+    "file_path": "samples/poly_variant_3_DI726H.exe",
+    "file_name": "poly_variant_3_DI726H.exe",
+    "file_size": 353,
+    "file_hash": "275096c5f513df3d7005a2e0e4bbc4f7e02ebc16732ae3380ced6ff290d1bc55",
+    "is_malicious": true,
+    "is_suspicious": false,
+    "threat_level": "MALICIOUS",
+    "risk_score": 100,
+    "detected_threats": [
+      "Malicious patterns detected: 3"
+    ],
+    "matched_signatures": [
+      "Polymorphic sample detected: RAT"
+    ],
+    "matched_patterns": [],
+    "recommendations": [
+      "🚨 Немедленно удалите этот файл!",
+      "🔒 Проверьте систему полным антивирусным сканированием",
+      "📋 Сохраните образец для дальнейшего анализа",
+      "🛡️ Проверьте точки восстановления системы"
+    ],
+    "preliminary_threat_type": "MALWARE",
+    "hashes": {
+      "sha256": "275096c5f513df3d7005a2e0e4bbc4f7e02ebc16732ae3380ced6ff290d1bc55"
+    }
+  },
+  "dynamic_analysis": [
+    {
+      "error": "[Errno 2] No such file or directory: 'samples/poly_variant_3_DI726H.exe'"
+    }
+  ],
+  "threat_classification": {
+    "type": "MINER",
+    "family": "XMRig",
+    "risk_score": 97,
+    "confidence": "HIGH",
+    "mitre_tactics": [
+      "TA0004 - Privilege Escalation",
+      "T1496 - Resource Hijacking"
+    ],
+    "all_scores": {
+      "RANSOMWARE": 66,
+      "STEALER": 62,
+      "MINER": 97,
+      "RAT": 64,
+      "WORM": 56,
+      "BOTNET": 61,
+      "ROOTKIT": 68,
+      "SPYWARE": 59,
+      "ADWARE": 31,
+      "TROJAN": 57,
+      "DROPPER": 54,
+      "KEYLOGGER": 60
+    },
+    "behaviors_detected": [],
+    "api_calls_detected": [],
+    "network_indicators_detected": [],
+    "detailed_analysis": {
+      "RANSOMWARE": {
+        "score": 66,
+        "indicators": [],
+        "base_risk": 95
+      },
+      "STEALER": {
+        "score": 62,
+        "indicators": [],
+        "base_risk": 90
+      },
+      "MINER": {
+        "score": 97,
+        "indicators": [
+          "static_type_match",
+          "malicious_indicator_match"
+        ],
+        "base_risk": 75
+      },
+      "RAT": {
+        "score": 64,
+        "indicators": [],
+        "base_risk": 92
+      },
+      "WORM": {
+        "score": 56,
+        "indicators": [],
+        "base_risk": 80
+      },
+      "BOTNET": {
+        "score": 61,
+        "indicators": [],
+        "base_risk": 88
+      },
+      "ROOTKIT": {
+        "score": 68,
+        "indicators": [],
+        "base_risk": 98
+      },
+      "SPYWARE": {
+        "score": 59,
+        "indicators": [],
+        "base_risk": 85
+      },
+      "ADWARE": {
+        "score": 31,
+        "indicators": [],
+        "base_risk": 45
+      },
+      "TROJAN": {
+        "score": 57,
+        "indicators": [],
+        "base_risk": 82
+      },
+      "DROPPER": {
+        "score": 54,
+        "indicators": [],
+        "base_risk": 78
+      },
+      "KEYLOGGER": {
+        "score": 60,
+        "indicators": [],
+        "base_risk": 87
+      }
+    },
+    "preliminary_type": "MALWARE",
+    "static_type": "MINER"
+  },
+  "analysis_time": {
+    "start": "2026-04-23T14:13:21.927791",
+    "end": "2026-04-23T14:13:21.928785",
+    "duration": 0.000999
+  },
+  "system_info": {
+    "network_disabled": false,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}

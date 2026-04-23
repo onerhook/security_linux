@@ -1,0 +1,50 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-23 14:12:48
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: fake_trojan_BXW7OP.exe
+Путь: samples/fake_trojan_BXW7OP.exe
+Размер: 697 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: TROJAN
+Семейство: Zeus
+Уровень риска: 100/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+TA0002 - Execution, T1204 - User Execution
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_path: samples/fake_trojan_BXW7OP.exe
+file_name: fake_trojan_BXW7OP.exe
+file_size: 697
+file_hash: 7eff2ff4189599a4809be749ee1a38a6d30df4b2130cfa70abeadfc06d12b75a
+is_malicious: True
+is_suspicious: False
+threat_level: MALICIOUS
+risk_score: 100
+detected_threats: ['Malicious patterns detected: 15']
+matched_signatures: ['Malicious pattern: CreateRemoteThread\\s*\\(\\s*NULL', 'Malicious pattern: VirtualAllocEx\\s*\\([^)]*PAGE_EXECUTE_READWRITE', 'Threat indicator: THREAT_TYPE: TROJAN', 'Threat indicator: Mock indicator: CreateRemoteThread(NULL, hProcess, lpStartAddress)', 'Threat indicator: Mock indicator: VirtualAllocEx(hProcess, NULL, dwSize, MEM_COMMIT,', 'Threat indicator: Mock indicator: WriteProcessMemory(hProcess, lpBaseAddress, buffer', 'Threat indicator: Mock indicator: URLDownloadToFile(NULL, "http://c2server.com/paylo', 'Threat indicator: Mock indicator: RegSetValueEx("HKCU\\\\Software\\\\Microsoft\\\\Windows\\', 'Threat indicator: Signature: trojan_payload', 'Threat indicator: Signature: dropper_downloader', 'Threat indicator: Signature: remote_access', 'Threat indicator: Signature: backdoor_shell', 'Threat indicator: Signature: credential_theft', 'Explicit threat type declared: TROJAN']
+matched_patterns: []
+recommendations: ['🚨 Немедленно удалите этот файл!', '🔒 Проверьте систему полным антивирусным сканированием', '📋 Сохраните образец для дальнейшего анализа', '🛡️ Проверьте точки восстановления системы']
+preliminary_threat_type: MALWARE
+hashes: {'sha256': '7eff2ff4189599a4809be749ee1a38a6d30df4b2130cfa70abeadfc06d12b75a'}
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+command_execution
+
+======================================================================
+Конец отчета
+======================================================================

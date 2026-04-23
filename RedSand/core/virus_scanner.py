@@ -377,9 +377,9 @@ class VirusScanner:
         poly_indicators = [
             r'POLYMORPHIC_SAMPLE',  # Маркер полиморфного образца
             r'METAMORPHIC_CODE',    # Маркер метамофрного кода
-            r'Encryption:\\s*XOR_MOCK',  # Маркер шифрования
-            r'Decryption_Routine:\\s*SIMULATED',  # Маркер декодера
-            r'Variant:\\s*\\d+',  # Номер варианта
+            r'Encryption:\s*XOR_MOCK',  # Маркер шифрования
+            r'Decryption_Routine:\s*SIMULATED',  # Маркер декодера
+            r'Variant:\s*\d+',  # Номер варианта
         ]
         
         # Считаем количество индикаторов полиморфного образца
@@ -420,10 +420,12 @@ class VirusScanner:
             if re.search(pattern, content, re.IGNORECASE):
                 return threat_type
         
-        # Если не нашли явного типа, пробуем определить по контексту "SAFE polymorphic test file"
-        # В этом случае возвращаем MALWARE как общий тип для полиморфных образцов
+        # Если не нашли явного типа, проверяем контекст "SAFE polymorphic test file"
+        # В этом случае определяем тип по дополнительным эвристикам
         if re.search(r'SAFE polymorphic test file|NOT REAL MALWARE', content, re.IGNORECASE):
-            return 'MALWARE'
+            # Полиморфные образцы без явного типа угрозы считаем TROJAN по умолчанию
+            # так как это наиболее распространенный тип для полиморфных вариаций
+            return 'TROJAN'
         
         # Если не нашли, возвращаем None
         return None

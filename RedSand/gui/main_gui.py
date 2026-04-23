@@ -2055,6 +2055,10 @@ class RedSandSecureGUI(QMainWindow):
         self.worker.error.connect(self.analysis_error)
         self.worker.log_message.connect(self.log_message)
 
+        # Очистка после завершения
+        self.worker.finished.connect(self._cleanup_worker)
+        self.worker.error.connect(self._cleanup_worker)
+
         # Запуск
         self.worker_thread.start()
 
@@ -2123,6 +2127,16 @@ class RedSandSecureGUI(QMainWindow):
         self.status_bar.showMessage("Ошибка анализа")
 
         QMessageBox.critical(self, "Ошибка анализа", error_msg)
+        
+        # Очистка после ошибки
+        self._cleanup_worker()
+
+    def _cleanup_worker(self):
+        """Очистка worker объекта после завершения анализа."""
+        if hasattr(self, 'worker_thread') and self.worker_thread and self.worker_thread.isRunning():
+            self.worker_thread.quit()
+            self.worker_thread.wait(3000)
+        # Не удаляем worker, чтобы избежать проблем при повторном запуске
 
     def update_progress(self, value: int, message: str):
         """Обновление прогресс бара."""
