@@ -91,7 +91,6 @@ LANGUAGES = {
         "results_tab": "📊 Результаты",
         "summary_tab": "🏠 Главная",
         "virus_info_tab": "🦠 О вирусе",
-        "hashes_tab": "#️⃣ Хеши файла",
         "help_tab": "❓ Справка",
         "logs_placeholder": "Здесь будет отображаться ход анализа в реальном времени...",
         "results_placeholder": "Результаты анализа появятся здесь после завершения...",
@@ -407,10 +406,6 @@ class DetailedReportDialog(QDialog):
         virus_widget = self.create_virus_info_tab()
         tabs.addTab(virus_widget, "🦠 О вирусе")
         
-        # Вкладка хешей
-        hashes_widget = self.create_hashes_tab()
-        tabs.addTab(hashes_widget, "#️⃣ Хеши файла")
-        
         # Вкладка справки
         help_widget = self.create_help_tab()
         tabs.addTab(help_widget, "❓ Справка")
@@ -630,63 +625,6 @@ class DetailedReportDialog(QDialog):
         layout.addStretch()
         return scroll
 
-    def create_hashes_tab(self) -> QWidget:
-        widget = QWidget()
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(widget)
-        
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(15)
-        layout.setContentsMargins(15, 15, 15, 15)
-        
-        static_data = self.report_data.get('static_results') or {}
-        hashes = static_data.get('hashes', {}) if static_data else {}
-        
-        if hashes:
-            hash_group = QGroupBox("🔐 Криптографические хеши файла")
-            hash_layout = QVBoxLayout()
-            hash_layout.setSpacing(12)
-            
-            for hash_type, hash_value in hashes.items():
-                hash_card = QGroupBox(hash_type.upper())
-                hash_card.setStyleSheet("""
-                    QGroupBox {
-                        background-color: #F3F4F6;
-                        border: 2px solid #D1D5DB;
-                        border-radius: 10px;
-                        margin-top: 10px;
-                        padding-top: 10px;
-                    }
-                    QGroupBox::title {
-                        subcontrol-origin: margin;
-                        left: 10px;
-                        color: #6B7280;
-                        font-size: 14px;
-                    }
-                """)
-                card_layout = QVBoxLayout()
-                
-                hash_label = QLabel(hash_value)
-                hash_label.setStyleSheet("font-size: 14px; font-family: 'Consolas', monospace; background-color: white; padding: 10px; border-radius: 5px;")
-                hash_label.setTextInteractionFlags(Qt.TextSelectableByMouse | Qt.TextEditable)
-                hash_label.setWordWrap(True)
-                card_layout.addWidget(hash_label)
-                
-                hash_card.setLayout(card_layout)
-                hash_layout.addWidget(hash_card)
-            
-            hash_group.setLayout(hash_layout)
-            layout.addWidget(hash_group)
-        else:
-            info_label = QLabel("ℹ️ Хеши не найдены или анализ еще не завершен")
-            info_label.setAlignment(Qt.AlignCenter)
-            info_label.setStyleSheet("font-size: 18px; color: #6B7280; padding: 50px;")
-            layout.addWidget(info_label)
-        
-        layout.addStretch()
-        return scroll
-
     def create_help_tab(self) -> QWidget:
         widget = QWidget()
         scroll = QScrollArea()
@@ -721,15 +659,17 @@ class DetailedReportDialog(QDialog):
             ("📊 Понимание результатов",
              "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз<br>"
              "<b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы, лучше не использовать<br>"
-             "<b>ОПАСНО (красный)</b> - Обнаружен вирус, немедленно удалите файл"),
-            
-            ("🔍 Что такое хеши?",
-             "Хеши - это уникальные цифровые отпечатки файла. Они используются для идентификации файла и проверки его целостности. По хешам можно найти информацию о файле в базах данных угроз."),
+             "<b>ОПАСНО (красный)</b> - Обнаружен вирус, немедленно удалите файл<br><br>"
+             "<b>Система оценки:</b> Программа оценивает угрозу по шкале от 0 до 100 баллов.<br>"
+             "• 0-39 баллов: БЕЗОПАСНО - файл прошел все проверки<br>"
+             "• 40-69 баллов: ПОДОЗРИТЕЛЬНО - есть сомнения в безопасности<br>"
+             "• 70-100 баллов: ОПАСНО - обнаружены явные признаки вируса"),
             
             ("⚙️ Настройки анализа",
              "<b>Время анализа</b> - максимальное время проверки файла<br>"
              "<b>Создавать варианты файла</b> - генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-             "<b>Отключать сеть</b> - защищает вашу сеть во время анализа (рекомендуется)")
+             "<b>Отключать сеть</b> - защищает вашу сеть во время анализа (рекомендуется)<br>"
+             "<b>Тема оформления</b> - выберите удобную для вас цветовую схему")
         ]
         
         for title, content in sections:
