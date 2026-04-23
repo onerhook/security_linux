@@ -205,13 +205,14 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        padding: 16px 32px;
+        padding: 18px 40px;
         font-weight: bold;
-        font-size: 16px;
+        font-size: 17px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-        margin-right: 5px;
-        min-width: 150px;
+        margin-right: 8px;
+        min-width: 160px;
+        min-height: 55px;
     }}
     QTabBar::tab:selected {{
         background-color: {theme['accent']};
@@ -320,8 +321,9 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         font-size: 16px;
     }}
     QTableWidget::item {{
-        padding: 14px;
-        min-height: 30px;
+        padding: 18px;
+        min-height: 45px;
+        border-bottom: 2px solid {theme['bg_tertiary']};
     }}
     QTableWidget::item:selected {{
         background-color: {theme['accent']};
@@ -968,8 +970,8 @@ class RedSandSecureGUI(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
-        # Запуск в полноэкранном режиме в окне (maximized)
-        self.setWindowState(Qt.WindowMaximized)
+        # Запуск в полноэкранном режиме (maximized)
+        self.showMaximized()
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1130,9 +1132,13 @@ class RedSandSecureGUI(QMainWindow):
         layout.setSpacing(20)
         self.tabs = QTabWidget()
         logs_widget = self.create_logs_tab()
-        self.tabs.addTab(logs_widget, "📋 Журнал событий")
+        logs_widget._tab_name_ru = "📋 Журнал"
+        logs_widget._tab_name_en = "📋 Logs"
+        self.tabs.addTab(logs_widget, logs_widget._tab_name_ru)
         results_widget = self.create_results_tab()
-        self.tabs.addTab(results_widget, "📊 Результаты")
+        results_widget._tab_name_ru = "📊 Результаты"
+        results_widget._tab_name_en = "📊 Results"
+        self.tabs.addTab(results_widget, results_widget._tab_name_ru)
         layout.addWidget(self.tabs)
         return widget
 
@@ -1157,7 +1163,9 @@ class RedSandSecureGUI(QMainWindow):
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
         self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
+        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.results_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         # Запрет редактирования таблицы
         self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
@@ -1385,8 +1393,11 @@ class RedSandSecureGUI(QMainWindow):
         # Обновляем заголовки вкладок
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
-            if hasattr(tab, '_tab_name'):
-                self.tabs.setTabText(i, tab._tab_name)
+            if hasattr(tab, '_tab_name_ru') and hasattr(tab, '_tab_name_en'):
+                if language == "Русский":
+                    self.tabs.setTabText(i, tab._tab_name_ru)
+                else:
+                    self.tabs.setTabText(i, tab._tab_name_en)
         
         self.log_message('INFO', f"Язык изменен на: {language}")
         self.update_status_bar()
