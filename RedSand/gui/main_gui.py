@@ -90,7 +90,52 @@ LANGUAGES = {
         "date": "Дата",
         "file": "Файл",
         "verdict": "Вердикт",
-        "clear_history": "Очистить историю"
+        "clear_history": "Очистить историю",
+        "language_label": "Язык:",
+        "step1_file": "Шаг 1: Выберите файл",
+        "step2_settings": "Шаг 2: Настройки (необязательно)",
+        "progress": "Прогресс",
+        "waiting": "Ожидание...",
+        "results_here": "Результаты анализа появятся здесь после завершения...",
+        "param": "Параметр",
+        "value": "Значение",
+        "confirm_title": "Предупреждение о безопасности",
+        "confirm_msg": "Вы запускаете анализ потенциально опасного файла!\n\nУбедитесь, что вы работаете в виртуальной машине.\n\nПродолжить?",
+        "file_not_found": "Файл не найден: ",
+        "select_file_warning": "Пожалуйста, выберите файл для анализа!",
+        "analysis_running": "Анализ выполняется",
+        "analysis_running_msg": "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
+        "yes": "Да",
+        "no": "Нет",
+        "close": "Закрыть",
+        "preparing": "Подготовка к анализу...",
+        "checking_file": "Проверка файла...",
+        "static_analysis": "Статический анализ...",
+        "behavior_analysis": "Анализ поведения...",
+        "threat_assessment": "Оценка угрозы...",
+        "creating_report": "Создание отчета...",
+        "analysis_complete": "Анализ завершен!",
+        "analysis_started": "Анализ запущен...",
+        "analysis_completed_status": "Анализ завершен",
+        "error_analysis": "Ошибка анализа!",
+        "file_selected": "Файл выбран: ",
+        "file_dropped": "Файл перетащен: ",
+        "settings_saved": "Настройки сохранены. Тема: ",
+        "language_changed": "Язык изменен на: ",
+        "theme_label": "Выберите тему:",
+        "max_time": "Максимальное время:",
+        "create_variants": "Создавать варианты файла для анализа",
+        "create_variants_tooltip": "Помогает обнаружить сложные вирусы",
+        "disable_network": "Отключать сеть (рекомендуется)",
+        "disable_network_tooltip": "Защищает вашу сеть во время анализа",
+        "risk_dangerous": "🚨 ОПАСНО",
+        "risk_suspicious": "⚠️ ПОДОЗРИТЕЛЬНО",
+        "risk_safe": "✅ БЕЗОПАСНО",
+        "threat_type": "Тип угрозы:",
+        "threat_family": "Семейство:",
+        "file_name": "Имя файла:",
+        "file_size": "Размер файла:",
+        "bytes": "байт"
     },
     "English": {
         "title": "RedSand Secure",
@@ -122,7 +167,52 @@ LANGUAGES = {
         "date": "Date",
         "file": "File",
         "verdict": "Verdict",
-        "clear_history": "Clear History"
+        "clear_history": "Clear History",
+        "language_label": "Language:",
+        "step1_file": "Step 1: Select File",
+        "step2_settings": "Step 2: Settings (optional)",
+        "progress": "Progress",
+        "waiting": "Waiting...",
+        "results_here": "Analysis results will appear here after completion...",
+        "param": "Parameter",
+        "value": "Value",
+        "confirm_title": "Security Warning",
+        "confirm_msg": "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?",
+        "file_not_found": "File not found: ",
+        "select_file_warning": "Please select a file for analysis!",
+        "analysis_running": "Analysis Running",
+        "analysis_running_msg": "Analysis is still in progress. Are you sure you want to exit?",
+        "yes": "Yes",
+        "no": "No",
+        "close": "Close",
+        "preparing": "Preparing for analysis...",
+        "checking_file": "Checking file...",
+        "static_analysis": "Static analysis...",
+        "behavior_analysis": "Behavior analysis...",
+        "threat_assessment": "Threat assessment...",
+        "creating_report": "Creating report...",
+        "analysis_complete": "Analysis complete!",
+        "analysis_started": "Analysis started...",
+        "analysis_completed_status": "Analysis completed",
+        "error_analysis": "Analysis error!",
+        "file_selected": "File selected: ",
+        "file_dropped": "File dropped: ",
+        "settings_saved": "Settings saved. Theme: ",
+        "language_changed": "Language changed to: ",
+        "theme_label": "Select theme:",
+        "max_time": "Maximum time:",
+        "create_variants": "Create file variants for analysis",
+        "create_variants_tooltip": "Helps detect complex viruses",
+        "disable_network": "Disable network (recommended)",
+        "disable_network_tooltip": "Protects your network during analysis",
+        "risk_dangerous": "🚨 DANGEROUS",
+        "risk_suspicious": "⚠️ SUSPICIOUS",
+        "risk_safe": "✅ SAFE",
+        "threat_type": "Threat Type:",
+        "threat_family": "Family:",
+        "file_name": "File Name:",
+        "file_size": "File Size:",
+        "bytes": "bytes"
     }
 }
 
@@ -1058,55 +1148,53 @@ class RedSandSecureGUI(QMainWindow):
         layout = QVBoxLayout(widget)
         layout.setSpacing(20)
         
-        file_group = QGroupBox("Шаг 1: Выберите файл")
+        lang = self.settings.get('language', 'Русский')
+        lang_data = LANGUAGES.get(lang, LANGUAGES["Русский"])
+        
+        file_group = QGroupBox(lang_data.get('step1_file', 'Step 1: Select File'))
         file_layout = QVBoxLayout()
         
         self.file_path_edit = QLineEdit()
-        lang = self.settings.get('language', 'Русский')
-        if lang == 'Русский':
-            placeholder = "Файл еще не выбран... или перетащите сюда"
-        else:
-            placeholder = "No file selected... or drag and drop here"
-        self.file_path_edit.setPlaceholderText(placeholder)
+        self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        btn_select_file = QPushButton("📁 Выбрать файл")
-        btn_select_file.setObjectName("actionBtn")
-        btn_select_file.clicked.connect(self.select_file)
-        file_layout.addWidget(btn_select_file)
+        self.btn_select_file = QPushButton(lang_data.get('select_file', '📁 Select File'))
+        self.btn_select_file.setObjectName("actionBtn")
+        self.btn_select_file.clicked.connect(self.select_file)
+        file_layout.addWidget(self.btn_select_file)
         
         file_group.setLayout(file_layout)
         layout.addWidget(file_group)
         
-        settings_group = QGroupBox("Шаг 2: Настройки (необязательно)")
+        settings_group = QGroupBox(lang_data.get('step2_settings', 'Step 2: Settings (optional)'))
         settings_layout = QVBoxLayout()
         
         timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel("Время анализа:"))
+        timeout_layout.addWidget(QLabel(lang_data.get('analysis_time', 'Analysis time:')))
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(80)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel("сек"))
+        timeout_layout.addWidget(QLabel(lang_data.get('seconds', 'sec')))
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
+        self.poly_check = QCheckBox(lang_data.get('create_variants', 'Create file variants for analysis'))
+        self.poly_check.setToolTip(lang_data.get('create_variants_tooltip', 'Helps detect complex viruses'))
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
+        self.network_check = QCheckBox(lang_data.get('disable_network', 'Disable network (recommended)'))
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
+        self.network_check.setToolTip(lang_data.get('disable_network_tooltip', 'Protects your network during analysis'))
         settings_layout.addWidget(self.network_check)
         
         settings_group.setLayout(settings_layout)
         layout.addWidget(settings_group)
         
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton(lang_data.get('analyze_btn', '🚀 START ANALYSIS'))
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
