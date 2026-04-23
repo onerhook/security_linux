@@ -140,12 +140,12 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         background-color: {theme['success']};
         color: #FFFFFF;
         border: none;
-        padding: 20px 40px;
+        padding: 24px 45px;
         border-radius: 15px;
         font-weight: bold;
-        font-size: 20px;
-        min-width: 280px;
-        min-height: 65px;
+        font-size: 22px;
+        min-width: 300px;
+        min-height: 75px;
     }}
     QPushButton#primaryBtn:hover {{
         background-color: #059669;
@@ -158,13 +158,13 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         background-color: {theme['accent']};
         color: #FFFFFF;
         border: none;
-        padding: 14px 28px;
+        padding: 16px 32px;
         border-radius: 12px;
         font-weight: bold;
-        font-size: 16px;
-        min-width: 200px;
-        min-height: 50px;
-        max-width: 250px;
+        font-size: 17px;
+        min-width: 220px;
+        min-height: 55px;
+        max-width: 280px;
     }}
     QPushButton#actionBtn:hover {{
         background-color: {theme['accent_hover']};
@@ -173,10 +173,11 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
         border: 2px solid {theme['accent']};
-        padding: 12px 24px;
+        padding: 14px 28px;
         border-radius: 10px;
         font-weight: bold;
-        font-size: 15px;
+        font-size: 16px;
+        min-height: 50px;
     }}
     QPushButton#secondaryBtn:hover {{
         background-color: {theme['accent']};
@@ -205,14 +206,14 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
     QTabBar::tab {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        padding: 18px 40px;
+        padding: 20px 45px;
         font-weight: bold;
-        font-size: 17px;
+        font-size: 18px;
         border-top-left-radius: 10px;
         border-top-right-radius: 10px;
-        margin-right: 8px;
-        min-width: 160px;
-        min-height: 55px;
+        margin-right: 10px;
+        min-width: 180px;
+        min-height: 60px;
     }}
     QTabBar::tab:selected {{
         background-color: {theme['accent']};
@@ -318,11 +319,11 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         border: 2px solid {theme['bg_tertiary']};
         border-radius: 12px;
         gridline-color: {theme['bg_tertiary']};
-        font-size: 16px;
+        font-size: 18px;
     }}
     QTableWidget::item {{
-        padding: 18px;
-        min-height: 45px;
+        padding: 20px;
+        min-height: 55px;
         border-bottom: 2px solid {theme['bg_tertiary']};
     }}
     QTableWidget::item:selected {{
