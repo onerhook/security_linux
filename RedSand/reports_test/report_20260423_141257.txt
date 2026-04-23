@@ -1,0 +1,50 @@
+======================================================================
+RedSand Secure v2.0 - Отчет об анализе вредоносного ПО
+======================================================================
+
+Дата анализа: 2026-04-23 14:12:57
+
+ИНФОРМАЦИЯ О ФАЙЛЕ
+----------------------------------------
+Имя: poly_variant_0_IHMD4H.exe
+Путь: samples/poly_variant_0_IHMD4H.exe
+Размер: 323 байт
+
+ВЕРДИКТ
+----------------------------------------
+Тип угрозы: MINER
+Семейство: XMRig
+Уровень риска: 97/100
+Доверие: HIGH
+
+MITRE ATT&CK:
+TA0004 - Privilege Escalation, T1496 - Resource Hijacking
+
+СТАТИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+file_path: samples/poly_variant_0_IHMD4H.exe
+file_name: poly_variant_0_IHMD4H.exe
+file_size: 323
+file_hash: 2ba1d16e25cbf8c2ffdcb71b9d1661af2bd9c2d7d17ef1f6394ce5795f0ddbbc
+is_malicious: True
+is_suspicious: False
+threat_level: MALICIOUS
+risk_score: 100
+detected_threats: ['Malicious patterns detected: 3']
+matched_signatures: ['Polymorphic sample detected: RAT']
+matched_patterns: []
+recommendations: ['🚨 Немедленно удалите этот файл!', '🔒 Проверьте систему полным антивирусным сканированием', '📋 Сохраните образец для дальнейшего анализа', '🛡️ Проверьте точки восстановления системы']
+preliminary_threat_type: MALWARE
+hashes: {'sha256': '2ba1d16e25cbf8c2ffdcb71b9d1661af2bd9c2d7d17ef1f6394ce5795f0ddbbc'}
+
+ДИНАМИЧЕСКИЙ АНАЛИЗ
+----------------------------------------
+[INFO] N/A
+
+ПОВЕДЕНИЕ
+----------------------------------------
+
+
+======================================================================
+Конец отчета
+======================================================================

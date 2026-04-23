@@ -1,0 +1,161 @@
+{
+  "file": {
+    "path": "samples/fake_trojan_BXW7OP.exe",
+    "name": "fake_trojan_BXW7OP.exe",
+    "size": 697
+  },
+  "static_analysis": {
+    "file_path": "samples/fake_trojan_BXW7OP.exe",
+    "file_name": "fake_trojan_BXW7OP.exe",
+    "file_size": 697,
+    "file_hash": "7eff2ff4189599a4809be749ee1a38a6d30df4b2130cfa70abeadfc06d12b75a",
+    "is_malicious": true,
+    "is_suspicious": false,
+    "threat_level": "MALICIOUS",
+    "risk_score": 100,
+    "detected_threats": [
+      "Malicious patterns detected: 15"
+    ],
+    "matched_signatures": [
+      "Malicious pattern: CreateRemoteThread\\s*\\(\\s*NULL",
+      "Malicious pattern: VirtualAllocEx\\s*\\([^)]*PAGE_EXECUTE_READWRITE",
+      "Threat indicator: THREAT_TYPE: TROJAN",
+      "Threat indicator: Mock indicator: CreateRemoteThread(NULL, hProcess, lpStartAddress)",
+      "Threat indicator: Mock indicator: VirtualAllocEx(hProcess, NULL, dwSize, MEM_COMMIT,",
+      "Threat indicator: Mock indicator: WriteProcessMemory(hProcess, lpBaseAddress, buffer",
+      "Threat indicator: Mock indicator: URLDownloadToFile(NULL, \"http://c2server.com/paylo",
+      "Threat indicator: Mock indicator: RegSetValueEx(\"HKCU\\\\Software\\\\Microsoft\\\\Windows\\",
+      "Threat indicator: Signature: trojan_payload",
+      "Threat indicator: Signature: dropper_downloader",
+      "Threat indicator: Signature: remote_access",
+      "Threat indicator: Signature: backdoor_shell",
+      "Threat indicator: Signature: credential_theft",
+      "Explicit threat type declared: TROJAN"
+    ],
+    "matched_patterns": [],
+    "recommendations": [
+      "🚨 Немедленно удалите этот файл!",
+      "🔒 Проверьте систему полным антивирусным сканированием",
+      "📋 Сохраните образец для дальнейшего анализа",
+      "🛡️ Проверьте точки восстановления системы"
+    ],
+    "preliminary_threat_type": "MALWARE",
+    "hashes": {
+      "sha256": "7eff2ff4189599a4809be749ee1a38a6d30df4b2130cfa70abeadfc06d12b75a"
+    }
+  },
+  "dynamic_analysis": [
+    {
+      "info": "Test sample detected, execution skipped",
+      "mock_analysis": true
+    }
+  ],
+  "threat_classification": {
+    "type": "TROJAN",
+    "family": "Zeus",
+    "risk_score": 100,
+    "confidence": "HIGH",
+    "mitre_tactics": [
+      "TA0002 - Execution",
+      "T1204 - User Execution"
+    ],
+    "all_scores": {
+      "RANSOMWARE": 66,
+      "STEALER": 62,
+      "MINER": 52,
+      "RAT": 64,
+      "WORM": 56,
+      "BOTNET": 79,
+      "ROOTKIT": 68,
+      "SPYWARE": 59,
+      "ADWARE": 31,
+      "TROJAN": 100,
+      "DROPPER": 54,
+      "KEYLOGGER": 60
+    },
+    "behaviors_detected": [
+      "command_execution"
+    ],
+    "api_calls_detected": [],
+    "network_indicators_detected": [],
+    "detailed_analysis": {
+      "RANSOMWARE": {
+        "score": 66,
+        "indicators": [],
+        "base_risk": 95
+      },
+      "STEALER": {
+        "score": 62,
+        "indicators": [],
+        "base_risk": 90
+      },
+      "MINER": {
+        "score": 52,
+        "indicators": [],
+        "base_risk": 75
+      },
+      "RAT": {
+        "score": 64,
+        "indicators": [],
+        "base_risk": 92
+      },
+      "WORM": {
+        "score": 56,
+        "indicators": [],
+        "base_risk": 80
+      },
+      "BOTNET": {
+        "score": 79,
+        "indicators": [
+          "behavior:command_execution"
+        ],
+        "base_risk": 88
+      },
+      "ROOTKIT": {
+        "score": 68,
+        "indicators": [],
+        "base_risk": 98
+      },
+      "SPYWARE": {
+        "score": 59,
+        "indicators": [],
+        "base_risk": 85
+      },
+      "ADWARE": {
+        "score": 31,
+        "indicators": [],
+        "base_risk": 45
+      },
+      "TROJAN": {
+        "score": 100,
+        "indicators": [
+          "static_type_match",
+          "malicious_indicator_match"
+        ],
+        "base_risk": 82
+      },
+      "DROPPER": {
+        "score": 54,
+        "indicators": [],
+        "base_risk": 78
+      },
+      "KEYLOGGER": {
+        "score": 60,
+        "indicators": [],
+        "base_risk": 87
+      }
+    },
+    "preliminary_type": "MALWARE",
+    "static_type": "TROJAN"
+  },
+  "analysis_time": {
+    "start": "2026-04-23T14:12:56.158063",
+    "end": "2026-04-23T14:12:56.158503",
+    "duration": 0.000444
+  },
+  "system_info": {
+    "network_disabled": false,
+    "emulation_used": true,
+    "anti_sandbox_applied": true
+  }
+}
