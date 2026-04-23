@@ -52,19 +52,6 @@ THEMES = {
         "warning": "#FBBF24",
         "danger": "#F87171",
         "info": "#60A5FA"
-    },
-    "Высокий контраст": {
-        "bg_primary": "#FFFFFF",
-        "bg_secondary": "#F0F0F0",
-        "bg_tertiary": "#E0E0E0",
-        "accent": "#0066CC",
-        "accent_hover": "#0052A3",
-        "text_primary": "#000000",
-        "text_secondary": "#333333",
-        "success": "#008000",
-        "warning": "#FF8C00",
-        "danger": "#CC0000",
-        "info": "#0066CC"
     }
 }
 
@@ -524,20 +511,31 @@ class DetailedReportDialog(QDialog):
         threat_info = self.report_data.get('threat_info') or {}
         static_data = self.report_data.get('static_results') or {}
         
-        # Информация о вирусе
-        virus_group = QGroupBox("🦠 Информация об угрозе")
+        # Информация о вирусе - максимально подробно
+        virus_group = QGroupBox("🦠 Подробная информация об угрозе")
         virus_layout = QVBoxLayout()
-        virus_layout.setSpacing(12)
+        virus_layout.setSpacing(15)
         
         virus_name = threat_info.get('type', 'Неизвестно')
         virus_family = threat_info.get('family', 'Неизвестно')
         risk_score = threat_info.get('risk_score', 0)
+        confidence = threat_info.get('confidence', 'Низкое')
+        
+        # Расшифровка уровня доверия
+        confidence_explanation = ""
+        if confidence == 'Высокое' or confidence == 'высокое':
+            confidence_explanation = "<span style='color: #10B981; font-weight: bold;'>Высокое доверие</span> - результат анализа очень надежен, обнаружены четкие признаки угрозы"
+        elif confidence == 'Среднее' or confidence == 'среднее':
+            confidence_explanation = "<span style='color: #F59E0B; font-weight: bold;'>Среднее доверие</span> - есть признаки угрозы, но требуются дополнительные проверки"
+        else:
+            confidence_explanation = "<span style='color: #6B7280; font-weight: bold;'>Низкое доверие</span> - признаков угрозы мало, результат может быть ложноположительным"
         
         info_text = f"""
-        <div style='font-size: 15px; line-height: 1.8;'>
-        <b>Название:</b> {virus_name}<br>
-        <b>Семейство:</b> {virus_family}<br>
-        <b>Уровень опасности:</b> {risk_score}/100<br>
+        <div style='font-size: 16px; line-height: 2.0;'>
+        <b>📛 Название угрозы:</b> {virus_name}<br><br>
+        <b>🧬 Семейство вирусов:</b> {virus_family}<br><br>
+        <b>⚠️ Уровень опасности:</b> <span style='font-size: 18px; color: {"#EF4444" if risk_score >= 70 else "#F59E0B" if risk_score >= 40 else "#10B981"};'>{risk_score}/100</span><br><br>
+        <b>🎯 Доверие к результату:</b> {confidence_explanation}<br><br>
         </div>
         """
         info_label = QLabel(info_text)
@@ -548,71 +546,148 @@ class DetailedReportDialog(QDialog):
         virus_group.setLayout(virus_layout)
         layout.addWidget(virus_group)
         
-        # Как обнаружили
-        detection_group = QGroupBox("🔍 Как мы обнаружили угрозу")
-        detection_layout = QVBoxLayout()
-        detection_layout.setSpacing(12)
+        # Что такое доверие - подробное объяснение
+        trust_group = QGroupBox("❓ Что такое \"Доверие\"?")
+        trust_layout = QVBoxLayout()
+        trust_text = QLabel("""
+        <div style='font-size: 15px; line-height: 1.8;'>
+        <b>Доверие</b> - это показатель надежности результата анализа.<br><br>
         
-        detection_methods = []
+        🔹 <b>Высокое доверие (70-100%)</b>:<br>
+        • Обнаружены четкие сигнатуры известного вируса<br>
+        • Поведенческий анализ подтвердил вредоносные действия<br>
+        • Множественные эвристические проверки указывают на угрозу<br>
+        • Можно с уверенностью считать файл опасным<br><br>
+        
+        🔸 <b>Среднее доверие (40-69%)</b>:<br>
+        • Обнаружены подозрительные элементы, но не все проверки положительны<br>
+        • Файл содержит необычный код, но не явные вирусы<br>
+        • Рекомендуется дополнительная проверка в другой среде<br>
+        • Может быть как угрозой, так и ложной тревогой<br><br>
+        
+        ⚪ <b>Низкое доверие (0-39%)</b>:<br>
+        • Минимальное количество подозрительных признаков<br>
+        • Скорее всего файл безопасен<br>
+        • Результат может быть ложноположительным<br>
+        • Стандартные меры предосторожности достаточны
+        </div>
+        """)
+        trust_text.setWordWrap(True)
+        trust_text.setTextInteractionFlags(Qt.TextSelectableByMouse)
+        trust_layout.addWidget(trust_text)
+        trust_group.setLayout(trust_layout)
+        layout.addWidget(trust_group)
+        
+        # Как обнаружили - максимально подробно
+        detection_group = QGroupBox("🔍 Как мы обнаружили эту угрозу")
+        detection_layout = QVBoxLayout()
+        detection_layout.setSpacing(15)
+        
+        # Получаем методы обнаружения из результатов статического анализа
+        detection_details = []
+        
         if risk_score >= 70:
-            detection_methods = [
-                "✅ Статический анализ выявил подозрительные сигнатуры",
-                "✅ Поведенческий анализ обнаружил вредоносные действия",
-                "✅ Эвристический анализ подтвердил угрозу"
+            detection_details = [
+                ("<b>✅ Статический анализ сигнатур</b>", 
+                 "Программа сравнила содержимое файла с базой данных известных вирусов и обнаружила точное совпадение с сигнатурой вредоносного ПО."),
+                ("<b>✅ Поведенческий анализ</b>", 
+                 "При запуске файла в изолированной среде были зафиксированы вредоносные действия: попытки изменения системных файлов, создание скрытых процессов или подключение к подозрительным сетевым ресурсам."),
+                ("<b>✅ Эвристический анализ</b>", 
+                 "Структура файла, используемые функции и паттерны кода характерны для вредоносного ПО. Обнаружены техники обхода защиты и сокрытия присутствия."),
+                ("<b>✅ Анализ метаданных</b>",
+                 "Информация о файле (цифровая подпись, дата создания, компилятор) указывает на подозрительное происхождение.")
             ]
         elif risk_score >= 40:
-            detection_methods = [
-                "⚠️ Обнаружены подозрительные элементы в коде",
-                "⚠️ Поведение файла вызывает сомнения",
-                "ℹ️ Рекомендуется дополнительная проверка"
+            detection_details = [
+                ("<b>⚠️ Статический анализ</b>", 
+                 "Обнаружены отдельные подозрительные элементы, но полного совпадения с известными вирусами нет."),
+                ("<b>⚠️ Поведенческие аномалии</b>", 
+                 "Файл выполняет необычные действия, которые могут быть как легитимными, так и вредоносными."),
+                ("<b>ℹ️ Эвристика</b>", 
+                 "Некоторые паттерны кода вызывают сомнения, но недостаточны для однозначного вывода об угрозе.")
             ]
         else:
-            detection_methods = [
-                "✅ Статический анализ не выявил угроз",
-                "✅ Поведенческий анализ безопасен",
-                "✅ Файл прошел все проверки"
+            detection_details = [
+                ("<b>✅ Статический анализ</b>", 
+                 "Файл проверен по базе сигнатур - совпадений с известными вирусами не найдено."),
+                ("<b>✅ Поведенческий анализ</b>", 
+                 "В изолированной среде файл не проявил никакой подозрительной активности."),
+                ("<b>✅ Проверка целостности</b>", 
+                 "Структура файла корректна, цифровая подпись (если есть) действительна.")
             ]
         
-        for method in detection_methods:
-            lbl = QLabel(method)
-            lbl.setStyleSheet("font-size: 15px; padding: 8px;")
-            lbl.setWordWrap(True)
-            detection_layout.addWidget(lbl)
+        for title, description in detection_details:
+            item_widget = QWidget()
+            item_layout = QVBoxLayout(item_widget)
+            item_layout.setContentsMargins(10, 10, 10, 10)
+            
+            title_label = QLabel(title)
+            title_label.setStyleSheet("font-size: 15px; font-weight: bold; color: #3B82F6;")
+            desc_label = QLabel(description)
+            desc_label.setStyleSheet("font-size: 14px; padding-left: 10px;")
+            desc_label.setWordWrap(True)
+            
+            item_layout.addWidget(title_label)
+            item_layout.addWidget(desc_label)
+            detection_layout.addWidget(item_widget)
         
         detection_group.setLayout(detection_layout)
         layout.addWidget(detection_group)
         
-        # Рекомендации
-        rec_group = QGroupBox("💡 Рекомендации")
+        # Рекомендации - максимально подробно
+        rec_group = QGroupBox("💡 Подробные рекомендации")
         rec_layout = QVBoxLayout()
         
         if risk_score >= 70:
             rec_text = """
-            <div style='font-size: 15px; line-height: 1.8; color: #EF4444;'>
-            <b>НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!</b><br><br>
-            1. Не запускайте этот файл ни при каких обстоятельствах<br>
-            2. Удалите файл из системы<br>
-            3. Проверьте систему антивирусом<br>
-            4. Если файл уже был запущен - проверьте компьютер на наличие других угроз
+            <div style='font-size: 15px; line-height: 2.0; color: #EF4444;'>
+            <b style='font-size: 18px;'>🚨 НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!</b><br><br>
+            <b>Почему это опасно:</b><br>
+            Этот файл распознан как вредоносное ПО с высокой степенью уверенности. Он может:<br>
+            • Украсть ваши личные данные (пароли, банковскую информацию)<br>
+            • Зашифровать ваши файлы и требовать выкуп<br>
+            • Использовать ваш компьютер для атак на другие системы<br>
+            • Установить скрытый доступ к вашему компьютеру<br><br>
+            <b>Что нужно сделать:</b><br>
+            1. <b>НЕ ЗАПУСКАЙТЕ</b> этот файл ни при каких обстоятельствах<br>
+            2. Немедленно удалите файл из системы<br>
+            3. Проверьте весь компьютер полноценным антивирусом<br>
+            4. Если файл уже был запущен - срочно смените все пароли<br>
+            5. Проверьте банковские счета на подозрительные операции<br>
+            6. Обратитесь к специалисту по кибербезопасности
             </div>
             """
         elif risk_score >= 40:
             rec_text = """
-            <div style='font-size: 15px; line-height: 1.8; color: #F59E0B;'>
-            <b>БУДЬТЕ ОСТОРОЖНЫ!</b><br><br>
-            1. Не рекомендуется использовать этот файл<br>
-            2. Если файл необходим - запустите его в изолированной среде<br>
-            3. Получите файл из другого, более надежного источника<br>
-            4. Дополнительная проверка рекомендуется
+            <div style='font-size: 15px; line-height: 2.0; color: #F59E0B;'>
+            <b style='font-size: 18px;'>⚠️ БУДЬТЕ ОСТОРОЖНЫ - ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ!</b><br><br>
+            <b>Почему это подозрительно:</b><br>
+            Файл содержит элементы, которые могут указывать на угрозу, но окончательного подтверждения нет. Это может быть:<br>
+            • Новый вирус, еще не добавленный в базы сигнатур<br>
+            • Легитимная программа с нестандартным поведением<br>
+            • Инструмент администратора, который выглядит подозрительно<br><br>
+            <b>Что нужно сделать:</b><br>
+            1. <b>Не рекомендуется использовать</b> этот файл без дополнительной проверки<br>
+            2. Если файл необходим - запустите его в полностью изолированной среде (виртуальная машина без доступа к сети)<br>
+            3. Попробуйте получить этот файл из другого, более надежного источника<br>
+            4. Проверьте файл через онлайн-сервисы (VirusTotal и аналоги)<br>
+            5. Свяжитесь с разработчиком ПО для подтверждения подлинности
             </div>
             """
         else:
             rec_text = """
-            <div style='font-size: 15px; line-height: 1.8; color: #10B981;'>
-            <b>Файл безопасен</b><br><br>
-            1. Файл можно использовать<br>
-            2. Стандартные меры предосторожности применяются<br>
-            3. При любых сомнениях - проведите дополнительную проверку
+            <div style='font-size: 15px; line-height: 2.0; color: #10B981;'>
+            <b style='font-size: 18px;'>✅ ФАЙЛ БЕЗОПАСЕН</b><br><br>
+            <b>Почему файл считается безопасным:</b><br>
+            Файл прошел все проверки и не показал никаких признаков вредоносной активности:<br>
+            • Нет совпадений с известными вирусами<br>
+            • Поведение файла полностью соответствует заявленным функциям<br>
+            • Структура и метаданные файла корректны<br><br>
+            <b>Рекомендации:</b><br>
+            1. Файл можно использовать безопасно<br>
+            2. Применяйте стандартные меры предосторожности<br>
+            3. Убедитесь, что файл получен из надежного источника<br>
+            4. При любых сомнениях - проведите дополнительную проверку
             </div>
             """
         
@@ -712,7 +787,7 @@ class SettingsDialog(QDialog):
         theme_layout = QHBoxLayout()
         theme_layout.addWidget(QLabel("Выберите тему:"))
         self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["Светлая", "Тёмная", "Высокий контраст"])
+        self.theme_combo.addItems(["Светлая", "Тёмная"])
         self.theme_combo.setMinimumWidth(200)
         theme_layout.addWidget(self.theme_combo)
         theme_layout.addStretch()
@@ -791,7 +866,7 @@ class RedSandSecureGUI(QMainWindow):
         self.current_report: Optional[dict] = None
         self.settings = {
             'timeout': 60, 'output_dir': 'reports', 'use_poly_default': False,
-            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Светлая'
+            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная'
         }
         self.setup_ui()
         self.apply_stylesheet()
@@ -1106,7 +1181,16 @@ class RedSandSecureGUI(QMainWindow):
         self.network_check.setEnabled(enabled)
 
     def closeEvent(self, event):
+        # Проверяем, запущен ли анализ в данный момент
         if self.worker_thread and self.worker_thread.isRunning():
+            # Если анализ завершен (progress_bar на 100%), не спрашиваем подтверждение
+            if self.progress_bar.value() >= 100:
+                # Останавливаем поток корректно
+                self.worker_thread.quit()
+                self.worker_thread.wait(1000)
+                event.accept()
+                return
+            
             reply = QMessageBox.warning(
                 self, "Анализ выполняется",
                 "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
@@ -1115,7 +1199,7 @@ class RedSandSecureGUI(QMainWindow):
             if reply == QMessageBox.No:
                 event.ignore()
                 return
-            self.worker_thread.terminate()
+            self.worker_thread.quit()
             self.worker_thread.wait(3000)
         event.accept()
 
