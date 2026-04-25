@@ -27,188 +27,224 @@ TRANSLATIONS = {
         "theme_btn": "🌓 Тема",
         "lang_btn_ru": "🇷🇺 RU",
         "lang_btn_en": "🇬🇧 EN",
-        "status_ready_ru": "Готов к работе. Выберите файл для анализа.",
-        "status_ready_en": "Ready. Select a file to analyze.",
-        "status_file_selected_ru": "Файл выбран: ",
-        "status_file_selected_en": "File selected: ",
-        "status_scanning_sigs_ru": "Сканирование сигнатур...",
-        "status_scanning_sigs_en": "Scanning signatures...",
-        "status_heuristic_ru": "Эвристический анализ...",
-        "status_heuristic_en": "Heuristic analysis...",
-        "status_behavior_ru": "Анализ поведения...",
-        "status_behavior_en": "Behavior analysis...",
-        "status_complete_ru": "Анализ завершен.",
-        "status_complete_en": "Analysis complete.",
-        "info_text_ru": "Выберите файл для проверки на вирусы.\nСистема автоматически обнаружит угрозы и даст рекомендации.",
-        "info_text_en": "Select a file to scan for viruses.\nThe system will automatically detect threats and provide recommendations.",
+        "status_ready": "Готов к работе. Выберите файл для анализа.",
+        "status_file_selected": "Файл выбран: ",
+        "status_scanning_sigs": "Сканирование сигнатур...",
+        "status_heuristic": "Эвристический анализ...",
+        "status_behavior": "Анализ поведения...",
+        "status_complete": "Анализ завершен.",
+        "info_text": "Выберите файл для проверки на вирусы.\nСистема автоматически обнаружит угрозы и даст рекомендации.",
         "select_file_btn": "📁 ВЫБРАТЬ ФАЙЛ",
-        "select_file_btn_en": "📁 SELECT FILE",
         "run_analysis_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
-        "run_analysis_btn_en": "🚀 START ANALYSIS",
         "analyzing_btn": "⏳ АНАЛИЗ...",
-        "analyzing_btn_en": "⏳ ANALYZING...",
         # Окно результатов
         "result_title": "Результаты анализа",
-        "result_title_en": "Analysis Results",
         "verdict_label": "ВЕРДИКТ: ",
-        "verdict_label_en": "VERDICT: ",
         "tab_main": "🏠 Главная",
-        "tab_main_en": "🏠 Main",
         "tab_virus": "🦠 О вирусе",
-        "tab_virus_en": "🦠 About Virus",
         "tab_help": "❓ Справка",
-        "tab_help_en": "❓ Help",
         "close_btn": "ЗАКРЫТЬ",
-        "close_btn_en": "CLOSE",
         # Вкладка Главная
         "file_info_title": "📄 Информация о файле",
-        "file_info_title_en": "📄 File Information",
         "file_name_label": "Имя файла:",
-        "file_name_label_en": "File name:",
         "file_path_label": "Полный путь:",
-        "file_path_label_en": "Full path:",
         "scan_date_label": "Дата проверки:",
-        "scan_date_label_en": "Scan date:",
         # Вкладка О вирусе
         "threat_title": "🦠 Обнаруженная угроза",
-        "threat_title_en": "🦠 Detected Threat",
         "family_label": "Семейство: ",
-        "family_label_en": "Family: ",
         "description_title": "📖 Что это такое?",
-        "description_title_en": "📖 What is it?",
         "method_title": "🔍 Как мы это нашли?",
-        "method_title_en": "🔍 How we found it?",
         "recommendations_title": "✅ Что делать? (Инструкция)",
-        "recommendations_title_en": "✅ What to do? (Instructions)",
         # Вкладка Справка
         "help_title": "❓ СПРАВКА ПО ИСПОЛЬЗОВАНИЮ",
-        "help_title_en": "❓ USER GUIDE",
         "help_usage_title": "📌 Как пользоваться программой:",
-        "help_usage_title_en": "📌 How to use the program:",
-        "help_step1_ru": "Нажмите кнопку \"ВЫБРАТЬ ФАЙЛ\".",
-        "help_step1_en": "Click the \"SELECT FILE\" button.",
-        "help_step2_ru": "Выберите подозрительный файл на компьютере.",
-        "help_step2_en": "Select a suspicious file on your computer.",
-        "help_step3_ru": "Нажмите \"ЗАПУСТИТЬ АНАЛИЗ\".",
-        "help_step3_en": "Click \"START ANALYSIS\".",
-        "help_step4_ru": "Дождитесь окончания проверки.",
-        "help_step4_en": "Wait for the scan to complete.",
-        "help_step5_ru": "Изучите вердикт и рекомендации.",
-        "help_step5_en": "Review the verdict and recommendations.",
+        "help_step1": "Нажмите кнопку \"ВЫБРАТЬ ФАЙЛ\".",
+        "help_step2": "Выберите подозрительный файл на компьютере.",
+        "help_step3": "Нажмите \"ЗАПУСТИТЬ АНАЛИЗ\".",
+        "help_step4": "Дождитесь окончания проверки.",
+        "help_step5": "Изучите вердикт и рекомендации.",
         "help_theme_title": "🎨 Темы оформления:",
-        "help_theme_title_en": "🎨 Themes:",
-        "help_theme_desc_ru": "Нажмите кнопку \"Тема\" сверху, чтобы переключить светлую/темную тему.",
-        "help_theme_desc_en": "Click the \"Theme\" button at the top to switch between light/dark theme.",
+        "help_theme_desc": "Нажмите кнопку \"Тема\" сверху, чтобы переключить светлую/темную тему.",
         "help_settings_title": "⚙️ Настройки:",
-        "help_settings_title_en": "⚙️ Settings:",
-        "help_settings_desc_ru": "В разделе настроек вы можете изменить параметры сканирования.",
-        "help_settings_desc_en": "In the settings section you can change scanning parameters.",
+        "help_settings_desc": "В разделе настроек вы можете изменить параметры сканирования.",
         "help_reports_title": "📊 Отчеты:",
-        "help_reports_title_en": "📊 Reports:",
-        "help_reports_desc_ru": "Здесь сохраняется история последних проверок.",
-        "help_reports_desc_en": "History of recent scans is saved here.",
+        "help_reports_desc": "Здесь сохраняется история последних проверок.",
         "help_verdicts_title": "🛡️ Интерпретация результатов:",
-        "help_verdicts_title_en": "🛡️ Result Interpretation:",
-        "help_safe_ru": "- БЕЗОПАСНО (Зеленый): Файл чист, можно использовать.",
-        "help_safe_en": "- SAFE (Green): File is clean, safe to use.",
-        "help_suspicious_ru": "- ПОДОЗРИТЕЛЬНО (Желтый): Есть сомнения. Лучше удалить, если не знаете источник.",
-        "help_suspicious_en": "- SUSPICIOUS (Yellow): Doubts exist. Better delete if source is unknown.",
-        "help_danger_ru": "- ОПАСНО (Красный): Вирус найден! Немедленно удалите файл!",
-        "help_danger_en": "- DANGEROUS (Red): Virus found! Delete the file immediately!",
+        "help_safe": "- БЕЗОПАСНО (Зеленый): Файл чист, можно использовать.",
+        "help_suspicious": "- ПОДОЗРИТЕЛЬНО (Желтый): Есть сомнения. Лучше удалить, если не знаете источник.",
+        "help_danger": "- ОПАСНО (Красный): Вирус найден! Немедленно удалите файл!",
         "help_about_title": "ℹ️ О программе:",
-        "help_about_title_en": "ℹ️ About:",
-        "help_about_desc_ru": "RedSand Secure использует современные методы эвристического анализа\nи базу сигнатур для защиты вашего компьютера.",
-        "help_about_desc_en": "RedSand Secure uses modern heuristic analysis methods\nand a signature database to protect your computer.",
+        "help_about_desc": "RedSand Secure использует современные методы эвристического анализа\nи базу сигнатур для защиты вашего компьютера.",
         # Окно настроек
         "settings_title": "Настройки",
-        "settings_title_en": "Settings",
         "settings_header": "⚙️ НАСТРОЙКИ ПРОГРАММЫ",
-        "settings_header_en": "⚙️ PROGRAM SETTINGS",
-        "opt_auto_update_ru": "Автоматическая проверка обновлений",
-        "opt_auto_update_en": "Automatic update check",
-        "opt_deep_scan_ru": "Глубокий анализ (медленнее, но точнее)",
-        "opt_deep_scan_en": "Deep scan (slower but more accurate)",
-        "opt_scan_archives_ru": "Проверять архивы внутри файлов",
-        "opt_scan_archives_en": "Scan archives inside files",
-        "opt_show_help_ru": "Показывать справку после каждого анализа",
-        "opt_show_help_en": "Show help after each analysis",
-        "settings_help_ru": "ℹ️ Здесь вы можете настроить поведение сканера.\nРекомендуется оставить все галочки включенными для максимальной защиты.",
-        "settings_help_en": "ℹ️ Here you can configure scanner behavior.\nRecommended to keep all options enabled for maximum protection.",
+        "opt_auto_update": "Автоматическая проверка обновлений",
+        "opt_deep_scan": "Глубокий анализ (медленнее, но точнее)",
+        "opt_scan_archives": "Проверять архивы внутри файлов",
+        "opt_show_help": "Показывать справку после каждого анализа",
+        "settings_help": "ℹ️ Здесь вы можете настроить поведение сканера.\nРекомендуется оставить все галочки включенными для максимальной защиты.",
         # Окно отчетов
         "reports_title": "Отчеты",
-        "reports_title_en": "Reports",
         "reports_header": "📊 ИСТОРИЯ ОТЧЕТОВ",
-        "reports_header_en": "📊 REPORT HISTORY",
-        "reports_empty_ru": "Здесь будет отображаться история ваших сканирований.\nПока что отчетов нет.\n\nПример будущего отчета:\n[2023-10-27 12:00] Файл: test.exe - ОПАСНО (Trojan)",
-        "reports_empty_en": "Your scan history will be displayed here.\nNo reports yet.\n\nExample future report:\n[2023-10-27 12:00] File: test.exe - DANGEROUS (Trojan)",
+        "reports_empty": "Здесь будет отображаться история ваших сканирований.\nПока что отчетов нет.\n\nПример будущего отчета:\n[2023-10-27 12:00] Файл: test.exe - ОПАСНО (Trojan)",
         # Вердикты
         "verdict_safe": "БЕЗОПАСНО",
-        "verdict_safe_en": "SAFE",
         "verdict_suspicious": "ПОДОЗРИТЕЛЬНО",
-        "verdict_suspicious_en": "SUSPICIOUS",
         "verdict_danger": "ОПАСНО",
-        "verdict_danger_en": "DANGEROUS",
         # Диалоги
-        "file_dialog_title_ru": "Выберите файл для анализа",
-        "file_dialog_title_en": "Select file to analyze",
-        "all_files_ru": "Все файлы",
-        "all_files_en": "All files",
-        "exe_files_ru": "EXE файлы",
-        "exe_files_en": "EXE files",
-        "script_files_ru": "Script files",
-        "script_files_en": "Script files",
-        "exit_confirm_ru": "Анализ еще идет. Вы действительно хотите выйти?",
-        "exit_confirm_en": "Analysis is still running. Do you really want to exit?",
-        "exit_title_ru": "Выход",
-        "exit_title_en": "Exit",
+        "file_dialog_title": "Выберите файл для анализа",
+        "all_files": "Все файлы",
+        "exe_files": "EXE файлы",
+        "script_files": "Script files",
+        "exit_confirm": "Анализ еще идет. Вы действительно хотите выйти?",
+        "exit_title": "Выход",
         # Детали угроз
-        "threat_no_threats_ru": "Нет угроз",
-        "threat_no_threats_en": "No threats",
-        "threat_clean_file_ru": "Чистый файл",
-        "threat_clean_file_en": "Clean file",
-        "desc_safe_ru": "Файл прошел все проверки. В нем не обнаружено известных вирусов, троянов или подозрительного кода. Цифровая подпись (если есть) действительна.",
-        "desc_safe_en": "The file passed all checks. No known viruses, trojans or suspicious code detected. Digital signature (if present) is valid.",
-        "method_safe_ru": "Сравнение с базой известных вирусов не дало совпадений. Поведенческий анализ не выявил опасных действий.",
-        "method_safe_en": "Comparison with known virus database yielded no matches. Behavioral analysis revealed no dangerous actions.",
-        "rec_safe_1_ru": "Файл можно использовать.",
-        "rec_safe_1_en": "File is safe to use.",
-        "rec_safe_2_ru": "Все равно соблюдайте базовую осторожность.",
-        "rec_safe_2_en": "Still exercise basic caution.",
-        "rec_safe_3_ru": "Убедитесь, что файл скачан с официального сайта.",
-        "rec_safe_3_en": "Make sure the file is downloaded from official website.",
-        "rec_safe_4_ru": "Храните резервные копии важных данных.",
-        "rec_safe_4_en": "Keep backups of important data.",
+        "threat_no_threats": "Нет угроз",
+        "threat_clean_file": "Чистый файл",
+        "desc_safe": "Файл прошел все проверки. В нем не обнаружено известных вирусов, троянов или подозрительного кода. Цифровая подпись (если есть) действительна.",
+        "method_safe": "Сравнение с базой известных вирусов не дало совпадений. Поведенческий анализ не выявил опасных действий.",
+        "rec_safe_1": "Файл можно использовать.",
+        "rec_safe_2": "Все равно соблюдайте базовую осторожность.",
+        "rec_safe_3": "Убедитесь, что файл скачан с официального сайта.",
+        "rec_safe_4": "Храните резервные копии важных данных.",
+        # Danger threat texts
+        "danger_family": "Семейство троянов-загрузчиков",
+        "danger_desc": "Этот файл является вредоносной программой, маскирующейся под легитимное приложение. При запуске он пытается внедриться в системные процессы, украсть ваши пароли и зашифровать личные данные.",
+        "danger_method": "Обнаружен по уникальной цифровой подписи (сигнатуре) в базе данных вирусов. Также выявлено подозрительное поведение: попытка скрытого подключения к интернету и модификация реестра.",
+        "danger_rec_1": "НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!",
+        "danger_rec_2": "Не пытайтесь его открывать или запускать.",
+        "danger_rec_3": "Проверьте компьютер полным сканированием антивируса.",
+        "danger_rec_4": "Если вы уже запустили файл, смените все важные пароли.",
+        "danger_rec_5": "Проверьте банковские счета на наличие подозрительных операций.",
+        # Suspicious threat texts
+        "suspicious_family": "Инструменты администрирования / Потенциально нежелательное ПО",
+        "suspicious_desc": "Файл содержит код, который может использоваться как во благо, так и во вред. Это может быть инструмент для взлома, майнер или программа для скрытого наблюдения. Сам по себе он не является вирусом, но несет риски.",
+        "suspicious_method": "Выявлено подозрительное поведение при эвристическом анализе. Файл пытается получить права администратора без явной необходимости и скрывает свои процессы.",
+        "suspicious_rec_1": "Лучше не использовать этот файл, если вы не уверены в источнике на 100%.",
+        "suspicious_rec_2": "Удалите файл, если вы не скачивали его специально.",
+        "suspicious_rec_3": "Если файл нужен, запустите его в изолированной среде (песочнице).",
+        "suspicious_rec_4": "Проверьте цифровую подпись издателя (скорее всего её нет).",
     },
-    "en": {}  # English keys are the same as values above with _en suffix
+    "en": {
+        # Main window
+        "app_title": "RedSand Secure",
+        "header": "🛡️ RedSand Secure",
+        "settings_btn": "⚙️ Settings",
+        "reports_btn": "📊 Reports",
+        "theme_btn": "🌓 Theme",
+        "lang_btn_ru": "🇷🇺 RU",
+        "lang_btn_en": "🇬🇧 EN",
+        "status_ready": "Ready. Select a file to analyze.",
+        "status_file_selected": "File selected: ",
+        "status_scanning_sigs": "Scanning signatures...",
+        "status_heuristic": "Heuristic analysis...",
+        "status_behavior": "Behavior analysis...",
+        "status_complete": "Analysis complete.",
+        "info_text": "Select a file to scan for viruses.\nThe system will automatically detect threats and provide recommendations.",
+        "select_file_btn": "📁 SELECT FILE",
+        "run_analysis_btn": "🚀 START ANALYSIS",
+        "analyzing_btn": "⏳ ANALYZING...",
+        # Result window
+        "result_title": "Analysis Results",
+        "verdict_label": "VERDICT: ",
+        "tab_main": "🏠 Main",
+        "tab_virus": "🦠 About Virus",
+        "tab_help": "❓ Help",
+        "close_btn": "CLOSE",
+        # Main tab
+        "file_info_title": "📄 File Information",
+        "file_name_label": "File name:",
+        "file_path_label": "Full path:",
+        "scan_date_label": "Scan date:",
+        # Virus tab
+        "threat_title": "🦠 Detected Threat",
+        "family_label": "Family: ",
+        "description_title": "📖 What is it?",
+        "method_title": "🔍 How we found it?",
+        "recommendations_title": "✅ What to do? (Instructions)",
+        # Help tab
+        "help_title": "❓ USER GUIDE",
+        "help_usage_title": "📌 How to use the program:",
+        "help_step1": "Click the \"SELECT FILE\" button.",
+        "help_step2": "Select a suspicious file on your computer.",
+        "help_step3": "Click \"START ANALYSIS\".",
+        "help_step4": "Wait for the scan to complete.",
+        "help_step5": "Review the verdict and recommendations.",
+        "help_theme_title": "🎨 Themes:",
+        "help_theme_desc": "Click the \"Theme\" button at the top to switch between light/dark theme.",
+        "help_settings_title": "⚙️ Settings:",
+        "help_settings_desc": "In the settings section you can change scanning parameters.",
+        "help_reports_title": "📊 Reports:",
+        "help_reports_desc": "History of recent scans is saved here.",
+        "help_verdicts_title": "🛡️ Result Interpretation:",
+        "help_safe": "- SAFE (Green): File is clean, safe to use.",
+        "help_suspicious": "- SUSPICIOUS (Yellow): Doubts exist. Better delete if source is unknown.",
+        "help_danger": "- DANGEROUS (Red): Virus found! Delete the file immediately!",
+        "help_about_title": "ℹ️ About:",
+        "help_about_desc": "RedSand Secure uses modern heuristic analysis methods\nand a signature database to protect your computer.",
+        # Settings window
+        "settings_title": "Settings",
+        "settings_header": "⚙️ PROGRAM SETTINGS",
+        "opt_auto_update": "Automatic update check",
+        "opt_deep_scan": "Deep scan (slower but more accurate)",
+        "opt_scan_archives": "Scan archives inside files",
+        "opt_show_help": "Show help after each analysis",
+        "settings_help": "ℹ️ Here you can configure scanner behavior.\nRecommended to keep all options enabled for maximum protection.",
+        # Reports window
+        "reports_title": "Reports",
+        "reports_header": "📊 REPORT HISTORY",
+        "reports_empty": "Your scan history will be displayed here.\nNo reports yet.\n\nExample future report:\n[2023-10-27 12:00] File: test.exe - DANGEROUS (Trojan)",
+        # Verdicts
+        "verdict_safe": "SAFE",
+        "verdict_suspicious": "SUSPICIOUS",
+        "verdict_danger": "DANGEROUS",
+        # Dialogs
+        "file_dialog_title": "Select file to analyze",
+        "all_files": "All files",
+        "exe_files": "EXE files",
+        "script_files": "Script files",
+        "exit_confirm": "Analysis is still running. Do you really want to exit?",
+        "exit_title": "Exit",
+        # Threat details
+        "threat_no_threats": "No threats",
+        "threat_clean_file": "Clean file",
+        "desc_safe": "The file passed all checks. No known viruses, trojans or suspicious code detected. Digital signature (if present) is valid.",
+        "method_safe": "Comparison with known virus database yielded no matches. Behavioral analysis revealed no dangerous actions.",
+        "rec_safe_1": "File is safe to use.",
+        "rec_safe_2": "Still exercise basic caution.",
+        "rec_safe_3": "Make sure the file is downloaded from official website.",
+        "rec_safe_4": "Keep backups of important data.",
+        # Danger threat texts
+        "danger_family": "Trojan downloader family",
+        "danger_desc": "This file is malware disguised as a legitimate application. When run, it tries to inject into system processes, steal your passwords and encrypt personal data.",
+        "danger_method": "Detected by unique digital signature in virus database. Also suspicious behavior detected: attempt to connect to internet secretly and modify registry.",
+        "danger_rec_1": "DELETE THIS FILE IMMEDIATELY!",
+        "danger_rec_2": "Do not try to open or run it.",
+        "danger_rec_3": "Run a full antivirus scan on your computer.",
+        "danger_rec_4": "If you already ran this file, change all important passwords.",
+        "danger_rec_5": "Check bank accounts for suspicious transactions.",
+        # Suspicious threat texts
+        "suspicious_family": "Admin tools / Potentially unwanted software",
+        "suspicious_desc": "File contains code that can be used for good or bad purposes. It could be a hacking tool, miner or spyware. By itself it's not a virus but carries risks.",
+        "suspicious_method": "Suspicious behavior detected during heuristic analysis. File tries to get admin rights without clear need and hides its processes.",
+        "suspicious_rec_1": "Better not use this file unless you're 100% sure of the source.",
+        "suspicious_rec_2": "Delete the file if you didn't download it intentionally.",
+        "suspicious_rec_3": "If you need the file, run it in an isolated environment (sandbox).",
+        "suspicious_rec_4": "Check publisher's digital signature (most likely there isn't one).",
+    }
 }
 
-# Заполняем английский словарь
-for key, value in TRANSLATIONS["ru"].items():
-    if key.endswith("_ru"):
-        base_key = key[:-3]
-        en_key = f"{base_key}_en"
-        if en_key in TRANSLATIONS["ru"]:
-            TRANSLATIONS["en"][base_key] = TRANSLATIONS["ru"][en_key]
 
-# Для ключей без суффиксов используем значения из ru как fallback
 class Localization:
     def __init__(self):
         self.current_lang = "ru"
     
     def get(self, key):
         lang = self.current_lang
-        if lang == "ru":
-            # Сначала пробуем ключ без суффикса, потом с _ru
-            value = TRANSLATIONS["ru"].get(key)
-            if value is None:
-                value = TRANSLATIONS["ru"].get(f"{key}_ru")
-            return value if value else key
-        else:
-            # Для английского сначала пробуем прямой ключ, потом _en
-            value = TRANSLATIONS["en"].get(key)
-            if value is None:
-                value = TRANSLATIONS["ru"].get(f"{key}_en")
-            return value if value else key
+        value = TRANSLATIONS.get(lang, {}).get(key)
+        if value is None:
+            value = TRANSLATIONS.get("ru", {}).get(key, key)
+        return value
     
     def set_language(self, lang):
         self.current_lang = lang
@@ -307,7 +343,7 @@ class RedSandApp:
         top_frame.pack_propagate(False)
         
         # Заголовок
-        title_label = tk.Label(top_frame, text="🛡️ RedSand Secure", font=("Segoe UI", 18, "bold"), 
+        title_label = tk.Label(top_frame, text=self.localization.get("header"), font=("Segoe UI", 18, "bold"), 
                                bg=self.colors["frame_bg"], fg=self.colors["accent"])
         title_label.pack(side=tk.LEFT, padx=20, pady=10)
         
@@ -342,14 +378,14 @@ class RedSandApp:
         separator.pack(side=tk.LEFT, padx=10, fill=tk.Y)
         
         # Кнопки переключения языка - только одна может быть активна
-        self.lang_button_ru = tk.Button(btn_frame, text="🇷🇺 RU", command=lambda: self.set_language("ru"),
+        self.lang_button_ru = tk.Button(btn_frame, text=self.localization.get("lang_btn_ru"), command=lambda: self.set_language("ru"),
                                         bg=self.colors["accent"], fg="#FFFFFF",
                                         font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=10, pady=5,
                                         activebackground=self.colors["accent"], activeforeground="#FFFFFF",
                                         borderwidth=2, borderrelief=tk.RAISED)
         self.lang_button_ru.pack(side=tk.LEFT, padx=2)
         
-        self.lang_button_en = tk.Button(btn_frame, text="🇬🇧 EN", command=lambda: self.set_language("en"),
+        self.lang_button_en = tk.Button(btn_frame, text=self.localization.get("lang_btn_en"), command=lambda: self.set_language("en"),
                                         bg=self.colors["button_bg"], fg=self.colors["button_fg"],
                                         font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=10, pady=5,
                                         activebackground=self.colors["accent"], activeforeground="#FFFFFF",
@@ -425,6 +461,11 @@ class RedSandApp:
         
         # Обновляем все тексты в интерфейсе
         self.update_ui_texts()
+        
+        # Обновляем окно результатов если оно открыто
+        if self.result_window:
+            self.result_window.destroy()
+            self.result_window = None
 
     def update_language_buttons(self):
         """Обновление визуального состояния кнопок языка"""
@@ -446,12 +487,9 @@ class RedSandApp:
         if hasattr(self, 'run_btn') and not self.is_analyzing:
             self.run_btn.configure(text=self.localization.get("run_analysis_btn"))
         
-        # Статус бар
-        if hasattr(self, 'status_var'):
-            if self.language == "ru":
-                self.status_var.set(self.localization.get("status_ready"))
-            else:
-                self.status_var.set(self.localization.get("status_ready"))
+        # Статус бар - обновляем только если не идет анализ
+        if hasattr(self, 'status_var') and not self.is_analyzing:
+            self.status_var.set(self.localization.get("status_ready"))
         
         # Обновляем кнопки в верхней панели
         for widget in self.root.winfo_children():
@@ -537,29 +575,17 @@ class RedSandApp:
         self.create_result_window(result_data)
 
     def generate_mock_details(self, risk, filename):
-        lang = self.language
-        
         if risk == "danger":
             verdict = self.localization.get("verdict_danger")
-            family = "Семейство троянов-загрузчиков" if lang == "ru" else "Trojan downloader family"
-            description = (
-                "Этот файл является вредоносной программой, маскирующейся под легитимное приложение. "
-                "При запуске он пытается внедриться в системные процессы, украсть ваши пароли и зашифровать личные данные."
-                if lang == "ru" else
-                "This file is malware disguised as a legitimate application. When run, it tries to inject into system processes, steal your passwords and encrypt personal data."
-            )
-            detection_method = (
-                "Обнаружен по уникальной цифровой подписи (сигнатуре) в базе данных вирусов. "
-                "Также выявлено подозрительное поведение: попытка скрытого подключения к интернету и модификация реестра."
-                if lang == "ru" else
-                "Detected by unique digital signature in virus database. Also suspicious behavior detected: attempt to connect to internet secretly and modify registry."
-            )
+            family = self.localization.get("danger_family")
+            description = self.localization.get("danger_desc")
+            detection_method = self.localization.get("danger_method")
             recommendations = [
-                "НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!" if lang == "ru" else "DELETE THIS FILE IMMEDIATELY!",
-                "Не пытайтесь его открывать или запускать." if lang == "ru" else "Do not try to open or run it.",
-                "Проверьте компьютер полным сканированием антивируса." if lang == "ru" else "Run a full antivirus scan on your computer.",
-                "Если вы уже запустили файл, смените все важные пароли." if lang == "ru" else "If you already ran this file, change all important passwords.",
-                "Проверьте банковские счета на наличие подозрительных операций." if lang == "ru" else "Check bank accounts for suspicious transactions."
+                self.localization.get("danger_rec_1"),
+                self.localization.get("danger_rec_2"),
+                self.localization.get("danger_rec_3"),
+                self.localization.get("danger_rec_4"),
+                self.localization.get("danger_rec_5")
             ]
             return {
                 "verdict": verdict,
@@ -572,25 +598,14 @@ class RedSandApp:
             }
         elif risk == "suspicious":
             verdict = self.localization.get("verdict_suspicious")
-            family = "Инструменты администрирования / Потенциально нежелательное ПО" if lang == "ru" else "Admin tools / Potentially unwanted software"
-            description = (
-                "Файл содержит код, который может использоваться как во благо, так и во вред. "
-                "Это может быть инструмент для взлома, майнер или программа для скрытого наблюдения. "
-                "Сам по себе он не является вирусом, но несет риски."
-                if lang == "ru" else
-                "File contains code that can be used for good or bad purposes. It could be a hacking tool, miner or spyware. By itself it's not a virus but carries risks."
-            )
-            detection_method = (
-                "Выявлено подозрительное поведение при эвристическом анализе. "
-                "Файл пытается получить права администратора без явной необходимости и скрывает свои процессы."
-                if lang == "ru" else
-                "Suspicious behavior detected during heuristic analysis. File tries to get admin rights without clear need and hides its processes."
-            )
+            family = self.localization.get("suspicious_family")
+            description = self.localization.get("suspicious_desc")
+            detection_method = self.localization.get("suspicious_method")
             recommendations = [
-                "Лучше не использовать этот файл, если вы не уверены в источнике на 100%." if lang == "ru" else "Better not use this file unless you're 100% sure of the source.",
-                "Удалите файл, если вы не скачивали его специально." if lang == "ru" else "Delete the file if you didn't download it intentionally.",
-                "Если файл нужен, запустите его в изолированной среде (песочнице)." if lang == "ru" else "If you need the file, run it in an isolated environment (sandbox).",
-                "Проверьте цифровую подпись издателя (скорее всего её нет)." if lang == "ru" else "Check publisher's digital signature (most likely there isn't one)."
+                self.localization.get("suspicious_rec_1"),
+                self.localization.get("suspicious_rec_2"),
+                self.localization.get("suspicious_rec_3"),
+                self.localization.get("suspicious_rec_4")
             ]
             return {
                 "verdict": verdict,
@@ -780,8 +795,11 @@ class RedSandApp:
         
         for i, rec in enumerate(details["recommendations"], 1):
             rec_text = f"{i}. {rec}"
-            color = details["color"] if "НЕ" in rec or "УДАЛИ" in rec.upper() else self.colors["fg"]
-            tk.Label(rec_frame, text=rec_text, font=("Segoe UI", 11, "bold" if "НЕ" in rec or "УДАЛИ" in rec.upper() else "normal"), 
+            # Проверка на важность рекомендации для обоих языков
+            is_urgent = ("НЕ" in rec or "УДАЛИ" in rec.upper() or 
+                        "DELETE" in rec.upper() or "IMMEDIATELY" in rec.upper())
+            color = details["color"] if is_urgent else self.colors["fg"]
+            tk.Label(rec_frame, text=rec_text, font=("Segoe UI", 11, "bold" if is_urgent else "normal"), 
                      bg=self.colors["frame_bg"], fg=color, wraplength=600, justify=tk.LEFT, anchor=tk.W).pack(fill=tk.X, pady=5)
 
     def create_help_tab(self, parent):
@@ -842,15 +860,15 @@ class RedSandApp:
         frame = tk.Frame(settings_win, bg=self.colors["frame_bg"], padx=20, pady=20)
         frame.pack(fill=tk.BOTH, expand=True)
         
-        tk.Label(frame, text="⚙️ НАСТРОЙКИ ПРОГРАММЫ", font=("Segoe UI", 16, "bold"), 
+        tk.Label(frame, text=self.localization.get("settings_header"), font=("Segoe UI", 16, "bold"), 
                  bg=self.colors["frame_bg"], fg=self.colors["accent"]).pack(pady=10)
         
-        # Опции
+        # Опции с локализацией
         opts = [
-            "Автоматическая проверка обновлений",
-            "Глубокий анализ (медленнее, но точнее)",
-            "Проверять архивы внутри файлов",
-            "Показывать справку после каждого анализа"
+            self.localization.get("opt_auto_update"),
+            self.localization.get("opt_deep_scan"),
+            self.localization.get("opt_scan_archives"),
+            self.localization.get("opt_show_help")
         ]
         
         vars_list = []
@@ -862,19 +880,19 @@ class RedSandApp:
                                 selectcolor=self.colors["bg"], font=("Segoe UI", 11))
             cb.pack(anchor=tk.W, pady=5)
             
-        # Справка внизу
-        help_lbl = tk.Label(frame, text="ℹ️ Здесь вы можете настроить поведение сканера.\nРекомендуется оставить все галочки включенными для максимальной защиты.",
+        # Справка внизу с локализацией
+        help_lbl = tk.Label(frame, text=self.localization.get("settings_help"),
                             font=("Segoe UI", 10, "italic"), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                             justify=tk.CENTER, pady=20)
         help_lbl.pack(side=tk.BOTTOM)
         
-        tk.Button(frame, text="ЗАКРЫТЬ", command=settings_win.destroy,
+        tk.Button(frame, text=self.localization.get("close_btn"), command=settings_win.destroy,
                   bg=self.colors["accent"], fg="#FFFFFF", font=("Segoe UI", 12, "bold"),
                   relief=tk.FLAT, padx=20, pady=10).pack(side=tk.BOTTOM, pady=10)
 
     def open_reports(self):
         rep_win = tk.Toplevel(self.root)
-        rep_win.title("Отчеты")
+        rep_win.title(self.localization.get("reports_title"))
         rep_win.geometry("600x400")
         rep_win.configure(bg=self.colors["bg"])
         rep_win.transient(self.root)
@@ -882,23 +900,22 @@ class RedSandApp:
         frame = tk.Frame(rep_win, bg=self.colors["frame_bg"], padx=20, pady=20)
         frame.pack(fill=tk.BOTH, expand=True)
         
-        tk.Label(frame, text="📊 ИСТОРИЯ ОТЧЕТОВ", font=("Segoe UI", 16, "bold"), 
+        tk.Label(frame, text=self.localization.get("reports_header"), font=("Segoe UI", 16, "bold"), 
                  bg=self.colors["frame_bg"], fg=self.colors["accent"]).pack(pady=10)
         
         text = scrolledtext.ScrolledText(frame, font=("Consolas", 10), bg=self.colors["bg"], fg=self.colors["fg"])
         text.pack(fill=tk.BOTH, expand=True, pady=10)
         
-        text.insert(tk.END, "Здесь будет отображаться история ваших сканирований.\n")
-        text.insert(tk.END, "Пока что отчетов нет.\n")
-        text.insert(tk.END, "\nПример будущего отчета:\n[2023-10-27 12:00] Файл: test.exe - ОПАСНО (Trojan)\n")
+        reports_empty = self.localization.get("reports_empty")
+        text.insert(tk.END, reports_empty)
         
-        tk.Button(frame, text="ЗАКРЫТЬ", command=rep_win.destroy,
+        tk.Button(frame, text=self.localization.get("close_btn"), command=rep_win.destroy,
                   bg=self.colors["accent"], fg="#FFFFFF", font=("Segoe UI", 12, "bold"),
                   relief=tk.FLAT, padx=20, pady=10).pack(pady=10)
 
     def on_closing(self):
         if self.is_analyzing:
-            if messagebox.askokcancel("Выход", "Анализ еще идет. Вы действительно хотите выйти?"):
+            if messagebox.askokcancel(self.localization.get("exit_title"), self.localization.get("exit_confirm")):
                 self.is_analyzing = False
                 self.root.destroy()
         else:
