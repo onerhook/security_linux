@@ -159,7 +159,13 @@ LANGUAGES = {
         },
         "log_safe": "БЕЗОПАСНО",
         "log_suspicious": "ПОДОЗРИТЕЛЬНО",
-        "log_dangerous": "ОПАСНО"
+        "log_dangerous": "ОПАСНО",
+        "log_info": "ИНФО",
+        "log_debug": "ОТЛАДКА",
+        "log_warning": "ПРЕДУПРЕЖДЕНИЕ",
+        "log_error": "ОШИБКА",
+        "log_critical": "КРИТИЧЕСКИ",
+        "log_success": "УСПЕШНО"
     },
     "English": {
         "title": "RedSand Secure",
@@ -260,7 +266,13 @@ LANGUAGES = {
         },
         "log_safe": "SAFE",
         "log_suspicious": "SUSPICIOUS",
-        "log_dangerous": "DANGEROUS"
+        "log_dangerous": "DANGEROUS",
+        "log_info": "INFO",
+        "log_debug": "DEBUG",
+        "log_warning": "WARNING",
+        "log_error": "ERROR",
+        "log_critical": "CRITICAL",
+        "log_success": "SUCCESS"
     }
 }
 
@@ -546,6 +558,8 @@ class HistoryDialog(QDialog):
         self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        # Увеличиваем высоту строки в 2 раза
+        self.history_table.verticalHeader().setDefaultSectionSize(50)
         self.load_history()
         layout.addWidget(self.history_table)
         
@@ -1339,10 +1353,10 @@ class RedSandSecureGUI(QMainWindow):
         # Верхняя панель с кнопками
         top_panel = QHBoxLayout()
         
-        # Выбор языка - две кнопки RU и EN (меньше и левее)
+        # Выбор языка - две кнопки RU и EN
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         lang_label = QLabel("Язык/Language:")
-        lang_label.setStyleSheet("font-weight: bold;")
+        lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         top_panel.addWidget(lang_label)
         
         self.btn_ru = QPushButton("RU")
@@ -1350,7 +1364,7 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setFixedSize(50, 35)
+        self.btn_ru.setMinimumHeight(50)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1358,10 +1372,10 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setFixedSize(50, 35)
+        self.btn_en.setMinimumHeight(50)
         top_panel.addWidget(self.btn_en)
         
-        top_panel.addSpacing(30)
+        top_panel.addSpacing(20)
         
         # Кнопка настроек
         btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
@@ -1691,16 +1705,17 @@ class RedSandSecureGUI(QMainWindow):
         
         # Локализация уровней логов
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        is_ru = self.current_lang == "Русский"
         level_texts = {
             'SAFE': lang_data.get('log_safe', 'SAFE'),
             'SUSPICIOUS': lang_data.get('log_suspicious', 'SUSPICIOUS'),
             'DANGEROUS': lang_data.get('log_dangerous', 'DANGEROUS'),
-            'INFO': 'INFO',
-            'DEBUG': 'DEBUG',
-            'WARNING': 'WARNING',
-            'ERROR': 'ERROR',
-            'CRITICAL': 'CRITICAL',
-            'SUCCESS': 'SUCCESS'
+            'INFO': lang_data.get('log_info', 'INFO'),
+            'DEBUG': lang_data.get('log_debug', 'DEBUG'),
+            'WARNING': lang_data.get('log_warning', 'WARNING'),
+            'ERROR': lang_data.get('log_error', 'ERROR'),
+            'CRITICAL': lang_data.get('log_critical', 'CRITICAL'),
+            'SUCCESS': lang_data.get('log_success', 'SUCCESS')
         }
         
         level_text = level_texts.get(level, level)
@@ -1774,7 +1789,7 @@ class RedSandSecureGUI(QMainWindow):
         # Применяем переводы
         self.apply_language(language)
         
-        self.log_message('INFO', f"Язык изменен на: {language}")
+        self.log_message('INFO', f"Language changed to: {language}" if language == "English" else f"Язык изменен на: {language}")
         self.update_status_bar()
     
     def apply_language(self, language: str):
@@ -1863,7 +1878,7 @@ class RedSandSecureGUI(QMainWindow):
         # Применяем новую тему
         self.setStyleSheet(generate_stylesheet(theme_name))
         
-        self.log_message('INFO', f"Тема изменена на: {theme_name}")
+        self.log_message('INFO', f"Theme changed to: {theme_name}" if self.current_lang == "English" else f"Тема изменена на: {theme_name}")
 
     def update_status_bar(self):
         """Обновить строку состояния - черный цвет с белым текстом"""
