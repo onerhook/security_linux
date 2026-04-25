@@ -90,7 +90,79 @@ LANGUAGES = {
         "date": "Дата",
         "file": "Файл",
         "verdict": "Вердикт",
-        "clear_history": "Очистить историю"
+        "clear_history": "Очистить историю",
+        "analysis_results_title": "📊 Результаты анализа безопасности",
+        "close_btn": "Закрыть",
+        "home_tab": "🏠 Главная",
+        "about_virus_tab": "🦠 О вирусе",
+        "help_tab_title": "❓ Справка",
+        "main_info_group": "📋 Основная информация",
+        "threat_type_label": "Тип угрозы:",
+        "threat_family_label": "Семейство:",
+        "virus_info_group": "🦠 Подробная информация об угрозе",
+        "detection_group": "🔍 Как мы обнаружили эту угрозу",
+        "recommendations_group": "💡 Подробные рекомендации",
+        "static_analysis_title": "✅ Статический анализ сигнатур",
+        "static_analysis_desc_safe": "Файл проверен по базе сигнатур - совпадений с известными вирусами не найдено.",
+        "static_analysis_desc_suspicious": "Обнаружены отдельные подозрительные элементы, но полного совпадения с известными вирусами нет.",
+        "static_analysis_desc_dangerous": "Программа сравнила содержимое файла с базой данных известных вирусов и обнаружила точное совпадение с сигнатурой вредоносного ПО.",
+        "behavioral_analysis_title": "✅ Поведенческий анализ",
+        "behavioral_analysis_desc_safe": "В изолированной среде файл не проявил никакой подозрительной активности.",
+        "behavioral_analysis_desc_suspicious": "Файл выполняет необычные действия, которые могут быть как легитимными, так и вредоносными.",
+        "behavioral_analysis_desc_dangerous": "При запуске файла в изолированной среде были зафиксированы вредоносные действия: попытки изменения системных файлов, создание скрытых процессов или подключение к подозрительным сетевым ресурсам.",
+        "heuristic_analysis_title": "✅ Эвристический анализ",
+        "heuristic_analysis_desc_safe": "Структура файла корректна, цифровая подпись (если есть) действительна.",
+        "heuristic_analysis_desc_suspicious": "Некоторые паттерны кода вызывают сомнения, но недостаточны для однозначного вывода об угрозе.",
+        "heuristic_analysis_desc_dangerous": "Структура файла, используемые функции и паттерны кода характерны для вредоносного ПО. Обнаружены техники обхода защиты и сокрытия присутствия.",
+        "metadata_analysis_title": "✅ Анализ метаданных",
+        "metadata_analysis_desc_dangerous": "Информация о файле (цифровая подпись, дата создания, компилятор) указывает на подозрительное происхождение.",
+        "integrity_check_title": "✅ Проверка целостности",
+        "integrity_check_desc_safe": "Структура файла корректна, цифровая подпись (если есть) действительна.",
+        "help_title": "❓ Справка и помощь",
+        "help_section_what_is": "🎯 Что такое RedSand Secure?",
+        "help_section_what_is_content": "RedSand Secure - это система анализа подозрительных файлов. Она проверяет файлы на наличие вирусов и других угроз безопасности, используя статический и поведенческий анализ.",
+        "help_section_how_to": "📁 Как проверить файл?",
+        "help_section_how_to_content": "1. Нажмите кнопку 'Выбрать файл'<br>2. Укажите подозрительный файл на вашем компьютере<br>3. Нажмите 'ЗАПУСТИТЬ АНАЛИЗ'<br>4. Дождитесь завершения проверки<br>5. Изучите результаты в окне отчета",
+        "help_section_precautions": "⚠️ Меры предосторожности",
+        "help_section_precautions_content": "<b>ВАЖНО:</b> Всегда запускайте анализ потенциально опасных файлов только в изолированной виртуальной машине! Это защитит вашу основную систему от возможного заражения.",
+        "help_section_results": "📊 Понимание результатов",
+        "help_section_results_content": "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз. Можно использовать.<br><b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы. Лучше не использовать.<br><b>ОПАСНО (красный)</b> - Обнаружен вирус. Немедленно удалите файл!<br><br><b>Как мы определяем угрозу:</b><br>• Статический анализ - проверка сигнатур вирусов в базе данных<br>• Поведенческий анализ - наблюдение за действиями файла в изолированной среде<br>• Эвристический анализ - поиск подозрительных паттернов в коде<br>• Анализ метаданных - проверка информации о файле",
+        "help_section_settings": "⚙️ Настройки анализа",
+        "help_section_settings_content": "<b>Время анализа</b> - максимальное время проверки файла<br><b>Создавать варианты файла</b> - генерирует модификации файла для лучшего обнаружения сложных угроз<br><b>Отключать сеть</b> - защищает вашу сеть во время анализа (рекомендуется)<br><b>Тема оформления</b> - выберите удобную для вас цветовую схему",
+        "settings_title": "⚙ Настройки программы",
+        "settings_theme_group": "🎨 Тема оформления",
+        "settings_theme_label": "Выберите тему:",
+        "settings_timeout_group": "⏱ Время анализа",
+        "settings_timeout_label": "Максимальное время:",
+        "settings_options_group": "🔧 Дополнительные опции",
+        "settings_help_group": "❓ Справка по настройкам",
+        "settings_help_content": "<b>Как использовать настройки:</b><br><br><b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br><b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br><b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br><b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br><b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!",
+        "step1_select_file": "Шаг 1: Выберите файл",
+        "step2_settings": "Шаг 2: Настройки (необязательно)",
+        "progress_group": "Прогресс",
+        "waiting_label": "Ожидание...",
+        "logs_placeholder": "Здесь будет отображаться ход анализа...",
+        "results_placeholder": "Результаты анализа появятся здесь после завершения...",
+        "table_param_header": "Параметр",
+        "table_value_header": "Значение",
+        "confirm_exit": "Анализ выполняется",
+        "confirm_exit_msg": "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
+        "warning_title": "Предупреждение",
+        "error_title": "Ошибка",
+        "security_warning": "Предупреждение о безопасности",
+        "security_warning_msg": "Вы запускаете анализ потенциально опасного файла!\n\nУбедитесь, что вы работаете в виртуальной машине.\n\nПродолжить?",
+        "no_file_warning": "Пожалуйста, выберите файл для анализа!",
+        "file_not_found": "Файл не найден: ",
+        "analysis_started": "Анализ запущен...",
+        "analysis_completed": "Анализ завершен успешно!",
+        "analysis_error": "Ошибка анализа!",
+        "preparing_analysis": "Подготовка к анализу...",
+        "checking_file": "Проверка файла...",
+        "static_analysis_progress": "Статический анализ...",
+        "behavioral_analysis_progress": "Анализ поведения...",
+        "threat_assessment": "Оценка угрозы...",
+        "creating_report": "Создание отчета...",
+        "analysis_finished_status": "Анализ завершен!"
     },
     "English": {
         "title": "RedSand Secure",
@@ -122,7 +194,79 @@ LANGUAGES = {
         "date": "Date",
         "file": "File",
         "verdict": "Verdict",
-        "clear_history": "Clear History"
+        "clear_history": "Clear History",
+        "analysis_results_title": "📊 Analysis Results",
+        "close_btn": "Close",
+        "home_tab": "🏠 Home",
+        "about_virus_tab": "🦠 About Virus",
+        "help_tab_title": "❓ Help",
+        "main_info_group": "📋 General Information",
+        "threat_type_label": "Threat Type:",
+        "threat_family_label": "Family:",
+        "virus_info_group": "🦠 Detailed Threat Information",
+        "detection_group": "🔍 How We Detected This Threat",
+        "recommendations_group": "💡 Detailed Recommendations",
+        "static_analysis_title": "✅ Static Signature Analysis",
+        "static_analysis_desc_safe": "File checked against signature database - no matches with known viruses found.",
+        "static_analysis_desc_suspicious": "Some suspicious elements detected, but no full match with known viruses.",
+        "static_analysis_desc_dangerous": "Program compared file content with virus database and found exact match with malware signature.",
+        "behavioral_analysis_title": "✅ Behavioral Analysis",
+        "behavioral_analysis_desc_safe": "In isolated environment, file showed no suspicious activity.",
+        "behavioral_analysis_desc_suspicious": "File performs unusual actions that could be either legitimate or malicious.",
+        "behavioral_analysis_desc_dangerous": "When run in isolated environment, malicious actions were detected: attempts to modify system files, create hidden processes, or connect to suspicious network resources.",
+        "heuristic_analysis_title": "✅ Heuristic Analysis",
+        "heuristic_analysis_desc_safe": "File structure is correct, digital signature (if present) is valid.",
+        "heuristic_analysis_desc_suspicious": "Some code patterns raise concerns, but insufficient for definitive threat conclusion.",
+        "heuristic_analysis_desc_dangerous": "File structure, used functions, and code patterns are characteristic of malware. Evasion and concealment techniques detected.",
+        "metadata_analysis_title": "✅ Metadata Analysis",
+        "metadata_analysis_desc_dangerous": "File information (digital signature, creation date, compiler) indicates suspicious origin.",
+        "integrity_check_title": "✅ Integrity Check",
+        "integrity_check_desc_safe": "File structure is correct, digital signature (if present) is valid.",
+        "help_title": "❓ Help and Support",
+        "help_section_what_is": "🎯 What is RedSand Secure?",
+        "help_section_what_is_content": "RedSand Secure is a suspicious file analysis system. It checks files for viruses and other security threats using static and behavioral analysis.",
+        "help_section_how_to": "📁 How to Check a File?",
+        "help_section_how_to_content": "1. Click 'Select File' button<br>2. Specify the suspicious file on your computer<br>3. Click 'START ANALYSIS'<br>4. Wait for the scan to complete<br>5. Review the results in the report window",
+        "help_section_precautions": "⚠️ Precautions",
+        "help_section_precautions_content": "<b>IMPORTANT:</b> Always run analysis of potentially dangerous files only in an isolated virtual machine! This will protect your main system from possible infection.",
+        "help_section_results": "📊 Understanding Results",
+        "help_section_results_content": "<b>SAFE (green)</b> - File contains no known threats. Safe to use.<br><b>SUSPICIOUS (yellow)</b> - File contains questionable elements. Better not use.<br><b>DANGEROUS (red)</b> - Virus detected. Delete file immediately!<br><br><b>How we determine threats:</b><br>• Static analysis - checking virus signatures in database<br>• Behavioral analysis - observing file actions in isolated environment<br>• Heuristic analysis - searching for suspicious code patterns<br>• Metadata analysis - checking file information",
+        "help_section_settings": "⚙️ Analysis Settings",
+        "help_section_settings_content": "<b>Analysis Time</b> - maximum file check duration<br><b>Create File Variants</b> - generates file modifications for better detection of complex threats<br><b>Disable Network</b> - protects your network during analysis (recommended)<br><b>Theme</b> - choose your preferred color scheme",
+        "settings_title": "⚙ Program Settings",
+        "settings_theme_group": "🎨 Theme",
+        "settings_theme_label": "Select theme:",
+        "settings_timeout_group": "⏱ Analysis Time",
+        "settings_timeout_label": "Maximum time:",
+        "settings_options_group": "🔧 Additional Options",
+        "settings_help_group": "❓ Settings Help",
+        "settings_help_content": "<b>How to use settings:</b><br><br><b>Theme:</b> Choose your preferred visual interface style<br><b>Analysis Time:</b> Maximum time to check one file (default 60 sec)<br><b>Create File Variants:</b> Generates file modifications for better detection of complex threats<br><b>Disable Network:</b> Protects your local network during malware analysis (recommended to always enable)<br><br><b style='color: #EF4444;'>IMPORTANT:</b> Run analysis only in an isolated virtual machine!",
+        "step1_select_file": "Step 1: Select File",
+        "step2_settings": "Step 2: Settings (optional)",
+        "progress_group": "Progress",
+        "waiting_label": "Waiting...",
+        "logs_placeholder": "Analysis progress will be displayed here...",
+        "results_placeholder": "Analysis results will appear here after completion...",
+        "table_param_header": "Parameter",
+        "table_value_header": "Value",
+        "confirm_exit": "Analysis in Progress",
+        "confirm_exit_msg": "Analysis is still running. Are you sure you want to exit?",
+        "warning_title": "Warning",
+        "error_title": "Error",
+        "security_warning": "Security Warning",
+        "security_warning_msg": "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?",
+        "no_file_warning": "Please select a file to analyze!",
+        "file_not_found": "File not found: ",
+        "analysis_started": "Analysis started...",
+        "analysis_completed": "Analysis completed successfully!",
+        "analysis_error": "Analysis error!",
+        "preparing_analysis": "Preparing for analysis...",
+        "checking_file": "Checking file...",
+        "static_analysis_progress": "Static analysis...",
+        "behavioral_analysis_progress": "Behavioral analysis...",
+        "threat_assessment": "Threat assessment...",
+        "creating_report": "Creating report...",
+        "analysis_finished_status": "Analysis finished!"
     }
 }
 
@@ -370,18 +514,25 @@ class HistoryDialog(QDialog):
     def __init__(self, history_file: str = "scan_history.json", parent=None):
         super().__init__(parent)
         self.history_file = Path(history_file)
-        self.setWindowTitle("История сканирований" if parent and hasattr(parent, 'current_lang') and parent.current_lang == "Русский" else "Scan History")
+        self.parent_gui = parent
+        self.current_lang = getattr(parent, 'current_lang', 'Русский') if parent else 'Русский'
+        self.setWindowTitle(self.get_text("scan_history"))
         self.setMinimumSize(800, 600)
         # Убираем вопросительный знак из заголовка окна
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
+    
+    def get_text(self, key: str) -> str:
+        """Получить переведенный текст"""
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        return lang_data.get(key, key)
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("📜 История сканирований")
+        title = QLabel(f"📜 {self.get_text('scan_history')}")
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
@@ -391,12 +542,12 @@ class HistoryDialog(QDialog):
         layout.addWidget(self.history_list)
         
         btn_layout = QHBoxLayout()
-        btn_clear = QPushButton("🗑 Очистить историю")
+        btn_clear = QPushButton(f"🗑 {self.get_text('clear_history')}")
         btn_clear.setObjectName("secondaryBtn")
         btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(btn_clear)
         
-        btn_close = QPushButton("Закрыть")
+        btn_close = QPushButton(self.get_text("close_btn"))
         btn_close.setObjectName("actionBtn")
         btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(btn_close)
@@ -561,16 +712,22 @@ class DetailedReportDialog(QDialog):
         
         risk_score = threat_info.get('risk_score', 0)
         
-        # Определение уровня угрозы
+        # Определение уровня угрозы с локализацией
         if risk_score >= 70:
-            risk_color, risk_text, risk_icon = "#EF4444", "ОПАСНО", "🚨"
-            risk_desc = "ОПАСНО! Немедленно удалите файл. Обнаружен вирус."
+            risk_color = "#EF4444"
+            risk_text = self.get_text("dangerous")
+            risk_icon = "🚨"
+            risk_desc = self.get_text("dangerous_desc")
         elif risk_score >= 40:
-            risk_color, risk_text, risk_icon = "#F59E0B", "ПОДОЗРИТЕЛЬНО", "⚠️"
-            risk_desc = "ПОДОЗРИТЕЛЬНО, лучше не использовать. Файл содержит сомнительные элементы."
+            risk_color = "#F59E0B"
+            risk_text = self.get_text("suspicious")
+            risk_icon = "⚠️"
+            risk_desc = self.get_text("suspicious_desc")
         else:
-            risk_color, risk_text, risk_icon = "#10B981", "БЕЗОПАСНО", "✅"
-            risk_desc = "Файл не содержит известных угроз. Можно использовать."
+            risk_color = "#10B981"
+            risk_text = self.get_text("safe")
+            risk_icon = "✅"
+            risk_desc = self.get_text("safe_desc")
         
         # Карточка уровня угрозы
         risk_card = QGroupBox()
@@ -606,14 +763,14 @@ class DetailedReportDialog(QDialog):
         layout.addWidget(risk_card)
         
         # Основная информация
-        info_group = QGroupBox("📋 Основная информация")
+        info_group = QGroupBox(self.get_text("main_info_group"))
         info_layout = QGridLayout()
         info_layout.setSpacing(12)
         
         row = 0
         items = [
-            ("Тип угрозы:", threat_info.get('type', 'Неизвестно')),
-            ("Семейство:", threat_info.get('family', 'Неизвестно')),
+            (self.get_text("threat_type_label"), threat_info.get('type', self.get_text("unknown"))),
+            (self.get_text("threat_family_label"), threat_info.get('family', self.get_text("unknown"))),
         ]
         
         for label_text, value in items:
@@ -646,29 +803,29 @@ class DetailedReportDialog(QDialog):
         static_data = self.report_data.get('static_results') or {}
         
         # Информация о вирусе - максимально подробно
-        virus_group = QGroupBox("🦠 Подробная информация об угрозе")
+        virus_group = QGroupBox(self.get_text("virus_info_group"))
         virus_layout = QVBoxLayout()
         virus_layout.setSpacing(15)
         
-        virus_name = threat_info.get('type', 'Неизвестно')
-        virus_family = threat_info.get('family', 'Неизвестно')
+        virus_name = threat_info.get('type', self.get_text("unknown"))
+        virus_family = threat_info.get('family', self.get_text("unknown"))
         risk_score = threat_info.get('risk_score', 0)
         
-        # Определяем вердикт без баллов
+        # Определяем вердикт с локализацией
         if risk_score >= 70:
-            verdict_text = "<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>🚨 ОПАСНО - Немедленно удалите файл!</span>"
-            verdict_desc = "Обнаружен вирус. Файл представляет серьезную угрозу для вашей системы."
+            verdict_text = f"<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>🚨 {self.get_text('dangerous')} - {self.get_text('dangerous_desc').split('.')[0]}!</span>"
+            verdict_desc = self.get_text("dangerous_desc")
         elif risk_score >= 40:
-            verdict_text = "<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>⚠️ ПОДОЗРИТЕЛЬНО - Лучше не использовать</span>"
-            verdict_desc = "Файл содержит подозрительные элементы. Рекомендуется воздержаться от использования."
+            verdict_text = f"<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>⚠️ {self.get_text('suspicious')} - {self.get_text('suspicious_desc').split('.')[0]}</span>"
+            verdict_desc = self.get_text("suspicious_desc")
         else:
-            verdict_text = "<span style='color: #10B981; font-size: 20px; font-weight: bold;'>✅ БЕЗОПАСНО - Можно использовать</span>"
-            verdict_desc = "Угроз не обнаружено. Файл прошел все проверки безопасности."
+            verdict_text = f"<span style='color: #10B981; font-size: 20px; font-weight: bold;'>✅ {self.get_text('safe')} - {self.get_text('safe_desc').split('.')[0]}</span>"
+            verdict_desc = self.get_text("safe_desc")
         
         info_text = f"""
         <div style='font-size: 16px; line-height: 2.0;'>
-        <b>📛 Название угрозы:</b> {virus_name}<br><br>
-        <b>🧬 Семейство вирусов:</b> {virus_family}<br><br>
+        <b>📛 {self.get_text('threat_type_label')}</b> {virus_name}<br><br>
+        <b>🧬 {self.get_text('threat_family_label')}</b> {virus_family}<br><br>
         {verdict_text}<br><br>
         <b>📝 Описание:</b> {verdict_desc}<br><br>
         </div>
@@ -681,8 +838,8 @@ class DetailedReportDialog(QDialog):
         virus_group.setLayout(virus_layout)
         layout.addWidget(virus_group)
         
-        # Как обнаружили - максимально подробно
-        detection_group = QGroupBox("🔍 Как мы обнаружили эту угрозу")
+        # Как обнаружили - максимально подробно с локализацией
+        detection_group = QGroupBox(self.get_text("detection_group"))
         detection_layout = QVBoxLayout()
         detection_layout.setSpacing(15)
         
@@ -691,32 +848,22 @@ class DetailedReportDialog(QDialog):
         
         if risk_score >= 70:
             detection_details = [
-                ("<b>✅ Статический анализ сигнатур</b>", 
-                 "Программа сравнила содержимое файла с базой данных известных вирусов и обнаружила точное совпадение с сигнатурой вредоносного ПО."),
-                ("<b>✅ Поведенческий анализ</b>", 
-                 "При запуске файла в изолированной среде были зафиксированы вредоносные действия: попытки изменения системных файлов, создание скрытых процессов или подключение к подозрительным сетевым ресурсам."),
-                ("<b>✅ Эвристический анализ</b>", 
-                 "Структура файла, используемые функции и паттерны кода характерны для вредоносного ПО. Обнаружены техники обхода защиты и сокрытия присутствия."),
-                ("<b>✅ Анализ метаданных</b>",
-                 "Информация о файле (цифровая подпись, дата создания, компилятор) указывает на подозрительное происхождение.")
+                (f"<b>{self.get_text('static_analysis_title')}</b>", self.get_text("static_analysis_desc_dangerous")),
+                (f"<b>{self.get_text('behavioral_analysis_title')}</b>", self.get_text("behavioral_analysis_desc_dangerous")),
+                (f"<b>{self.get_text('heuristic_analysis_title')}</b>", self.get_text("heuristic_analysis_desc_dangerous")),
+                (f"<b>{self.get_text('metadata_analysis_title')}</b>", self.get_text("metadata_analysis_desc_dangerous"))
             ]
         elif risk_score >= 40:
             detection_details = [
-                ("<b>⚠️ Статический анализ</b>", 
-                 "Обнаружены отдельные подозрительные элементы, но полного совпадения с известными вирусами нет."),
-                ("<b>⚠️ Поведенческие аномалии</b>", 
-                 "Файл выполняет необычные действия, которые могут быть как легитимными, так и вредоносными."),
-                ("<b>ℹ️ Эвристика</b>", 
-                 "Некоторые паттерны кода вызывают сомнения, но недостаточны для однозначного вывода об угрозе.")
+                (f"<b>{self.get_text('static_analysis_title').replace('✅', '⚠️')}</b>", self.get_text("static_analysis_desc_suspicious")),
+                (f"<b>⚠️ {self.get_text('behavioral_analysis_title').replace('✅', '').strip()}</b>", self.get_text("behavioral_analysis_desc_suspicious")),
+                (f"<b>ℹ️ {self.get_text('heuristic_analysis_title').replace('✅', '').strip()}</b>", self.get_text("heuristic_analysis_desc_suspicious"))
             ]
         else:
             detection_details = [
-                ("<b>✅ Статический анализ</b>", 
-                 "Файл проверен по базе сигнатур - совпадений с известными вирусами не найдено."),
-                ("<b>✅ Поведенческий анализ</b>", 
-                 "В изолированной среде файл не проявил никакой подозрительной активности."),
-                ("<b>✅ Проверка целостности</b>", 
-                 "Структура файла корректна, цифровая подпись (если есть) действительна.")
+                (f"<b>{self.get_text('static_analysis_title').replace('✅', '').strip()}</b>", self.get_text("static_analysis_desc_safe")),
+                (f"<b>{self.get_text('behavioral_analysis_title').replace('✅', '').strip()}</b>", self.get_text("behavioral_analysis_desc_safe")),
+                (f"<b>{self.get_text('integrity_check_title')}</b>", self.get_text("integrity_check_desc_safe"))
             ]
         
         for title, description in detection_details:
@@ -737,14 +884,14 @@ class DetailedReportDialog(QDialog):
         detection_group.setLayout(detection_layout)
         layout.addWidget(detection_group)
         
-        # Рекомендации - максимально подробно
-        rec_group = QGroupBox("💡 Подробные рекомендации")
+        # Рекомендации - максимально подробно с локализацией
+        rec_group = QGroupBox(self.get_text("recommendations_group"))
         rec_layout = QVBoxLayout()
         
         if risk_score >= 70:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #EF4444;'>
-            <b style='font-size: 18px;'>🚨 НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!</b><br><br>
+            <b style='font-size: 18px;'>🚨 {self.get_text('dangerous')} - {self.get_text('dangerous_desc')}</b><br><br>
             <b>Почему это опасно:</b><br>
             Этот файл распознан как вредоносное ПО с высокой степенью уверенности. Он может:<br>
             • Украсть ваши личные данные (пароли, банковскую информацию)<br>
@@ -761,9 +908,9 @@ class DetailedReportDialog(QDialog):
             </div>
             """
         elif risk_score >= 40:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #F59E0B;'>
-            <b style='font-size: 18px;'>⚠️ БУДЬТЕ ОСТОРОЖНЫ - ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ!</b><br><br>
+            <b style='font-size: 18px;'>⚠️ {self.get_text('suspicious')} - {self.get_text('suspicious_desc')}</b><br><br>
             <b>Почему это подозрительно:</b><br>
             Файл содержит элементы, которые могут указывать на угрозу, но окончательного подтверждения нет. Это может быть:<br>
             • Новый вирус, еще не добавленный в базы сигнатур<br>
@@ -778,9 +925,9 @@ class DetailedReportDialog(QDialog):
             </div>
             """
         else:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #10B981;'>
-            <b style='font-size: 18px;'>✅ ФАЙЛ БЕЗОПАСЕН</b><br><br>
+            <b style='font-size: 18px;'>✅ {self.get_text('safe')} - {self.get_text('safe_desc')}</b><br><br>
             <b>Почему файл считается безопасным:</b><br>
             Файл прошел все проверки и не показал никаких признаков вредоносной активности:<br>
             • Нет совпадений с известными вирусами<br>
@@ -813,42 +960,19 @@ class DetailedReportDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        # Заголовок справки
-        help_title = QLabel("❓ Справка и помощь")
+        # Заголовок справки с локализацией
+        help_title = QLabel(self.get_text("help_title"))
         help_title.setObjectName("helpTitle")
         help_title.setAlignment(Qt.AlignCenter)
         layout.addWidget(help_title)
         
-        # Разделы справки
+        # Разделы справки с локализацией
         sections = [
-            ("🎯 Что такое RedSand Secure?", 
-             "RedSand Secure - это система анализа подозрительных файлов. Она проверяет файлы на наличие вирусов и других угроз безопасности, используя статический и поведенческий анализ."),
-            
-            ("📁 Как проверить файл?",
-             "1. Нажмите кнопку 'Выбрать файл'<br>"
-             "2. Укажите подозрительный файл на вашем компьютере<br>"
-             "3. Нажмите 'ЗАПУСТИТЬ АНАЛИЗ'<br>"
-             "4. Дождитесь завершения проверки<br>"
-             "5. Изучите результаты в окне отчета"),
-            
-            ("⚠️ Меры предосторожности",
-             "<b>ВАЖНО:</b> Всегда запускайте анализ потенциально опасных файлов только в изолированной виртуальной машине! Это защитит вашу основную систему от возможного заражения."),
-            
-            ("📊 Понимание результатов",
-             "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз. Можно использовать.<br>"
-             "<b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы. Лучше не использовать.<br>"
-             "<b>ОПАСНО (красный)</b> - Обнаружен вирус. Немедленно удалите файл!<br><br>"
-             "<b>Как мы определяем угрозу:</b><br>"
-             "• Статический анализ - проверка сигнатур вирусов в базе данных<br>"
-             "• Поведенческий анализ - наблюдение за действиями файла в изолированной среде<br>"
-             "• Эвристический анализ - поиск подозрительных паттернов в коде<br>"
-             "• Анализ метаданных - проверка информации о файле"),
-            
-            ("⚙️ Настройки анализа",
-             "<b>Время анализа</b> - максимальное время проверки файла<br>"
-             "<b>Создавать варианты файла</b> - генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-             "<b>Отключать сеть</b> - защищает вашу сеть во время анализа (рекомендуется)<br>"
-             "<b>Тема оформления</b> - выберите удобную для вас цветовую схему")
+            (self.get_text("help_section_what_is"), self.get_text("help_section_what_is_content")),
+            (self.get_text("help_section_how_to"), self.get_text("help_section_how_to_content")),
+            (self.get_text("help_section_precautions"), self.get_text("help_section_precautions_content")),
+            (self.get_text("help_section_results"), self.get_text("help_section_results_content")),
+            (self.get_text("help_section_settings"), self.get_text("help_section_settings_content"))
         ]
         
         for title, content in sections:
@@ -872,26 +996,33 @@ class DetailedReportDialog(QDialog):
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Настройки")
+        self.parent_gui = parent
+        self.current_lang = getattr(parent, 'current_lang', 'Русский') if parent else 'Русский'
+        self.setWindowTitle(self.get_text("settings_title"))
         self.setMinimumWidth(600)
         # Убираем вопросительный знак из заголовка окна
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
+    
+    def get_text(self, key: str) -> str:
+        """Получить переведенный текст"""
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        return lang_data.get(key, key)
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title_label = QLabel("⚙ Настройки программы")
+        title_label = QLabel(self.get_text("settings_title"))
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
         # Тема оформления
-        theme_group = QGroupBox("🎨 Тема оформления")
+        theme_group = QGroupBox(self.get_text("settings_theme_group"))
         theme_layout = QHBoxLayout()
-        theme_layout.addWidget(QLabel("Выберите тему:"))
+        theme_layout.addWidget(QLabel(self.get_text("settings_theme_label")))
         self.theme_combo = QComboBox()
         self.theme_combo.addItems(["Светлая", "Тёмная"])
         self.theme_combo.setMinimumWidth(200)
@@ -901,46 +1032,39 @@ class SettingsDialog(QDialog):
         layout.addWidget(theme_group)
         
         # Время анализа
-        timeout_group = QGroupBox("⏱ Время анализа")
+        timeout_group = QGroupBox(self.get_text("settings_timeout_group"))
         timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel("Максимальное время:"))
+        timeout_layout.addWidget(QLabel(self.get_text("settings_timeout_label")))
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(100)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel("сек"))
+        timeout_layout.addWidget(QLabel(self.get_text("seconds")))
         timeout_layout.addStretch()
         timeout_group.setLayout(timeout_layout)
         layout.addWidget(timeout_group)
         
         # Дополнительные опции
-        options_group = QGroupBox("🔧 Дополнительные опции")
+        options_group = QGroupBox(self.get_text("settings_options_group"))
         options_layout = QVBoxLayout()
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы путем создания модификаций файла")
+        self.poly_check = QCheckBox(self.get_text("poly_check"))
+        self.poly_check.setToolTip(self.get_text("help_section_settings_content").split('<br>')[2].replace('<b>', '').replace('</b>', ''))
         options_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть во время анализа (рекомендуется)")
+        self.network_check = QCheckBox(self.get_text("network_check") + " (" + self.get_text("help_section_settings_content").split('(')[1].split(')')[0] + ")")
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть от потенциальной угрозы")
+        self.network_check.setToolTip(self.get_text("help_section_settings_content").split('<br>')[3].replace('<b>', '').replace('</b>', '') if '<br>' in self.get_text("help_section_settings_content") else "")
         options_layout.addWidget(self.network_check)
         
         options_group.setLayout(options_layout)
         layout.addWidget(options_group)
         
         # Справка
-        help_group = QGroupBox("❓ Справка по настройкам")
+        help_group = QGroupBox(self.get_text("settings_help_group"))
         help_layout = QVBoxLayout()
-        help_text = QLabel(
-            "<b>Как использовать настройки:</b><br><br>"
-            "<b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br>"
-            "<b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br>"
-            "<b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-            "<b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br>"
-            "<b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!"
-        )
+        help_text = QLabel(self.get_text("settings_help_content"))
         help_text.setWordWrap(True)
         help_text.setStyleSheet("font-size: 15px; line-height: 1.8;")
         help_layout.addWidget(help_text)
@@ -1279,10 +1403,11 @@ class RedSandSecureGUI(QMainWindow):
         self.analysis_completed = True  # Устанавливаем флаг завершения
         self.set_ui_enabled(True)
         self.progress_bar.setValue(100)
-        self.progress_label.setText("Анализ завершен успешно!")
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.progress_label.setText(lang_data.get('analysis_completed', 'Analysis completed successfully!'))
         self.update_results_display(result)
-        self.log_message('SUCCESS', "Анализ завершен успешно!")
-        self.status_bar.showMessage("Анализ завершен")
+        self.log_message('SUCCESS', lang_data.get('analysis_completed', 'Analysis completed successfully!'))
+        self.status_bar.showMessage(lang_data.get('analysis_finished_status', 'Analysis finished!'))
         
         # Сохраняем в историю
         if result:
@@ -1305,11 +1430,12 @@ class RedSandSecureGUI(QMainWindow):
 
     def analysis_error(self, error_msg: str):
         self.set_ui_enabled(True)
-        self.progress_label.setText("Ошибка анализа!")
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.progress_label.setText(lang_data.get('analysis_error', 'Analysis error!'))
         self.progress_label.setStyleSheet("color: #CC0000; font-weight: bold;")
         self.log_message('ERROR', error_msg)
-        self.status_bar.showMessage("Ошибка анализа")
-        QMessageBox.critical(self, "Ошибка анализа", error_msg)
+        self.status_bar.showMessage(lang_data.get('analysis_error', 'Analysis error!'))
+        QMessageBox.critical(self, lang_data.get('error_title', 'Error'), error_msg)
 
     def update_progress(self, value: int, message: str):
         self.progress_bar.setValue(value)
@@ -1396,13 +1522,40 @@ class RedSandSecureGUI(QMainWindow):
         # Получаем переводы
         lang_data = LANGUAGES.get(language, LANGUAGES["Русский"])
         
-        # Обновляем все текстовые элементы
+        # Обновляем все текстовые элементы главного окна
         self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
         self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
         self.btn_analyze.setText(lang_data.get('analyze_btn', '🚀 START ANALYSIS'))
-        self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:') + " (sec)")
-        self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
-        self.network_check.setText(lang_data.get('network_check', 'Disable network'))
+        
+        # Обновляем заголовки групп
+        for group in self.findChildren(QGroupBox):
+            if group.title() == "Шаг 1: Выберите файл" or group.title() == "Step 1: Select File":
+                group.setTitle(lang_data.get('step1_select_file', 'Step 1: Select File'))
+            elif group.title() == "Шаг 2: Настройки (необязательно)" or group.title() == "Step 2: Settings (optional)":
+                group.setTitle(lang_data.get('step2_settings', 'Step 2: Settings (optional)'))
+            elif group.title() == "Прогресс" or group.title() == "Progress":
+                group.setTitle(lang_data.get('progress_group', 'Progress'))
+        
+        # Обновляем labels настроек
+        if hasattr(self, 'timeout_label'):
+            self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:'))
+        if hasattr(self, 'poly_check'):
+            self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
+        if hasattr(self, 'network_check'):
+            self.network_check.setText(lang_data.get('network_check', 'Disable network'))
+        
+        # Обновляем placeholder логов и результатов
+        if hasattr(self, 'log_text'):
+            self.log_text.setPlaceholderText(lang_data.get('logs_placeholder', 'Analysis progress will be displayed here...'))
+        if hasattr(self, 'results_summary'):
+            self.results_summary.setText(lang_data.get('results_placeholder', 'Analysis results will appear here after completion...'))
+        
+        # Обновляем заголовки таблицы
+        if hasattr(self, 'results_table'):
+            self.results_table.setHorizontalHeaderLabels([
+                lang_data.get('table_param_header', 'Parameter'),
+                lang_data.get('table_value_header', 'Value')
+            ])
         
         # Обновляем заголовки вкладок
         for i in range(self.tabs.count()):
@@ -1412,6 +1565,15 @@ class RedSandSecureGUI(QMainWindow):
                     self.tabs.setTabText(i, tab._tab_name_ru)
                 else:
                     self.tabs.setTabText(i, tab._tab_name_en)
+        
+        # Обновляем кнопки в верхней панели
+        for btn in self.findChildren(QPushButton):
+            if btn.text().startswith("⚙"):
+                btn.setText(lang_data.get('settings', '⚙ Settings'))
+            elif btn.text().startswith("📂"):
+                btn.setText(lang_data.get('reports', '📂 Reports'))
+            elif btn.text().startswith("📜"):
+                btn.setText(lang_data.get('history', '📜 History'))
         
         self.log_message('INFO', f"Язык изменен на: {language}")
         self.update_status_bar()
@@ -1488,11 +1650,12 @@ def main():
     window = RedSandSecureGUI()
     window.show()
     if not Path('gui_settings.json').exists():
+        lang_data = LANGUAGES.get(window.current_lang, LANGUAGES["Русский"])
         QMessageBox.warning(
-            window, "Предупреждение о безопасности",
-            "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2>"
-            "<p>Вы запускаете инструмент для анализа потенциально опасных файлов.</p>"
-            "<p><b>Запускайте ТОЛЬКО в изолированной виртуальной машине!</b></p>"
+            window, lang_data.get('security_warning', 'Security Warning'),
+            "<h2>IMPORTANT WARNING</h2>"
+            "<p>You are launching a tool for analyzing potentially dangerous files.</p>"
+            "<p><b>Run ONLY in an isolated virtual machine!</b></p>"
         )
     sys.exit(app.exec_())
 
