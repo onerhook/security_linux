@@ -492,19 +492,28 @@ class DetailedReportDialog(QDialog):
     def __init__(self, report_data: dict, parent=None):
         super().__init__(parent)
         self.report_data = report_data
-        self.setWindowTitle("Результаты анализа безопасности")
+        self.parent_gui = parent
+        # Получаем текущий язык от родительского окна
+        self.current_lang = getattr(parent, 'current_lang', 'Русский')
+        self.setWindowTitle("Результаты анализа безопасности" if self.current_lang == "Русский" else "Analysis Results")
         self.setMinimumSize(900, 700)
         # Убираем вопросительный знак из заголовка окна
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
 
+    def get_text(self, key: str) -> str:
+        """Получить переведенный текст"""
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        return lang_data.get(key, key)
+    
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
         layout.setContentsMargins(25, 25, 25, 25)
         
         # Заголовок
-        title_label = QLabel("📊 Результаты анализа безопасности")
+        title_text = "📊 Результаты анализа безопасности" if self.current_lang == "Русский" else "📊 Analysis Results"
+        title_label = QLabel(title_text)
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -514,20 +523,24 @@ class DetailedReportDialog(QDialog):
         
         # Главная вкладка с резюме
         summary_widget = self.create_summary_tab()
-        tabs.addTab(summary_widget, "🏠 Главная")
+        tab_name = "🏠 Главная" if self.current_lang == "Русский" else "🏠 Home"
+        tabs.addTab(summary_widget, tab_name)
         
         # Вкладка о вирусе
         virus_widget = self.create_virus_info_tab()
-        tabs.addTab(virus_widget, "🦠 О вирусе")
+        tab_name = "🦠 О вирусе" if self.current_lang == "Русский" else "🦠 About Virus"
+        tabs.addTab(virus_widget, tab_name)
         
         # Вкладка справки
         help_widget = self.create_help_tab()
-        tabs.addTab(help_widget, "❓ Справка")
+        tab_name = "❓ Справка" if self.current_lang == "Русский" else "❓ Help"
+        tabs.addTab(help_widget, tab_name)
         
         layout.addWidget(tabs)
         
         # Кнопка закрытия
-        btn_close = QPushButton("Закрыть")
+        btn_close_text = "Закрыть" if self.current_lang == "Русский" else "Close"
+        btn_close = QPushButton(btn_close_text)
         btn_close.setObjectName("actionBtn")
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
