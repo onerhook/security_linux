@@ -600,15 +600,17 @@ class HistoryDialog(QDialog):
                         color = "#059669"
                         bg_color = "#D1FAE5"  # Светло-зеленый фон
                     
-                    # Дата
+                    # Дата - с явным цветом текста и фона
                     date_item = QTableWidgetItem(date)
                     date_item.setForeground(QColor("#0F172A"))
+                    date_item.setBackground(QColor(bg_color))
                     self.history_table.setItem(row, 0, date_item)
                     
-                    # Файл
+                    # Файл - с явным цветом текста и фона
                     file_item = QTableWidgetItem(os.path.basename(file_name))
                     file_item.setToolTip(file_name)
                     file_item.setForeground(QColor("#0F172A"))
+                    file_item.setBackground(QColor(bg_color))
                     self.history_table.setItem(row, 1, file_item)
                     
                     # Вердикт - цветной текст и фон
@@ -619,12 +621,6 @@ class HistoryDialog(QDialog):
                     font.setBold(True)
                     verdict_item.setFont(font)
                     self.history_table.setItem(row, 2, verdict_item)
-                    
-                    # Применяем цвет фона ко всей строке
-                    for col in range(3):
-                        item = self.history_table.item(row, col)
-                        if item and col != 2:  # Не перезаписываем фон вердикта
-                            item.setBackground(QColor(bg_color))
                             
             except Exception as e:
                 pass
@@ -1336,8 +1332,8 @@ class RedSandSecureGUI(QMainWindow):
 
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
-        # Запуск в полноэкранном режиме (maximized)
-        self.showMaximized()
+        # Запуск в полноэкранном режиме без предупреждений о геометрии
+        self.setWindowState(Qt.WindowMaximized)
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1358,13 +1354,15 @@ class RedSandSecureGUI(QMainWindow):
         lang_label = QLabel("Язык/Language:")
         lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         top_panel.addWidget(lang_label)
+        top_panel.addSpacing(10)  # Небольшой отступ до кнопок
         
         self.btn_ru = QPushButton("RU")
         self.btn_ru.setObjectName("secondaryBtn")
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumHeight(50)
+        self.btn_ru.setMinimumSize(60, 40)  # Уменьшенный размер кнопок
+        self.btn_ru.setMaximumSize(60, 40)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1372,10 +1370,11 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumHeight(50)
+        self.btn_en.setMinimumSize(60, 40)  # Уменьшенный размер кнопок
+        self.btn_en.setMaximumSize(60, 40)
         top_panel.addWidget(self.btn_en)
         
-        top_panel.addSpacing(20)
+        top_panel.addSpacing(30)  # Отступ до других кнопок
         
         # Кнопка настроек
         btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
@@ -1652,12 +1651,12 @@ class RedSandSecureGUI(QMainWindow):
         self.log_message('SUCCESS', complete_msg)
         self.status_bar.showMessage(lang_data.get("analysis_complete_status", "Analysis complete"))
         
-        # Сохраняем в историю
+        # Сохраняем в историю с вердиктом на текущем языке
         if result:
             threat_info = result.get('threat_info') or {}
             risk_score = threat_info.get('risk_score', 0) if isinstance(threat_info, dict) else 0
             
-            # Определяем вердикт
+            # Определяем вердикт на текущем языке
             if risk_score >= 70:
                 verdict = "ОПАСНО" if self.current_lang == "Русский" else "DANGEROUS"
             elif risk_score >= 40:
@@ -1719,10 +1718,45 @@ class RedSandSecureGUI(QMainWindow):
         }
         
         level_text = level_texts.get(level, level)
-        html = f'<span style="color: {color}; font-weight: bold;">[{timestamp}] [{level_text}]</span> {message}<br>'
+        
+        # Перевод сообщения лога если это стандартное сообщение
+        translated_message = message
+        if is_ru:
+            # Если русский язык - оставляем как есть
+            pass
+        else:
+            # Переводим стандартные сообщения на английский
+            translations = {
+                "Подготовка к анализу...": "Preparing for analysis...",
+                "Проверка файла...": "Checking file...",
+                "Статический анализ...": "Static analysis...",
+                "Анализ поведения...": "Behavioral analysis...",
+                "Оценка угрозы...": "Threat assessment...",
+                "Создание отчета...": "Generating report...",
+                "Анализ завершен!": "Analysis complete!",
+                "Запуск анализа файла: ": "Starting file analysis: ",
+                "Настройки сохранены.": "Settings saved.",
+                "Тема изменена на: ": "Theme changed to: ",
+                "Язык изменен на: ": "Language changed to: ",
+                "Файл перетащен: ": "File dragged: ",
+                "Анализ запущен...": "Analysis started...",
+                "Анализ завершен успешно!": "Analysis completed successfully!",
+                "Ошибка анализа!": "Analysis error!",
+                "Анализ завершен": "Analysis complete",
+                "Ошибка анализа": "Analysis error"
+            }
+            for ru_text, en_text in translations.items():
+                if message.startswith(ru_text):
+                    translated_message = en_text + message[len(ru_text):]
+                    break
+        
+        html = f'<span style="color: {color}; font-weight: bold;">[{timestamp}] [{level_text}]</span> {translated_message}<br>'
         self.log_text.append(html)
         scrollbar = self.log_text.verticalScrollBar()
         scrollbar.setValue(scrollbar.maximum())
+        
+        # Дублируем в консоль на обоих языках
+        print(f"[{timestamp}] [{level_text}] {translated_message}")
 
     def update_results_display(self, result: dict):
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
@@ -1732,22 +1766,45 @@ class RedSandSecureGUI(QMainWindow):
         static_data = result.get('static_results') or {}
         file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
         file_size = static_data.get('file_size', 0) if static_data else 0
+        
+        # Получаем вердикт и определяем цвет для таблицы результатов
+        risk_score = threat_info.get('risk_score', 0)
+        if risk_score >= 70:
+            verdict = "ОПАСНО" if self.current_lang == "Русский" else "DANGEROUS"
+            verdict_color = "#DC2626"
+        elif risk_score >= 40:
+            verdict = "ПОДОЗРИТЕЛЬНО" if self.current_lang == "Русский" else "SUSPICIOUS"
+            verdict_color = "#D97706"
+        else:
+            verdict = "БЕЗОПАСНО" if self.current_lang == "Русский" else "SAFE"
+            verdict_color = "#059669"
+        
         self.results_summary.setVisible(False)
         self.results_table.setVisible(True)
         self.results_table.setRowCount(0)
         
-        # Переводим заголовки таблицы
+        # Переводим заголовки таблицы и добавляем вердикт с цветом
         data = [
+            (lang_data.get("verdict", "Verdict"), f"<b style='color: {verdict_color};'>{verdict}</b>"),
             (lang_data.get("threat_type", "Threat Type"), threat_info.get('type', lang_data.get("unknown", "Unknown"))),
             (lang_data.get("threat_family", "Family"), threat_info.get('family', lang_data.get("unknown", "Unknown"))),
             (lang_data.get("file_name", "File Name"), file_name),
             (lang_data.get("file_size", "File Size"), f"{file_size} {lang_data.get('bytes', 'bytes')}"),
+            (lang_data.get("risk_score", "Risk Score"), str(risk_score)),
         ]
         for param, value in data:
             row = self.results_table.rowCount()
             self.results_table.insertRow(row)
-            self.results_table.setItem(row, 0, QTableWidgetItem(param))
-            self.results_table.setItem(row, 1, QTableWidgetItem(str(value)))
+            item_param = QTableWidgetItem(param)
+            item_value = QTableWidgetItem(value if not value.startswith("<") else value.replace("<b>", "").replace("</b>", ""))
+            if value.startswith("<"):
+                # Для вердикта устанавливаем цвет текста
+                item_value.setForeground(QColor(verdict_color))
+                font = item_value.font()
+                font.setBold(True)
+                item_value.setFont(font)
+            self.results_table.setItem(row, 0, item_param)
+            self.results_table.setItem(row, 1, item_value)
 
     def open_settings(self):
         try:
@@ -1920,6 +1977,13 @@ class RedSandSecureGUI(QMainWindow):
         
         with open(history_file, 'w', encoding='utf-8') as f:
             json.dump(history, f, indent=2, ensure_ascii=False)
+        
+        # Логируем сохранение в историю на обоих языках
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        is_ru = self.current_lang == "Русский"
+        log_msg = f"Результат сохранен в историю: {verdict}" if is_ru else f"Result saved to history: {verdict}"
+        print(f"[{datetime.now().strftime('%H:%M:%S')}] [INFO] {log_msg}")
+
 
     def closeEvent(self, event):
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
