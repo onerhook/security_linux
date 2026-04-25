@@ -308,7 +308,7 @@ LANGUAGES = {
         "rec_safe_why": "Why the file is considered safe:",
         "rec_safe_why_content": "The file has passed all checks and showed no signs of malicious activity:<br>• No matches with known viruses<br>• File behavior fully matches declared functions<br>• File structure and metadata are correct",
         "rec_safe_what": "Recommendations:",
-        "rec_safe_what_content": "1. File can be used safely<br>2. Apply standard precautions<br>3. Make sure the file is from a reliable source<br>4. In case of any doubt - conduct additional verification",
+        "rec_safe_what_content": "1. File can be used safely<br>2. Apply standard precautions<br>3. Make sure the file is from a reliable source<br>4. If in doubt - conduct additional verification",
         # History dialog
         "history_title": "Scan History",
         # Main window tabs
@@ -686,6 +686,8 @@ class DetailedReportDialog(QDialog):
     def __init__(self, report_data: dict, parent=None):
         super().__init__(parent)
         self.report_data = report_data
+        self.parent_window = parent
+        self.current_lang = parent.current_lang if parent else "Русский"
         self.setWindowTitle("Результаты анализа безопасности")
         self.setMinimumSize(900, 700)
         # Убираем вопросительный знак из заголовка окна
@@ -697,8 +699,11 @@ class DetailedReportDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(25, 25, 25, 25)
         
+        # Получаем переводы
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         # Заголовок
-        title_label = QLabel("📊 Результаты анализа безопасности")
+        title_label = QLabel(lang_data.get("report_header", "📊 Security Analysis Results"))
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -708,20 +713,20 @@ class DetailedReportDialog(QDialog):
         
         # Главная вкладка с резюме
         summary_widget = self.create_summary_tab()
-        tabs.addTab(summary_widget, "🏠 Главная")
+        tabs.addTab(summary_widget, lang_data.get("tab_summary", "🏠 Home"))
         
         # Вкладка о вирусе
         virus_widget = self.create_virus_info_tab()
-        tabs.addTab(virus_widget, "🦠 О вирусе")
+        tabs.addTab(virus_widget, lang_data.get("tab_virus_info", "🦠 About Virus"))
         
         # Вкладка справки
         help_widget = self.create_help_tab()
-        tabs.addTab(help_widget, "❓ Справка")
+        tabs.addTab(help_widget, lang_data.get("tab_help", "❓ Help"))
         
         layout.addWidget(tabs)
         
         # Кнопка закрытия
-        btn_close = QPushButton("Закрыть")
+        btn_close = QPushButton(lang_data.get("btn_close", "Close"))
         btn_close.setObjectName("actionBtn")
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
@@ -736,6 +741,9 @@ class DetailedReportDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(15, 15, 15, 15)
         
+        # Получаем переводы
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         threat_info = self.report_data.get('threat_info') or {}
         if not isinstance(threat_info, dict):
             threat_info = {}
@@ -744,14 +752,14 @@ class DetailedReportDialog(QDialog):
         
         # Определение уровня угрозы
         if risk_score >= 70:
-            risk_color, risk_text, risk_icon = "#EF4444", "ОПАСНО", "🚨"
-            risk_desc = "ОПАСНО! Немедленно удалите файл. Обнаружен вирус."
+            risk_color, risk_text, risk_icon = "#EF4444", lang_data.get("dangerous_text", "DANGEROUS"), "🚨"
+            risk_desc = lang_data.get("dangerous_desc_full", "DANGEROUS! Delete the file immediately. Virus detected.")
         elif risk_score >= 40:
-            risk_color, risk_text, risk_icon = "#F59E0B", "ПОДОЗРИТЕЛЬНО", "⚠️"
-            risk_desc = "ПОДОЗРИТЕЛЬНО, лучше не использовать. Файл содержит сомнительные элементы."
+            risk_color, risk_text, risk_icon = "#F59E0B", lang_data.get("suspicious_text", "SUSPICIOUS"), "⚠️"
+            risk_desc = lang_data.get("suspicious_desc_full", "SUSPICIOUS, better not use. File contains questionable elements.")
         else:
-            risk_color, risk_text, risk_icon = "#10B981", "БЕЗОПАСНО", "✅"
-            risk_desc = "Файл не содержит известных угроз. Можно использовать."
+            risk_color, risk_text, risk_icon = "#10B981", lang_data.get("safe_text", "SAFE"), "✅"
+            risk_desc = lang_data.get("safe_desc_full", "File contains no known threats. Safe to use.")
         
         # Карточка уровня угрозы
         risk_card = QGroupBox()
@@ -787,14 +795,14 @@ class DetailedReportDialog(QDialog):
         layout.addWidget(risk_card)
         
         # Основная информация
-        info_group = QGroupBox("📋 Основная информация")
+        info_group = QGroupBox(lang_data.get("info_group", "📋 General Information"))
         info_layout = QGridLayout()
         info_layout.setSpacing(12)
         
         row = 0
         items = [
-            ("Тип угрозы:", threat_info.get('type', 'Неизвестно')),
-            ("Семейство:", threat_info.get('family', 'Неизвестно')),
+            (lang_data.get("threat_type", "Threat Type:"), threat_info.get('type', lang_data.get("unknown", "Unknown"))),
+            (lang_data.get("threat_family", "Family:"), threat_info.get('family', lang_data.get("unknown", "Unknown"))),
         ]
         
         for label_text, value in items:
@@ -823,35 +831,38 @@ class DetailedReportDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(15, 15, 15, 15)
         
+        # Получаем переводы
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         threat_info = self.report_data.get('threat_info') or {}
         static_data = self.report_data.get('static_results') or {}
         
         # Информация о вирусе - максимально подробно
-        virus_group = QGroupBox("🦠 Подробная информация об угрозе")
+        virus_group = QGroupBox(lang_data.get("virus_info_group", "🦠 Detailed Threat Information"))
         virus_layout = QVBoxLayout()
         virus_layout.setSpacing(15)
         
-        virus_name = threat_info.get('type', 'Неизвестно')
-        virus_family = threat_info.get('family', 'Неизвестно')
+        virus_name = threat_info.get('type', lang_data.get("unknown", "Unknown"))
+        virus_family = threat_info.get('family', lang_data.get("unknown", "Unknown"))
         risk_score = threat_info.get('risk_score', 0)
         
         # Определяем вердикт без баллов
         if risk_score >= 70:
-            verdict_text = "<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>🚨 ОПАСНО - Немедленно удалите файл!</span>"
-            verdict_desc = "Обнаружен вирус. Файл представляет серьезную угрозу для вашей системы."
+            verdict_text = f"<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>{lang_data.get('dangerous_verdict', '🚨 DANGEROUS - Delete the file immediately!')}</span>"
+            verdict_desc = lang_data.get("dangerous_verdict_desc", "Virus detected. The file poses a serious threat to your system.")
         elif risk_score >= 40:
-            verdict_text = "<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>⚠️ ПОДОЗРИТЕЛЬНО - Лучше не использовать</span>"
-            verdict_desc = "Файл содержит подозрительные элементы. Рекомендуется воздержаться от использования."
+            verdict_text = f"<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>{lang_data.get('suspicious_verdict', '⚠️ SUSPICIOUS - Better not use')}</span>"
+            verdict_desc = lang_data.get("suspicious_verdict_desc", "File contains suspicious elements. It is recommended to refrain from using it.")
         else:
-            verdict_text = "<span style='color: #10B981; font-size: 20px; font-weight: bold;'>✅ БЕЗОПАСНО - Можно использовать</span>"
-            verdict_desc = "Угроз не обнаружено. Файл прошел все проверки безопасности."
+            verdict_text = f"<span style='color: #10B981; font-size: 20px; font-weight: bold;'>{lang_data.get('safe_verdict', '✅ SAFE - Safe to use')}</span>"
+            verdict_desc = lang_data.get("safe_verdict_desc", "No threats detected. The file has passed all security checks.")
         
         info_text = f"""
         <div style='font-size: 16px; line-height: 2.0;'>
-        <b>📛 Название угрозы:</b> {virus_name}<br><br>
-        <b>🧬 Семейство вирусов:</b> {virus_family}<br><br>
+        <b>{lang_data.get('virus_name_label', '📛 Threat Name:')}</b> {virus_name}<br><br>
+        <b>{lang_data.get('virus_family_label', '🧬 Virus Family:')}</b> {virus_family}<br><br>
         {verdict_text}<br><br>
-        <b>📝 Описание:</b> {verdict_desc}<br><br>
+        <b>{lang_data.get('virus_desc_label', '📝 Description:')}</b> {verdict_desc}<br><br>
         </div>
         """
         info_label = QLabel(info_text)
@@ -863,7 +874,7 @@ class DetailedReportDialog(QDialog):
         layout.addWidget(virus_group)
         
         # Как обнаружили - максимально подробно
-        detection_group = QGroupBox("🔍 Как мы обнаружили эту угрозу")
+        detection_group = QGroupBox(lang_data.get("detection_group", "🔍 How We Detected This Threat"))
         detection_layout = QVBoxLayout()
         detection_layout.setSpacing(15)
         
@@ -872,32 +883,32 @@ class DetailedReportDialog(QDialog):
         
         if risk_score >= 70:
             detection_details = [
-                ("<b>✅ Статический анализ сигнатур</b>", 
-                 "Программа сравнила содержимое файла с базой данных известных вирусов и обнаружила точное совпадение с сигнатурой вредоносного ПО."),
-                ("<b>✅ Поведенческий анализ</b>", 
-                 "При запуске файла в изолированной среде были зафиксированы вредоносные действия: попытки изменения системных файлов, создание скрытых процессов или подключение к подозрительным сетевым ресурсам."),
-                ("<b>✅ Эвристический анализ</b>", 
-                 "Структура файла, используемые функции и паттерны кода характерны для вредоносного ПО. Обнаружены техники обхода защиты и сокрытия присутствия."),
-                ("<b>✅ Анализ метаданных</b>",
-                 "Информация о файле (цифровая подпись, дата создания, компилятор) указывает на подозрительное происхождение.")
+                (f"<b>{lang_data.get('static_analysis_dangerous', '✅ Static Signature Analysis')}</b>", 
+                 lang_data.get("static_analysis_dangerous_desc", "The program compared the file contents with a database of known viruses and found an exact match with malware signature.")),
+                (f"<b>{lang_data.get('behavioral_analysis_dangerous', '✅ Behavioral Analysis')}</b>", 
+                 lang_data.get("behavioral_analysis_dangerous_desc", "When the file was run in an isolated environment, malicious actions were recorded: attempts to modify system files, create hidden processes, or connect to suspicious network resources.")),
+                (f"<b>{lang_data.get('heuristic_analysis_dangerous', '✅ Heuristic Analysis')}</b>", 
+                 lang_data.get("heuristic_analysis_dangerous_desc", "The file structure, functions used, and code patterns are characteristic of malware. Evasion and concealment techniques have been detected.")),
+                (f"<b>{lang_data.get('metadata_analysis', '✅ Metadata Analysis')}</b>",
+                 lang_data.get("metadata_analysis_desc", "File information (digital signature, creation date, compiler) indicates suspicious origin."))
             ]
         elif risk_score >= 40:
             detection_details = [
-                ("<b>⚠️ Статический анализ</b>", 
-                 "Обнаружены отдельные подозрительные элементы, но полного совпадения с известными вирусами нет."),
-                ("<b>⚠️ Поведенческие аномалии</b>", 
-                 "Файл выполняет необычные действия, которые могут быть как легитимными, так и вредоносными."),
-                ("<b>ℹ️ Эвристика</b>", 
-                 "Некоторые паттерны кода вызывают сомнения, но недостаточны для однозначного вывода об угрозе.")
+                (f"<b>{lang_data.get('static_analysis_suspicious', '⚠️ Static Analysis')}</b>", 
+                 lang_data.get("static_analysis_suspicious_desc", "Individual suspicious elements were found, but no complete match with known viruses.")),
+                (f"<b>{lang_data.get('behavioral_analysis_suspicious', '⚠️ Behavioral Anomalies')}</b>", 
+                 lang_data.get("behavioral_analysis_suspicious_desc", "The file performs unusual actions that could be either legitimate or malicious.")),
+                (f"<b>{lang_data.get('heuristic_analysis_suspicious', 'ℹ️ Heuristics')}</b>", 
+                 lang_data.get("heuristic_analysis_suspicious_desc", "Some code patterns raise doubts, but are insufficient for a definitive conclusion about the threat."))
             ]
         else:
             detection_details = [
-                ("<b>✅ Статический анализ</b>", 
-                 "Файл проверен по базе сигнатур - совпадений с известными вирусами не найдено."),
-                ("<b>✅ Поведенческий анализ</b>", 
-                 "В изолированной среде файл не проявил никакой подозрительной активности."),
-                ("<b>✅ Проверка целостности</b>", 
-                 "Структура файла корректна, цифровая подпись (если есть) действительна.")
+                (f"<b>{lang_data.get('static_analysis_safe', '✅ Static Analysis')}</b>", 
+                 lang_data.get("static_analysis_safe_desc", "File checked against signature database - no matches with known viruses found.")),
+                (f"<b>{lang_data.get('behavioral_analysis_safe', '✅ Behavioral Analysis')}</b>", 
+                 lang_data.get("behavioral_analysis_safe_desc", "In an isolated environment, the file showed no suspicious activity.")),
+                (f"<b>{lang_data.get('integrity_check', '✅ Integrity Check')}</b>", 
+                 lang_data.get("integrity_check_desc", "File structure is correct, digital signature (if any) is valid."))
             ]
         
         for title, description in detection_details:
@@ -919,59 +930,37 @@ class DetailedReportDialog(QDialog):
         layout.addWidget(detection_group)
         
         # Рекомендации - максимально подробно
-        rec_group = QGroupBox("💡 Подробные рекомендации")
+        rec_group = QGroupBox(lang_data.get("recommendations_group", "💡 Detailed Recommendations"))
         rec_layout = QVBoxLayout()
         
         if risk_score >= 70:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #EF4444;'>
-            <b style='font-size: 18px;'>🚨 НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!</b><br><br>
-            <b>Почему это опасно:</b><br>
-            Этот файл распознан как вредоносное ПО с высокой степенью уверенности. Он может:<br>
-            • Украсть ваши личные данные (пароли, банковскую информацию)<br>
-            • Зашифровать ваши файлы и требовать выкуп<br>
-            • Использовать ваш компьютер для атак на другие системы<br>
-            • Установить скрытый доступ к вашему компьютеру<br><br>
-            <b>Что нужно сделать:</b><br>
-            1. <b>НЕ ЗАПУСКАЙТЕ</b> этот файл ни при каких обстоятельствах<br>
-            2. Немедленно удалите файл из системы<br>
-            3. Проверьте весь компьютер полноценным антивирусом<br>
-            4. Если файл уже был запущен - срочно смените все пароли<br>
-            5. Проверьте банковские счета на подозрительные операции<br>
-            6. Обратитесь к специалисту по кибербезопасности
+            <b style='font-size: 18px;'>{lang_data.get('rec_dangerous_title', '🚨 DELETE THIS FILE IMMEDIATELY!')}</b><br><br>
+            <b>{lang_data.get('rec_dangerous_why', 'Why this is dangerous:')}</b><br>
+            {lang_data.get('rec_dangerous_why_content', 'This file is recognized as malware with high confidence. It can:<br>• Steal your personal data (passwords, banking information)<br>• Encrypt your files and demand ransom<br>• Use your computer to attack other systems<br>• Install hidden access to your computer')}<br><br>
+            <b>{lang_data.get('rec_dangerous_what', 'What to do:')}</b><br>
+            {lang_data.get('rec_dangerous_what_content', '1. <b>DO NOT RUN</b> this file under any circumstances<br>2. Immediately delete the file from the system<br>3. Scan the entire computer with a full-featured antivirus<br>4. If the file was already run - urgently change all passwords<br>5. Check bank accounts for suspicious transactions<br>6. Contact a cybersecurity specialist')}
             </div>
             """
         elif risk_score >= 40:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #F59E0B;'>
-            <b style='font-size: 18px;'>⚠️ БУДЬТЕ ОСТОРОЖНЫ - ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ!</b><br><br>
-            <b>Почему это подозрительно:</b><br>
-            Файл содержит элементы, которые могут указывать на угрозу, но окончательного подтверждения нет. Это может быть:<br>
-            • Новый вирус, еще не добавленный в базы сигнатур<br>
-            • Легитимная программа с нестандартным поведением<br>
-            • Инструмент администратора, который выглядит подозрительно<br><br>
-            <b>Что нужно сделать:</b><br>
-            1. <b>Не рекомендуется использовать</b> этот файл без дополнительной проверки<br>
-            2. Если файл необходим - запустите его в полностью изолированной среде (виртуальная машина без доступа к сети)<br>
-            3. Попробуйте получить этот файл из другого, более надежного источника<br>
-            4. Проверьте файл через онлайн-сервисы (VirusTotal и аналоги)<br>
-            5. Свяжитесь с разработчиком ПО для подтверждения подлинности
+            <b style='font-size: 18px;'>{lang_data.get('rec_suspicious_title', '⚠️ BE CAREFUL - SUSPICIOUS FILE!')}</b><br><br>
+            <b>{lang_data.get('rec_suspicious_why', 'Why this is suspicious:')}</b><br>
+            {lang_data.get('rec_suspicious_why_content', 'The file contains elements that may indicate a threat, but there is no final confirmation. This could be:<br>• A new virus not yet added to signature databases<br>• A legitimate program with non-standard behavior<br>• An administrator tool that looks suspicious')}<br><br>
+            <b>{lang_data.get('rec_suspicious_what', 'What to do:')}</b><br>
+            {lang_data.get('rec_suspicious_what_content', '1. <b>Not recommended to use</b> this file without additional verification<br>2. If the file is needed - run it in a fully isolated environment (virtual machine without network access)<br>3. Try to get this file from another, more reliable source<br>4. Check the file through online services (VirusTotal and similar)<br>5. Contact the software developer to confirm authenticity')}
             </div>
             """
         else:
-            rec_text = """
+            rec_text = f"""
             <div style='font-size: 15px; line-height: 2.0; color: #10B981;'>
-            <b style='font-size: 18px;'>✅ ФАЙЛ БЕЗОПАСЕН</b><br><br>
-            <b>Почему файл считается безопасным:</b><br>
-            Файл прошел все проверки и не показал никаких признаков вредоносной активности:<br>
-            • Нет совпадений с известными вирусами<br>
-            • Поведение файла полностью соответствует заявленным функциям<br>
-            • Структура и метаданные файла корректны<br><br>
-            <b>Рекомендации:</b><br>
-            1. Файл можно использовать безопасно<br>
-            2. Применяйте стандартные меры предосторожности<br>
-            3. Убедитесь, что файл получен из надежного источника<br>
-            4. При любых сомнениях - проведите дополнительную проверку
+            <b style='font-size: 18px;'>{lang_data.get('rec_safe_title', '✅ FILE IS SAFE')}</b><br><br>
+            <b>{lang_data.get('rec_safe_why', 'Why the file is considered safe:')}</b><br>
+            {lang_data.get('rec_safe_why_content', 'The file has passed all checks and showed no signs of malicious activity:<br>• No matches with known viruses<br>• File behavior fully matches declared functions<br>• File structure and metadata are correct')}<br><br>
+            <b>{lang_data.get('rec_safe_what', 'Recommendations:')}</b><br>
+            {lang_data.get('rec_safe_what_content', '1. File can be used safely<br>2. Apply standard precautions<br>3. Make sure the file is from a reliable source<br>4. If in doubt - conduct additional verification')}
             </div>
             """
         
