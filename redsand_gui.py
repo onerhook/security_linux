@@ -16,6 +16,204 @@ import json
 import random
 from datetime import datetime
 
+# Словари локализации
+TRANSLATIONS = {
+    "ru": {
+        # Основное окно
+        "app_title": "RedSand Secure",
+        "header": "🛡️ RedSand Secure",
+        "settings_btn": "⚙️ Настройки",
+        "reports_btn": "📊 Отчеты",
+        "theme_btn": "🌓 Тема",
+        "lang_btn_ru": "🇷🇺 RU",
+        "lang_btn_en": "🇬🇧 EN",
+        "status_ready_ru": "Готов к работе. Выберите файл для анализа.",
+        "status_ready_en": "Ready. Select a file to analyze.",
+        "status_file_selected_ru": "Файл выбран: ",
+        "status_file_selected_en": "File selected: ",
+        "status_scanning_sigs_ru": "Сканирование сигнатур...",
+        "status_scanning_sigs_en": "Scanning signatures...",
+        "status_heuristic_ru": "Эвристический анализ...",
+        "status_heuristic_en": "Heuristic analysis...",
+        "status_behavior_ru": "Анализ поведения...",
+        "status_behavior_en": "Behavior analysis...",
+        "status_complete_ru": "Анализ завершен.",
+        "status_complete_en": "Analysis complete.",
+        "info_text_ru": "Выберите файл для проверки на вирусы.\nСистема автоматически обнаружит угрозы и даст рекомендации.",
+        "info_text_en": "Select a file to scan for viruses.\nThe system will automatically detect threats and provide recommendations.",
+        "select_file_btn": "📁 ВЫБРАТЬ ФАЙЛ",
+        "select_file_btn_en": "📁 SELECT FILE",
+        "run_analysis_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
+        "run_analysis_btn_en": "🚀 START ANALYSIS",
+        "analyzing_btn": "⏳ АНАЛИЗ...",
+        "analyzing_btn_en": "⏳ ANALYZING...",
+        # Окно результатов
+        "result_title": "Результаты анализа",
+        "result_title_en": "Analysis Results",
+        "verdict_label": "ВЕРДИКТ: ",
+        "verdict_label_en": "VERDICT: ",
+        "tab_main": "🏠 Главная",
+        "tab_main_en": "🏠 Main",
+        "tab_virus": "🦠 О вирусе",
+        "tab_virus_en": "🦠 About Virus",
+        "tab_help": "❓ Справка",
+        "tab_help_en": "❓ Help",
+        "close_btn": "ЗАКРЫТЬ",
+        "close_btn_en": "CLOSE",
+        # Вкладка Главная
+        "file_info_title": "📄 Информация о файле",
+        "file_info_title_en": "📄 File Information",
+        "file_name_label": "Имя файла:",
+        "file_name_label_en": "File name:",
+        "file_path_label": "Полный путь:",
+        "file_path_label_en": "Full path:",
+        "scan_date_label": "Дата проверки:",
+        "scan_date_label_en": "Scan date:",
+        # Вкладка О вирусе
+        "threat_title": "🦠 Обнаруженная угроза",
+        "threat_title_en": "🦠 Detected Threat",
+        "family_label": "Семейство: ",
+        "family_label_en": "Family: ",
+        "description_title": "📖 Что это такое?",
+        "description_title_en": "📖 What is it?",
+        "method_title": "🔍 Как мы это нашли?",
+        "method_title_en": "🔍 How we found it?",
+        "recommendations_title": "✅ Что делать? (Инструкция)",
+        "recommendations_title_en": "✅ What to do? (Instructions)",
+        # Вкладка Справка
+        "help_title": "❓ СПРАВКА ПО ИСПОЛЬЗОВАНИЮ",
+        "help_title_en": "❓ USER GUIDE",
+        "help_usage_title": "📌 Как пользоваться программой:",
+        "help_usage_title_en": "📌 How to use the program:",
+        "help_step1_ru": "Нажмите кнопку \"ВЫБРАТЬ ФАЙЛ\".",
+        "help_step1_en": "Click the \"SELECT FILE\" button.",
+        "help_step2_ru": "Выберите подозрительный файл на компьютере.",
+        "help_step2_en": "Select a suspicious file on your computer.",
+        "help_step3_ru": "Нажмите \"ЗАПУСТИТЬ АНАЛИЗ\".",
+        "help_step3_en": "Click \"START ANALYSIS\".",
+        "help_step4_ru": "Дождитесь окончания проверки.",
+        "help_step4_en": "Wait for the scan to complete.",
+        "help_step5_ru": "Изучите вердикт и рекомендации.",
+        "help_step5_en": "Review the verdict and recommendations.",
+        "help_theme_title": "🎨 Темы оформления:",
+        "help_theme_title_en": "🎨 Themes:",
+        "help_theme_desc_ru": "Нажмите кнопку \"Тема\" сверху, чтобы переключить светлую/темную тему.",
+        "help_theme_desc_en": "Click the \"Theme\" button at the top to switch between light/dark theme.",
+        "help_settings_title": "⚙️ Настройки:",
+        "help_settings_title_en": "⚙️ Settings:",
+        "help_settings_desc_ru": "В разделе настроек вы можете изменить параметры сканирования.",
+        "help_settings_desc_en": "In the settings section you can change scanning parameters.",
+        "help_reports_title": "📊 Отчеты:",
+        "help_reports_title_en": "📊 Reports:",
+        "help_reports_desc_ru": "Здесь сохраняется история последних проверок.",
+        "help_reports_desc_en": "History of recent scans is saved here.",
+        "help_verdicts_title": "🛡️ Интерпретация результатов:",
+        "help_verdicts_title_en": "🛡️ Result Interpretation:",
+        "help_safe_ru": "- БЕЗОПАСНО (Зеленый): Файл чист, можно использовать.",
+        "help_safe_en": "- SAFE (Green): File is clean, safe to use.",
+        "help_suspicious_ru": "- ПОДОЗРИТЕЛЬНО (Желтый): Есть сомнения. Лучше удалить, если не знаете источник.",
+        "help_suspicious_en": "- SUSPICIOUS (Yellow): Doubts exist. Better delete if source is unknown.",
+        "help_danger_ru": "- ОПАСНО (Красный): Вирус найден! Немедленно удалите файл!",
+        "help_danger_en": "- DANGEROUS (Red): Virus found! Delete the file immediately!",
+        "help_about_title": "ℹ️ О программе:",
+        "help_about_title_en": "ℹ️ About:",
+        "help_about_desc_ru": "RedSand Secure использует современные методы эвристического анализа\nи базу сигнатур для защиты вашего компьютера.",
+        "help_about_desc_en": "RedSand Secure uses modern heuristic analysis methods\nand a signature database to protect your computer.",
+        # Окно настроек
+        "settings_title": "Настройки",
+        "settings_title_en": "Settings",
+        "settings_header": "⚙️ НАСТРОЙКИ ПРОГРАММЫ",
+        "settings_header_en": "⚙️ PROGRAM SETTINGS",
+        "opt_auto_update_ru": "Автоматическая проверка обновлений",
+        "opt_auto_update_en": "Automatic update check",
+        "opt_deep_scan_ru": "Глубокий анализ (медленнее, но точнее)",
+        "opt_deep_scan_en": "Deep scan (slower but more accurate)",
+        "opt_scan_archives_ru": "Проверять архивы внутри файлов",
+        "opt_scan_archives_en": "Scan archives inside files",
+        "opt_show_help_ru": "Показывать справку после каждого анализа",
+        "opt_show_help_en": "Show help after each analysis",
+        "settings_help_ru": "ℹ️ Здесь вы можете настроить поведение сканера.\nРекомендуется оставить все галочки включенными для максимальной защиты.",
+        "settings_help_en": "ℹ️ Here you can configure scanner behavior.\nRecommended to keep all options enabled for maximum protection.",
+        # Окно отчетов
+        "reports_title": "Отчеты",
+        "reports_title_en": "Reports",
+        "reports_header": "📊 ИСТОРИЯ ОТЧЕТОВ",
+        "reports_header_en": "📊 REPORT HISTORY",
+        "reports_empty_ru": "Здесь будет отображаться история ваших сканирований.\nПока что отчетов нет.\n\nПример будущего отчета:\n[2023-10-27 12:00] Файл: test.exe - ОПАСНО (Trojan)",
+        "reports_empty_en": "Your scan history will be displayed here.\nNo reports yet.\n\nExample future report:\n[2023-10-27 12:00] File: test.exe - DANGEROUS (Trojan)",
+        # Вердикты
+        "verdict_safe": "БЕЗОПАСНО",
+        "verdict_safe_en": "SAFE",
+        "verdict_suspicious": "ПОДОЗРИТЕЛЬНО",
+        "verdict_suspicious_en": "SUSPICIOUS",
+        "verdict_danger": "ОПАСНО",
+        "verdict_danger_en": "DANGEROUS",
+        # Диалоги
+        "file_dialog_title_ru": "Выберите файл для анализа",
+        "file_dialog_title_en": "Select file to analyze",
+        "all_files_ru": "Все файлы",
+        "all_files_en": "All files",
+        "exe_files_ru": "EXE файлы",
+        "exe_files_en": "EXE files",
+        "script_files_ru": "Script files",
+        "script_files_en": "Script files",
+        "exit_confirm_ru": "Анализ еще идет. Вы действительно хотите выйти?",
+        "exit_confirm_en": "Analysis is still running. Do you really want to exit?",
+        "exit_title_ru": "Выход",
+        "exit_title_en": "Exit",
+        # Детали угроз
+        "threat_no_threats_ru": "Нет угроз",
+        "threat_no_threats_en": "No threats",
+        "threat_clean_file_ru": "Чистый файл",
+        "threat_clean_file_en": "Clean file",
+        "desc_safe_ru": "Файл прошел все проверки. В нем не обнаружено известных вирусов, троянов или подозрительного кода. Цифровая подпись (если есть) действительна.",
+        "desc_safe_en": "The file passed all checks. No known viruses, trojans or suspicious code detected. Digital signature (if present) is valid.",
+        "method_safe_ru": "Сравнение с базой известных вирусов не дало совпадений. Поведенческий анализ не выявил опасных действий.",
+        "method_safe_en": "Comparison with known virus database yielded no matches. Behavioral analysis revealed no dangerous actions.",
+        "rec_safe_1_ru": "Файл можно использовать.",
+        "rec_safe_1_en": "File is safe to use.",
+        "rec_safe_2_ru": "Все равно соблюдайте базовую осторожность.",
+        "rec_safe_2_en": "Still exercise basic caution.",
+        "rec_safe_3_ru": "Убедитесь, что файл скачан с официального сайта.",
+        "rec_safe_3_en": "Make sure the file is downloaded from official website.",
+        "rec_safe_4_ru": "Храните резервные копии важных данных.",
+        "rec_safe_4_en": "Keep backups of important data.",
+    },
+    "en": {}  # English keys are the same as values above with _en suffix
+}
+
+# Заполняем английский словарь
+for key, value in TRANSLATIONS["ru"].items():
+    if key.endswith("_ru"):
+        base_key = key[:-3]
+        en_key = f"{base_key}_en"
+        if en_key in TRANSLATIONS["ru"]:
+            TRANSLATIONS["en"][base_key] = TRANSLATIONS["ru"][en_key]
+
+# Для ключей без суффиксов используем значения из ru как fallback
+class Localization:
+    def __init__(self):
+        self.current_lang = "ru"
+    
+    def get(self, key):
+        lang = self.current_lang
+        if lang == "ru":
+            # Сначала пробуем ключ без суффикса, потом с _ru
+            value = TRANSLATIONS["ru"].get(key)
+            if value is None:
+                value = TRANSLATIONS["ru"].get(f"{key}_ru")
+            return value if value else key
+        else:
+            # Для английского сначала пробуем прямой ключ, потом _en
+            value = TRANSLATIONS["en"].get(key)
+            if value is None:
+                value = TRANSLATIONS["ru"].get(f"{key}_en")
+            return value if value else key
+    
+    def set_language(self, lang):
+        self.current_lang = lang
+
+
 class RedSandApp:
     def __init__(self, root):
         self.root = root
@@ -26,8 +224,13 @@ class RedSandApp:
         # Настройки по умолчанию
         self.current_theme = "dark"
         self.language = "ru"
+        self.localization = Localization()
         self.is_analyzing = False
         self.analysis_complete = False
+        
+        # Переменные для кнопок языка
+        self.lang_button_ru = None
+        self.lang_button_en = None
         
         # Применение тем
         self.styles = {
@@ -112,14 +315,14 @@ class RedSandApp:
         btn_frame = tk.Frame(top_frame, bg=self.colors["frame_bg"])
         btn_frame.pack(side=tk.RIGHT, padx=20, pady=10)
         
-        settings_btn = tk.Button(btn_frame, text="⚙️ Настройки", command=self.open_settings,
+        settings_btn = tk.Button(btn_frame, text=self.localization.get("settings_btn"), command=self.open_settings,
                                  bg=self.colors["button_bg"], fg=self.colors["button_fg"],
                                  font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=15, pady=5,
                                  activebackground=self.colors["accent"], activeforeground="#FFFFFF",
                                  borderwidth=2, borderrelief=tk.RAISED)
         settings_btn.pack(side=tk.LEFT, padx=5)
         
-        reports_btn = tk.Button(btn_frame, text="📊 Отчеты", command=self.open_reports,
+        reports_btn = tk.Button(btn_frame, text=self.localization.get("reports_btn"), command=self.open_reports,
                                 bg=self.colors["button_bg"], fg=self.colors["button_fg"],
                                 font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=15, pady=5,
                                 activebackground=self.colors["accent"], activeforeground="#FFFFFF",
@@ -127,12 +330,34 @@ class RedSandApp:
         reports_btn.pack(side=tk.LEFT, padx=5)
         
         # Переключатель темы
-        theme_btn = tk.Button(btn_frame, text="🌓 Тема", command=self.toggle_theme,
+        theme_btn = tk.Button(btn_frame, text=self.localization.get("theme_btn"), command=self.toggle_theme,
                               bg=self.colors["button_bg"], fg=self.colors["button_fg"],
                               font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=15, pady=5,
                               activebackground=self.colors["accent"], activeforeground="#FFFFFF",
                               borderwidth=2, borderrelief=tk.RAISED)
         theme_btn.pack(side=tk.LEFT, padx=5)
+        
+        # Разделитель
+        separator = tk.Frame(btn_frame, bg=self.colors["border"], width=2)
+        separator.pack(side=tk.LEFT, padx=10, fill=tk.Y)
+        
+        # Кнопки переключения языка - только одна может быть активна
+        self.lang_button_ru = tk.Button(btn_frame, text="🇷🇺 RU", command=lambda: self.set_language("ru"),
+                                        bg=self.colors["accent"], fg="#FFFFFF",
+                                        font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=10, pady=5,
+                                        activebackground=self.colors["accent"], activeforeground="#FFFFFF",
+                                        borderwidth=2, borderrelief=tk.RAISED)
+        self.lang_button_ru.pack(side=tk.LEFT, padx=2)
+        
+        self.lang_button_en = tk.Button(btn_frame, text="🇬🇧 EN", command=lambda: self.set_language("en"),
+                                        bg=self.colors["button_bg"], fg=self.colors["button_fg"],
+                                        font=("Segoe UI", 10, "bold"), relief=tk.FLAT, padx=10, pady=5,
+                                        activebackground=self.colors["accent"], activeforeground="#FFFFFF",
+                                        borderwidth=2, borderrelief=tk.RAISED)
+        self.lang_button_en.pack(side=tk.LEFT, padx=2)
+        
+        # Обновляем состояние кнопок языка
+        self.update_language_buttons()
 
     def create_main_area(self):
         self.main_frame = tk.Frame(self.root, bg=self.colors["bg"])
@@ -142,14 +367,14 @@ class RedSandApp:
         self.content_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
         
         # Инструкция
-        info_label = tk.Label(self.content_frame, 
-                              text="Выберите файл для проверки на вирусы.\nСистема автоматически обнаружит угрозы и даст рекомендации.",
+        self.info_label = tk.Label(self.content_frame, 
+                              text=self.localization.get("info_text"),
                               font=("Segoe UI", 12), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                               justify=tk.CENTER, pady=20)
-        info_label.pack(anchor=tk.N)
+        self.info_label.pack(anchor=tk.N)
         
         # Большая кнопка выбора файла
-        self.select_btn = tk.Button(self.content_frame, text="📁 ВЫБРАТЬ ФАЙЛ", command=self.select_file,
+        self.select_btn = tk.Button(self.content_frame, text=self.localization.get("select_file_btn"), command=self.select_file,
                                     bg=self.colors["accent"], fg="#FFFFFF",
                                     font=("Segoe UI", 16, "bold"), relief=tk.FLAT, padx=40, pady=20,
                                     activebackground="#9965F4", activeforeground="#FFFFFF",
@@ -164,7 +389,7 @@ class RedSandApp:
         self.path_label.pack(pady=10)
         
         # Кнопка запуска
-        self.run_btn = tk.Button(self.content_frame, text="🚀 ЗАПУСТИТЬ АНАЛИЗ", command=self.start_analysis,
+        self.run_btn = tk.Button(self.content_frame, text=self.localization.get("run_analysis_btn"), command=self.start_analysis,
                                  bg=self.colors["safe"], fg="#000000",
                                  font=("Segoe UI", 16, "bold"), relief=tk.FLAT, padx=40, pady=20,
                                  activebackground="#00BFA5", activeforeground="#000000",
@@ -190,13 +415,70 @@ class RedSandApp:
         if self.result_window:
             self.update_result_theme()
 
+    def set_language(self, lang):
+        """Установка языка и обновление всех текстов"""
+        self.language = lang
+        self.localization.set_language(lang)
+        
+        # Обновляем состояние кнопок языка - только одна активна
+        self.update_language_buttons()
+        
+        # Обновляем все тексты в интерфейсе
+        self.update_ui_texts()
+
+    def update_language_buttons(self):
+        """Обновление визуального состояния кнопок языка"""
+        if self.lang_button_ru and self.lang_button_en:
+            if self.language == "ru":
+                self.lang_button_ru.configure(bg=self.colors["accent"], fg="#FFFFFF")
+                self.lang_button_en.configure(bg=self.colors["button_bg"], fg=self.colors["button_fg"])
+            else:
+                self.lang_button_en.configure(bg=self.colors["accent"], fg="#FFFFFF")
+                self.lang_button_ru.configure(bg=self.colors["button_bg"], fg=self.colors["button_fg"])
+
+    def update_ui_texts(self):
+        """Обновление всех текстов в интерфейсе при смене языка"""
+        # Основное окно
+        if hasattr(self, 'info_label'):
+            self.info_label.configure(text=self.localization.get("info_text"))
+        if hasattr(self, 'select_btn'):
+            self.select_btn.configure(text=self.localization.get("select_file_btn"))
+        if hasattr(self, 'run_btn') and not self.is_analyzing:
+            self.run_btn.configure(text=self.localization.get("run_analysis_btn"))
+        
+        # Статус бар
+        if hasattr(self, 'status_var'):
+            if self.language == "ru":
+                self.status_var.set(self.localization.get("status_ready"))
+            else:
+                self.status_var.set(self.localization.get("status_ready"))
+        
+        # Обновляем кнопки в верхней панели
+        for widget in self.root.winfo_children():
+            if isinstance(widget, tk.Frame):
+                for child in widget.winfo_children():
+                    if isinstance(child, tk.Button):
+                        text = child.cget("text")
+                        if "⚙️" in text:
+                            child.configure(text=self.localization.get("settings_btn"))
+                        elif "📊" in text:
+                            child.configure(text=self.localization.get("reports_btn"))
+                        elif "🌓" in text:
+                            child.configure(text=self.localization.get("theme_btn"))
+
     def select_file(self):
-        filename = filedialog.askopenfilename(title="Выберите файл для анализа",
-                                              filetypes=[("Все файлы", "*.*"), ("EXE файлы", "*.exe"), ("Script files", "*.bat *.cmd *.ps1 *.vbs")])
+        title = self.localization.get("file_dialog_title")
+        all_files = self.localization.get("all_files")
+        exe_files = self.localization.get("exe_files")
+        script_files = self.localization.get("script_files")
+        
+        filename = filedialog.askopenfilename(title=title,
+                                              filetypes=[(all_files, "*.*"), (exe_files, "*.exe"), (script_files, "*.bat *.cmd *.ps1 *.vbs")])
         if filename:
             self.file_path_var.set(filename)
             self.run_btn.config(state=tk.NORMAL)
-            self.status_var.set(f"Файл выбран: {os.path.basename(filename)}")
+            prefix = self.localization.get("status_file_selected")
+            self.status_var.set(f"{prefix}{os.path.basename(filename)}")
 
     def start_analysis(self):
         if not self.file_path_var.get():
@@ -204,7 +486,8 @@ class RedSandApp:
         
         self.is_analyzing = True
         self.analysis_complete = False
-        self.run_btn.config(state=tk.DISABLED, text="⏳ АНАЛИЗ...")
+        analyzing_text = self.localization.get("analyzing_btn")
+        self.run_btn.config(state=tk.DISABLED, text=analyzing_text)
         self.select_btn.config(state=tk.DISABLED)
         self.progress['value'] = 0
         
@@ -221,20 +504,21 @@ class RedSandApp:
             self.root.update_idletasks()
             
             if i == 30:
-                self.status_var.set("Сканирование сигнатур...")
+                self.status_var.set(self.localization.get("status_scanning_sigs"))
             elif i == 60:
-                self.status_var.set("Эвристический анализ...")
+                self.status_var.set(self.localization.get("status_heuristic"))
             elif i == 80:
-                self.status_var.set("Анализ поведения...")
+                self.status_var.set(self.localization.get("status_behavior"))
         
         self.analysis_complete = True
         self.is_analyzing = False
         self.root.after(100, self.show_results)
 
     def show_results(self):
-        self.run_btn.config(state=tk.NORMAL, text="🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        run_text = self.localization.get("run_analysis_btn")
+        self.run_btn.config(state=tk.NORMAL, text=run_text)
         self.select_btn.config(state=tk.NORMAL)
-        self.status_var.set("Анализ завершен.")
+        self.status_var.set(self.localization.get("status_complete"))
         
         # Генерация фейкового результата для демонстрации (в реальности тут был бы движок)
         # Для примера рандомим результат, но с уклоном в опасность для демонстрации интерфейса
@@ -253,51 +537,90 @@ class RedSandApp:
         self.create_result_window(result_data)
 
     def generate_mock_details(self, risk, filename):
+        lang = self.language
+        
         if risk == "danger":
+            verdict = self.localization.get("verdict_danger")
+            family = "Семейство троянов-загрузчиков" if lang == "ru" else "Trojan downloader family"
+            description = (
+                "Этот файл является вредоносной программой, маскирующейся под легитимное приложение. "
+                "При запуске он пытается внедриться в системные процессы, украсть ваши пароли и зашифровать личные данные."
+                if lang == "ru" else
+                "This file is malware disguised as a legitimate application. When run, it tries to inject into system processes, steal your passwords and encrypt personal data."
+            )
+            detection_method = (
+                "Обнаружен по уникальной цифровой подписи (сигнатуре) в базе данных вирусов. "
+                "Также выявлено подозрительное поведение: попытка скрытого подключения к интернету и модификация реестра."
+                if lang == "ru" else
+                "Detected by unique digital signature in virus database. Also suspicious behavior detected: attempt to connect to internet secretly and modify registry."
+            )
+            recommendations = [
+                "НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!" if lang == "ru" else "DELETE THIS FILE IMMEDIATELY!",
+                "Не пытайтесь его открывать или запускать." if lang == "ru" else "Do not try to open or run it.",
+                "Проверьте компьютер полным сканированием антивируса." if lang == "ru" else "Run a full antivirus scan on your computer.",
+                "Если вы уже запустили файл, смените все важные пароли." if lang == "ru" else "If you already ran this file, change all important passwords.",
+                "Проверьте банковские счета на наличие подозрительных операций." if lang == "ru" else "Check bank accounts for suspicious transactions."
+            ]
             return {
-                "verdict": "ОПАСНО",
+                "verdict": verdict,
                 "color": self.colors["danger"],
                 "threat_name": f"Trojan.Win32.Generic.{random.randint(1000,9999)}",
-                "family": "Семейство троянов-загрузчиков",
-                "description": "Этот файл является вредоносной программой, маскирующейся под легитимное приложение. При запуске он пытается внедриться в системные процессы, украсть ваши пароли и зашифровать личные данные.",
-                "detection_method": "Обнаружен по уникальной цифровой подписи (сигнатуре) в базе данных вирусов. Также выявлено подозрительное поведение: попытка скрытого подключения к интернету и модификация реестра.",
-                "recommendations": [
-                    "НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!",
-                    "Не пытайтесь его открывать или запускать.",
-                    "Проверьте компьютер полным сканированием антивируса.",
-                    "Если вы уже запустили файл, смените все важные пароли.",
-                    "Проверьте банковские счета на наличие подозрительных операций."
-                ]
+                "family": family,
+                "description": description,
+                "detection_method": detection_method,
+                "recommendations": recommendations
             }
         elif risk == "suspicious":
+            verdict = self.localization.get("verdict_suspicious")
+            family = "Инструменты администрирования / Потенциально нежелательное ПО" if lang == "ru" else "Admin tools / Potentially unwanted software"
+            description = (
+                "Файл содержит код, который может использоваться как во благо, так и во вред. "
+                "Это может быть инструмент для взлома, майнер или программа для скрытого наблюдения. "
+                "Сам по себе он не является вирусом, но несет риски."
+                if lang == "ru" else
+                "File contains code that can be used for good or bad purposes. It could be a hacking tool, miner or spyware. By itself it's not a virus but carries risks."
+            )
+            detection_method = (
+                "Выявлено подозрительное поведение при эвристическом анализе. "
+                "Файл пытается получить права администратора без явной необходимости и скрывает свои процессы."
+                if lang == "ru" else
+                "Suspicious behavior detected during heuristic analysis. File tries to get admin rights without clear need and hides its processes."
+            )
+            recommendations = [
+                "Лучше не использовать этот файл, если вы не уверены в источнике на 100%." if lang == "ru" else "Better not use this file unless you're 100% sure of the source.",
+                "Удалите файл, если вы не скачивали его специально." if lang == "ru" else "Delete the file if you didn't download it intentionally.",
+                "Если файл нужен, запустите его в изолированной среде (песочнице)." if lang == "ru" else "If you need the file, run it in an isolated environment (sandbox).",
+                "Проверьте цифровую подпись издателя (скорее всего её нет)." if lang == "ru" else "Check publisher's digital signature (most likely there isn't one)."
+            ]
             return {
-                "verdict": "ПОДОЗРИТЕЛЬНО",
+                "verdict": verdict,
                 "color": self.colors["warn"],
                 "threat_name": "Heuristic.Suspicious.Tool",
-                "family": "Инструменты администрирования / Потенциально нежелательное ПО",
-                "description": "Файл содержит код, который может использоваться как во благо, так и во вред. Это может быть инструмент для взлома, майнер или программа для скрытого наблюдения. Сам по себе он не является вирусом, но несет риски.",
-                "detection_method": "Выявлено подозрительное поведение при эвристическом анализе. Файл пытается получить права администратора без явной необходимости и скрывает свои процессы.",
-                "recommendations": [
-                    "Лучше не использовать этот файл, если вы не уверены в источнике на 100%.",
-                    "Удалите файл, если вы не скачивали его специально.",
-                    "Если файл нужен, запустите его в изолированной среде (песочнице).",
-                    "Проверьте цифровую подпись издателя (скорее всего её нет)."
-                ]
+                "family": family,
+                "description": description,
+                "detection_method": detection_method,
+                "recommendations": recommendations
             }
         else:
+            verdict = self.localization.get("verdict_safe")
+            threat_name = self.localization.get("threat_no_threats")
+            family = self.localization.get("threat_clean_file")
+            description = self.localization.get("desc_safe")
+            method = self.localization.get("method_safe")
+            recommendations = [
+                self.localization.get("rec_safe_1"),
+                self.localization.get("rec_safe_2"),
+                self.localization.get("rec_safe_3"),
+                self.localization.get("rec_safe_4")
+            ]
             return {
-                "verdict": "БЕЗОПАСНО",
+                "verdict": verdict,
                 "color": self.colors["safe"],
-                "threat_name": "Нет угроз",
-                "family": "Чистый файл",
-                "description": "Файл прошел все проверки. В нем не обнаружено известных вирусов, троянов или подозрительного кода. Цифровая подпись (если есть) действительна.",
-                "detection_method": "Сравнение с базой известных вирусов не дало совпадений. Поведенческий анализ не выявил опасных действий.",
-                "recommendations": [
-                    "Файл можно использовать.",
-                    "Все равно соблюдайте базовую осторожность.",
-                    "Убедитесь, что файл скачан с официального сайта.",
-                    "Храните резервные копии важных данных."
-                ]
+                "threat_name": threat_name,
+                "family": family,
+                "description": description,
+                "detection_method": method,
+                "recommendations": recommendations
             }
 
     def create_result_window(self, data):
@@ -305,7 +628,7 @@ class RedSandApp:
             self.result_window.destroy()
             
         self.result_window = tk.Toplevel(self.root)
-        self.result_window.title("Результаты анализа")
+        self.result_window.title(self.localization.get("result_title"))
         self.result_window.geometry("800x650")
         self.result_window.configure(bg=self.colors["bg"])
         self.result_window.transient(self.root)
@@ -323,7 +646,8 @@ class RedSandApp:
         verdict_frame.pack(fill=tk.X)
         verdict_frame.pack_propagate(False)
         
-        verdict_label = tk.Label(verdict_frame, text=f"ВЕРДИКТ: {data['details']['verdict']}", 
+        verdict_text = f"{self.localization.get('verdict_label')}{data['details']['verdict']}"
+        verdict_label = tk.Label(verdict_frame, text=verdict_text, 
                                  font=("Segoe UI", 24, "bold"), bg=data["details"]["color"], fg="#000000" if data["risk"] != "danger" else "#FFFFFF",
                                  pady=20)
         verdict_label.pack()
@@ -338,21 +662,21 @@ class RedSandApp:
         
         # Вкладка 1: Главная
         tab_main = tk.Frame(tab_control, bg=self.colors["frame_bg"])
-        tab_control.add(tab_main, text="🏠 Главная")
+        tab_control.add(tab_main, text=self.localization.get("tab_main"))
         self.create_main_result_tab(tab_main, data)
         
         # Вкладка 2: О вирусе
         tab_virus = tk.Frame(tab_control, bg=self.colors["frame_bg"])
-        tab_control.add(tab_virus, text="🦠 О вирусе")
+        tab_control.add(tab_virus, text=self.localization.get("tab_virus"))
         self.create_virus_info_tab(tab_virus, data)
         
         # Вкладка 3: Справка
         tab_help = tk.Frame(tab_control, bg=self.colors["frame_bg"])
-        tab_control.add(tab_help, text="❓ Справка")
+        tab_control.add(tab_help, text=self.localization.get("tab_help"))
         self.create_help_tab(tab_help)
         
         # Кнопка закрыть
-        close_btn = tk.Button(self.result_window, text="ЗАКРЫТЬ", command=on_close,
+        close_btn = tk.Button(self.result_window, text=self.localization.get("close_btn"), command=on_close,
                               bg=self.colors["button_bg"], fg=self.colors["fg"],
                               font=("Segoe UI", 12, "bold"), relief=tk.FLAT, padx=20, pady=10,
                               activebackground=self.colors["accent"], activeforeground="#FFFFFF")
@@ -388,18 +712,18 @@ class RedSandApp:
         scrollbar.pack(side="right", fill="y")
         
         # Информация о файле
-        info_box = tk.LabelFrame(scrollable_frame, text="📄 Информация о файле", 
+        info_box = tk.LabelFrame(scrollable_frame, text=self.localization.get("file_info_title"), 
                                  font=("Segoe UI", 12, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                                  padx=15, pady=15)
         info_box.pack(fill=tk.X, padx=20, pady=20)
         
-        tk.Label(info_box, text=f"Имя файла:", font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
+        tk.Label(info_box, text=self.localization.get("file_name_label"), font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
         tk.Label(info_box, text=data["file"], font=("Consolas", 10), bg=self.colors["frame_bg"], fg=self.colors["text_highlight"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W, pady=(0,10))
         
-        tk.Label(info_box, text="Полный путь:", font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
+        tk.Label(info_box, text=self.localization.get("file_path_label"), font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
         tk.Label(info_box, text=data["path"], font=("Consolas", 9), bg=self.colors["frame_bg"], fg=self.colors["text_highlight"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W, pady=(0,10))
         
-        tk.Label(info_box, text="Дата проверки:", font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
+        tk.Label(info_box, text=self.localization.get("scan_date_label"), font=("Segoe UI", 11, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
         tk.Label(info_box, text=data["date"], font=("Segoe UI", 10), bg=self.colors["frame_bg"], fg=self.colors["fg"]).pack(anchor=tk.W)
 
     def create_virus_info_tab(self, parent, data):
@@ -419,18 +743,19 @@ class RedSandApp:
         padding = 20
         
         # Название угрозы
-        name_frame = tk.LabelFrame(scrollable_frame, text="🦠 Обнаруженная угроза", 
+        name_frame = tk.LabelFrame(scrollable_frame, text=self.localization.get("threat_title"), 
                                    font=("Segoe UI", 12, "bold"), bg=self.colors["frame_bg"], fg=details["color"],
                                    padx=padding, pady=padding)
         name_frame.pack(fill=tk.X, padx=20, pady=10)
         
         tk.Label(name_frame, text=details["threat_name"], font=("Segoe UI", 14, "bold"), 
                  bg=self.colors["frame_bg"], fg=self.colors["fg"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W)
-        tk.Label(name_frame, text=f"Семейство: {details['family']}", font=("Segoe UI", 11), 
+        family_label_text = self.localization.get("family_label")
+        tk.Label(name_frame, text=f"{family_label_text}{details['family']}", font=("Segoe UI", 11), 
                  bg=self.colors["frame_bg"], fg=self.colors["fg"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W, pady=(5,0))
 
         # Описание
-        desc_frame = tk.LabelFrame(scrollable_frame, text="📖 Что это такое?", 
+        desc_frame = tk.LabelFrame(scrollable_frame, text=self.localization.get("description_title"), 
                                    font=("Segoe UI", 12, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                                    padx=padding, pady=padding)
         desc_frame.pack(fill=tk.X, padx=20, pady=10)
@@ -439,7 +764,7 @@ class RedSandApp:
                  bg=self.colors["frame_bg"], fg=self.colors["fg"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W)
 
         # Метод обнаружения
-        method_frame = tk.LabelFrame(scrollable_frame, text="🔍 Как мы это нашли?", 
+        method_frame = tk.LabelFrame(scrollable_frame, text=self.localization.get("method_title"), 
                                      font=("Segoe UI", 12, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                                      padx=padding, pady=padding)
         method_frame.pack(fill=tk.X, padx=20, pady=10)
@@ -448,7 +773,7 @@ class RedSandApp:
                  bg=self.colors["frame_bg"], fg=self.colors["fg"], wraplength=600, justify=tk.LEFT).pack(anchor=tk.W)
 
         # Рекомендации
-        rec_frame = tk.LabelFrame(scrollable_frame, text="✅ Что делать? (Инструкция)", 
+        rec_frame = tk.LabelFrame(scrollable_frame, text=self.localization.get("recommendations_title"), 
                                   font=("Segoe UI", 12, "bold"), bg=self.colors["frame_bg"], fg=self.colors["fg"],
                                   padx=padding, pady=padding)
         rec_frame.pack(fill=tk.X, padx=20, pady=10)
@@ -471,34 +796,36 @@ class RedSandApp:
         canvas.pack(side="left", fill="both", expand=True)
         scrollbar.pack(side="right", fill="y")
         
-        help_text = """
-        ❓ СПРАВКА ПО ИСПОЛЬЗОВАНИЮ
+        # Формируем текст справки с использованием локализации
+        help_lines = [
+            self.localization.get("help_title"),
+            "",
+            self.localization.get("help_usage_title"),
+            f"1. {self.localization.get('help_step1')}",
+            f"2. {self.localization.get('help_step2')}",
+            f"3. {self.localization.get('help_step3')}",
+            f"4. {self.localization.get('help_step4')}",
+            f"5. {self.localization.get('help_step5')}",
+            "",
+            self.localization.get("help_theme_title"),
+            self.localization.get("help_theme_desc"),
+            "",
+            self.localization.get("help_settings_title"),
+            self.localization.get("help_settings_desc"),
+            "",
+            self.localization.get("help_reports_title"),
+            self.localization.get("help_reports_desc"),
+            "",
+            self.localization.get("help_verdicts_title"),
+            self.localization.get("help_safe"),
+            self.localization.get("help_suspicious"),
+            self.localization.get("help_danger"),
+            "",
+            self.localization.get("help_about_title"),
+            self.localization.get("help_about_desc"),
+        ]
         
-        📌 Как пользоваться программой:
-        1. Нажмите кнопку "ВЫБРАТЬ ФАЙЛ".
-        2. Выберите подозрительный файл на компьютере.
-        3. Нажмите "ЗАПУСТИТЬ АНАЛИЗ".
-        4. Дождитесь окончания проверки.
-        5. Изучите вердикт и рекомендации.
-        
-        🎨 Темы оформления:
-        Нажмите кнопку "Тема" сверху, чтобы переключить светлую/темную тему.
-        
-        ⚙️ Настройки:
-        В разделе настроек вы можете изменить параметры сканирования.
-        
-        📊 Отчеты:
-        Здесь сохраняется история последних проверок.
-        
-        🛡️ Интерпретация результатов:
-        - БЕЗОПАСНО (Зеленый): Файл чист, можно использовать.
-        - ПОДОЗРИТЕЛЬНО (Желтый): Есть сомнения. Лучше удалить, если не знаете источник.
-        - ОПАСНО (Красный): Вирус найден! Немедленно удалите файл!
-        
-        ℹ️ О программе:
-        RedSand Secure использует современные методы эвристического анализа
-        и базу сигнатур для защиты вашего компьютера.
-        """
+        help_text = "\n        ".join(help_lines)
         
         label = tk.Label(scrollable_frame, text=help_text, font=("Segoe UI", 11), 
                          bg=self.colors["frame_bg"], fg=self.colors["fg"], 
@@ -507,7 +834,7 @@ class RedSandApp:
 
     def open_settings(self):
         settings_win = tk.Toplevel(self.root)
-        settings_win.title("Настройки")
+        settings_win.title(self.localization.get("settings_title"))
         settings_win.geometry("500x400")
         settings_win.configure(bg=self.colors["bg"])
         settings_win.transient(self.root)
