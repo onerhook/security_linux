@@ -90,7 +90,58 @@ LANGUAGES = {
         "date": "Дата",
         "file": "Файл",
         "verdict": "Вердикт",
-        "clear_history": "Очистить историю"
+        "clear_history": "Очистить историю",
+        "close": "Закрыть",
+        "confirm": "Подтверждение",
+        "delete_history_confirm": "Удалить всю историю сканирований?",
+        "step1": "Шаг 1: Выберите файл",
+        "step2": "Шаг 2: Настройки (необязательно)",
+        "progress": "Прогресс",
+        "waiting": "Ожидание...",
+        "results_here": "Результаты анализа появятся здесь после завершения...",
+        "param": "Параметр",
+        "value": "Значение",
+        "select_file_dialog": "Выберите файл для анализа",
+        "all_files": "Все файлы (*.*)",
+        "exe_files": "Executable файлы (*.exe)",
+        "dll_files": "DLL файлы (*.dll)",
+        "warning": "Предупреждение",
+        "please_select_file": "Пожалуйста, выберите файл для анализа!",
+        "error": "Ошибка",
+        "file_not_found": "Файл не найден:",
+        "security_warning": "Предупреждение о безопасности",
+        "security_warning_text": "Вы запускаете анализ потенциально опасного файла!\n\nУбедитесь, что вы работаете в виртуальной машине.\n\nПродолжить?",
+        "analysis_error": "Ошибка анализа!",
+        "analysis_complete": "Анализ завершен успешно!",
+        "report_title": "Результаты анализа безопасности",
+        "main": "Главная",
+        "about_virus": "О вирусе",
+        "help": "Справка",
+        "threat_type": "Тип угрозы",
+        "family": "Семейство",
+        "file_name": "Имя файла",
+        "file_size": "Размер файла",
+        "bytes": "байт",
+        "settings_title": "Настройки программы",
+        "theme": "Тема оформления",
+        "select_theme": "Выберите тему:",
+        "light_theme": "Светлая",
+        "dark_theme": "Тёмная",
+        "max_time": "Максимальное время:",
+        "additional_options": "Дополнительные опции",
+        "poly_tooltip": "Помогает обнаружить сложные вирусы путем создания модификаций файла",
+        "network_tooltip": "Защищает вашу сеть от потенциальной угрозы",
+        "settings_help": "Справка по настройкам",
+        "settings_help_text": "<b>Как использовать настройки:</b><br><br><b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br><b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br><b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br><b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br><b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!",
+        "detailed_report": "Подробная информация об угрозе",
+        "how_detected": "Как мы обнаружили эту угрозу",
+        "recommendations": "Подробные рекомендации",
+        "what_is_redsand": "Что такое RedSand Secure?",
+        "how_to_scan": "Как проверить файл?",
+        "precautions": "Меры предосторожности",
+        "understand_results": "Понимание результатов",
+        "analysis_settings": "Настройки анализа",
+        "language_label": "Язык:"
     },
     "English": {
         "title": "RedSand Secure",
@@ -122,7 +173,58 @@ LANGUAGES = {
         "date": "Date",
         "file": "File",
         "verdict": "Verdict",
-        "clear_history": "Clear History"
+        "clear_history": "Clear History",
+        "close": "Close",
+        "confirm": "Confirmation",
+        "delete_history_confirm": "Delete all scan history?",
+        "step1": "Step 1: Select File",
+        "step2": "Step 2: Settings (optional)",
+        "progress": "Progress",
+        "waiting": "Waiting...",
+        "results_here": "Analysis results will appear here after completion...",
+        "param": "Parameter",
+        "value": "Value",
+        "select_file_dialog": "Select file for analysis",
+        "all_files": "All files (*.*)",
+        "exe_files": "Executable files (*.exe)",
+        "dll_files": "DLL files (*.dll)",
+        "warning": "Warning",
+        "please_select_file": "Please select a file for analysis!",
+        "error": "Error",
+        "file_not_found": "File not found:",
+        "security_warning": "Security Warning",
+        "security_warning_text": "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?",
+        "analysis_error": "Analysis error!",
+        "analysis_complete": "Analysis completed successfully!",
+        "report_title": "Security Analysis Results",
+        "main": "Home",
+        "about_virus": "About Virus",
+        "help": "Help",
+        "threat_type": "Threat Type",
+        "family": "Family",
+        "file_name": "File Name",
+        "file_size": "File Size",
+        "bytes": "bytes",
+        "settings_title": "Program Settings",
+        "theme": "Theme",
+        "select_theme": "Select theme:",
+        "light_theme": "Light",
+        "dark_theme": "Dark",
+        "max_time": "Maximum time:",
+        "additional_options": "Additional Options",
+        "poly_tooltip": "Helps detect complex viruses by creating file modifications",
+        "network_tooltip": "Protects your network from potential threats",
+        "settings_help": "Settings Help",
+        "settings_help_text": "<b>How to use settings:</b><br><br><b>Theme:</b> Choose a visual style that suits you<br><b>Analysis Time:</b> Maximum time to check one file (default 60 sec)<br><b>Create File Variants:</b> Generates file modifications for better detection of complex threats<br><b>Disable Network:</b> Protects your local network during malware analysis (recommended to always enable)<br><br><b style='color: #EF4444;'>IMPORTANT:</b> Run analysis only in an isolated virtual machine!",
+        "detailed_report": "Detailed Threat Information",
+        "how_detected": "How We Detected This Threat",
+        "recommendations": "Detailed Recommendations",
+        "what_is_redsand": "What is RedSand Secure?",
+        "how_to_scan": "How to Scan a File?",
+        "precautions": "Precautions",
+        "understand_results": "Understanding Results",
+        "analysis_settings": "Analysis Settings",
+        "language_label": "Language:"
     }
 }
 
@@ -370,18 +472,27 @@ class HistoryDialog(QDialog):
     def __init__(self, history_file: str = "scan_history.json", parent=None):
         super().__init__(parent)
         self.history_file = Path(history_file)
-        self.setWindowTitle("История сканирований" if parent and hasattr(parent, 'current_lang') and parent.current_lang == "Русский" else "Scan History")
+        self.parent_ref = parent
+        self.setWindowTitle(self.get_translation("scan_history"))
         self.setMinimumSize(800, 600)
         # Убираем вопросительный знак из заголовка окна
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
+    
+    def get_translation(self, key: str) -> str:
+        """Получить перевод для ключа"""
+        if self.parent_ref and hasattr(self.parent_ref, 'current_lang'):
+            lang = self.parent_ref.current_lang
+        else:
+            lang = "English"
+        return LANGUAGES.get(lang, LANGUAGES["English"]).get(key, key)
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("📜 История сканирований")
+        title = QLabel("📜 " + self.get_translation("scan_history"))
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
@@ -391,12 +502,12 @@ class HistoryDialog(QDialog):
         layout.addWidget(self.history_list)
         
         btn_layout = QHBoxLayout()
-        btn_clear = QPushButton("🗑 Очистить историю")
+        btn_clear = QPushButton("🗑 " + self.get_translation("clear_history"))
         btn_clear.setObjectName("secondaryBtn")
         btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(btn_clear)
         
-        btn_close = QPushButton("Закрыть")
+        btn_close = QPushButton(self.get_translation("close"))
         btn_close.setObjectName("actionBtn")
         btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(btn_close)
@@ -429,7 +540,7 @@ class HistoryDialog(QDialog):
                 pass
     
     def clear_history(self):
-        reply = QMessageBox.question(self, "Подтверждение", "Удалить всю историю сканирований?", 
+        reply = QMessageBox.question(self, self.get_translation("confirm"), self.get_translation("delete_history_confirm"), 
                                      QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
             if self.history_file.exists():
@@ -492,11 +603,20 @@ class DetailedReportDialog(QDialog):
     def __init__(self, report_data: dict, parent=None):
         super().__init__(parent)
         self.report_data = report_data
-        self.setWindowTitle("Результаты анализа безопасности")
+        self.parent_ref = parent
+        self.setWindowTitle(self.get_translation("report_title"))
         self.setMinimumSize(900, 700)
         # Убираем вопросительный знак из заголовка окна
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
+    
+    def get_translation(self, key: str) -> str:
+        """Получить перевод для ключа"""
+        if self.parent_ref and hasattr(self.parent_ref, 'current_lang'):
+            lang = self.parent_ref.current_lang
+        else:
+            lang = "English"
+        return LANGUAGES.get(lang, LANGUAGES["English"]).get(key, key)
 
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -504,7 +624,7 @@ class DetailedReportDialog(QDialog):
         layout.setContentsMargins(25, 25, 25, 25)
         
         # Заголовок
-        title_label = QLabel("📊 Результаты анализа безопасности")
+        title_label = QLabel("📊 " + self.get_translation("report_title"))
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -514,20 +634,20 @@ class DetailedReportDialog(QDialog):
         
         # Главная вкладка с резюме
         summary_widget = self.create_summary_tab()
-        tabs.addTab(summary_widget, "🏠 Главная")
+        tabs.addTab(summary_widget, "🏠 " + self.get_translation("main"))
         
         # Вкладка о вирусе
         virus_widget = self.create_virus_info_tab()
-        tabs.addTab(virus_widget, "🦠 О вирусе")
+        tabs.addTab(virus_widget, "🦠 " + self.get_translation("about_virus"))
         
         # Вкладка справки
         help_widget = self.create_help_tab()
-        tabs.addTab(help_widget, "❓ Справка")
+        tabs.addTab(help_widget, "❓ " + self.get_translation("help"))
         
         layout.addWidget(tabs)
         
         # Кнопка закрытия
-        btn_close = QPushButton("Закрыть")
+        btn_close = QPushButton(self.get_translation("close"))
         btn_close.setObjectName("actionBtn")
         btn_close.clicked.connect(self.accept)
         layout.addWidget(btn_close)
@@ -548,16 +668,20 @@ class DetailedReportDialog(QDialog):
         
         risk_score = threat_info.get('risk_score', 0)
         
-        # Определение уровня угрозы
+        # Определение уровня угрозы с переводом
+        lang = self.get_translation("dangerous")
         if risk_score >= 70:
-            risk_color, risk_text, risk_icon = "#EF4444", "ОПАСНО", "🚨"
-            risk_desc = "ОПАСНО! Немедленно удалите файл. Обнаружен вирус."
+            risk_color, risk_icon = "#EF4444", "🚨"
+            risk_text = self.get_translation("dangerous")
+            risk_desc = self.get_translation("dangerous_desc")
         elif risk_score >= 40:
-            risk_color, risk_text, risk_icon = "#F59E0B", "ПОДОЗРИТЕЛЬНО", "⚠️"
-            risk_desc = "ПОДОЗРИТЕЛЬНО, лучше не использовать. Файл содержит сомнительные элементы."
+            risk_color, risk_icon = "#F59E0B", "⚠️"
+            risk_text = self.get_translation("suspicious")
+            risk_desc = self.get_translation("suspicious_desc")
         else:
-            risk_color, risk_text, risk_icon = "#10B981", "БЕЗОПАСНО", "✅"
-            risk_desc = "Файл не содержит известных угроз. Можно использовать."
+            risk_color, risk_icon = "#10B981", "✅"
+            risk_text = self.get_translation("safe")
+            risk_desc = self.get_translation("safe_desc")
         
         # Карточка уровня угрозы
         risk_card = QGroupBox()
@@ -593,14 +717,14 @@ class DetailedReportDialog(QDialog):
         layout.addWidget(risk_card)
         
         # Основная информация
-        info_group = QGroupBox("📋 Основная информация")
+        info_group = QGroupBox("📋 " + self.get_translation("file_name"))
         info_layout = QGridLayout()
         info_layout.setSpacing(12)
         
         row = 0
         items = [
-            ("Тип угрозы:", threat_info.get('type', 'Неизвестно')),
-            ("Семейство:", threat_info.get('family', 'Неизвестно')),
+            (self.get_translation("threat_type") + ":", threat_info.get('type', self.get_translation("unknown"))),
+            (self.get_translation("family") + ":", threat_info.get('family', self.get_translation("unknown"))),
         ]
         
         for label_text, value in items:
