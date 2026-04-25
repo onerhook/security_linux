@@ -1345,7 +1345,8 @@ class RedSandSecureGUI(QMainWindow):
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
         # Запуск в полноэкранном режиме без предупреждений о геометрии
-        self.showMaximized()
+        self.setWindowState(Qt.WindowMaximized)
+        self.showFullScreen()
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1373,8 +1374,8 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumSize(50, 50)  # Квадратные кнопки, размер как у настроек и истории по высоте
-        self.btn_ru.setMaximumSize(50, 50)
+        self.btn_ru.setMinimumSize(70, 70)  # Квадратные кнопки, увеличенный размер
+        self.btn_ru.setMaximumSize(70, 70)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1382,8 +1383,8 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumSize(50, 50)  # Квадратные кнопки, размер как у настроек и истории по высоте
-        self.btn_en.setMaximumSize(50, 50)
+        self.btn_en.setMinimumSize(70, 70)  # Квадратные кнопки, увеличенный размер
+        self.btn_en.setMaximumSize(70, 70)
         top_panel.addWidget(self.btn_en)
         
         top_panel.addStretch()  # Растягиваем пространство, чтобы сдвинуть остальные кнопки вправо
@@ -1449,11 +1450,11 @@ class RedSandSecureGUI(QMainWindow):
         self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'Файл еще не выбран... или перетащите сюда'))
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
-        # Устанавливаем серый цвет текста placeholder и обычного текста
+        # Устанавливаем белый цвет текста placeholder и обычного текста
         self.file_path_edit.setStyleSheet("""
             QLineEdit {
                 background-color: transparent;
-                color: #666666;
+                color: #FFFFFF;
                 border: 2px solid #CCCCCC;
                 border-radius: 10px;
                 padding: 12px;
