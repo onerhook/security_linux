@@ -1255,15 +1255,25 @@ class RedSandSecureGUI(QMainWindow):
         # Верхняя панель с кнопками
         top_panel = QHBoxLayout()
         
-        # Выбор языка
+        # Выбор языка - две кнопки RU и EN
         lang_label = QLabel("Язык:")
         top_panel.addWidget(lang_label)
-        self.lang_combo = QComboBox()
-        self.lang_combo.addItems(["Русский", "English"])
-        self.lang_combo.setCurrentText(self.current_lang)
-        self.lang_combo.currentTextChanged.connect(self.change_language)
-        self.lang_combo.setMinimumWidth(120)
-        top_panel.addWidget(self.lang_combo)
+        
+        self.btn_ru = QPushButton("RU")
+        self.btn_ru.setObjectName("secondaryBtn")
+        self.btn_ru.setCheckable(True)
+        self.btn_ru.setChecked(self.current_lang == "Русский")
+        self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
+        self.btn_ru.setMinimumWidth(60)
+        top_panel.addWidget(self.btn_ru)
+        
+        self.btn_en = QPushButton("EN")
+        self.btn_en.setObjectName("secondaryBtn")
+        self.btn_en.setCheckable(True)
+        self.btn_en.setChecked(self.current_lang == "English")
+        self.btn_en.clicked.connect(lambda: self.change_language("English"))
+        self.btn_en.setMinimumWidth(60)
+        top_panel.addWidget(self.btn_en)
         
         top_panel.addStretch()
         
@@ -1272,12 +1282,6 @@ class RedSandSecureGUI(QMainWindow):
         btn_settings.setObjectName("secondaryBtn")
         btn_settings.clicked.connect(self.open_settings)
         top_panel.addWidget(btn_settings)
-        
-        # Кнопка отчетов
-        btn_reports = QPushButton("📂 Отчеты")
-        btn_reports.setObjectName("secondaryBtn")
-        btn_reports.clicked.connect(self.open_reports_folder)
-        top_panel.addWidget(btn_reports)
         
         # Кнопка истории
         btn_history = QPushButton("📜 История")
@@ -1322,76 +1326,74 @@ class RedSandSecureGUI(QMainWindow):
 
     def create_left_panel(self) -> QWidget:
         widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(20)
+        self.left_panel_layout = QVBoxLayout(widget)
+        self.left_panel_layout.setSpacing(20)
         
-        file_group = QGroupBox("Шаг 1: Выберите файл")
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        file_group = QGroupBox(lang_data.get('step1_file', 'Шаг 1: Выберите файл'))
         file_layout = QVBoxLayout()
         
         self.file_path_edit = QLineEdit()
-        lang = self.settings.get('language', 'Русский')
-        if lang == 'Русский':
-            placeholder = "Файл еще не выбран... или перетащите сюда"
-        else:
-            placeholder = "No file selected... or drag and drop here"
-        self.file_path_edit.setPlaceholderText(placeholder)
+        self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'Файл еще не выбран... или перетащите сюда'))
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        btn_select_file = QPushButton("📁 Выбрать файл")
-        btn_select_file.setObjectName("actionBtn")
-        btn_select_file.clicked.connect(self.select_file)
-        file_layout.addWidget(btn_select_file)
+        self.btn_select_file = QPushButton(lang_data.get('select_file', '📁 Выбрать файл'))
+        self.btn_select_file.setObjectName("actionBtn")
+        self.btn_select_file.clicked.connect(self.select_file)
+        file_layout.addWidget(self.btn_select_file)
         
         file_group.setLayout(file_layout)
-        layout.addWidget(file_group)
+        self.left_panel_layout.addWidget(file_group)
         
-        settings_group = QGroupBox("Шаг 2: Настройки (необязательно)")
+        settings_group = QGroupBox(lang_data.get('step2_settings', 'Шаг 2: Настройки (необязательно)'))
         settings_layout = QVBoxLayout()
         
         timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel("Время анализа:"))
+        self.timeout_label = QLabel(lang_data.get('analysis_time', 'Время анализа:'))
+        timeout_layout.addWidget(self.timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(80)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel("сек"))
+        timeout_layout.addWidget(QLabel(lang_data.get('seconds', 'сек')))
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
+        self.poly_check = QCheckBox(lang_data.get('poly_check', 'Создавать варианты файла для анализа'))
+        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы" if self.current_lang == "Русский" else "Helps detect complex viruses")
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
+        self.network_check = QCheckBox(lang_data.get('network_check', 'Отключать сеть (рекомендуется)'))
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
+        self.network_check.setToolTip("Защищает вашу сеть во время анализа" if self.current_lang == "Русский" else "Protects your network during analysis")
         settings_layout.addWidget(self.network_check)
         
         settings_group.setLayout(settings_layout)
-        layout.addWidget(settings_group)
+        self.left_panel_layout.addWidget(settings_group)
         
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton(lang_data.get('analyze_btn', '🚀 ЗАПУСТИТЬ АНАЛИЗ'))
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.clicked.connect(self.start_analysis)
-        layout.addWidget(self.btn_analyze)
+        self.left_panel_layout.addWidget(self.btn_analyze)
         
-        progress_group = QGroupBox("Прогресс")
+        progress_group = QGroupBox(lang_data.get('progress', 'Прогресс'))
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel("Ожидание...")
+        self.progress_label = QLabel(lang_data.get('waiting', 'Ожидание...'))
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
         progress_group.setLayout(progress_layout)
-        layout.addWidget(progress_group)
+        self.left_panel_layout.addWidget(progress_group)
         
-        layout.addStretch()
+        self.left_panel_layout.addStretch()
         return widget
 
     def create_right_panel(self) -> QWidget:
@@ -1459,6 +1461,11 @@ class RedSandSecureGUI(QMainWindow):
                 if theme != self.settings.get('_current_theme', None):
                     self.setStyleSheet(generate_stylesheet(theme))
                     self.settings['_current_theme'] = theme
+                # Применяем язык после загрузки настроек
+                lang = self.settings.get('language', 'Русский')
+                if lang != self.current_lang:
+                    self.current_lang = lang
+                    self.apply_language(lang)
             except Exception as e:
                 self.log_message('WARNING', f"Ошибка загрузки настроек: {e}")
 
@@ -1647,8 +1654,21 @@ class RedSandSecureGUI(QMainWindow):
         self.settings['language'] = language
         self.save_settings()
         
-        # Получаем переводы
+        # Применяем переводы
+        self.apply_language(language)
+        
+        self.log_message('INFO', f"Язык изменен на: {language}")
+        self.update_status_bar()
+    
+    def apply_language(self, language: str):
+        """Применить переводы ко всем элементам интерфейса"""
         lang_data = LANGUAGES.get(language, LANGUAGES["Русский"])
+        
+        # Обновляем кнопки языка (состояние checked)
+        if hasattr(self, 'btn_ru'):
+            self.btn_ru.setChecked(language == "Русский")
+        if hasattr(self, 'btn_en'):
+            self.btn_en.setChecked(language == "English")
         
         # Обновляем все текстовые элементы
         self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
@@ -1658,6 +1678,30 @@ class RedSandSecureGUI(QMainWindow):
         self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
         self.network_check.setText(lang_data.get('network_check', 'Disable network'))
         
+        # Обновляем заголовки групп
+        for i in range(self.left_panel_layout.count()):
+            item = self.left_panel_layout.itemAt(i)
+            if item and item.widget():
+                widget = item.widget()
+                if isinstance(widget, QGroupBox):
+                    if i == 0:  # Шаг 1: Выберите файл
+                        widget.setTitle(lang_data.get('step1_file', 'Step 1: Select File'))
+                    elif i == 1:  # Шаг 2: Настройки
+                        widget.setTitle(lang_data.get('step2_settings', 'Step 2: Settings (optional)'))
+                    elif i == 3:  # Прогресс
+                        widget.setTitle(lang_data.get('progress', 'Progress'))
+        
+        # Обновляем placeholder лога и результатов
+        self.log_text.setPlaceholderText(lang_data.get('log_placeholder', 'Analysis progress will be shown here...'))
+        self.results_summary.setText(lang_data.get('results_placeholder', 'Analysis results will appear here after completion...'))
+        
+        # Обновляем заголовки таблицы результатов
+        if hasattr(self, 'results_table'):
+            self.results_table.setHorizontalHeaderLabels([
+                lang_data.get('param', 'Parameter'),
+                lang_data.get('value', 'Value')
+            ])
+        
         # Обновляем заголовки вкладок
         for i in range(self.tabs.count()):
             tab = self.tabs.widget(i)
@@ -1666,9 +1710,6 @@ class RedSandSecureGUI(QMainWindow):
                     self.tabs.setTabText(i, tab._tab_name_ru)
                 else:
                     self.tabs.setTabText(i, tab._tab_name_en)
-        
-        self.log_message('INFO', f"Язык изменен на: {language}")
-        self.update_status_bar()
 
     def update_status_bar(self):
         """Обновить строку состояния - черный цвет с белым текстом"""
