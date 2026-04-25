@@ -593,12 +593,15 @@ class HistoryDialog(QDialog):
                     if verdict == "ОПАСНО" or verdict == "DANGEROUS":
                         text_color = "#FFFFFF"  # Белый текст для контраста
                         bg_color = "#DC2626"  # Красный фон
+                        verdict_display = "ОПАСНО" if "ОПАСНО" in verdict else "DANGEROUS"
                     elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
                         text_color = "#000000"  # Черный текст для контраста
                         bg_color = "#F59E0B"  # Желтый фон
+                        verdict_display = "ПОДОЗРИТЕЛЬНО" if "ПОДОЗРИТЕЛЬНО" in verdict else "SUSPICIOUS"
                     else:
                         text_color = "#FFFFFF"  # Белый текст для контраста
                         bg_color = "#059669"  # Зеленый фон
+                        verdict_display = "БЕЗОПАСНО" if "БЕЗОПАСНО" in verdict or "SAFE" not in verdict else "SAFE"
                     
                     # Дата - с явным цветом текста и фона
                     date_item = QTableWidgetItem(date)
@@ -622,8 +625,8 @@ class HistoryDialog(QDialog):
                     file_item.setFont(font)
                     self.history_table.setItem(row, 1, file_item)
                     
-                    # Вердикт - цветной текст и фон
-                    verdict_item = QTableWidgetItem(verdict)
+                    # Вердикт - цветной текст и фон, только текст вердикта
+                    verdict_item = QTableWidgetItem(verdict_display)
                     verdict_item.setForeground(QColor(text_color))
                     verdict_item.setBackground(QColor(bg_color))
                     verdict_item.setFlags(verdict_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
@@ -1345,8 +1348,7 @@ class RedSandSecureGUI(QMainWindow):
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
         # Запуск в полноэкранном режиме без предупреждений о геометрии
-        self.setWindowState(Qt.WindowMaximized)
-        self.showFullScreen()
+        self.showMaximized()
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1367,15 +1369,15 @@ class RedSandSecureGUI(QMainWindow):
         lang_label = QLabel("Язык/Language:")
         lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         top_panel.addWidget(lang_label)
-        top_panel.addSpacing(10)  # Маленький отступ до кнопок
+        top_panel.addSpacing(5)  # Маленький отступ до кнопок
         
         self.btn_ru = QPushButton("RU")
         self.btn_ru.setObjectName("secondaryBtn")
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumSize(70, 70)  # Квадратные кнопки, увеличенный размер
-        self.btn_ru.setMaximumSize(70, 70)
+        self.btn_ru.setMinimumSize(50, 50)  # Квадратные кнопки, компактный размер
+        self.btn_ru.setMaximumSize(50, 50)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1383,8 +1385,8 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumSize(70, 70)  # Квадратные кнопки, увеличенный размер
-        self.btn_en.setMaximumSize(70, 70)
+        self.btn_en.setMinimumSize(50, 50)  # Квадратные кнопки, компактный размер
+        self.btn_en.setMaximumSize(50, 50)
         top_panel.addWidget(self.btn_en)
         
         top_panel.addStretch()  # Растягиваем пространство, чтобы сдвинуть остальные кнопки вправо
@@ -1974,12 +1976,12 @@ class RedSandSecureGUI(QMainWindow):
             # Сохраняем серый цвет текста
             self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         
-        # Обновляем placeholder файла - сохраняем серый цвет
+        # Обновляем placeholder файла - сохраняем белый цвет
         if hasattr(self, 'file_path_edit'):
             self.file_path_edit.setStyleSheet("""
                 QLineEdit {
                     background-color: transparent;
-                    color: #666666;
+                    color: #FFFFFF;
                     border: 2px solid #CCCCCC;
                     border-radius: 10px;
                     padding: 12px;
