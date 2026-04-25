@@ -129,6 +129,7 @@ LANGUAGES = {
         "no": "Нет",
         "confirm": "Подтверждение",
         "confirm_clear_history": "Удалить всю историю сканирований?",
+        "analysis_in_progress": "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
         "detailed_report_title": "📊 Результаты анализа безопасности",
         "main_info": "📋 Основная информация",
         "threat_info": "🦠 Подробная информация об угрозе",
@@ -229,6 +230,7 @@ LANGUAGES = {
         "no": "No",
         "confirm": "Confirmation",
         "confirm_clear_history": "Delete all scan history?",
+        "analysis_in_progress": "Analysis is still in progress. Are you sure you want to exit?",
         "detailed_report_title": "📊 Security Analysis Results",
         "main_info": "📋 Main Information",
         "threat_info": "🦠 Detailed Threat Information",
@@ -501,7 +503,7 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
 
 
 class HistoryDialog(QDialog):
-    """Диалог истории сканирований"""
+    """Диалог истории сканирований с цветовой индикацией вердиктов"""
     
     def __init__(self, history_file: str = "scan_history.json", parent=None):
         super().__init__(parent)
@@ -531,9 +533,21 @@ class HistoryDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        self.history_list = QListWidget()
+        # Таблица вместо списка для лучшего отображения цветов
+        self.history_table = QTableWidget()
+        self.history_table.setColumnCount(3)
+        self.history_table.setHorizontalHeaderLabels([
+            lang_data.get("date", "Date"),
+            lang_data.get("file", "File"),
+            lang_data.get("verdict", "Verdict")
+        ])
+        self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.load_history()
-        layout.addWidget(self.history_list)
+        layout.addWidget(self.history_table)
         
         btn_layout = QHBoxLayout()
         btn_clear = QPushButton(lang_data.get("clear_history", "🗑 Clear History"))
@@ -548,7 +562,7 @@ class HistoryDialog(QDialog):
         layout.addLayout(btn_layout)
     
     def load_history(self):
-        self.history_list.clear()
+        self.history_table.setRowCount(0)
         if self.history_file.exists():
             try:
                 with open(self.history_file, 'r', encoding='utf-8') as f:
@@ -558,18 +572,46 @@ class HistoryDialog(QDialog):
                     file_name = entry.get('file', 'N/A')
                     verdict = entry.get('verdict', 'N/A')
                     
-                    # Цвет вердикта
-                    if verdict == "ОПАСНО" or verdict == "DANGEROUS":
-                        color = "#EF4444"
-                    elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
-                        color = "#F59E0B"
-                    else:
-                        color = "#10B981"
+                    row = self.history_table.rowCount()
+                    self.history_table.insertRow(row)
                     
-                    item_text = f"{date} | {os.path.basename(file_name)} | <span style='color:{color};font-weight:bold'>{verdict}</span>"
-                    item = QListWidgetItem(item_text)
-                    item.setData(Qt.UserRole, entry)
-                    self.history_list.addItem(item)
+                    # Цвет вердикта и фона строки
+                    if verdict == "ОПАСНО" or verdict == "DANGEROUS":
+                        color = "#DC2626"
+                        bg_color = "#FEE2E2"  # Светло-красный фон
+                    elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
+                        color = "#D97706"
+                        bg_color = "#FEF3C7"  # Светло-желтый фон
+                    else:
+                        color = "#059669"
+                        bg_color = "#D1FAE5"  # Светло-зеленый фон
+                    
+                    # Дата
+                    date_item = QTableWidgetItem(date)
+                    date_item.setForeground(QColor("#0F172A"))
+                    self.history_table.setItem(row, 0, date_item)
+                    
+                    # Файл
+                    file_item = QTableWidgetItem(os.path.basename(file_name))
+                    file_item.setToolTip(file_name)
+                    file_item.setForeground(QColor("#0F172A"))
+                    self.history_table.setItem(row, 1, file_item)
+                    
+                    # Вердикт - цветной текст и фон
+                    verdict_item = QTableWidgetItem(verdict)
+                    verdict_item.setForeground(QColor(color))
+                    verdict_item.setBackground(QColor(bg_color))
+                    font = verdict_item.font()
+                    font.setBold(True)
+                    verdict_item.setFont(font)
+                    self.history_table.setItem(row, 2, verdict_item)
+                    
+                    # Применяем цвет фона ко всей строке
+                    for col in range(3):
+                        item = self.history_table.item(row, col)
+                        if item and col != 2:  # Не перезаписываем фон вердикта
+                            item.setBackground(QColor(bg_color))
+                            
             except Exception as e:
                 pass
     
@@ -1112,6 +1154,8 @@ class DetailedReportDialog(QDialog):
 
 
 class SettingsDialog(QDialog):
+    theme_changed = pyqtSignal(str)  # Сигнал для мгновенного изменения темы
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_ref = parent
@@ -1248,11 +1292,14 @@ class SettingsDialog(QDialog):
         }
     
     def select_theme(self, theme_name: str):
-        """Выбор темы через кнопки"""
+        """Выбор темы через кнопки с мгновенным применением"""
         if hasattr(self, 'btn_light_theme'):
             self.btn_light_theme.setChecked(theme_name == "Светлая")
         if hasattr(self, 'btn_dark_theme'):
             self.btn_dark_theme.setChecked(theme_name == "Тёмная")
+        
+        # Отправляем сигнал для мгновенного изменения темы в главном окне
+        self.theme_changed.emit(theme_name)
 
 
 class RedSandSecureGUI(QMainWindow):
@@ -1292,9 +1339,10 @@ class RedSandSecureGUI(QMainWindow):
         # Верхняя панель с кнопками
         top_panel = QHBoxLayout()
         
-        # Выбор языка - две кнопки RU и EN
+        # Выбор языка - две кнопки RU и EN (меньше и левее)
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        lang_label = QLabel(lang_data.get("lang_label", "Language:"))
+        lang_label = QLabel("Язык/Language:")
+        lang_label.setStyleSheet("font-weight: bold;")
         top_panel.addWidget(lang_label)
         
         self.btn_ru = QPushButton("RU")
@@ -1302,7 +1350,7 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumWidth(60)
+        self.btn_ru.setFixedSize(50, 35)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1310,10 +1358,10 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumWidth(60)
+        self.btn_en.setFixedSize(50, 35)
         top_panel.addWidget(self.btn_en)
         
-        top_panel.addSpacing(20)
+        top_panel.addSpacing(30)
         
         # Кнопка настроек
         btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
@@ -1580,10 +1628,15 @@ class RedSandSecureGUI(QMainWindow):
         self.analysis_completed = True  # Устанавливаем флаг завершения
         self.set_ui_enabled(True)
         self.progress_bar.setValue(100)
-        self.progress_label.setText("Анализ завершен успешно!")
+        
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        complete_msg = lang_data.get("analysis_complete", "Analysis completed successfully!")
+        error_msg = lang_data.get("analysis_error", "Analysis error!")
+        
+        self.progress_label.setText(complete_msg)
         self.update_results_display(result)
-        self.log_message('SUCCESS', "Анализ завершен успешно!")
-        self.status_bar.showMessage("Анализ завершен")
+        self.log_message('SUCCESS', complete_msg)
+        self.status_bar.showMessage(lang_data.get("analysis_complete_status", "Analysis complete"))
         
         # Сохраняем в историю
         if result:
@@ -1606,11 +1659,12 @@ class RedSandSecureGUI(QMainWindow):
 
     def analysis_error(self, error_msg: str):
         self.set_ui_enabled(True)
-        self.progress_label.setText("Ошибка анализа!")
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.progress_label.setText(lang_data.get("analysis_error", "Analysis error!"))
         self.progress_label.setStyleSheet("color: #CC0000; font-weight: bold;")
         self.log_message('ERROR', error_msg)
-        self.status_bar.showMessage("Ошибка анализа")
-        QMessageBox.critical(self, "Ошибка анализа", error_msg)
+        self.status_bar.showMessage(lang_data.get("analysis_error", "Analysis error"))
+        QMessageBox.critical(self, lang_data.get("error", "Error"), error_msg)
 
     def update_progress(self, value: int, message: str):
         self.progress_bar.setValue(value)
@@ -1656,6 +1710,7 @@ class RedSandSecureGUI(QMainWindow):
         scrollbar.setValue(scrollbar.maximum())
 
     def update_results_display(self, result: dict):
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         threat_info = result.get('threat_info') or {}
         if not isinstance(threat_info, dict):
             threat_info = {}
@@ -1665,11 +1720,13 @@ class RedSandSecureGUI(QMainWindow):
         self.results_summary.setVisible(False)
         self.results_table.setVisible(True)
         self.results_table.setRowCount(0)
+        
+        # Переводим заголовки таблицы
         data = [
-            ("Тип угрозы", threat_info.get('type', 'Неизвестно')),
-            ("Семейство", threat_info.get('family', 'Неизвестно')),
-            ("Имя файла", file_name),
-            ("Размер файла", f"{file_size} байт"),
+            (lang_data.get("threat_type", "Threat Type"), threat_info.get('type', lang_data.get("unknown", "Unknown"))),
+            (lang_data.get("threat_family", "Family"), threat_info.get('family', lang_data.get("unknown", "Unknown"))),
+            (lang_data.get("file_name", "File Name"), file_name),
+            (lang_data.get("file_size", "File Size"), f"{file_size} {lang_data.get('bytes', 'bytes')}"),
         ]
         for param, value in data:
             row = self.results_table.rowCount()
@@ -1680,19 +1737,13 @@ class RedSandSecureGUI(QMainWindow):
     def open_settings(self):
         try:
             dialog = SettingsDialog(self)
+            # Тема меняется сразу при нажатии на кнопки внутри диалога
+            dialog.theme_changed.connect(self.change_theme)
             if dialog.exec_() == QDialog.Accepted:
                 settings = dialog.get_settings()
-                old_theme = self.settings.get('theme', 'Тёмная')
                 self.settings.update(settings)
                 self.save_settings()
-                
-                # Если тема изменилась, применяем новую
-                new_theme = self.settings.get('theme', 'Тёмная')
-                if old_theme != new_theme:
-                    self.setStyleSheet(generate_stylesheet(new_theme))
-                    self.settings['_current_theme'] = new_theme
-                
-                self.log_message('INFO', f"Настройки сохранены. Тема: {new_theme}")
+                self.log_message('INFO', f"Настройки сохранены.")
         except Exception as e:
             self.log_message('ERROR', f"Ошибка при открытии настроек: {e}")
             QMessageBox.critical(self, "Ошибка", f"Не удалось открыть настройки: {str(e)}")
@@ -1856,6 +1907,8 @@ class RedSandSecureGUI(QMainWindow):
             json.dump(history, f, indent=2, ensure_ascii=False)
 
     def closeEvent(self, event):
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         # Если анализ уже завершен, закрываем без вопросов
         if self.analysis_completed:
             if self.worker_thread and self.worker_thread.isRunning():
@@ -1867,8 +1920,8 @@ class RedSandSecureGUI(QMainWindow):
         # Проверяем, запущен ли анализ в данный момент
         if self.worker_thread and self.worker_thread.isRunning():
             reply = QMessageBox.warning(
-                self, "Анализ выполняется",
-                "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
+                self, lang_data.get("warning", "Warning"),
+                lang_data.get("analysis_in_progress", "Analysis is still in progress. Are you sure you want to exit?"),
                 QMessageBox.Yes | QMessageBox.No, QMessageBox.No
             )
             if reply == QMessageBox.No:
@@ -1886,11 +1939,10 @@ def main():
     window = RedSandSecureGUI()
     window.show()
     if not Path('gui_settings.json').exists():
+        lang_data = LANGUAGES.get(window.current_lang, LANGUAGES["Русский"])
         QMessageBox.warning(
-            window, "Предупреждение о безопасности",
-            "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2>"
-            "<p>Вы запускаете инструмент для анализа потенциально опасных файлов.</p>"
-            "<p><b>Запускайте ТОЛЬКО в изолированной виртуальной машине!</b></p>"
+            window, lang_data.get("vm_warning_title", "Security Warning"),
+            lang_data.get("vm_warning_msg", "<h2>IMPORTANT WARNING</h2><p>You are launching a tool for analyzing potentially dangerous files.</p><p><b>Run ONLY in an isolated virtual machine!</b></p>")
         )
     sys.exit(app.exec_())
 
