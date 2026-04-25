@@ -1315,28 +1315,6 @@ class RedSandSecureGUI(QMainWindow):
         
         top_panel.addSpacing(20)
         
-        # Выбор темы - две кнопки Светлая и Тёмная
-        theme_label = QLabel(lang_data.get("theme_label_ui", "Theme:"))
-        top_panel.addWidget(theme_label)
-        
-        self.btn_light_theme_main = QPushButton(lang_data.get("light_theme", "Light"))
-        self.btn_light_theme_main.setObjectName("secondaryBtn")
-        self.btn_light_theme_main.setCheckable(True)
-        self.btn_light_theme_main.setChecked(self.settings.get('theme', 'Тёмная') == "Светлая")
-        self.btn_light_theme_main.clicked.connect(lambda: self.change_theme("Светлая"))
-        self.btn_light_theme_main.setMinimumWidth(100)
-        top_panel.addWidget(self.btn_light_theme_main)
-        
-        self.btn_dark_theme_main = QPushButton(lang_data.get("dark_theme", "Dark"))
-        self.btn_dark_theme_main.setObjectName("secondaryBtn")
-        self.btn_dark_theme_main.setCheckable(True)
-        self.btn_dark_theme_main.setChecked(self.settings.get('theme', 'Тёмная') == "Тёмная")
-        self.btn_dark_theme_main.clicked.connect(lambda: self.change_theme("Тёмная"))
-        self.btn_dark_theme_main.setMinimumWidth(100)
-        top_panel.addWidget(self.btn_dark_theme_main)
-        
-        top_panel.addStretch()
-        
         # Кнопка настроек
         btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
         btn_settings.setObjectName("secondaryBtn")
@@ -1550,19 +1528,21 @@ class RedSandSecureGUI(QMainWindow):
     def start_analysis(self):
         file_path = self.file_path_edit.text().strip()
         if not file_path:
-            QMessageBox.warning(self, "Предупреждение", "Пожалуйста, выберите файл для анализа!")
+            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+            QMessageBox.warning(self, lang_data.get("warning", "Warning"), lang_data.get("please_select_file", "Please select a file for analysis!"))
             return
         if not os.path.exists(file_path):
-            QMessageBox.critical(self, "Ошибка", f"Файл не найден: {file_path}")
+            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+            QMessageBox.critical(self, lang_data.get("error", "Error"), lang_data.get("file_not_found", "File not found: ") + file_path)
             return
         
         # Сбрасываем флаг завершения перед новым анализом
         self.analysis_completed = False
-        
+
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         reply = QMessageBox.question(
-            self, "Предупреждение о безопасности",
-            "Вы запускаете анализ потенциально опасного файла!\n\n"
-            "Убедитесь, что вы работаете в виртуальной машине.\n\nПродолжить?",
+            self, lang_data.get("security_warning_title", "Security Warning"),
+            lang_data.get("security_warning_msg", "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?"),
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if reply == QMessageBox.No:
@@ -1756,12 +1736,6 @@ class RedSandSecureGUI(QMainWindow):
         if hasattr(self, 'btn_en'):
             self.btn_en.setChecked(language == "English")
         
-        # Обновляем кнопки темы
-        if hasattr(self, 'btn_light_theme_main'):
-            self.btn_light_theme_main.setText(lang_data.get('light_theme', 'Light'))
-        if hasattr(self, 'btn_dark_theme_main'):
-            self.btn_dark_theme_main.setText(lang_data.get('dark_theme', 'Dark'))
-        
         # Обновляем метки языка и темы
         for i in range(self.layout().count() if hasattr(self, 'layout') else 0):
             item = self.layout().itemAt(i) if hasattr(self, 'layout') else None
@@ -1837,12 +1811,6 @@ class RedSandSecureGUI(QMainWindow):
         
         # Применяем новую тему
         self.setStyleSheet(generate_stylesheet(theme_name))
-        
-        # Обновляем состояние кнопок темы
-        if hasattr(self, 'btn_light_theme_main'):
-            self.btn_light_theme_main.setChecked(theme_name == "Светлая")
-        if hasattr(self, 'btn_dark_theme_main'):
-            self.btn_dark_theme_main.setChecked(theme_name == "Тёмная")
         
         self.log_message('INFO', f"Тема изменена на: {theme_name}")
 
