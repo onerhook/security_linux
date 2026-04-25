@@ -545,7 +545,7 @@ class HistoryDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Таблица вместо списка для лучшего отображения цветов
+        # Таблица с улучшенным отображением цветов - текст виден всегда
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(3)
         self.history_table.setHorizontalHeaderLabels([
@@ -559,7 +559,7 @@ class HistoryDialog(QDialog):
         self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
         # Увеличиваем высоту строки в 2 раза
-        self.history_table.verticalHeader().setDefaultSectionSize(50)
+        self.history_table.verticalHeader().setDefaultSectionSize(100)
         self.load_history()
         layout.addWidget(self.history_table)
         
@@ -591,26 +591,33 @@ class HistoryDialog(QDialog):
                     
                     # Цвет вердикта и фона строки
                     if verdict == "ОПАСНО" or verdict == "DANGEROUS":
-                        color = "#DC2626"
-                        bg_color = "#FEE2E2"  # Светло-красный фон
+                        color = "#FFFFFF"  # Белый текст для контраста
+                        bg_color = "#DC2626"  # Красный фон
                     elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
-                        color = "#D97706"
-                        bg_color = "#FEF3C7"  # Светло-желтый фон
+                        color = "#000000"  # Черный текст для контраста
+                        bg_color = "#F59E0B"  # Желтый фон
                     else:
-                        color = "#059669"
-                        bg_color = "#D1FAE5"  # Светло-зеленый фон
+                        color = "#FFFFFF"  # Белый текст для контраста
+                        bg_color = "#059669"  # Зеленый фон
                     
                     # Дата - с явным цветом текста и фона
                     date_item = QTableWidgetItem(date)
-                    date_item.setForeground(QColor("#0F172A"))
+                    date_item.setForeground(QColor(color))
                     date_item.setBackground(QColor(bg_color))
+                    font = date_item.font()
+                    font.setPointSize(14)
+                    date_item.setFont(font)
                     self.history_table.setItem(row, 0, date_item)
                     
                     # Файл - с явным цветом текста и фона
                     file_item = QTableWidgetItem(os.path.basename(file_name))
                     file_item.setToolTip(file_name)
-                    file_item.setForeground(QColor("#0F172A"))
+                    file_item.setForeground(QColor(color))
                     file_item.setBackground(QColor(bg_color))
+                    font = file_item.font()
+                    font.setPointSize(14)
+                    font.setBold(True)
+                    file_item.setFont(font)
                     self.history_table.setItem(row, 1, file_item)
                     
                     # Вердикт - цветной текст и фон
@@ -618,6 +625,7 @@ class HistoryDialog(QDialog):
                     verdict_item.setForeground(QColor(color))
                     verdict_item.setBackground(QColor(bg_color))
                     font = verdict_item.font()
+                    font.setPointSize(16)
                     font.setBold(True)
                     verdict_item.setFont(font)
                     self.history_table.setItem(row, 2, verdict_item)
@@ -650,12 +658,13 @@ class AnalysisWorker(QObject):
     def run(self):
         try:
             from core.orchestrator import RedSandSecure
-            sandbox = RedSandSecure(output_dir='reports_gui')
+            # Используем Docker-песочницу для изоляции файлов от системы
+            sandbox = RedSandSecure(output_dir='reports_gui', use_docker=True)
             stages = [
                 (10, "Подготовка к анализу..."),
                 (20, "Проверка файла..."),
                 (40, "Статический анализ..."),
-                (60, "Анализ поведения..."),
+                (60, "Анализ поведения в Docker-контейнере..."),
                 (80, "Оценка угрозы..."),
                 (95, "Создание отчета..."),
                 (100, "Анализ завершен!")
@@ -1333,7 +1342,7 @@ class RedSandSecureGUI(QMainWindow):
     def setup_ui(self):
         self.setWindowTitle("RedSand Secure - Анализ файлов")
         # Запуск в полноэкранном режиме без предупреждений о геометрии
-        self.setWindowState(Qt.WindowMaximized)
+        self.showMaximized()
         
         # Центральное виджет с Drag&Drop поддержкой
         central_widget = QWidget()
@@ -1349,20 +1358,20 @@ class RedSandSecureGUI(QMainWindow):
         # Верхняя панель с кнопками
         top_panel = QHBoxLayout()
         
-        # Выбор языка - две кнопки RU и EN
+        # Выбор языка - две кнопки RU и EN на одном уровне с настройками и историей
         lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         lang_label = QLabel("Язык/Language:")
         lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         top_panel.addWidget(lang_label)
-        top_panel.addSpacing(10)  # Небольшой отступ до кнопок
+        top_panel.addSpacing(15)  # Отступ до кнопок
         
         self.btn_ru = QPushButton("RU")
         self.btn_ru.setObjectName("secondaryBtn")
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumSize(60, 40)  # Уменьшенный размер кнопок
-        self.btn_ru.setMaximumSize(60, 40)
+        self.btn_ru.setMinimumSize(70, 50)  # Размер как у кнопок настроек и истории
+        self.btn_ru.setMaximumSize(70, 50)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1370,8 +1379,8 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumSize(60, 40)  # Уменьшенный размер кнопок
-        self.btn_en.setMaximumSize(60, 40)
+        self.btn_en.setMinimumSize(70, 50)  # Размер как у кнопок настроек и истории
+        self.btn_en.setMaximumSize(70, 50)
         top_panel.addWidget(self.btn_en)
         
         top_panel.addSpacing(30)  # Отступ до других кнопок
@@ -1458,7 +1467,7 @@ class RedSandSecureGUI(QMainWindow):
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(80)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel(lang_data.get('seconds', 'сек')))
+        # Убрали надпись "сек" / Removed "sec" label
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
@@ -1783,14 +1792,13 @@ class RedSandSecureGUI(QMainWindow):
         self.results_table.setVisible(True)
         self.results_table.setRowCount(0)
         
-        # Переводим заголовки таблицы и добавляем вердикт с цветом
+        # Переводим заголовки таблицы и добавляем вердикт с цветом (без risk_score для пользователя)
         data = [
             (lang_data.get("verdict", "Verdict"), f"<b style='color: {verdict_color};'>{verdict}</b>"),
             (lang_data.get("threat_type", "Threat Type"), threat_info.get('type', lang_data.get("unknown", "Unknown"))),
             (lang_data.get("threat_family", "Family"), threat_info.get('family', lang_data.get("unknown", "Unknown"))),
             (lang_data.get("file_name", "File Name"), file_name),
             (lang_data.get("file_size", "File Size"), f"{file_size} {lang_data.get('bytes', 'bytes')}"),
-            (lang_data.get("risk_score", "Risk Score"), str(risk_score)),
         ]
         for param, value in data:
             row = self.results_table.rowCount()
@@ -1828,6 +1836,33 @@ class RedSandSecureGUI(QMainWindow):
         except Exception as e:
             self.log_message('ERROR', f"Ошибка открытия папки: {e}")
             QMessageBox.warning(self, "Предупреждение", f"Не удалось открыть папку.\nПуть: {reports_dir.absolute()}")
+
+    def export_report(self):
+        """Экспорт отчета о сканировании в JSON файл"""
+        if not self.current_report:
+            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+            msg = "Нет данных для экспорта. Сначала выполните анализ." if self.current_lang == "Русский" else "No data to export. Run analysis first."
+            QMessageBox.information(self, "Инфо" if self.current_lang == "Русский" else "Info", msg)
+            return
+        
+        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Экспорт отчета" if self.current_lang == "Русский" else "Export Report",
+            f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+            "JSON файлы (*.json);;Все файлы (*.*)"
+        )
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(self.current_report, f, indent=2, ensure_ascii=False)
+                msg = f"Отчет сохранен: {file_path}" if self.current_lang == "Русский" else f"Report saved: {file_path}"
+                self.log_message('SUCCESS', msg)
+                QMessageBox.information(self, "Успешно" if self.current_lang == "Русский" else "Success", msg)
+            except Exception as e:
+                msg = f"Ошибка экспорта: {e}" if self.current_lang == "Русский" else f"Export error: {e}"
+                self.log_message('ERROR', msg)
+                QMessageBox.critical(self, "Ошибка" if self.current_lang == "Русский" else "Error", msg)
 
     def open_history(self):
         """Открыть диалог истории сканирований"""
@@ -1871,7 +1906,7 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
         self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
         self.btn_analyze.setText(lang_data.get('analyze_btn', '🚀 START ANALYSIS'))
-        self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:') + " (sec)")
+        self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:'))
         self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
         self.network_check.setText(lang_data.get('network_check', 'Disable network'))
         

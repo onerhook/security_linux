@@ -92,9 +92,10 @@ def analyze_single_file_worker(args: Tuple[str, str, int, bool]) -> Dict[str, An
 class RedSandSecure:
     """Основной класс оркестратора анализа вредоносного ПО."""
 
-    def __init__(self, output_dir: str = 'reports', log_level: int = logging.INFO, max_workers: Optional[int] = None):
+    def __init__(self, output_dir: str = 'reports', log_level: int = logging.INFO, max_workers: Optional[int] = None, use_docker: bool = False):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+        self.use_docker = use_docker  # Флаг использования Docker для изоляции
 
         # Настройка логирования
         self._setup_logging(log_level)
@@ -109,7 +110,8 @@ class RedSandSecure:
 
         # Multiprocessing настройки
         self.max_workers = max_workers or mp.cpu_count()
-        self.logger.info(f"RedSand Secure v3.0 инициализирован (максимум потоков: {self.max_workers})")
+        docker_msg = " с Docker-изоляцией" if use_docker else ""
+        self.logger.info(f"RedSand Secure v3.0 инициализирован (максимум потоков: {self.max_workers}){docker_msg}")
 
         self.original_network_state: Dict[str, Any] = {}
         self.is_network_disabled = False
