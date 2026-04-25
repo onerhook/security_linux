@@ -591,19 +591,20 @@ class HistoryDialog(QDialog):
                     
                     # Цвет вердикта и фона строки
                     if verdict == "ОПАСНО" or verdict == "DANGEROUS":
-                        color = "#FFFFFF"  # Белый текст для контраста
+                        text_color = "#FFFFFF"  # Белый текст для контраста
                         bg_color = "#DC2626"  # Красный фон
                     elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
-                        color = "#000000"  # Черный текст для контраста
+                        text_color = "#000000"  # Черный текст для контраста
                         bg_color = "#F59E0B"  # Желтый фон
                     else:
-                        color = "#FFFFFF"  # Белый текст для контраста
+                        text_color = "#FFFFFF"  # Белый текст для контраста
                         bg_color = "#059669"  # Зеленый фон
                     
                     # Дата - с явным цветом текста и фона
                     date_item = QTableWidgetItem(date)
-                    date_item.setForeground(QColor(color))
+                    date_item.setForeground(QColor(text_color))
                     date_item.setBackground(QColor(bg_color))
+                    date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
                     font = date_item.font()
                     font.setPointSize(14)
                     date_item.setFont(font)
@@ -612,8 +613,9 @@ class HistoryDialog(QDialog):
                     # Файл - с явным цветом текста и фона
                     file_item = QTableWidgetItem(os.path.basename(file_name))
                     file_item.setToolTip(file_name)
-                    file_item.setForeground(QColor(color))
+                    file_item.setForeground(QColor(text_color))
                     file_item.setBackground(QColor(bg_color))
+                    file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
                     font = file_item.font()
                     font.setPointSize(14)
                     font.setBold(True)
@@ -622,8 +624,9 @@ class HistoryDialog(QDialog):
                     
                     # Вердикт - цветной текст и фон
                     verdict_item = QTableWidgetItem(verdict)
-                    verdict_item.setForeground(QColor(color))
+                    verdict_item.setForeground(QColor(text_color))
                     verdict_item.setBackground(QColor(bg_color))
+                    verdict_item.setFlags(verdict_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
                     font = verdict_item.font()
                     font.setPointSize(16)
                     font.setBold(True)
@@ -1363,15 +1366,15 @@ class RedSandSecureGUI(QMainWindow):
         lang_label = QLabel("Язык/Language:")
         lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         top_panel.addWidget(lang_label)
-        top_panel.addSpacing(15)  # Отступ до кнопок
+        top_panel.addSpacing(10)  # Маленький отступ до кнопок
         
         self.btn_ru = QPushButton("RU")
         self.btn_ru.setObjectName("secondaryBtn")
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumSize(70, 50)  # Размер как у кнопок настроек и истории
-        self.btn_ru.setMaximumSize(70, 50)
+        self.btn_ru.setMinimumSize(50, 50)  # Квадратные кнопки, размер как у настроек и истории по высоте
+        self.btn_ru.setMaximumSize(50, 50)
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
@@ -1379,11 +1382,11 @@ class RedSandSecureGUI(QMainWindow):
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumSize(70, 50)  # Размер как у кнопок настроек и истории
-        self.btn_en.setMaximumSize(70, 50)
+        self.btn_en.setMinimumSize(50, 50)  # Квадратные кнопки, размер как у настроек и истории по высоте
+        self.btn_en.setMaximumSize(50, 50)
         top_panel.addWidget(self.btn_en)
         
-        top_panel.addSpacing(30)  # Отступ до других кнопок
+        top_panel.addStretch()  # Растягиваем пространство, чтобы сдвинуть остальные кнопки вправо
         
         # Кнопка настроек
         btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
@@ -1446,6 +1449,17 @@ class RedSandSecureGUI(QMainWindow):
         self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'Файл еще не выбран... или перетащите сюда'))
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
+        # Устанавливаем серый цвет текста placeholder и обычного текста
+        self.file_path_edit.setStyleSheet("""
+            QLineEdit {
+                background-color: transparent;
+                color: #666666;
+                border: 2px solid #CCCCCC;
+                border-radius: 10px;
+                padding: 12px;
+                font-size: 15px;
+            }
+        """)
         file_layout.addWidget(self.file_path_edit)
         
         self.btn_select_file = QPushButton(lang_data.get('select_file', '📁 Выбрать файл'))
@@ -1894,14 +1908,6 @@ class RedSandSecureGUI(QMainWindow):
         if hasattr(self, 'btn_en'):
             self.btn_en.setChecked(language == "English")
         
-        # Обновляем метки языка и темы
-        for i in range(self.layout().count() if hasattr(self, 'layout') else 0):
-            item = self.layout().itemAt(i) if hasattr(self, 'layout') else None
-            if item and item.widget():
-                widget = item.widget()
-                if isinstance(widget, QLabel) and widget.text() in ["Язык:", "Language:", "Тема:", "Theme:"]:
-                    widget.setText(lang_data.get('lang_label', 'Language:') if i < 5 else lang_data.get('theme_label_ui', 'Theme:'))
-        
         # Обновляем все текстовые элементы
         self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
         self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
@@ -1960,6 +1966,25 @@ class RedSandSecureGUI(QMainWindow):
                                     btn.setText(lang_data.get('settings', '⚙ Settings'))
                                 elif "📜" in btn_text or "History" in btn_text:
                                     btn.setText(lang_data.get('history', '📜 History'))
+        
+        # Обновляем label под прогресс-баром (waiting)
+        if hasattr(self, 'progress_label'):
+            self.progress_label.setText(lang_data.get('waiting', 'Waiting...'))
+            # Сохраняем серый цвет текста
+            self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
+        
+        # Обновляем placeholder файла - сохраняем серый цвет
+        if hasattr(self, 'file_path_edit'):
+            self.file_path_edit.setStyleSheet("""
+                QLineEdit {
+                    background-color: transparent;
+                    color: #666666;
+                    border: 2px solid #CCCCCC;
+                    border-radius: 10px;
+                    padding: 12px;
+                    font-size: 15px;
+                }
+            """)
     
     def change_theme(self, theme_name: str):
         """Сменить тему оформления"""
