@@ -24,7 +24,7 @@ from PyQt5.QtWidgets import (
     QMessageBox, QCheckBox, QSpinBox, QDialog,
     QDialogButtonBox, QLineEdit, QStatusBar,
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
-    QScrollArea, QGridLayout, QListWidget, QListWidgetItem
+    QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QButtonGroup, QRadioButton
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
@@ -90,7 +90,50 @@ LANGUAGES = {
         "date": "Дата",
         "file": "Файл",
         "verdict": "Вердикт",
-        "clear_history": "Очистить историю"
+        "clear_history": "Очистить историю",
+        "step1_title": "Шаг 1: Выберите файл",
+        "step2_title": "Шаг 2: Настройки (необязательно)",
+        "progress_title": "Прогресс",
+        "waiting": "Ожидание...",
+        "results_placeholder": "Результаты анализа появятся здесь после завершения...",
+        "log_placeholder": "Здесь будет отображаться ход анализа...",
+        "confirm_clear_history": "Удалить всю историю сканирований?",
+        "confirm_exit_title": "Анализ выполняется",
+        "confirm_exit_msg": "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
+        "file_not_found": "Файл не найден: ",
+        "select_file_warning": "Пожалуйста, выберите файл для анализа!",
+        "analysis_complete": "Анализ завершен успешно!",
+        "analysis_error": "Ошибка анализа!",
+        "settings_saved": "Настройки сохранены. Тема: ",
+        "settings_error": "Не удалось открыть настройки: ",
+        "folder_open_error": "Не удалось открыть папку.\nПуть: ",
+        "lang_changed": "Язык изменен на: ",
+        "settings_title": "⚙ Настройки программы",
+        "theme_group": "🎨 Тема оформления",
+        "theme_label": "Выберите тему:",
+        "timeout_group": "⏱ Время анализа",
+        "timeout_label": "Максимальное время:",
+        "options_group": "🔧 Дополнительные опции",
+        "poly_tooltip": "Помогает обнаружить сложные вирусы путем создания модификаций файла",
+        "network_tooltip": "Защищает вашу сеть от потенциальной угрозы",
+        "network_recommended": "(рекомендуется)",
+        "help_settings_group": "❓ Справка по настройкам",
+        "help_settings_text": "<b>Как использовать настройки:</b><br><br><b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br><b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br><b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br><b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br><b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!",
+        "history_title": "📜 История сканирований",
+        "btn_close": "Закрыть",
+        "btn_clear": "🗑 Очистить историю",
+        "confirm_clear": "Подтверждение",
+        "tab_logs": "📋 Журнал",
+        "tab_results": "📊 Результаты",
+        "param_column": "Параметр",
+        "value_column": "Значение",
+        "all_files": "Все файлы (*.*)",
+        "exe_files": "Executable файлы (*.exe)",
+        "dll_files": "DLL файлы (*.dll)",
+        "security_warning_title": "Предупреждение о безопасности",
+        "security_warning_msg": "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2><p>Вы запускаете инструмент для анализа потенциально опасных файлов.</p><p><b>Запускайте ТОЛЬКО в изолированной виртуальной машине!</b></p>",
+        "light_theme": "Светлая",
+        "dark_theme": "Тёмная"
     },
     "English": {
         "title": "RedSand Secure",
@@ -122,7 +165,50 @@ LANGUAGES = {
         "date": "Date",
         "file": "File",
         "verdict": "Verdict",
-        "clear_history": "Clear History"
+        "clear_history": "Clear History",
+        "step1_title": "Step 1: Select File",
+        "step2_title": "Step 2: Settings (optional)",
+        "progress_title": "Progress",
+        "waiting": "Waiting...",
+        "results_placeholder": "Analysis results will appear here after completion...",
+        "log_placeholder": "Analysis progress will be displayed here...",
+        "confirm_clear_history": "Delete all scan history?",
+        "confirm_exit_title": "Analysis in Progress",
+        "confirm_exit_msg": "Analysis is still running. Are you sure you want to exit?",
+        "file_not_found": "File not found: ",
+        "select_file_warning": "Please select a file for analysis!",
+        "analysis_complete": "Analysis completed successfully!",
+        "analysis_error": "Analysis error!",
+        "settings_saved": "Settings saved. Theme: ",
+        "settings_error": "Failed to open settings: ",
+        "folder_open_error": "Failed to open folder.\nPath: ",
+        "lang_changed": "Language changed to: ",
+        "settings_title": "⚙ Program Settings",
+        "theme_group": "🎨 Theme",
+        "theme_label": "Select theme:",
+        "timeout_group": "⏱ Analysis Time",
+        "timeout_label": "Maximum time:",
+        "options_group": "🔧 Additional Options",
+        "poly_tooltip": "Helps detect complex viruses by creating file modifications",
+        "network_tooltip": "Protects your network from potential threats",
+        "network_recommended": "(recommended)",
+        "help_settings_group": "❓ Settings Help",
+        "help_settings_text": "<b>How to use settings:</b><br><br><b>Theme:</b> Choose a visual style that suits you<br><b>Analysis Time:</b> Maximum time to check one file (default 60 sec)<br><b>Create file variants:</b> Generates file modifications for better detection of complex threats<br><b>Disable network:</b> Protects your local network during malware analysis (always recommended to enable)<br><br><b style='color: #EF4444;'>IMPORTANT:</b> Run analysis only in an isolated virtual machine!",
+        "history_title": "📜 Scan History",
+        "btn_close": "Close",
+        "btn_clear": "🗑 Clear History",
+        "confirm_clear": "Confirmation",
+        "tab_logs": "📋 Logs",
+        "tab_results": "📊 Results",
+        "param_column": "Parameter",
+        "value_column": "Value",
+        "all_files": "All files (*.*)",
+        "exe_files": "Executable files (*.exe)",
+        "dll_files": "DLL files (*.dll)",
+        "security_warning_title": "Security Warning",
+        "security_warning_msg": "<h2>IMPORTANT WARNING</h2><p>You are running a tool for analyzing potentially dangerous files.</p><p><b>Run ONLY in an isolated virtual machine!</b></p>",
+        "light_theme": "Light",
+        "dark_theme": "Dark"
     }
 }
 
@@ -859,10 +945,7 @@ class DetailedReportDialog(QDialog):
 class SettingsDialog(QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Настройки")
-        self.setMinimumWidth(600)
-        # Убираем вопросительный знак из заголовка окна
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.parent_window = parent
         self.setup_ui()
 
     def setup_ui(self):
@@ -870,64 +953,71 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title_label = QLabel("⚙ Настройки программы")
+        lang = self.get_lang_data()
+        
+        self.setWindowTitle(lang["settings_title"])
+        self.setMinimumWidth(600)
+        # Убираем вопросительный знак из заголовка окна
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        
+        title_label = QLabel(lang["settings_title"])
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        # Тема оформления
-        theme_group = QGroupBox("🎨 Тема оформления")
-        theme_layout = QHBoxLayout()
-        theme_layout.addWidget(QLabel("Выберите тему:"))
-        self.theme_combo = QComboBox()
-        self.theme_combo.addItems(["Светлая", "Тёмная"])
-        self.theme_combo.setMinimumWidth(200)
-        theme_layout.addWidget(self.theme_combo)
-        theme_layout.addStretch()
+        # Тема оформления - используем QRadioButton для эксклюзивного выбора
+        theme_group = QGroupBox(lang["theme_group"])
+        theme_layout = QVBoxLayout()
+        theme_layout.addWidget(QLabel(lang["theme_label"]))
+        
+        self.theme_button_group = QButtonGroup(self)
+        self.theme_button_group.setExclusive(True)
+        
+        self.light_theme_radio = QRadioButton(lang["light_theme"])
+        self.dark_theme_radio = QRadioButton(lang["dark_theme"])
+        
+        self.theme_button_group.addButton(self.light_theme_radio, 0)
+        self.theme_button_group.addButton(self.dark_theme_radio, 1)
+        
+        theme_layout.addWidget(self.light_theme_radio)
+        theme_layout.addWidget(self.dark_theme_radio)
         theme_group.setLayout(theme_layout)
         layout.addWidget(theme_group)
         
         # Время анализа
-        timeout_group = QGroupBox("⏱ Время анализа")
+        timeout_group = QGroupBox(lang["timeout_group"])
         timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel("Максимальное время:"))
+        timeout_layout.addWidget(QLabel(lang["timeout_label"]))
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(100)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel("сек"))
+        timeout_layout.addWidget(QLabel(lang["seconds"]))
         timeout_layout.addStretch()
         timeout_group.setLayout(timeout_layout)
         layout.addWidget(timeout_group)
         
         # Дополнительные опции
-        options_group = QGroupBox("🔧 Дополнительные опции")
+        options_group = QGroupBox(lang["options_group"])
         options_layout = QVBoxLayout()
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы путем создания модификаций файла")
+        self.poly_check = QCheckBox(lang["poly_check"])
+        self.poly_check.setToolTip(lang["poly_tooltip"])
         options_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть во время анализа (рекомендуется)")
+        self.network_check = QCheckBox(lang["network_check"] + " " + lang["network_recommended"])
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть от потенциальной угрозы")
+        self.network_check.setToolTip(lang["network_tooltip"])
         options_layout.addWidget(self.network_check)
         
         options_group.setLayout(options_layout)
         layout.addWidget(options_group)
         
         # Справка
-        help_group = QGroupBox("❓ Справка по настройкам")
+        help_group = QGroupBox(lang["help_settings_group"])
         help_layout = QVBoxLayout()
-        help_text = QLabel(
-            "<b>Как использовать настройки:</b><br><br>"
-            "<b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br>"
-            "<b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br>"
-            "<b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-            "<b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br>"
-            "<b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!"
-        )
+        help_text = QLabel(lang["help_settings_text"])
         help_text.setWordWrap(True)
         help_text.setStyleSheet("font-size: 15px; line-height: 1.8;")
         help_layout.addWidget(help_text)
@@ -941,13 +1031,27 @@ class SettingsDialog(QDialog):
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
+    
+    def get_lang_data(self):
+        if self.parent_window and hasattr(self.parent_window, 'current_lang'):
+            return LANGUAGES.get(self.parent_window.current_lang, LANGUAGES["Русский"])
+        return LANGUAGES["Русский"]
 
     def get_settings(self):
+        # Определяем выбранную тему
+        selected_theme = lang["light_theme"] if self.light_theme_radio.isChecked() else lang["dark_theme"]
+        # Маппинг русских названий тем
+        theme_map = {
+            "Светлая": "Светлая",
+            "Тёмная": "Тёмная",
+            "Light": "Светлая",
+            "Dark": "Тёмная"
+        }
         return {
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
-            'theme': self.theme_combo.currentText()
+            'theme': theme_map.get(selected_theme, "Светлая")
         }
 
 
@@ -1058,66 +1162,63 @@ class RedSandSecureGUI(QMainWindow):
         layout = QVBoxLayout(widget)
         layout.setSpacing(20)
         
-        file_group = QGroupBox("Шаг 1: Выберите файл")
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        file_group = QGroupBox(lang["step1_title"])
         file_layout = QVBoxLayout()
         
         self.file_path_edit = QLineEdit()
-        lang = self.settings.get('language', 'Русский')
-        if lang == 'Русский':
-            placeholder = "Файл еще не выбран... или перетащите сюда"
-        else:
-            placeholder = "No file selected... or drag and drop here"
-        self.file_path_edit.setPlaceholderText(placeholder)
+        self.file_path_edit.setPlaceholderText(lang["file_placeholder"])
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        btn_select_file = QPushButton("📁 Выбрать файл")
-        btn_select_file.setObjectName("actionBtn")
-        btn_select_file.clicked.connect(self.select_file)
-        file_layout.addWidget(btn_select_file)
+        self.btn_select_file = QPushButton(lang["select_file"])
+        self.btn_select_file.setObjectName("actionBtn")
+        self.btn_select_file.clicked.connect(self.select_file)
+        file_layout.addWidget(self.btn_select_file)
         
         file_group.setLayout(file_layout)
         layout.addWidget(file_group)
         
-        settings_group = QGroupBox("Шаг 2: Настройки (необязательно)")
+        settings_group = QGroupBox(lang["step2_title"])
         settings_layout = QVBoxLayout()
         
         timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel("Время анализа:"))
+        timeout_layout.addWidget(QLabel(lang["analysis_time"]))
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(80)
         timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel("сек"))
+        timeout_layout.addWidget(QLabel(lang["seconds"]))
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
+        self.poly_check = QCheckBox(lang["poly_check"])
+        self.poly_check.setToolTip(lang["poly_tooltip"])
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
+        self.network_check = QCheckBox(lang["network_check"] + " " + lang["network_recommended"])
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
+        self.network_check.setToolTip(lang["network_tooltip"])
         settings_layout.addWidget(self.network_check)
         
         settings_group.setLayout(settings_layout)
         layout.addWidget(settings_group)
         
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton(lang["analyze_btn"])
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.clicked.connect(self.start_analysis)
         layout.addWidget(self.btn_analyze)
         
-        progress_group = QGroupBox("Прогресс")
+        progress_group = QGroupBox(lang["progress_title"])
         progress_layout = QVBoxLayout()
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel("Ожидание...")
+        self.progress_label = QLabel(lang["waiting"])
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
@@ -1133,12 +1234,12 @@ class RedSandSecureGUI(QMainWindow):
         layout.setSpacing(20)
         self.tabs = QTabWidget()
         logs_widget = self.create_logs_tab()
-        logs_widget._tab_name_ru = "📋 Журнал"
-        logs_widget._tab_name_en = "📋 Logs"
+        logs_widget._tab_name_ru = LANGUAGES["Русский"]["tab_logs"]
+        logs_widget._tab_name_en = LANGUAGES["English"]["tab_logs"]
         self.tabs.addTab(logs_widget, logs_widget._tab_name_ru)
         results_widget = self.create_results_tab()
-        results_widget._tab_name_ru = "📊 Результаты"
-        results_widget._tab_name_en = "📊 Results"
+        results_widget._tab_name_ru = LANGUAGES["Русский"]["tab_results"]
+        results_widget._tab_name_en = LANGUAGES["English"]["tab_results"]
         self.tabs.addTab(results_widget, results_widget._tab_name_ru)
         layout.addWidget(self.tabs)
         return widget
@@ -1149,21 +1250,23 @@ class RedSandSecureGUI(QMainWindow):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setFont(QFont("Consolas", 14))
-        self.log_text.setPlaceholderText("Здесь будет отображаться ход анализа...")
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.log_text.setPlaceholderText(lang["log_placeholder"])
         layout.addWidget(self.log_text)
         return widget
 
     def create_results_tab(self) -> QWidget:
         widget = QWidget()
         layout = QVBoxLayout(widget)
-        self.results_summary = QLabel("Результаты анализа появятся здесь после завершения...")
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.results_summary = QLabel(lang["results_placeholder"])
         self.results_summary.setAlignment(Qt.AlignCenter)
         self.results_summary.setFont(QFont("Segoe UI", 16))
         self.results_summary.setStyleSheet("color: #666; padding: 50px;")
         layout.addWidget(self.results_summary)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
-        self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
+        self.results_table.setHorizontalHeaderLabels([lang["param_column"], lang["value_column"]])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.results_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
