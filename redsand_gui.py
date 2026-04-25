@@ -95,7 +95,7 @@ TRANSLATIONS = {
         "file_dialog_title": "Выберите файл для анализа",
         "all_files": "Все файлы",
         "exe_files": "EXE файлы",
-        "script_files": "Script files",
+        "script_files": "Скрипт файлы",
         "exit_confirm": "Анализ еще идет. Вы действительно хотите выйти?",
         "exit_title": "Выход",
         # Детали угроз
@@ -503,6 +503,25 @@ class RedSandApp:
                             child.configure(text=self.localization.get("reports_btn"))
                         elif "🌓" in text:
                             child.configure(text=self.localization.get("theme_btn"))
+                        elif "🇷🇺" in text or "RU" in text:
+                            child.configure(text=self.localization.get("lang_btn_ru"))
+                        elif "🇬🇧" in text or "EN" in text:
+                            child.configure(text=self.localization.get("lang_btn_en"))
+        
+        # Обновляем окно результатов если оно открыто
+        if self.result_window:
+            self.result_window.title(self.localization.get("result_title"))
+            # Обновляем заголовки вкладок
+            if hasattr(self, 'result_tab_control') and self.result_tab_control:
+                self.result_tab_control.tab(0, text=self.localization.get("tab_main"))
+                self.result_tab_control.tab(1, text=self.localization.get("tab_virus"))
+                self.result_tab_control.tab(2, text=self.localization.get("tab_help"))
+            # Обновляем кнопку закрытия
+            for widget in self.result_window.winfo_children():
+                if isinstance(widget, tk.Button):
+                    btn_text = widget.cget("text")
+                    if "CLOSE" in btn_text or "ЗАКРЫТЬ" in btn_text:
+                        widget.configure(text=self.localization.get("close_btn"))
 
     def select_file(self):
         title = self.localization.get("file_dialog_title")
@@ -649,6 +668,9 @@ class RedSandApp:
         self.result_window.transient(self.root)
         self.result_window.grab_set()
         
+        # Сохраняем ссылку на tab_control для обновления текстов вкладок при смене языка
+        self.result_tab_control = None
+        
         # Обработка закрытия окна
         def on_close():
             self.result_window.destroy()
@@ -674,6 +696,7 @@ class RedSandApp:
         # Создаем вкладки вручную для полного контроля стиля
         tab_control = ttk.Notebook(notebook_frame)
         tab_control.pack(fill=tk.BOTH, expand=True)
+        self.result_tab_control = tab_control
         
         # Вкладка 1: Главная
         tab_main = tk.Frame(tab_control, bg=self.colors["frame_bg"])
