@@ -129,6 +129,16 @@ class ThreatClassifier:
                 'file_extensions': ['.exe', '.dll', '.sys'],
                 'registry_keys': ['SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'],
                 'network_indicators': ['ftp', 'smtp', 'http']
+            },
+            'MEMORY_INJECTOR': {
+                'keywords': ['inject', 'memory', 'process', 'hollow', 'dll', 'remote', 'thread', 'allocate'],
+                'behaviors': ['process_injection', 'memory_allocation', 'code_execution', 'process_hollowing'],
+                'mitre_tactics': ['TA0005 - Defense Evasion', 'T1055 - Process Injection'],
+                'risk_base': 94,
+                'api_calls': ['VirtualAllocEx', 'WriteProcessMemory', 'CreateRemoteThread', 'NtUnmapViewOfSection'],
+                'file_extensions': ['.exe', '.dll', '.bin'],
+                'registry_keys': ['SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run'],
+                'network_indicators': ['payload', 'stage', 'shellcode']
             }
         }
         
