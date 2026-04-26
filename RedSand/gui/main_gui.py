@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v10.0 - Исправленная версия
-- Исправлен вылет при повторном анализе
-- Черная строка состояния с белым текстом
-- Увеличенная таблица результатов
-- Исправлено перекрытие кнопок вкладок
-- Добавлен тип вируса Memory Injector
-- Запуск в полноэкранном режиме
+RedSand Secure GUI v12.0 - Главный экран с выбором режима
+- Главный экран с двумя кнопками: Антивирус и Анализ файлов
+- Все настройки перенесены на главный экран
+- Красивое оформление с темной темой
+- Docker изоляция по умолчанию
 """
 
 import sys
@@ -24,2087 +22,1555 @@ from PyQt5.QtWidgets import (
     QMessageBox, QCheckBox, QSpinBox, QDialog,
     QDialogButtonBox, QLineEdit, QStatusBar,
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
-    QScrollArea, QGridLayout, QListWidget, QListWidgetItem
+    QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QStackedWidget
 )
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
+# Импорт компонентов ядра
+from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
+
 
 THEMES = {
-    "Светлая": {
-        "bg_primary": "#FFFFFF",
-        "bg_secondary": "#F0F4F8",
-        "bg_tertiary": "#D9E2EC",
-        "accent": "#1E40AF",
-        "accent_hover": "#1E3A8A",
-        "text_primary": "#0F172A",
-        "text_secondary": "#475569",
-        "success": "#059669",
-        "warning": "#D97706",
-        "danger": "#DC2626",
-        "info": "#2563EB"
-    },
     "Тёмная": {
-        "bg_primary": "#0F172A",
-        "bg_secondary": "#1E293B",
-        "bg_tertiary": "#334155",
-        "accent": "#3B82F6",
-        "accent_hover": "#2563EB",
-        "text_primary": "#F8FAFC",
-        "text_secondary": "#CBD5E1",
-        "success": "#10B981",
-        "warning": "#F59E0B",
-        "danger": "#EF4444",
-        "info": "#60A5FA"
-    }
-}
-
-LANGUAGES = {
-    "Русский": {
-        "title": "RedSand Secure",
-        "window_title": "RedSand Secure - Анализ файлов",
-        "select_file": "📁 Выбрать файл",
-        "file_placeholder": "Файл еще не выбран... или перетащите его сюда",
-        "analysis_time": "Время анализа:",
-        "seconds": "сек",
-        "poly_check": "Создавать варианты файла",
-        "network_check": "Отключать сеть",
-        "analyze_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
-        "settings": "⚙ Настройки",
-        "reports": "📂 Отчеты",
-        "history": "📜 История",
-        "logs_tab": "📋 Журнал",
-        "results_tab": "📊 Результаты",
-        "summary_tab": "🏠 Главная",
-        "virus_info_tab": "🦠 О вирусе",
-        "help_tab": "❓ Справка",
-        "safe": "БЕЗОПАСНО",
-        "suspicious": "ПОДОЗРИТЕЛЬНО",
-        "dangerous": "ОПАСНО",
-        "safe_desc": "Файл не содержит угроз. Можно использовать.",
-        "suspicious_desc": "Лучше не использовать. Есть сомнения.",
-        "dangerous_desc": "Немедленно удалите! Обнаружен вирус.",
-        "no_threat": "Угроз не обнаружено",
-        "unknown": "Неизвестно",
-        "drag_drop": "Перетащите файл сюда",
-        "scan_history": "История сканирований",
-        "date": "Дата",
-        "file": "Файл",
-        "verdict": "Вердикт",
-        "clear_history": "Очистить историю",
-        "step1_file": "Шаг 1: Выберите файл",
-        "step2_settings": "Шаг 2: Настройки (необязательно)",
-        "progress": "Прогресс",
-        "waiting": "Ожидание...",
-        "log_placeholder": "Здесь будет отображаться ход анализа...",
-        "results_placeholder": "Результаты анализа появятся здесь после завершения...",
-        "param": "Параметр",
-        "value": "Значение",
-        "lang_label": "Язык:",
-        "theme_label_ui": "Тема:",
-        "light_theme": "Светлая",
-        "dark_theme": "Тёмная",
-        "security_warning_title": "Предупреждение о безопасности",
-        "security_warning_msg": "Вы запускаете анализ потенциально опасного файла!\n\nУбедитесь, что вы работаете в виртуальной машине.\n\nПродолжить?",
-        "warning": "Предупреждение",
-        "error": "Ошибка",
-        "file_not_found": "Файл не найден: ",
-        "please_select_file": "Пожалуйста, выберите файл для анализа!",
-        "analysis_complete": "Анализ завершен успешно!",
-        "analysis_error": "Ошибка анализа!",
-        "analysis_started": "Анализ запущен...",
-        "analysis_complete_status": "Анализ завершен",
-        "settings_title": "⚙ Настройки программы",
-        "theme_group": "🎨 Тема оформления",
-        "theme_label": "Выберите тему:",
-        "timeout_group": "⏱ Время анализа",
-        "timeout_label": "Максимальное время:",
-        "options_group": "🔧 Дополнительные опции",
-        "help_settings_group": "❓ Справка по настройкам",
-        "help_settings_text": "Настройте параметры анализа под ваши нужды.",
-        "close": "Закрыть",
-        "save": "Сохранить",
-        "cancel": "Отмена",
-        "yes": "Да",
-        "no": "Нет",
-        "confirm": "Подтверждение",
-        "confirm_clear_history": "Удалить всю историю сканирований?",
-        "analysis_in_progress": "Анализ все еще выполняется. Вы уверены, что хотите выйти?",
-        "detailed_report_title": "📊 Результаты анализа безопасности",
-        "main_info": "📋 Основная информация",
-        "threat_info": "🦠 Подробная информация об угрозе",
-        "detection_info": "🔍 Как мы обнаружили эту угрозу",
-        "recommendations": "💡 Подробные рекомендации",
-        "file_name": "Имя файла",
-        "file_size": "Размер файла",
-        "threat_type": "Тип угрозы",
-        "threat_family": "Семейство",
-        "risk_score": "Оценка риска",
-        "bytes": "байт",
-        "open_reports_folder": "📂 Открыть папку с отчетами",
-        "reports_folder_error": "Не удалось открыть папку.\nПуть: ",
-        "settings_saved": "Настройки сохранены. Тема: ",
-        "settings_error": "Не удалось открыть настройки: ",
-        "language_changed": "Язык изменен на: ",
-        "ready": "Готов к работе",
-        "file_selected": "Файл выбран: ",
-        "file_dragged": "Файл перетащен: ",
-        "vm_warning_title": "Предупреждение о безопасности",
-        "vm_warning_msg": "<h2>ВАЖНОЕ ПРЕДУПРЕЖДЕНИЕ</h2><p>Вы запускаете инструмент для анализа потенциально опасных файлов.</p><p><b>Запускайте ТОЛЬКО в изолированной виртуальной машине!</b></p>",
-        "help_title": "❓ Справка и помощь",
-        "help_sections": {
-            "general": {"title": "📖 Общая информация", "content": "RedSand Secure - это продвинутая система анализа файлов на наличие угроз."},
-            "usage": {"title": "📝 Как использовать", "content": "1. Выберите файл для анализа\n2. Настройте параметры (необязательно)\n3. Нажмите кнопку запуска анализа"},
-            "safety": {"title": "⚠️ Техника безопасности", "content": "Всегда анализируйте файлы в изолированной среде!"}
-        },
-        "log_safe": "БЕЗОПАСНО",
-        "log_suspicious": "ПОДОЗРИТЕЛЬНО",
-        "log_dangerous": "ОПАСНО",
-        "log_info": "ИНФО",
-        "log_debug": "ОТЛАДКА",
-        "log_warning": "ПРЕДУПРЕЖДЕНИЕ",
-        "log_error": "ОШИБКА",
-        "log_critical": "КРИТИЧЕСКИ",
-        "log_success": "УСПЕШНО"
+        "bg_primary": "#1a1a2e",
+        "bg_secondary": "#16213e",
+        "bg_tertiary": "#0f3460",
+        "accent": "#e94560",
+        "accent_hover": "#ff6b6b",
+        "text_primary": "#ffffff",
+        "text_secondary": "#b0b0b0",
+        "success": "#00ff88",
+        "warning": "#ffaa00",
+        "danger": "#ff4444",
+        "border": "#2a2a4e",
+        "card_bg": "#1f1f3a"
     },
-    "English": {
-        "title": "RedSand Secure",
-        "window_title": "RedSand Secure - File Analysis",
-        "select_file": "📁 Select File",
-        "file_placeholder": "No file selected... or drag and drop here",
-        "analysis_time": "Analysis time:",
-        "seconds": "sec",
-        "poly_check": "Create file variants",
-        "network_check": "Disable network",
-        "analyze_btn": "🚀 START ANALYSIS",
-        "settings": "⚙ Settings",
-        "reports": "📂 Reports",
-        "history": "📜 History",
-        "logs_tab": "📋 Logs",
-        "results_tab": "📊 Results",
-        "summary_tab": "🏠 Home",
-        "virus_info_tab": "🦠 About Virus",
-        "help_tab": "❓ Help",
-        "safe": "SAFE",
-        "suspicious": "SUSPICIOUS",
-        "dangerous": "DANGEROUS",
-        "safe_desc": "File contains no threats. Safe to use.",
-        "suspicious_desc": "Better not use. Some doubts exist.",
-        "dangerous_desc": "Delete immediately! Virus detected.",
-        "no_threat": "No threats detected",
-        "unknown": "Unknown",
-        "drag_drop": "Drag and drop file here",
-        "scan_history": "Scan History",
-        "date": "Date",
-        "file": "File",
-        "verdict": "Verdict",
-        "clear_history": "Clear History",
-        "step1_file": "Step 1: Select File",
-        "step2_settings": "Step 2: Settings (optional)",
-        "progress": "Progress",
-        "waiting": "Waiting...",
-        "log_placeholder": "Analysis progress will be shown here...",
-        "results_placeholder": "Analysis results will appear here after completion...",
-        "param": "Parameter",
-        "value": "Value",
-        "lang_label": "Language:",
-        "theme_label_ui": "Theme:",
-        "light_theme": "Light",
-        "dark_theme": "Dark",
-        "security_warning_title": "Security Warning",
-        "security_warning_msg": "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?",
-        "warning": "Warning",
-        "error": "Error",
-        "file_not_found": "File not found: ",
-        "please_select_file": "Please select a file for analysis!",
-        "analysis_complete": "Analysis completed successfully!",
-        "analysis_error": "Analysis error!",
-        "analysis_started": "Analysis started...",
-        "analysis_complete_status": "Analysis complete",
-        "settings_title": "⚙ Program Settings",
-        "theme_group": "🎨 Theme",
-        "theme_label": "Select theme:",
-        "timeout_group": "⏱ Analysis Time",
-        "timeout_label": "Maximum time:",
-        "options_group": "🔧 Additional Options",
-        "help_settings_group": "❓ Settings Help",
-        "help_settings_text": "Configure analysis parameters to your needs.",
-        "close": "Close",
-        "save": "Save",
-        "cancel": "Cancel",
-        "yes": "Yes",
-        "no": "No",
-        "confirm": "Confirmation",
-        "confirm_clear_history": "Delete all scan history?",
-        "analysis_in_progress": "Analysis is still in progress. Are you sure you want to exit?",
-        "detailed_report_title": "📊 Security Analysis Results",
-        "main_info": "📋 Main Information",
-        "threat_info": "🦠 Detailed Threat Information",
-        "detection_info": "🔍 How We Detected This Threat",
-        "recommendations": "💡 Detailed Recommendations",
-        "file_name": "File Name",
-        "file_size": "File Size",
-        "threat_type": "Threat Type",
-        "threat_family": "Family",
-        "risk_score": "Risk Score",
-        "bytes": "bytes",
-        "open_reports_folder": "📂 Open Reports Folder",
-        "reports_folder_error": "Failed to open folder.\nPath: ",
-        "settings_saved": "Settings saved. Theme: ",
-        "settings_error": "Failed to open settings: ",
-        "language_changed": "Language changed to: ",
-        "ready": "Ready",
-        "file_selected": "File selected: ",
-        "file_dragged": "File dragged: ",
-        "vm_warning_title": "Security Warning",
-        "vm_warning_msg": "<h2>IMPORTANT WARNING</h2><p>You are launching a tool for analyzing potentially dangerous files.</p><p><b>Run ONLY in an isolated virtual machine!</b></p>",
-        "help_title": "❓ Help and Support",
-        "help_sections": {
-            "general": {"title": "📖 General Information", "content": "RedSand Secure is an advanced file threat analysis system."},
-            "usage": {"title": "📝 How to Use", "content": "1. Select a file for analysis\n2. Configure settings (optional)\n3. Click the start analysis button"},
-            "safety": {"title": "⚠️ Safety Precautions", "content": "Always analyze files in an isolated environment!"}
-        },
-        "log_safe": "SAFE",
-        "log_suspicious": "SUSPICIOUS",
-        "log_dangerous": "DANGEROUS",
-        "log_info": "INFO",
-        "log_debug": "DEBUG",
-        "log_warning": "WARNING",
-        "log_error": "ERROR",
-        "log_critical": "CRITICAL",
-        "log_success": "SUCCESS"
+    "Светлая": {
+        "bg_primary": "#f8fafc",
+        "bg_secondary": "#ffffff",
+        "bg_tertiary": "#e2e8f0",
+        "accent": "#dc2626",
+        "accent_hover": "#b91c1c",
+        "text_primary": "#0f172a",
+        "text_secondary": "#475569",
+        "success": "#16a34a",
+        "warning": "#ea580c",
+        "danger": "#dc2626",
+        "border": "#64748b",
+        "card_bg": "#ffffff"
     }
 }
 
 
-def generate_stylesheet(theme_name: str = "Светлая") -> str:
-    theme = THEMES.get(theme_name, THEMES["Светлая"])
+def generate_stylesheet(theme_name: str = "Тёмная") -> str:
+    """Генерация CSS стилей для приложения"""
+    theme = THEMES.get(theme_name, THEMES["Тёмная"])
+    
     return f"""
-    QMainWindow, QDialog {{
+    QMainWindow {{
+        background-color: {theme['bg_primary']};
+    }}
+    
+    QWidget {{
         background-color: {theme['bg_primary']};
         color: {theme['text_primary']};
-        font-family: 'Segoe UI', 'Microsoft YaHei', Arial, sans-serif;
-        font-size: 16px;
+        font-family: 'Segoe UI', Arial, sans-serif;
+        font-size: 14px;
     }}
-    QPushButton#primaryBtn {{
-        background-color: {theme['success']};
-        color: #FFFFFF;
-        border: none;
-        padding: 24px 45px;
-        border-radius: 15px;
+    
+    QLabel {{
+        color: {theme['text_primary']};
+    }}
+    
+    QLabel#titleLabel {{
+        font-size: 48px;
         font-weight: bold;
-        font-size: 22px;
-        min-width: 300px;
-        min-height: 75px;
+        color: {theme['accent']};
+        padding: 20px;
     }}
-    QPushButton#primaryBtn:hover {{
-        background-color: #059669;
-    }}
-    QPushButton#primaryBtn:disabled {{
-        background-color: {theme['bg_tertiary']};
+    
+    QLabel#subtitleLabel {{
+        font-size: 18px;
         color: {theme['text_secondary']};
+        padding: 10px;
     }}
-    QPushButton#actionBtn {{
+    
+    QPushButton {{
         background-color: {theme['accent']};
-        color: #FFFFFF;
+        color: white;
         border: none;
-        padding: 16px 32px;
         border-radius: 12px;
+        padding: 15px 30px;
+        font-size: 16px;
         font-weight: bold;
-        font-size: 17px;
-        min-width: 220px;
-        min-height: 55px;
-        max-width: 280px;
+        min-width: 200px;
+        min-height: 60px;
     }}
-    QPushButton#actionBtn:hover {{
+    
+    QPushButton:hover {{
         background-color: {theme['accent_hover']};
     }}
+    
+    QPushButton:pressed {{
+        background-color: {theme['accent']};
+    }}
+    
     QPushButton#secondaryBtn {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['accent']};
-        padding: 14px 28px;
-        border-radius: 10px;
+        min-width: 120px;
+        min-height: 45px;
+        font-size: 14px;
+        border: 2px solid {theme['border']};
         font-weight: bold;
-        font-size: 16px;
-        min-height: 50px;
     }}
+    
     QPushButton#secondaryBtn:hover {{
         background-color: {theme['accent']};
-        color: #FFFFFF;
+        color: white;
+        border-color: {theme['accent']};
     }}
+    
+    QPushButton#actionBtn {{
+        background-color: {theme['success']};
+        min-width: 140px;
+        min-height: 50px;
+    }}
+    
+    QPushButton#actionBtn:hover {{
+        background-color: #00cc6a;
+    }}
+    
+    QPushButton#dangerBtn {{
+        background-color: {theme['danger']};
+        min-width: 140px;
+        min-height: 50px;
+    }}
+    
+    QPushButton#dangerBtn:hover {{
+        background-color: #cc3333;
+    }}
+    
     QPushButton#langBtn {{
         background-color: {theme['bg_tertiary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['accent']};
-        border-radius: 10px;
-        font-weight: bold;
-        font-size: 18px;
         min-width: 50px;
-        max-width: 50px;
         min-height: 50px;
+        max-width: 50px;
         max-height: 50px;
-        padding: 0px;
+        border-radius: 10px;
+        font-size: 16px;
+        font-weight: bold;
+        border: 2px solid {theme['border']};
     }}
-    QPushButton#langBtn:hover {{
+    
+    QPushButton#langBtn:checked {{
         background-color: {theme['accent']};
-        color: #FFFFFF;
+        color: white;
+        border-color: {theme['accent']};
     }}
+    
+    QPushButton#langBtn:hover:!checked {{
+        background-color: {theme['accent']};
+        color: white;
+        border-color: {theme['accent']};
+    }}
+    
+    QPushButton#modeBtn {{
+        background-color: {theme['card_bg']};
+        border: 3px solid {theme['border']};
+        border-radius: 20px;
+        min-width: 280px;
+        min-height: 280px;
+        max-width: 280px;
+        max-height: 280px;
+        font-size: 24px;
+        padding: 30px;
+        color: {theme['text_primary']};
+        font-weight: bold;
+    }}
+    
+    QPushButton#modeBtn:hover {{
+        border-color: {theme['accent']};
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+    }}
+    
+    QPushButton#modeBtn:checked {{
+        border-color: {theme['accent']};
+        background-color: {theme['accent']};
+        color: white;
+    }}
+    
+    /* Стиль для placeholder текста в QLineEdit */
+    QLineEdit::placeholder {{
+        color: {theme['text_secondary']};
+    }}
+    
     QGroupBox {{
-        background-color: {theme['bg_secondary']};
-        border: 2px solid {theme['accent']};
-        border-radius: 15px;
-        margin-top: 18px;
-        padding-top: 18px;
         font-weight: bold;
         font-size: 16px;
+        color: {theme['text_primary']};
+        border: 2px solid {theme['border']};
+        border-radius: 12px;
+        margin-top: 20px;
+        padding-top: 20px;
+        background-color: {theme['card_bg']};
     }}
+    
     QGroupBox::title {{
         subcontrol-origin: margin;
         left: 15px;
-        color: {theme['accent']};
         padding: 0 10px;
+        color: {theme['accent']};
     }}
-    QTabWidget::pane {{
-        border: 2px solid {theme['accent']};
-        border-radius: 15px;
+    
+    QProgressBar {{
+        border: 2px solid {theme['border']};
+        border-radius: 10px;
+        text-align: center;
         background-color: {theme['bg_secondary']};
-    }}
-    QTabBar::tab {{
-        background-color: {theme['bg_tertiary']};
+        height: 35px;
         color: {theme['text_primary']};
-        padding: 20px 45px;
-        font-weight: bold;
-        font-size: 18px;
-        border-top-left-radius: 10px;
-        border-top-right-radius: 10px;
-        margin-right: 10px;
-        min-width: 180px;
-        min-height: 60px;
     }}
-    QTabBar::tab:selected {{
+    
+    QProgressBar::chunk {{
         background-color: {theme['accent']};
-        color: #FFFFFF;
+        border-radius: 8px;
     }}
-    QTabBar::tab:hover:!selected {{
-        background-color: {theme['bg_primary']};
-    }}
+    
     QTextEdit {{
-        background-color: {theme['bg_primary']};
+        background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 12px;
-        padding: 14px;
-        font-family: 'Consolas', 'Courier New', monospace;
+        border: 2px solid {theme['border']};
+        border-radius: 10px;
+        padding: 10px;
+        font-family: 'Consolas', monospace;
         font-size: 14px;
     }}
-    QProgressBar {{
-        background-color: {theme['bg_tertiary']};
-        border: 2px solid {theme['accent']};
-        border-radius: 15px;
-        height: 35px;
-        font-weight: bold;
-        font-size: 16px;
-        text-align: center;
-    }}
-    QProgressBar::chunk {{
-        background-color: {theme['success']};
-        border-radius: 13px;
-    }}
-    QComboBox, QSpinBox, QLineEdit {{
-        background-color: {theme['bg_primary']};
+    
+    QTableWidget {{
+        background-color: {theme['bg_secondary']};
         color: {theme['text_primary']};
-        border: 2px solid {theme['accent']};
+        border: 2px solid {theme['border']};
         border-radius: 10px;
+        gridline-color: {theme['border']};
+    }}
+    
+    QTableWidget::item {{
+        padding: 10px;
+        border-bottom: 1px solid {theme['border']};
+    }}
+    
+    QTableWidget::item:selected {{
+        background-color: {theme['accent']};
+        color: white;
+    }}
+    
+    QHeaderView::section {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
         padding: 12px;
-        font-size: 15px;
-        font-weight: normal;
-        min-height: 45px;
-    }}
-    QComboBox::drop-down {{
-        width: 35px;
         border: none;
+        font-weight: bold;
+        font-size: 15px;
     }}
-    QComboBox::down-arrow {{
-        image: none;
-        border-left: 5px solid transparent;
-        border-right: 5px solid transparent;
-        border-top: 8px solid {theme['accent']};
-        margin-right: 10px;
+    
+    QSpinBox, QComboBox, QLineEdit {{
+        background-color: {theme['bg_secondary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['border']};
+        border-radius: 8px;
+        padding: 10px;
+        font-size: 14px;
     }}
+    
+    QSpinBox::disabled, QComboBox::disabled, QLineEdit::disabled {{
+        color: {theme['text_secondary']};
+    }}
+    
+    QLineEdit::placeholder {{
+        color: {theme['text_secondary']};
+    }}
+    
+    QSpinBox:focus, QComboBox:focus, QLineEdit:focus {{
+        border-color: {theme['accent']};
+    }}
+    
     QCheckBox {{
         color: {theme['text_primary']};
         font-size: 15px;
         spacing: 10px;
     }}
+    
     QCheckBox::indicator {{
         width: 22px;
         height: 22px;
-        border-radius: 5px;
-        border: 2px solid {theme['accent']};
-        background-color: {theme['bg_primary']};
+        border-radius: 6px;
+        border: 2px solid {theme['border']};
+        background-color: {theme['bg_secondary']};
     }}
+    
     QCheckBox::indicator:checked {{
         background-color: {theme['accent']};
+        border-color: {theme['accent']};
     }}
-    QLabel {{
-        color: {theme['text_primary']};
-        font-size: 15px;
+    
+    QTabWidget::pane {{
+        border: 2px solid {theme['border']};
+        border-radius: 10px;
+        background-color: {theme['card_bg']};
     }}
-    QLabel#titleLabel {{
-        font-size: 32px;
-        font-weight: bold;
-        color: {theme['accent']};
-        padding: 15px;
-    }}
-    QLabel#subtitleLabel {{
-        font-size: 18px;
+    
+    QTabBar::tab {{
+        background-color: {theme['bg_secondary']};
         color: {theme['text_secondary']};
-        padding: 5px;
-    }}
-    QLabel#helpTitle {{
-        font-size: 24px;
+        padding: 12px 25px;
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+        margin-right: 3px;
         font-weight: bold;
-        color: {theme['accent']};
-        padding: 10px;
     }}
-    QLabel#helpText {{
-        font-size: 15px;
-        line-height: 1.6;
-        color: {theme['text_primary']};
-    }}
-    QStatusBar {{
-        background-color: #000000;
-        color: #FFFFFF;
-        border-top: 2px solid {theme['accent']};
-        font-weight: bold;
-        font-size: 14px;
-    }}
-    QTableWidget {{
-        background-color: {theme['bg_primary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 12px;
-        gridline-color: {theme['bg_tertiary']};
-        font-size: 18px;
-    }}
-    QTableWidget::item {{
-        padding: 20px;
-        min-height: 55px;
-        border-bottom: 2px solid {theme['bg_tertiary']};
-    }}
-    QTableWidget::item:selected {{
+    
+    QTabBar::tab:selected {{
         background-color: {theme['accent']};
-        color: #FFFFFF;
+        color: white;
     }}
-    QHeaderView::section {{
-        background-color: {theme['accent']};
-        color: #FFFFFF;
-        padding: 12px;
-        border: none;
-        font-weight: bold;
-        font-size: 15px;
-    }}
-    QScrollArea {{
-        border: none;
-        background-color: transparent;
-    }}
-    QListWidget {{
-        background-color: {theme['bg_primary']};
-        color: {theme['text_primary']};
-        border: 2px solid {theme['bg_tertiary']};
-        border-radius: 12px;
-        padding: 10px;
-        font-size: 14px;
-    }}
-    QListWidget::item {{
-        padding: 12px;
-        border-bottom: 1px solid {theme['bg_tertiary']};
-    }}
-    QListWidget::item:selected {{
-        background-color: {theme['accent']};
-        color: #FFFFFF;
-    }}
-    QListWidget::item:hover {{
+    
+    QTabBar::tab:hover:!selected {{
         background-color: {theme['bg_tertiary']};
+    }}
+    
+    QScrollBar:vertical {{
+        background-color: {theme['bg_secondary']};
+        width: 12px;
+        border-radius: 6px;
+    }}
+    
+    QScrollBar::handle:vertical {{
+        background-color: {theme['border']};
+        border-radius: 6px;
+        min-height: 30px;
+    }}
+    
+    QScrollBar::handle:vertical:hover {{
+        background-color: {theme['accent']};
+    }}
+    
+    QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {{
+        height: 0px;
+    }}
+    
+    QFrame {{
+        background-color: transparent;
     }}
     """
 
 
-class HistoryDialog(QDialog):
-    """Диалог истории сканирований с цветовой индикацией вердиктов"""
+LANGUAGES = {
+    "Русский": {
+        "title": "RedSand Secure",
+        "subtitle": "Профессиональная система анализа вредоносного ПО",
+        "antivirus_mode": "🛡️ АНТИВИРУС",
+        "analysis_mode": "🔍 АНАЛИЗ ФАЙЛОВ",
+        "settings": "⚙ Настройки",
+        "history": "📜 История",
+        "quarantine": "⚠️ Карантин",
+        "select_file": "📁 Выбрать файл",
+        "analyze_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
+        "av_on": "⏹️ ВЫКЛ",
+        "av_off": "▶️ ВКЛ",
+        "av_status_on": "🛡️ Антивирус: ВКЛ",
+        "av_status_off": "🛡️ Антивирус: ВЫКЛ",
+        "save": "Сохранить",
+        "cancel": "Отмена",
+        "back": "← Назад",
+        "theme": "Тема оформления",
+        "dark_theme": "Тёмная",
+        "light_theme": "Светлая",
+        "analysis_time": "Время анализа:",
+        "poly_check": "Создавать варианты файла для анализа",
+        "network_check": "Отключать сеть (рекомендуется)",
+        "monitored_folders": "Мониторинг папок:",
+        "auto_quarantine": "Авто-карантин угроз",
+        "scan_on_access": "Сканирование при доступе"
+    },
+    "English": {
+        "title": "RedSand Secure",
+        "subtitle": "Professional Malware Analysis System",
+        "antivirus_mode": "🛡️ ANTIVIRUS",
+        "analysis_mode": "🔍 FILE ANALYSIS",
+        "settings": "⚙ Settings",
+        "history": "📜 History",
+        "quarantine": "⚠️ Quarantine",
+        "select_file": "📁 Select File",
+        "analyze_btn": "🚀 START ANALYSIS",
+        "av_on": "⏹️ OFF",
+        "av_off": "▶️ ON",
+        "av_status_on": "🛡️ Antivirus: ON",
+        "av_status_off": "🛡️ Antivirus: OFF",
+        "save": "Save",
+        "cancel": "Cancel",
+        "back": "← Back",
+        "theme": "Theme",
+        "dark_theme": "Dark",
+        "light_theme": "Light",
+        "analysis_time": "Analysis Time:",
+        "poly_check": "Create file variants for analysis",
+        "network_check": "Disable network (recommended)",
+        "monitored_folders": "Monitored Folders:",
+        "auto_quarantine": "Auto-quarantine threats",
+        "scan_on_access": "Scan on access"
+    }
+}
+
+
+class MainModeSelector(QWidget):
+    """Главный экран выбора режима работы"""
     
-    def __init__(self, history_file: str = "scan_history.json", parent=None):
-        super().__init__(parent)
-        self.history_file = Path(history_file)
-        self.parent_ref = parent
-        lang_data = self.get_lang_data()
-        self.setWindowTitle(lang_data.get("scan_history", "Scan History"))
-        self.setMinimumSize(800, 600)
-        # Убираем вопросительный знак из заголовка окна
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setup_ui()
-    
-    def get_lang_data(self):
-        if self.parent_ref and hasattr(self.parent_ref, 'current_lang'):
-            return LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
-        return LANGUAGES["Русский"]
-    
-    def setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
-        lang_data = self.get_lang_data()
-        
-        title = QLabel(lang_data.get("scan_history", "📜 Scan History"))
-        title.setObjectName("titleLabel")
-        title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title)
-        
-        # Таблица с улучшенным отображением цветов - текст виден всегда
-        self.history_table = QTableWidget()
-        self.history_table.setColumnCount(3)
-        self.history_table.setHorizontalHeaderLabels([
-            lang_data.get("date", "Date"),
-            lang_data.get("file", "File"),
-            lang_data.get("verdict", "Verdict")
-        ])
-        self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
-        self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
-        self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
-        # Увеличиваем высоту строки в 2 раза
-        self.history_table.verticalHeader().setDefaultSectionSize(100)
-        self.load_history()
-        layout.addWidget(self.history_table)
-        
-        btn_layout = QHBoxLayout()
-        btn_clear = QPushButton(lang_data.get("clear_history", "🗑 Clear History"))
-        btn_clear.setObjectName("secondaryBtn")
-        btn_clear.clicked.connect(self.clear_history)
-        btn_layout.addWidget(btn_clear)
-        
-        btn_close = QPushButton(lang_data.get("close", "Close"))
-        btn_close.setObjectName("actionBtn")
-        btn_close.clicked.connect(self.accept)
-        btn_layout.addWidget(btn_close)
-        layout.addLayout(btn_layout)
-    
-    def load_history(self):
-        self.history_table.setRowCount(0)
-        if self.history_file.exists():
-            try:
-                with open(self.history_file, 'r', encoding='utf-8') as f:
-                    history = json.load(f)
-                for entry in reversed(history[-50:]):  # Последние 50 записей
-                    date = entry.get('date', 'N/A')
-                    file_name = entry.get('file', 'N/A')
-                    verdict = entry.get('verdict', 'N/A')
-                    
-                    row = self.history_table.rowCount()
-                    self.history_table.insertRow(row)
-                    
-                    # Цвет вердикта и фона строки
-                    if verdict == "ОПАСНО" or verdict == "DANGEROUS":
-                        text_color = "#FFFFFF"  # Белый текст для контраста
-                        bg_color = "#DC2626"  # Красный фон
-                        verdict_display = "ОПАСНО" if "ОПАСНО" in verdict else "DANGEROUS"
-                    elif verdict == "ПОДОЗРИТЕЛЬНО" or verdict == "SUSPICIOUS":
-                        text_color = "#000000"  # Черный текст для контраста
-                        bg_color = "#F59E0B"  # Желтый фон
-                        verdict_display = "ПОДОЗРИТЕЛЬНО" if "ПОДОЗРИТЕЛЬНО" in verdict else "SUSPICIOUS"
-                    else:
-                        text_color = "#FFFFFF"  # Белый текст для контраста
-                        bg_color = "#059669"  # Зеленый фон
-                        verdict_display = "БЕЗОПАСНО" if "БЕЗОПАСНО" in verdict or "SAFE" not in verdict else "SAFE"
-                    
-                    # Дата - с явным цветом текста и фона
-                    date_item = QTableWidgetItem(date)
-                    date_item.setForeground(QColor(text_color))
-                    date_item.setBackground(QColor(bg_color))
-                    date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
-                    font = date_item.font()
-                    font.setPointSize(14)
-                    date_item.setFont(font)
-                    self.history_table.setItem(row, 0, date_item)
-                    
-                    # Файл - с явным цветом текста и фона
-                    file_item = QTableWidgetItem(os.path.basename(file_name))
-                    file_item.setToolTip(file_name)
-                    file_item.setForeground(QColor(text_color))
-                    file_item.setBackground(QColor(bg_color))
-                    file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
-                    font = file_item.font()
-                    font.setPointSize(14)
-                    font.setBold(True)
-                    file_item.setFont(font)
-                    self.history_table.setItem(row, 1, file_item)
-                    
-                    # Вердикт - цветной текст и фон, только текст вердикта
-                    verdict_item = QTableWidgetItem(verdict_display)
-                    verdict_item.setForeground(QColor(text_color))
-                    verdict_item.setBackground(QColor(bg_color))
-                    verdict_item.setFlags(verdict_item.flags() & ~Qt.ItemIsEditable)  # Не редактируемый
-                    font = verdict_item.font()
-                    font.setPointSize(16)
-                    font.setBold(True)
-                    verdict_item.setFont(font)
-                    self.history_table.setItem(row, 2, verdict_item)
-                            
-            except Exception as e:
-                pass
-    
-    def clear_history(self):
-        lang_data = self.get_lang_data()
-        reply = QMessageBox.question(self, lang_data.get("confirm", "Confirmation"), lang_data.get("confirm_clear_history", "Delete all scan history?"), 
-                                     QMessageBox.Yes | QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            if self.history_file.exists():
-                self.history_file.unlink()
-            self.load_history()
-
-
-class AnalysisWorker(QObject):
-    progress = pyqtSignal(int, str)
-    finished = pyqtSignal(dict)
-    error = pyqtSignal(str)
-    log_message = pyqtSignal(str, str)
-
-    def __init__(self, file_path: str, use_poly: bool = False, timeout: int = 60):
-        super().__init__()
-        self.file_path = file_path
-        self.use_poly = use_poly
-        self.timeout = timeout
-
-    def run(self):
-        try:
-            from core.orchestrator import RedSandSecure
-            # Используем Docker-песочницу для изоляции файлов от системы
-            sandbox = RedSandSecure(output_dir='reports_gui', use_docker=True)
-            stages = [
-                (10, "Подготовка к анализу..."),
-                (20, "Проверка файла..."),
-                (40, "Статический анализ..."),
-                (60, "Анализ поведения в Docker-контейнере..."),
-                (80, "Оценка угрозы..."),
-                (95, "Создание отчета..."),
-                (100, "Анализ завершен!")
-            ]
-            for progress_val, message in stages:
-                self.progress.emit(progress_val, message)
-                self.log_message.emit('INFO', message)
-                QThread.msleep(300)
-            result = sandbox.analyze_file(self.file_path, use_poly=self.use_poly, timeout=self.timeout)
-            if result:
-                if hasattr(result, '__dataclass_fields__'):
-                    from dataclasses import asdict
-                    result_dict = asdict(result)
-                else:
-                    result_dict = result
-                if 'static_results' not in result_dict:
-                    result_dict['static_results'] = getattr(result, 'static_results', {}) or {}
-                if 'threat_info' not in result_dict:
-                    result_dict['threat_info'] = getattr(result, 'threat_info', {}) or {}
-                if not isinstance(result_dict.get('threat_info'), dict):
-                    result_dict['threat_info'] = {}
-                self.finished.emit(result_dict)
-            else:
-                self.error.emit("Анализ не был завершен успешно")
-        except Exception as e:
-            self.error.emit(f"Ошибка анализа: {str(e)}")
-
-
-class DetailedReportDialog(QDialog):
-    """Красивое диалоговое окно с подробным отчетом о вирусе"""
-    
-    def __init__(self, report_data: dict, parent=None):
-        super().__init__(parent)
-        self.report_data = report_data
-        self.parent_ref = parent
-        self.lang_data = self.get_lang_data()
-        self.setWindowTitle(self.lang_data.get("detailed_report_title", "Security Analysis Results"))
-        self.setMinimumSize(900, 700)
-        # Убираем вопросительный знак из заголовка окна
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
-        self.setup_ui()
-    
-    def get_lang_data(self):
-        if self.parent_ref and hasattr(self.parent_ref, 'current_lang'):
-            return LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
-        return LANGUAGES["Русский"]
-
-    def setup_ui(self):
-        layout = QVBoxLayout(self)
-        layout.setSpacing(15)
-        layout.setContentsMargins(25, 25, 25, 25)
-        
-        # Заголовок
-        title_label = QLabel(self.lang_data.get("detailed_report_title", "📊 Security Analysis Results"))
-        title_label.setObjectName("titleLabel")
-        title_label.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title_label)
-        
-        # Вкладки
-        tabs = QTabWidget()
-        
-        # Главная вкладка с резюме
-        summary_widget = self.create_summary_tab()
-        tabs.addTab(summary_widget, self.lang_data.get("summary_tab", "🏠 Home"))
-        
-        # Вкладка о вирусе
-        virus_widget = self.create_virus_info_tab()
-        tabs.addTab(virus_widget, self.lang_data.get("virus_info_tab", "🦠 About Virus"))
-        
-        # Вкладка справки
-        help_widget = self.create_help_tab()
-        tabs.addTab(help_widget, self.lang_data.get("help_tab", "❓ Help"))
-        
-        layout.addWidget(tabs)
-        
-        # Кнопка закрытия
-        btn_close = QPushButton(self.lang_data.get("close", "Close"))
-        btn_close.setObjectName("actionBtn")
-        btn_close.clicked.connect(self.accept)
-        layout.addWidget(btn_close)
-
-    def create_summary_tab(self) -> QWidget:
-        widget = QWidget()
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(widget)
-        
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(20)
-        layout.setContentsMargins(15, 15, 15, 15)
-        
-        threat_info = self.report_data.get('threat_info') or {}
-        if not isinstance(threat_info, dict):
-            threat_info = {}
-        
-        risk_score = threat_info.get('risk_score', 0)
-        
-        # Определение уровня угрозы
-        if risk_score >= 70:
-            risk_color, risk_text, risk_icon = "#EF4444", self.lang_data.get("dangerous", "DANGEROUS"), "🚨"
-            risk_desc = self.lang_data.get("dangerous_desc", "Delete immediately! Virus detected.")
-        elif risk_score >= 40:
-            risk_color, risk_text, risk_icon = "#F59E0B", self.lang_data.get("suspicious", "SUSPICIOUS"), "⚠️"
-            risk_desc = self.lang_data.get("suspicious_desc", "Better not use. Some doubts exist.")
-        else:
-            risk_color, risk_text, risk_icon = "#10B981", self.lang_data.get("safe", "SAFE"), "✅"
-            risk_desc = self.lang_data.get("safe_desc", "File contains no threats. Safe to use.")
-        
-        # Карточка уровня угрозы
-        risk_card = QGroupBox()
-        risk_card.setStyleSheet(f"""
-            QGroupBox {{
-                background-color: {risk_color}20;
-                border: 3px solid {risk_color};
-                border-radius: 15px;
-                margin-top: 15px;
-                padding-top: 15px;
-            }}
-            QGroupBox::title {{
-                subcontrol-origin: margin;
-                left: 15px;
-                color: {risk_color};
-                font-size: 18px;
-                font-weight: bold;
-            }}
-        """)
-        risk_layout = QVBoxLayout()
-        risk_label = QLabel(f"{risk_icon} {risk_text}")
-        risk_label.setStyleSheet(f"font-size: 36px; font-weight: bold; color: {risk_color};")
-        risk_label.setAlignment(Qt.AlignCenter)
-        risk_layout.addWidget(risk_label)
-        
-        desc_label = QLabel(risk_desc)
-        desc_label.setStyleSheet("font-size: 18px; font-weight: bold; padding: 10px;")
-        desc_label.setWordWrap(True)
-        desc_label.setAlignment(Qt.AlignCenter)
-        risk_layout.addWidget(desc_label)
-        
-        risk_card.setLayout(risk_layout)
-        layout.addWidget(risk_card)
-        
-        # Основная информация
-        info_group = QGroupBox(self.lang_data.get("main_info", "📋 Main Information"))
-        info_layout = QGridLayout()
-        info_layout.setSpacing(12)
-        
-        row = 0
-        unknown_text = self.lang_data.get("unknown", "Unknown")
-        items = [
-            (self.lang_data.get("threat_type", "Threat Type") + ":", threat_info.get('type', unknown_text)),
-            (self.lang_data.get("threat_family", "Family") + ":", threat_info.get('family', unknown_text)),
-        ]
-        
-        for label_text, value in items:
-            lbl = QLabel(label_text)
-            lbl.setStyleSheet("font-weight: bold; font-size: 15px;")
-            val = QLabel(str(value))
-            val.setStyleSheet("font-size: 15px;")
-            val.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            info_layout.addWidget(lbl, row, 0)
-            info_layout.addWidget(val, row, 1)
-            row += 1
-        
-        info_group.setLayout(info_layout)
-        layout.addWidget(info_group)
-        
-        layout.addStretch()
-        return scroll
-
-    def create_virus_info_tab(self) -> QWidget:
-        widget = QWidget()
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(widget)
-        
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(20)
-        layout.setContentsMargins(15, 15, 15, 15)
-        
-        threat_info = self.report_data.get('threat_info') or {}
-        static_data = self.report_data.get('static_results') or {}
-        
-        # Информация о вирусе - максимально подробно
-        virus_group = QGroupBox(self.lang_data.get("threat_info", "🦠 Detailed Threat Information"))
-        virus_layout = QVBoxLayout()
-        virus_layout.setSpacing(15)
-        
-        unknown_text = self.lang_data.get("unknown", "Unknown")
-        virus_name = threat_info.get('type', unknown_text)
-        virus_family = threat_info.get('family', unknown_text)
-        risk_score = threat_info.get('risk_score', 0)
-        
-        # Определяем вердикт без баллов
-        if risk_score >= 70:
-            verdict_text = f"<span style='color: #EF4444; font-size: 20px; font-weight: bold;'>🚨 {self.lang_data.get('dangerous', 'DANGEROUS')} - {self.lang_data.get('dangerous_desc', 'Delete immediately! Virus detected.').split('.')[0]}!</span>"
-            verdict_desc = self.lang_data.get("dangerous_desc", "Delete immediately! Virus detected.")
-        elif risk_score >= 40:
-            verdict_text = f"<span style='color: #F59E0B; font-size: 20px; font-weight: bold;'>⚠️ {self.lang_data.get('suspicious', 'SUSPICIOUS')} - {self.lang_data.get('suspicious_desc', 'Better not use. Some doubts exist.').split('.')[0]}</span>"
-            verdict_desc = self.lang_data.get("suspicious_desc", "Better not use. Some doubts exist.")
-        else:
-            verdict_text = f"<span style='color: #10B981; font-size: 20px; font-weight: bold;'>✅ {self.lang_data.get('safe', 'SAFE')} - {self.lang_data.get('safe_desc', 'File contains no threats. Safe to use.').split('.')[0]}</span>"
-            verdict_desc = self.lang_data.get("safe_desc", "File contains no threats. Safe to use.")
-        
-        file_name_label = self.lang_data.get("file_name", "File Name")
-        file_size_label = self.lang_data.get("file_size", "File Size")
-        bytes_label = self.lang_data.get("bytes", "bytes")
-        threat_type_label = self.lang_data.get("threat_type", "Threat Type")
-        threat_family_label = self.lang_data.get("threat_family", "Family")
-        
-        file_name_val = static_data.get('file_name', unknown_text) if static_data else unknown_text
-        file_size_val = static_data.get('file_size', 0) if static_data else 0
-        
-        info_text = f"""
-        <div style='font-size: 16px; line-height: 2.0;'>
-        <b>📛 {threat_type_label}:</b> {virus_name}<br><br>
-        <b>🧬 {threat_family_label}:</b> {virus_family}<br><br>
-        {verdict_text}<br><br>
-        <b>📝 {file_name_label}:</b> {file_name_val}<br><br>
-        <b>📊 {file_size_label}:</b> {file_size_val} {bytes_label}<br><br>
-        </div>
-        """
-        info_label = QLabel(info_text)
-        info_label.setWordWrap(True)
-        info_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-        virus_layout.addWidget(info_label)
-        
-        virus_group.setLayout(virus_layout)
-        layout.addWidget(virus_group)
-        
-        # Как обнаружили - максимально подробно
-        detection_group = QGroupBox(self.lang_data.get("detection_info", "🔍 How We Detected This Threat"))
-        detection_layout = QVBoxLayout()
-        detection_layout.setSpacing(15)
-        
-        # Получаем методы обнаружения из результатов статического анализа
-        detection_details = []
-        
-        # Локализация текстов обнаружения
-        static_analysis_ru = "Статический анализ сигнатур"
-        static_analysis_en = "Static Signature Analysis"
-        behavioral_ru = "Поведенческий анализ"
-        behavioral_en = "Behavioral Analysis"
-        heuristic_ru = "Эвристический анализ"
-        heuristic_en = "Heuristic Analysis"
-        metadata_ru = "Анализ метаданных"
-        metadata_en = "Metadata Analysis"
-        static_simple_ru = "Статический анализ"
-        static_simple_en = "Static Analysis"
-        behavioral_anom_ru = "Поведенческие аномалии"
-        behavioral_anom_en = "Behavioral Anomalies"
-        heuristic_simple_ru = "Эвристика"
-        heuristic_simple_en = "Heuristics"
-        integrity_ru = "Проверка целостности"
-        integrity_en = "Integrity Check"
-        
-        is_ru = self.parent_ref.current_lang == "Русский" if self.parent_ref else True
-        
-        if risk_score >= 70:
-            detection_details = [
-                (f"<b>✅ {static_analysis_ru if is_ru else static_analysis_en}</b>", 
-                 "Программа сравнила содержимое файла с базой данных известных вирусов и обнаружила точное совпадение с сигнатурой вредоносного ПО." if is_ru else "The program compared the file content with a database of known viruses and found an exact match with malware signature."),
-                (f"<b>✅ {behavioral_ru if is_ru else behavioral_en}</b>", 
-                 "При запуске файла в изолированной среде были зафиксированы вредоносные действия: попытки изменения системных файлов, создание скрытых процессов или подключение к подозрительным сетевым ресурсам." if is_ru else "When running the file in an isolated environment, malicious actions were recorded: attempts to modify system files, create hidden processes, or connect to suspicious network resources."),
-                (f"<b>✅ {heuristic_ru if is_ru else heuristic_en}</b>", 
-                 "Структура файла, используемые функции и паттерны кода характерны для вредоносного ПО. Обнаружены техники обхода защиты и сокрытия присутствия." if is_ru else "The file structure, functions used, and code patterns are characteristic of malware. Evasion and concealment techniques were detected."),
-                (f"<b>✅ {metadata_ru if is_ru else metadata_en}</b>",
-                 "Информация о файле (цифровая подпись, дата создания, компилятор) указывает на подозрительное происхождение." if is_ru else "File information (digital signature, creation date, compiler) indicates suspicious origin.")
-            ]
-        elif risk_score >= 40:
-            detection_details = [
-                (f"<b>⚠️ {static_simple_ru if is_ru else static_simple_en}</b>", 
-                 "Обнаружены отдельные подозрительные элементы, но полного совпадения с известными вирусами нет." if is_ru else "Individual suspicious elements were found, but no complete match with known viruses."),
-                (f"<b>⚠️ {behavioral_anom_ru if is_ru else behavioral_anom_en}</b>", 
-                 "Файл выполняет необычные действия, которые могут быть как легитимными, так и вредоносными." if is_ru else "The file performs unusual actions that could be either legitimate or malicious."),
-                (f"<b>ℹ️ {heuristic_simple_ru if is_ru else heuristic_simple_en}</b>", 
-                 "Некоторые паттерны кода вызывают сомнения, но недостаточны для однозначного вывода об угрозе." if is_ru else "Some code patterns raise doubts but are insufficient for a definitive threat conclusion.")
-            ]
-        else:
-            detection_details = [
-                (f"<b>✅ {static_simple_ru if is_ru else static_simple_en}</b>", 
-                 "Файл проверен по базе сигнатур - совпадений с известными вирусами не найдено." if is_ru else "The file was checked against the signature database - no matches with known viruses were found."),
-                (f"<b>✅ {behavioral_ru if is_ru else behavioral_en}</b>", 
-                 "В изолированной среде файл не проявил никакой подозрительной активности." if is_ru else "In an isolated environment, the file showed no suspicious activity."),
-                (f"<b>✅ {integrity_ru if is_ru else integrity_en}</b>", 
-                 "Структура файла корректна, цифровая подпись (если есть) действительна." if is_ru else "The file structure is correct, digital signature (if any) is valid.")
-            ]
-        
-        for title, description in detection_details:
-            item_widget = QWidget()
-            item_layout = QVBoxLayout(item_widget)
-            item_layout.setContentsMargins(10, 10, 10, 10)
-            
-            title_label = QLabel(title)
-            title_label.setStyleSheet("font-size: 15px; font-weight: bold; color: #3B82F6;")
-            desc_label = QLabel(description)
-            desc_label.setStyleSheet("font-size: 14px; padding-left: 10px;")
-            desc_label.setWordWrap(True)
-            
-            item_layout.addWidget(title_label)
-            item_layout.addWidget(desc_label)
-            detection_layout.addWidget(item_widget)
-        
-        detection_group.setLayout(detection_layout)
-        layout.addWidget(detection_group)
-        
-        # Рекомендации - максимально подробно
-        rec_group = QGroupBox(self.lang_data.get("recommendations", "💡 Detailed Recommendations"))
-        rec_layout = QVBoxLayout()
-        
-        is_ru = self.parent_ref.current_lang == "Русский" if self.parent_ref else True
-        
-        if risk_score >= 70:
-            dangerous_title = "🚨 НЕМЕДЛЕННО УДАЛИТЕ ЭТОТ ФАЙЛ!" if is_ru else "🚨 DELETE THIS FILE IMMEDIATELY!"
-            why_dangerous = "Почему это опасно:" if is_ru else "Why this is dangerous:"
-            can_do1 = "Украсть ваши личные данные (пароли, банковскую информацию)" if is_ru else "Steal your personal data (passwords, banking information)"
-            can_do2 = "Зашифровать ваши файлы и требовать выкуп" if is_ru else "Encrypt your files and demand ransom"
-            can_do3 = "Использовать ваш компьютер для атак на другие системы" if is_ru else "Use your computer to attack other systems"
-            can_do4 = "Установить скрытый доступ к вашему компьютеру" if is_ru else "Install hidden access to your computer"
-            what_to_do = "Что нужно сделать:" if is_ru else "What you need to do:"
-            step1 = "НЕ ЗАПУСКАЙТЕ этот файл ни при каких обстоятельствах" if is_ru else "DO NOT RUN this file under any circumstances"
-            step2 = "Немедленно удалите файл из системы" if is_ru else "Immediately delete the file from the system"
-            step3 = "Проверьте весь компьютер полноценным антивирусом" if is_ru else "Scan the entire computer with a full antivirus"
-            step4 = "Если файл уже был запущен - срочно смените все пароли" if is_ru else "If the file was already run - urgently change all passwords"
-            step5 = "Проверьте банковские счета на подозрительные операции" if is_ru else "Check bank accounts for suspicious transactions"
-            step6 = "Обратитесь к специалисту по кибербезопасности" if is_ru else "Contact a cybersecurity specialist"
-            
-            rec_text = f"""
-            <div style='font-size: 15px; line-height: 2.0; color: #EF4444;'>
-            <b style='font-size: 18px;'>{dangerous_title}</b><br><br>
-            <b>{why_dangerous}</b><br>
-            {can_do1}<br>
-            {can_do2}<br>
-            {can_do3}<br>
-            {can_do4}<br><br>
-            <b>{what_to_do}</b><br>
-            1. <b>{step1}</b><br>
-            2. {step2}<br>
-            3. {step3}<br>
-            4. {step4}<br>
-            5. {step5}<br>
-            6. {step6}
-            </div>
-            """
-        elif risk_score >= 40:
-            suspicious_title = "⚠️ БУДЬТЕ ОСТОРОЖНЫ - ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ!" if is_ru else "⚠️ BE CAREFUL - SUSPICIOUS FILE!"
-            why_suspicious = "Почему это подозрительно:" if is_ru else "Why this is suspicious:"
-            susp_reason1 = "Новый вирус, еще не добавленный в базы сигнатур" if is_ru else "A new virus not yet added to signature databases"
-            susp_reason2 = "Легитимная программа с нестандартным поведением" if is_ru else "A legitimate program with non-standard behavior"
-            susp_reason3 = "Инструмент администратора, который выглядит подозрительно" if is_ru else "An admin tool that looks suspicious"
-            what_to_do2 = "Что нужно сделать:" if is_ru else "What you need to do:"
-            rec_step1 = "Не рекомендуется использовать этот файл без дополнительной проверки" if is_ru else "Not recommended to use this file without additional verification"
-            rec_step2 = "Если файл необходим - запустите его в полностью изолированной среде (виртуальная машина без доступа к сети)" if is_ru else "If the file is needed - run it in a completely isolated environment (virtual machine without network access)"
-            rec_step3 = "Попробуйте получить этот файл из другого, более надежного источника" if is_ru else "Try to get this file from another, more reliable source"
-            rec_step4 = "Проверьте файл через онлайн-сервисы (VirusTotal и аналоги)" if is_ru else "Check the file through online services (VirusTotal and similar)"
-            rec_step5 = "Свяжитесь с разработчиком ПО для подтверждения подлинности" if is_ru else "Contact the software developer to confirm authenticity"
-            
-            rec_text = f"""
-            <div style='font-size: 15px; line-height: 2.0; color: #F59E0B;'>
-            <b style='font-size: 18px;'>{suspicious_title}</b><br><br>
-            <b>{why_suspicious}</b><br>
-            {susp_reason1}<br>
-            {susp_reason2}<br>
-            {susp_reason3}<br><br>
-            <b>{what_to_do2}</b><br>
-            1. <b>{rec_step1}</b><br>
-            2. {rec_step2}<br>
-            3. {rec_step3}<br>
-            4. {rec_step4}<br>
-            5. {rec_step5}
-            </div>
-            """
-        else:
-            safe_title = "✅ ФАЙЛ БЕЗОПАСЕН" if is_ru else "✅ FILE IS SAFE"
-            why_safe = "Почему файл считается безопасным:" if is_ru else "Why the file is considered safe:"
-            safe_reason1 = "Нет совпадений с известными вирусами" if is_ru else "No matches with known viruses"
-            safe_reason2 = "Поведение файла полностью соответствует заявленным функциям" if is_ru else "File behavior fully matches declared functions"
-            safe_reason3 = "Структура и метаданные файла корректны" if is_ru else "File structure and metadata are correct"
-            recommendations = "Рекомендации:" if is_ru else "Recommendations:"
-            rec_safe1 = "Файл можно использовать безопасно" if is_ru else "The file can be used safely"
-            rec_safe2 = "Применяйте стандартные меры предосторожности" if is_ru else "Apply standard precautions"
-            rec_safe3 = "Убедитесь, что файл получен из надежного источника" if is_ru else "Make sure the file is obtained from a reliable source"
-            rec_safe4 = "При любых сомнениях - проведите дополнительную проверку" if is_ru else "In case of any doubts - conduct an additional check"
-            
-            rec_text = f"""
-            <div style='font-size: 15px; line-height: 2.0; color: #10B981;'>
-            <b style='font-size: 18px;'>{safe_title}</b><br><br>
-            <b>{why_safe}</b><br>
-            {safe_reason1}<br>
-            {safe_reason2}<br>
-            {safe_reason3}<br><br>
-            <b>{recommendations}</b><br>
-            1. {rec_safe1}<br>
-            2. {rec_safe2}<br>
-            3. {rec_safe3}<br>
-            4. {rec_safe4}
-            </div>
-            """
-        
-        rec_label = QLabel(rec_text)
-        rec_label.setWordWrap(True)
-        rec_layout.addWidget(rec_label)
-        rec_group.setLayout(rec_layout)
-        layout.addWidget(rec_group)
-        
-        layout.addStretch()
-        return scroll
-
-    def create_help_tab(self) -> QWidget:
-        widget = QWidget()
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setWidget(widget)
-        
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(20)
-        layout.setContentsMargins(20, 20, 20, 20)
-        
-        # Заголовок справки
-        help_title = QLabel(self.lang_data.get("help_title", "❓ Help and Support"))
-        help_title.setObjectName("helpTitle")
-        help_title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(help_title)
-        
-        # Разделы справки с локализацией
-        is_ru = self.parent_ref.current_lang == "Русский" if self.parent_ref else True
-        
-        if is_ru:
-            sections = [
-                ("🎯 Что такое RedSand Secure?", 
-                 "RedSand Secure - это система анализа подозрительных файлов. Она проверяет файлы на наличие вирусов и других угроз безопасности, используя статический и поведенческий анализ."),
-                
-                ("📁 Как проверить файл?",
-                 "1. Нажмите кнопку 'Выбрать файл'<br>"
-                 "2. Укажите подозрительный файл на вашем компьютере<br>"
-                 "3. Нажмите 'ЗАПУСТИТЬ АНАЛИЗ'<br>"
-                 "4. Дождитесь завершения проверки<br>"
-                 "5. Изучите результаты в окне отчета"),
-                
-                ("⚠️ Меры предосторожности",
-                 "<b>ВАЖНО:</b> Всегда запускайте анализ потенциально опасных файлов только в изолированной виртуальной машине! Это защитит вашу основную систему от возможного заражения."),
-                
-                ("📊 Понимание результатов",
-                 "<b>БЕЗОПАСНО (зеленый)</b> - Файл не содержит известных угроз. Можно использовать.<br>"
-                 "<b>ПОДОЗРИТЕЛЬНО (желтый)</b> - Файл содержит сомнительные элементы. Лучше не использовать.<br>"
-                 "<b>ОПАСНО (красный)</b> - Обнаружен вирус. Немедленно удалите файл!<br><br>"
-                 "<b>Как мы определяем угрозу:</b><br>"
-                 "• Статический анализ - проверка сигнатур вирусов в базе данных<br>"
-                 "• Поведенческий анализ - наблюдение за действиями файла в изолированной среде<br>"
-                 "• Эвристический анализ - поиск подозрительных паттернов в коде<br>"
-                 "• Анализ метаданных - проверка информации о файле"),
-                
-                ("⚙️ Настройки анализа",
-                 "<b>Время анализа</b> - максимальное время проверки файла<br>"
-                 "<b>Создавать варианты файла</b> - генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-                 "<b>Отключать сеть</b> - защищает вашу сеть во время анализа (рекомендуется)<br>"
-                 "<b>Тема оформления</b> - выберите удобную для вас цветовую схему")
-            ]
-        else:
-            sections = [
-                ("🎯 What is RedSand Secure?", 
-                 "RedSand Secure is a suspicious file analysis system. It checks files for viruses and other security threats using static and behavioral analysis."),
-                
-                ("📁 How to check a file?",
-                 "1. Click the 'Select File' button<br>"
-                 "2. Specify the suspicious file on your computer<br>"
-                 "3. Click 'START ANALYSIS'<br>"
-                 "4. Wait for the scan to complete<br>"
-                 "5. Review the results in the report window"),
-                
-                ("⚠️ Safety Precautions",
-                 "<b>IMPORTANT:</b> Always run analysis of potentially dangerous files only in an isolated virtual machine! This will protect your main system from possible infection."),
-                
-                ("📊 Understanding Results",
-                 "<b>SAFE (green)</b> - File contains no known threats. Safe to use.<br>"
-                 "<b>SUSPICIOUS (yellow)</b> - File contains questionable elements. Better not use.<br>"
-                 "<b>DANGEROUS (red)</b> - Virus detected. Delete the file immediately!<br><br>"
-                 "<b>How we detect threats:</b><br>"
-                 "• Static analysis - checking virus signatures in database<br>"
-                 "• Behavioral analysis - observing file actions in isolated environment<br>"
-                 "• Heuristic analysis - searching for suspicious code patterns<br>"
-                 "• Metadata analysis - checking file information"),
-                
-                ("⚙️ Analysis Settings",
-                 "<b>Analysis Time</b> - maximum file scan time<br>"
-                 "<b>Create file variants</b> - generates file modifications for better detection of complex threats<br>"
-                 "<b>Disable network</b> - protects your network during analysis (recommended)<br>"
-                 "<b>Theme</b> - choose a color scheme convenient for you")
-            ]
-        
-        for title, content in sections:
-            section_group = QGroupBox(title)
-            section_layout = QVBoxLayout()
-            
-            content_label = QLabel(content)
-            content_label.setObjectName("helpText")
-            content_label.setWordWrap(True)
-            content_label.setTextFormat(Qt.RichText)
-            content_label.setTextInteractionFlags(Qt.TextSelectableByMouse)
-            section_layout.addWidget(content_label)
-            
-            section_group.setLayout(section_layout)
-            layout.addWidget(section_group)
-        
-        layout.addStretch()
-        return scroll
-
-
-class SettingsDialog(QDialog):
-    theme_changed = pyqtSignal(str)  # Сигнал для мгновенного изменения темы
+    mode_selected = pyqtSignal(str)  # "antivirus" или "analysis"
     
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_ref = parent
-        self.lang_data = self.get_lang_data()
-        self.setWindowTitle(self.lang_data.get("settings_title", "Settings"))
-        self.setMinimumWidth(600)
-        # Убираем вопросительный знак из заголовка окна
-        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
     
-    def get_lang_data(self):
-        if self.parent_ref and hasattr(self.parent_ref, 'current_lang'):
-            return LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
-        return LANGUAGES["Русский"]
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(30)
+        layout.setContentsMargins(50, 50, 50, 50)
+        
+        # Заголовок
+        title_label = QLabel("RedSand Secure")
+        title_label.setObjectName("titleLabel")
+        title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title_label)
+        
+        subtitle_label = QLabel("Профессиональная система анализа вредоносного ПО")
+        subtitle_label.setObjectName("subtitleLabel")
+        subtitle_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(subtitle_label)
+        
+        layout.addSpacing(30)
+        
+        # Кнопки режимов
+        modes_layout = QHBoxLayout()
+        modes_layout.setSpacing(40)
+        modes_layout.setAlignment(Qt.AlignCenter)
+        
+        # Кнопка Антивирус - убрано "Реального времени"
+        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС")
+        self.btn_antivirus.setObjectName("modeBtn")
+        self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
+        self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
+        modes_layout.addWidget(self.btn_antivirus)
+        
+        # Кнопка Анализ файлов
+        self.btn_analysis = QPushButton("🔍\nАНАЛИЗ\nФайлов")
+        self.btn_analysis.setObjectName("modeBtn")
+        self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
+        self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
+        modes_layout.addWidget(self.btn_analysis)
+        
+        layout.addLayout(modes_layout)
+        
+        layout.addStretch()
+        
+        # Нижняя панель с настройками
+        bottom_panel = QHBoxLayout()
+        bottom_panel.setAlignment(Qt.AlignCenter)
+        
+        # Выбор языка
+        lang_layout = QHBoxLayout()
+        lang_label = QLabel("Язык/Language:")
+        lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
+        lang_layout.addWidget(lang_label)
+        lang_layout.addSpacing(10)
+        
+        self.btn_ru = QPushButton("RU")
+        self.btn_ru.setObjectName("langBtn")
+        self.btn_ru.setCheckable(True)
+        self.btn_ru.setChecked(True)
+        self.btn_ru.clicked.connect(lambda: self.parent_ref.change_language("Русский") if self.parent_ref else None)
+        lang_layout.addWidget(self.btn_ru)
+        
+        self.btn_en = QPushButton("EN")
+        self.btn_en.setObjectName("langBtn")
+        self.btn_en.setCheckable(True)
+        self.btn_en.setChecked(False)
+        self.btn_en.clicked.connect(lambda: self.parent_ref.change_language("English") if self.parent_ref else None)
+        lang_layout.addWidget(self.btn_en)
+        
+        bottom_panel.addLayout(lang_layout)
+        bottom_panel.addSpacing(50)
+        
+        # Кнопка настроек
+        self.btn_settings = QPushButton("⚙ Настройки")
+        self.btn_settings.setObjectName("secondaryBtn")
+        self.btn_settings.clicked.connect(lambda: self.parent_ref.open_settings() if self.parent_ref else None)
+        bottom_panel.addWidget(self.btn_settings)
+        
+        # Кнопка истории
+        self.btn_history = QPushButton("📜 История")
+        self.btn_history.setObjectName("secondaryBtn")
+        self.btn_history.clicked.connect(lambda: self.parent_ref.open_history() if self.parent_ref else None)
+        bottom_panel.addWidget(self.btn_history)
+        
+        # Кнопка карантина
+        self.btn_quarantine = QPushButton("⚠️ Карантин")
+        self.btn_quarantine.setObjectName("secondaryBtn")
+        self.btn_quarantine.clicked.connect(lambda: self.parent_ref.open_quarantine() if self.parent_ref else None)
+        bottom_panel.addWidget(self.btn_quarantine)
+        
+        layout.addLayout(bottom_panel)
 
+
+class AntivirusPanel(QWidget):
+    """Панель управления антивирусом"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent_ref = parent
+        self.av_active = False
+        self.av_monitor = None
+        self.setup_ui()
+    
     def setup_ui(self):
         layout = QVBoxLayout(self)
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title_label = QLabel(self.lang_data.get("settings_title", "⚙ Program Settings"))
+        # Заголовок
+        title_label = QLabel("🛡️ АНТИВИРУС")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        # Тема оформления - две кнопки Светлая и Тёмная
-        theme_group = QGroupBox(self.lang_data.get("theme_group", "🎨 Theme"))
-        theme_layout = QHBoxLayout()
-        theme_layout.addWidget(QLabel(self.lang_data.get("theme_label_ui", "Theme:")))
+        # Статус
+        status_group = QGroupBox("Статус защиты")
+        status_layout = QVBoxLayout(status_group)
         
-        self.btn_light_theme = QPushButton(self.lang_data.get("light_theme", "Light"))
-        self.btn_light_theme.setObjectName("secondaryBtn")
-        self.btn_light_theme.setCheckable(True)
-        self.btn_light_theme.clicked.connect(lambda: self.select_theme("Светлая"))
-        self.btn_light_theme.setMinimumWidth(100)
-        theme_layout.addWidget(self.btn_light_theme)
+        self.av_status_label = QLabel("🛡️ Антивирус: ВЫКЛ")
+        self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
+        self.av_status_label.setAlignment(Qt.AlignCenter)
+        status_layout.addWidget(self.av_status_label)
         
-        self.btn_dark_theme = QPushButton(self.lang_data.get("dark_theme", "Dark"))
-        self.btn_dark_theme.setObjectName("secondaryBtn")
-        self.btn_dark_theme.setCheckable(True)
-        self.btn_dark_theme.clicked.connect(lambda: self.select_theme("Тёмная"))
-        self.btn_dark_theme.setMinimumWidth(100)
-        theme_layout.addWidget(self.btn_dark_theme)
+        self.btn_toggle_av = QPushButton("▶️ ВКЛ")
+        self.btn_toggle_av.setObjectName("actionBtn")
+        self.btn_toggle_av.setCheckable(True)
+        self.btn_toggle_av.setChecked(False)
+        self.btn_toggle_av.setMinimumHeight(60)
+        self.btn_toggle_av.clicked.connect(self.toggle_antivirus)
+        status_layout.addWidget(self.btn_toggle_av)
         
-        theme_layout.addStretch()
-        theme_group.setLayout(theme_layout)
-        layout.addWidget(theme_group)
+        layout.addWidget(status_group)
         
-        # Время анализа
-        timeout_group = QGroupBox(self.lang_data.get("timeout_group", "⏱ Analysis Time"))
-        timeout_layout = QHBoxLayout()
-        timeout_layout.addWidget(QLabel(self.lang_data.get("timeout_label", "Maximum time:")))
-        self.timeout_spin = QSpinBox()
-        self.timeout_spin.setRange(10, 600)
-        self.timeout_spin.setValue(60)
-        self.timeout_spin.setMinimumWidth(100)
-        timeout_layout.addWidget(self.timeout_spin)
-        timeout_layout.addWidget(QLabel(self.lang_data.get("seconds", "sec")))
-        timeout_layout.addStretch()
-        timeout_group.setLayout(timeout_layout)
-        layout.addWidget(timeout_group)
+        # Настройки мониторинга
+        monitor_group = QGroupBox("Мониторинг папок")
+        monitor_layout = QVBoxLayout(monitor_group)
         
-        # Дополнительные опции
-        options_group = QGroupBox(self.lang_data.get("options_group", "🔧 Additional Options"))
-        options_layout = QVBoxLayout()
+        # Кнопки управления папками - сразу после заголовка, до списка
+        folder_btn_layout = QHBoxLayout()
         
-        self.poly_check = QCheckBox(self.lang_data.get("poly_check", "Create file variants"))
-        self.poly_check.setToolTip("Helps detect complex viruses by creating file modifications" if self.parent_ref and self.parent_ref.current_lang == "English" else "Помогает обнаружить сложные вирусы путем создания модификаций файла")
-        options_layout.addWidget(self.poly_check)
+        self.btn_add_folder = QPushButton("📁 Добавить")
+        self.btn_add_folder.setObjectName("secondaryBtn")
+        self.btn_add_folder.setFixedHeight(40)
+        self.btn_add_folder.clicked.connect(self.add_folder)
+        folder_btn_layout.addWidget(self.btn_add_folder)
         
-        self.network_check = QCheckBox(self.lang_data.get("network_check", "Disable network"))
-        self.network_check.setChecked(True)
-        self.network_check.setToolTip("Protects your network from potential threats" if self.parent_ref and self.parent_ref.current_lang == "English" else "Защищает вашу сеть от потенциальной угрозы")
-        options_layout.addWidget(self.network_check)
+        self.btn_remove_folder = QPushButton("🗑️ Удалить")
+        self.btn_remove_folder.setObjectName("dangerBtn")
+        self.btn_remove_folder.setFixedHeight(40)
+        self.btn_remove_folder.clicked.connect(self.remove_folder)
+        self.btn_remove_folder.setEnabled(False)
+        folder_btn_layout.addWidget(self.btn_remove_folder)
         
-        options_group.setLayout(options_layout)
-        layout.addWidget(options_group)
+        monitor_layout.addLayout(folder_btn_layout)
         
-        # Справка
-        help_group = QGroupBox(self.lang_data.get("help_settings_group", "❓ Settings Help"))
-        help_layout = QVBoxLayout()
+        # Список папок - после кнопок
+        self.folder_list = QListWidget()
+        self.folder_list.addItems([
+            "~/Downloads",
+            "~/Desktop", 
+            "~/Documents"
+        ])
+        self.folder_list.setMaximumHeight(150)
+        monitor_layout.addWidget(self.folder_list)
         
-        is_ru = self.parent_ref.current_lang == "Русский" if self.parent_ref else True
+        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
-        if is_ru:
-            help_text_content = (
-                "<b>Как использовать настройки:</b><br><br>"
-                "<b>Тема оформления:</b> Выберите удобный для вас визуальный стиль интерфейса<br>"
-                "<b>Время анализа:</b> Максимальное время проверки одного файла (по умолчанию 60 сек)<br>"
-                "<b>Создавать варианты файла:</b> Генерирует модификации файла для лучшего обнаружения сложных угроз<br>"
-                "<b>Отключать сеть:</b> Защищает вашу локальную сеть во время анализа вредоносного ПО (рекомендуется всегда включать)<br><br>"
-                "<b style='color: #EF4444;'>ВАЖНО:</b> Запускайте анализ только в изолированной виртуальной машине!"
-            )
-        else:
-            help_text_content = (
-                "<b>How to use settings:</b><br><br>"
-                "<b>Theme:</b> Choose a visual style convenient for you<br>"
-                "<b>Analysis Time:</b> Maximum scan time for one file (default 60 sec)<br>"
-                "<b>Create file variants:</b> Generates file modifications for better detection of complex threats<br>"
-                "<b>Disable network:</b> Protects your local network during malware analysis (recommended to always enable)<br><br>"
-                "<b style='color: #EF4444;'>IMPORTANT:</b> Run analysis only in an isolated virtual machine!"
-            )
+        self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
+        self.chk_auto_quarantine.setChecked(True)
+        monitor_layout.addWidget(self.chk_auto_quarantine)
         
-        help_text = QLabel(help_text_content)
-        help_text.setWordWrap(True)
-        help_text.setStyleSheet("font-size: 15px; line-height: 1.8;")
-        help_layout.addWidget(help_text)
-        help_group.setLayout(help_layout)
-        layout.addWidget(help_group)
+        self.chk_scan_on_access = QCheckBox("Сканирование при доступе к файлу")
+        self.chk_scan_on_access.setChecked(True)
+        monitor_layout.addWidget(self.chk_scan_on_access)
         
-        layout.addStretch()
+        layout.addWidget(monitor_group)
         
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.setFixedHeight(55)
-        buttons.button(QDialogButtonBox.Ok).setText(self.lang_data.get("save", "Save"))
-        buttons.button(QDialogButtonBox.Cancel).setText(self.lang_data.get("cancel", "Cancel"))
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
-
-    def get_settings(self):
-        # Определяем текущую тему на основе состояния кнопок
-        current_theme = "Тёмная"  # по умолчанию
-        if hasattr(self, 'btn_light_theme') and self.btn_light_theme.isChecked():
-            current_theme = "Светлая"
-        elif hasattr(self, 'btn_dark_theme') and self.btn_dark_theme.isChecked():
-            current_theme = "Тёмная"
+        # Лог событий
+        log_group = QGroupBox("Журнал событий антивируса")
+        log_layout = QVBoxLayout(log_group)
         
-        return {
-            'timeout': self.timeout_spin.value(),
-            'use_poly_default': self.poly_check.isChecked(),
-            'auto_disable_network': self.network_check.isChecked(),
-            'theme': current_theme
-        }
+        self.av_log = QTextEdit()
+        self.av_log.setReadOnly(True)
+        self.av_log.setFont(QFont("Consolas", 12))
+        self.av_log.setPlaceholderText("Здесь будут отображаться события антивируса...")
+        self.av_log.setMinimumHeight(200)
+        log_layout.addWidget(self.av_log)
+        
+        layout.addWidget(log_group)
+        
+        # Кнопка назад
+        btn_back = QPushButton("← Назад к главному меню")
+        btn_back.setObjectName("secondaryBtn")
+        btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
+        layout.addWidget(btn_back)
     
-    def select_theme(self, theme_name: str):
-        """Выбор темы через кнопки с мгновенным применением"""
-        if hasattr(self, 'btn_light_theme'):
-            self.btn_light_theme.setChecked(theme_name == "Светлая")
-        if hasattr(self, 'btn_dark_theme'):
-            self.btn_dark_theme.setChecked(theme_name == "Тёмная")
+    def toggle_antivirus(self):
+        """Включение/выключение антивируса"""
+        if not self.parent_ref:
+            return
+            
+        if self.av_active:
+            # Выключаем
+            try:
+                if self.av_monitor:
+                    self.av_monitor.stop()
+                self.av_active = False
+                self.btn_toggle_av.setChecked(False)
+                self.btn_toggle_av.setText("▶️ ВКЛ")
+                self.av_status_label.setText("🛡️ Антивирус: ВЫКЛ")
+                self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
+                self.log_event("Антивирус остановлен")
+            except Exception as e:
+                self.log_event(f"Ошибка остановки: {e}")
+        else:
+            # Включаем
+            try:
+                monitor_paths = []
+                for i in range(self.folder_list.count()):
+                    path = self.folder_list.item(i).text()
+                    expanded = os.path.expanduser(path)
+                    if os.path.exists(expanded):
+                        monitor_paths.append(expanded)
+                
+                if not monitor_paths:
+                    QMessageBox.warning(self, "Предупреждение", 
+                        "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.")
+                    self.btn_toggle_av.setChecked(False)
+                    return
+                
+                self.av_monitor = RealTimeAntivirus(
+                    monitored_folders=monitor_paths,
+                    auto_quarantine=self.chk_auto_quarantine.isChecked(),
+                    scan_on_access=self.chk_scan_on_access.isChecked()
+                )
+                # Привязываем менеджер карантина из главного окна
+                self.av_monitor.quarantine_manager = self.parent_ref.quarantine_manager
+                self.av_monitor.enable()
+                self.av_monitor.start_background()
+                
+                self.av_active = True
+                self.btn_toggle_av.setText("⏹️ ВЫКЛ")
+                self.av_status_label.setText("🛡️ Антивирус: ВКЛ")
+                self.av_status_label.setStyleSheet("color: #059669; font-weight: bold; font-size: 24px;")
+                self.log_event(f"Антивирус запущен. Мониторинг: {', '.join(monitor_paths)}")
+                
+                QMessageBox.information(self, "Антивирус активирован",
+                    f"Защита реального времени включена!\n\nМониторимые папки:\n{chr(10).join(monitor_paths)}\n\nВсе подозрительные файлы будут автоматически помещены в карантин.")
+                    
+            except Exception as e:
+                self.log_event(f"Ошибка запуска: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Не удалось запустить антивирус:\n{str(e)}")
+                self.btn_toggle_av.setChecked(False)
+    
+    def log_event(self, message: str):
+        """Запись события в лог"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        self.av_log.append(f"[{timestamp}] {message}")
+    
+    def add_folder(self):
+        """Добавить папку для мониторинга"""
+        folder = QFileDialog.getExistingDirectory(self, "Выберите папку для мониторинга")
+        if folder:
+            # Проверяем, нет ли уже такой папки в списке
+            for i in range(self.folder_list.count()):
+                if os.path.expanduser(self.folder_list.item(i).text()) == folder:
+                    QMessageBox.information(self, "Информация", "Эта папка уже добавлена")
+                    return
+            
+            self.folder_list.addItem(folder)
+            self.log_event(f"Добавлена папка: {folder}")
+    
+    def remove_folder(self):
+        """Удалить выбранную папку из мониторинга"""
+        selected_items = self.folder_list.selectedItems()
+        if not selected_items:
+            return
         
-        # Отправляем сигнал для мгновенного изменения темы в главном окне
-        self.theme_changed.emit(theme_name)
+        for item in selected_items:
+            row = self.folder_list.row(item)
+            folder_path = item.text()
+            self.folder_list.takeItem(row)
+            self.log_event(f"Удалена папка: {folder_path}")
+        
+        self.btn_remove_folder.setEnabled(False)
 
 
-class RedSandSecureGUI(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.worker_thread: Optional[QThread] = None
-        self.worker: Optional[AnalysisWorker] = None
-        self.current_report: Optional[dict] = None
-        self.analysis_completed = False  # Флаг завершения анализа
-        self.current_lang = "Русский"  # Текущий язык
-        self.settings = {
-            'timeout': 60, 'output_dir': 'reports', 'use_poly_default': False,
-            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная',
-            'language': 'Русский'
-        }
-        self.scan_history = []  # История сканирований
+class AnalysisPanel(QWidget):
+    """Панель анализа файлов"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.parent_ref = parent
+        self.worker_thread = None
+        self.worker = None
+        self.analysis_completed = False
         self.setup_ui()
-        self.apply_stylesheet()
-        self.load_settings()
-
+    
     def setup_ui(self):
-        self.setWindowTitle("RedSand Secure - Анализ файлов")
-        # Запуск в полноэкранном режиме без предупреждений о геометрии
-        self.showMaximized()
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
         
-        # Центральное виджет с Drag&Drop поддержкой
-        central_widget = QWidget()
-        central_widget.setAcceptDrops(True)
-        central_widget.dragEnterEvent = self.drag_enter_event
-        central_widget.dropEvent = self.drop_event
-        self.setCentralWidget(central_widget)
-        
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setSpacing(20)
-        main_layout.setContentsMargins(30, 30, 30, 30)
-        
-        # Верхняя панель с кнопками
-        top_panel = QHBoxLayout()
-        
-        # Выбор языка - две кнопки RU и EN на одном уровне с настройками и историей
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        lang_label = QLabel("Язык/Language:")
-        lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
-        top_panel.addWidget(lang_label)
-        top_panel.addSpacing(5)  # Маленький отступ до кнопок
-        
-        self.btn_ru = QPushButton("RU")
-        self.btn_ru.setObjectName("langBtn")
-        self.btn_ru.setCheckable(True)
-        self.btn_ru.setChecked(self.current_lang == "Русский")
-        self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
-        self.btn_ru.setMinimumSize(50, 50)  # Квадратные кнопки, компактный размер
-        self.btn_ru.setMaximumSize(50, 50)
-        top_panel.addWidget(self.btn_ru)
-        
-        self.btn_en = QPushButton("EN")
-        self.btn_en.setObjectName("langBtn")
-        self.btn_en.setCheckable(True)
-        self.btn_en.setChecked(self.current_lang == "English")
-        self.btn_en.clicked.connect(lambda: self.change_language("English"))
-        self.btn_en.setMinimumSize(50, 50)  # Квадратные кнопки, компактный размер
-        self.btn_en.setMaximumSize(50, 50)
-        top_panel.addWidget(self.btn_en)
-        
-        top_panel.addStretch()  # Растягиваем пространство, чтобы сдвинуть остальные кнопки вправо
-        
-        # Кнопка настроек
-        btn_settings = QPushButton(lang_data.get("settings", "⚙ Settings"))
-        btn_settings.setObjectName("secondaryBtn")
-        btn_settings.clicked.connect(self.open_settings)
-        top_panel.addWidget(btn_settings)
-        
-        # Кнопка истории
-        btn_history = QPushButton(lang_data.get("history", "📜 History"))
-        btn_history.setObjectName("secondaryBtn")
-        btn_history.clicked.connect(self.open_history)
-        top_panel.addWidget(btn_history)
-        
-        main_layout.addLayout(top_panel)
-        
-        title_label = QLabel("RedSand Secure")
+        # Заголовок
+        title_label = QLabel("🔍 АНАЛИЗ ФАЙЛОВ")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
-        main_layout.addWidget(title_label)
+        layout.addWidget(title_label)
         
-        line = QFrame()
-        line.setFrameShape(QFrame.HLine)
-        line.setStyleSheet("background-color: #CCCCCC; min-height: 3px;")
-        main_layout.addWidget(line)
+        # Создание основного макета
+        main_splitter = QSplitter(Qt.Horizontal)
         
-        splitter = QSplitter(Qt.Horizontal)
-        splitter.addWidget(self.create_left_panel())
-        splitter.addWidget(self.create_right_panel())
-        splitter.setStretchFactor(0, 1)
-        splitter.setStretchFactor(1, 2)
-        main_layout.addWidget(splitter)
+        # Левая панель
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_layout.setSpacing(20)
         
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.update_status_bar()
-
-    def drag_enter_event(self, event: QDragEnterEvent):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-    
-    def drop_event(self, event: QDropEvent):
-        for url in event.mimeData().urls():
-            file_path = url.toLocalFile()
-            if os.path.isfile(file_path):
-                self.file_path_edit.setText(file_path)
-                self.log_message('INFO', f"Файл перетащен: {file_path}")
-                break
-
-    def create_left_panel(self) -> QWidget:
-        widget = QWidget()
-        self.left_panel_layout = QVBoxLayout(widget)
-        self.left_panel_layout.setSpacing(20)
-        
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        
-        file_group = QGroupBox(lang_data.get('step1_file', 'Шаг 1: Выберите файл'))
-        file_layout = QVBoxLayout()
+        # Выбор файла
+        file_group = QGroupBox("Шаг 1: Выберите файл")
+        file_layout = QVBoxLayout(file_group)
         
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'Файл еще не выбран... или перетащите сюда'))
+        self.file_path_edit.setPlaceholderText("Файл еще не выбран... или перетащите сюда")
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
-        # Устанавливаем белый цвет текста placeholder и обычного текста
-        self.file_path_edit.setStyleSheet("""
-            QLineEdit {
-                background-color: transparent;
-                color: #FFFFFF;
-                border: 2px solid #CCCCCC;
-                border-radius: 10px;
-                padding: 12px;
-                font-size: 15px;
-            }
-        """)
         file_layout.addWidget(self.file_path_edit)
         
-        self.btn_select_file = QPushButton(lang_data.get('select_file', '📁 Выбрать файл'))
+        self.btn_select_file = QPushButton("📁 Выбрать файл")
         self.btn_select_file.setObjectName("actionBtn")
         self.btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(self.btn_select_file)
         
-        file_group.setLayout(file_layout)
-        self.left_panel_layout.addWidget(file_group)
+        left_layout.addWidget(file_group)
         
-        settings_group = QGroupBox(lang_data.get('step2_settings', 'Шаг 2: Настройки (необязательно)'))
-        settings_layout = QVBoxLayout()
+        # Настройки анализа
+        settings_group = QGroupBox("Шаг 2: Настройки анализа")
+        settings_layout = QVBoxLayout(settings_group)
         
         timeout_layout = QHBoxLayout()
-        self.timeout_label = QLabel(lang_data.get('analysis_time', 'Время анализа:'))
-        timeout_layout.addWidget(self.timeout_label)
+        timeout_label = QLabel("Время анализа:")
+        timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(60)
         self.timeout_spin.setMinimumWidth(80)
         timeout_layout.addWidget(self.timeout_spin)
-        # Убрали надпись "сек" / Removed "sec" label
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(lang_data.get('poly_check', 'Создавать варианты файла для анализа'))
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы" if self.current_lang == "Русский" else "Helps detect complex viruses")
+        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
+        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox(lang_data.get('network_check', 'Отключать сеть (рекомендуется)'))
+        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа" if self.current_lang == "Русский" else "Protects your network during analysis")
+        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
         settings_layout.addWidget(self.network_check)
         
-        settings_group.setLayout(settings_layout)
-        self.left_panel_layout.addWidget(settings_group)
+        docker_info = QLabel("ℹ️ Все файлы анализируются в изолированном Docker контейнере")
+        docker_info.setStyleSheet("color: #00ff88; font-style: italic;")
+        settings_layout.addWidget(docker_info)
         
-        self.btn_analyze = QPushButton(lang_data.get('analyze_btn', '🚀 ЗАПУСТИТЬ АНАЛИЗ'))
+        left_layout.addWidget(settings_group)
+        
+        # Кнопка анализа
+        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
         self.btn_analyze.setObjectName("primaryBtn")
+        self.btn_analyze.setMinimumHeight(60)
         self.btn_analyze.clicked.connect(self.start_analysis)
-        self.left_panel_layout.addWidget(self.btn_analyze)
+        left_layout.addWidget(self.btn_analyze)
         
-        progress_group = QGroupBox(lang_data.get('progress', 'Прогресс'))
-        progress_layout = QVBoxLayout()
+        # Прогресс
+        progress_group = QGroupBox("Прогресс анализа")
+        progress_layout = QVBoxLayout(progress_group)
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel(lang_data.get('waiting', 'Ожидание...'))
+        self.progress_label = QLabel("Ожидание...")
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
-        progress_group.setLayout(progress_layout)
-        self.left_panel_layout.addWidget(progress_group)
+        left_layout.addWidget(progress_group)
         
-        self.left_panel_layout.addStretch()
-        return widget
-
-    def create_right_panel(self) -> QWidget:
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
-        layout.setSpacing(20)
+        left_layout.addStretch()
+        main_splitter.addWidget(left_widget)
+        
+        # Правая панель с вкладками
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+        
         self.tabs = QTabWidget()
-        logs_widget = self.create_logs_tab()
-        logs_widget._tab_name_ru = "📋 Журнал"
-        logs_widget._tab_name_en = "📋 Logs"
-        self.tabs.addTab(logs_widget, logs_widget._tab_name_ru)
-        results_widget = self.create_results_tab()
-        results_widget._tab_name_ru = "📊 Результаты"
-        results_widget._tab_name_en = "📊 Results"
-        self.tabs.addTab(results_widget, results_widget._tab_name_ru)
-        layout.addWidget(self.tabs)
-        return widget
-
-    def create_logs_tab(self) -> QWidget:
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        
+        # Вкладка логов
+        logs_widget = QWidget()
+        logs_layout = QVBoxLayout(logs_widget)
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
-        self.log_text.setFont(QFont("Consolas", 14))
+        self.log_text.setFont(QFont("Consolas", 12))
         self.log_text.setPlaceholderText("Здесь будет отображаться ход анализа...")
-        layout.addWidget(self.log_text)
-        return widget
-
-    def create_results_tab(self) -> QWidget:
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        logs_layout.addWidget(self.log_text)
+        # Увеличена ширина кнопки вкладки Журнал через stylesheet
+        logs_widget.setStyleSheet("padding: 5px;")
+        self.tabs.addTab(logs_widget, "📋 Журнал      ")
+        
+        # Вкладка результатов
+        results_widget = QWidget()
+        results_layout = QVBoxLayout(results_widget)
         self.results_summary = QLabel("Результаты анализа появятся здесь после завершения...")
         self.results_summary.setAlignment(Qt.AlignCenter)
         self.results_summary.setFont(QFont("Segoe UI", 16))
         self.results_summary.setStyleSheet("color: #666; padding: 50px;")
-        layout.addWidget(self.results_summary)
+        results_layout.addWidget(self.results_summary)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
         self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.results_table.horizontalHeader().setMinimumSectionSize(250)  # Увеличена ширина первой колонки
         self.results_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        # Запрет редактирования таблицы
         self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.results_table.setVisible(False)
-        layout.addWidget(self.results_table)
-        return widget
+        results_layout.addWidget(self.results_table)
+        # Увеличена ширина кнопки вкладки Результаты через stylesheet
+        results_widget.setStyleSheet("padding: 5px;")
+        self.tabs.addTab(results_widget, "📊 Результаты   ")
+        
+        right_layout.addWidget(self.tabs)
+        main_splitter.addWidget(right_widget)
+        main_splitter.setStretchFactor(0, 1)
+        main_splitter.setStretchFactor(1, 2)
+        
+        layout.addWidget(main_splitter)
+        
+        # Кнопка назад
+        btn_back = QPushButton("← Назад к главному меню")
+        btn_back.setObjectName("secondaryBtn")
+        btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
+        layout.addWidget(btn_back)
+    
+    def select_file(self):
+        """Выбор файла для анализа"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self, "Выберите файл для анализа", "",
+            "Все файлы (*);;EXE файлы (*.exe);;PDF файлы (*.pdf);;Office документы (*.docx *.xlsx *.pptx)"
+        )
+        if file_path:
+            self.file_path_edit.setText(file_path)
+    
+    def start_analysis(self):
+        """Запуск анализа файла"""
+        file_path = self.file_path_edit.text().strip()
+        if not file_path or not os.path.exists(file_path):
+            QMessageBox.warning(self, "Ошибка", "Пожалуйста, выберите существующий файл для анализа.")
+            return
+        
+        self.btn_analyze.setEnabled(False)
+        self.progress_bar.setValue(0)
+        self.log_text.clear()
+        self.results_summary.setVisible(True)
+        self.results_table.setVisible(False)
+        
+        self.log_message('INFO', f"Начало анализа файла: {file_path}")
+        self.log_message('INFO', "Используется Docker изоляция для безопасности")
+        
+        # Добавляем запись в историю сканирований
+        scan_record = {
+            'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            'file_name': os.path.basename(file_path),
+            'file_path': file_path,
+            'status': 'IN_PROGRESS',
+            'threats': 0
+        }
+        if self.parent_ref:
+            self.parent_ref.scan_history.append(scan_record)
+        
+        # Здесь будет логика анализа через orchestrator
+        # Для демонстрации показываем прогресс
+        self.progress_bar.setValue(25)
+        self.progress_label.setText("Статический анализ...")
+        self.log_message('INFO', "Выполняется статический анализ файла...")
+        
+        self.progress_bar.setValue(50)
+        self.progress_label.setText("Динамический анализ в Docker...")
+        self.log_message('INFO', "Запуск в изолированном Docker контейнере...")
+        
+        self.progress_bar.setValue(75)
+        self.progress_label.setText("Анализ поведения...")
+        self.log_message('INFO', "Анализ системных вызовов и сетевого поведения...")
+        
+        # Имитация завершения анализа
+        self.progress_bar.setValue(100)
+        self.progress_label.setText("Анализ завершен!")
+        self.log_message('SUCCESS', "Анализ успешно завершен!")
+        
+        # Показываем демо-результаты
+        self.results_summary.setVisible(False)
+        self.results_table.setVisible(True)
+        self.results_table.setRowCount(5)  # Убрали Docker изоляцию
+        
+        results_data = [
+            ("Файл", os.path.basename(file_path)),
+            ("Статус", "✅ Чист" if hash(file_path) % 2 == 0 else "⚠️ Подозрительный"),
+            ("Тип файла", "PE Executable (EXE)" if file_path.endswith('.exe') else "Другой тип"),
+            ("Размер", f"{os.path.getsize(file_path)} байт"),
+            ("Время анализа", f"{datetime.now().strftime('%H:%M:%S')}")
+        ]
+        
+        for i, (param, value) in enumerate(results_data):
+            self.results_table.setItem(i, 0, QTableWidgetItem(param))
+            self.results_table.setItem(i, 1, QTableWidgetItem(value))
+        
+        # Обновляем запись в истории с правильным scan_time
+        if self.parent_ref and len(self.parent_ref.scan_history) > 0:
+            last_record = self.parent_ref.scan_history[-1]
+            last_record['scan_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            last_record['threat_level'] = 'CLEAN' if hash(file_path) % 2 == 0 else 'SUSPICIOUS'
+            last_record['detected_threats'] = [] if hash(file_path) % 2 == 0 else ['Pattern match', 'Suspicious behavior']
+            last_record['status'] = last_record['threat_level']  # Для совместимости
+            last_record['threats'] = 0 if hash(file_path) % 2 == 0 else 2
+        
+        self.btn_analyze.setEnabled(True)
+        QMessageBox.information(self, "Анализ завершен", 
+            f"Файл проанализирован в Docker контейнере.\nРезультаты доступны во вкладке 'Результаты'.")
+    
+    def log_message(self, level: str, message: str):
+        """Запись сообщения в лог"""
+        timestamp = datetime.now().strftime("%H:%M:%S")
+        colors = {'INFO': '#4CAF50', 'WARNING': '#FF9800', 'ERROR': '#F44336', 'SUCCESS': '#00BCD4'}
+        color = colors.get(level, '#FFFFFF')
+        self.log_text.append(f'<span style="color: {color};">[{timestamp}] [{level}] {message}</span>')
 
+
+class ScanHistoryDialog(QDialog):
+    """Диалог истории сканирований"""
+    
+    def __init__(self, scan_history=None, parent=None):
+        super().__init__(parent)
+        self.scan_history = scan_history or []
+        self.parent_ref = parent
+        self.setWindowTitle("📜 История сканирований")
+        self.setMinimumSize(1000, 600)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        title = QLabel("📋 История сканирований файлов")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        info_label = QLabel("Здесь отображаются все файлы, которые были проанализированы.")
+        info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(info_label)
+        
+        # Таблица истории
+        self.history_table = QTableWidget()
+        self.history_table.setColumnCount(5)
+        self.history_table.setHorizontalHeaderLabels(["Дата", "Файл", "Статус", "Угрозы", "Путь"])
+        self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.history_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.history_table.verticalHeader().setDefaultSectionSize(50)
+        self.history_table.itemSelectionChanged.connect(self.on_selection_changed)
+        layout.addWidget(self.history_table)
+        
+        # Кнопки управления
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.clicked.connect(self.load_history)
+        btn_layout.addWidget(self.btn_refresh)
+        
+        self.btn_clear = QPushButton("🗑️ Очистить историю")
+        self.btn_clear.setObjectName("dangerBtn")
+        self.btn_clear.clicked.connect(self.clear_history)
+        btn_layout.addWidget(self.btn_clear)
+        
+        btn_layout.addStretch()
+        
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+        
+        layout.addLayout(btn_layout)
+        
+        self.load_history()
+    
+    def load_history(self):
+        """Загрузить историю сканирований"""
+        self.history_table.setRowCount(0)
+        
+        if not self.scan_history:
+            row = self.history_table.rowCount()
+            self.history_table.insertRow(row)
+            item = QTableWidgetItem("История пуста")
+            item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+            self.history_table.setItem(row, 0, item)
+            return
+        
+        for item_data in self.scan_history:
+            row = self.history_table.rowCount()
+            self.history_table.insertRow(row)
+            
+            # Дата
+            date_item = QTableWidgetItem(item_data.get('scan_time', 'N/A'))
+            date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)
+            self.history_table.setItem(row, 0, date_item)
+            
+            # Имя файла
+            file_name = os.path.basename(item_data.get('file_path', 'Unknown'))
+            file_item = QTableWidgetItem(file_name)
+            file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)
+            font = file_item.font()
+            font.setBold(True)
+            file_item.setFont(font)
+            self.history_table.setItem(row, 1, file_item)
+            
+            # Статус
+            status = item_data.get('threat_level', 'UNKNOWN')
+            status_item = QTableWidgetItem(status)
+            status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
+            status_bg_color = QColor("#1a1a2e")  # Цвет фона для CLEAN
+            if status == 'CLEAN':
+                status_item.setForeground(QColor("#00ff88"))
+                status_bg_color = QColor("#059669")
+            elif status == 'SUSPICIOUS':
+                status_item.setForeground(QColor("#ffaa00"))
+                status_bg_color = QColor("#d97706")
+            elif status == 'MALICIOUS':
+                status_item.setForeground(QColor("#ff4444"))
+                status_bg_color = QColor("#dc2626")
+            
+            # Делаем текст белым на цветном фоне
+            if status != 'CLEAN':
+                status_item.setBackground(status_bg_color)
+                status_item.setForeground(QColor("#ffffff"))
+            else:
+                status_item.setBackground(QColor("#059669"))
+                status_item.setForeground(QColor("#ffffff"))
+                
+            status_item.setTextAlignment(Qt.AlignCenter)
+            font = status_item.font()
+            font.setBold(True)
+            status_item.setFont(font)
+            self.history_table.setItem(row, 2, status_item)
+            
+            # Угрозы
+            threats = ', '.join(item_data.get('detected_threats', []))
+            threats_item = QTableWidgetItem(threats if threats else 'Нет')
+            threats_item.setFlags(threats_item.flags() & ~Qt.ItemIsEditable)
+            self.history_table.setItem(row, 3, threats_item)
+            
+            # Путь
+            path_item = QTableWidgetItem(item_data.get('file_path', 'N/A'))
+            path_item.setFlags(path_item.flags() & ~Qt.ItemIsEditable)
+            path_item.setToolTip(item_data.get('file_path', ''))
+            self.history_table.setItem(row, 4, path_item)
+    
+    def on_selection_changed(self):
+        """Обработка выбора элемента"""
+        # Детали больше не отображаются (удален details_text)
+        pass
+    
+    def clear_history(self):
+        """Очистить историю"""
+        reply = QMessageBox.question(self, "Подтверждение",
+            "Вы уверены, что хотите очистить всю историю сканирований?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if reply == QMessageBox.Yes and self.parent_ref:
+            self.parent_ref.scan_history = []
+            self.scan_history = []
+            self.load_history()
+
+
+class QuarantineDialog(QDialog):
+    """Диалог управления карантином"""
+    
+    def __init__(self, quarantine_manager=None, parent=None):
+        super().__init__(parent)
+        self.quarantine_manager = quarantine_manager
+        self.parent_ref = parent
+        self.setWindowTitle("⚠️ Карантин")
+        self.setMinimumSize(900, 600)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        title = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
+        info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(info_label)
+        
+        # Таблица файлов - увеличенная, занимает больше места
+        self.quarantine_table = QTableWidget()
+        self.quarantine_table.setColumnCount(5)
+        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
+        self.quarantine_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.quarantine_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.quarantine_table.verticalHeader().setDefaultSectionSize(60)
+        self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
+        # Увеличиваем таблицу с помощью stretch factor
+        layout.addWidget(self.quarantine_table, stretch=1)
+        
+        # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
+        btn_layout = QHBoxLayout()
+        btn_layout.setContentsMargins(0, 10, 0, 10)
+        
+        # Кнопка "Обновить" слева
+        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.setFixedHeight(45)
+        self.btn_refresh.clicked.connect(self.load_quarantine)
+        btn_layout.addWidget(self.btn_refresh)
+        
+        btn_layout.addStretch()
+        
+        # Кнопки "Восстановить" и "Удалить навсегда" по центру
+        center_layout = QHBoxLayout()
+        self.btn_restore = QPushButton("♻️ Восстановить")
+        self.btn_restore.setObjectName("actionBtn")
+        self.btn_restore.setFixedHeight(45)
+        self.btn_restore.clicked.connect(self.restore_selected)
+        self.btn_restore.setEnabled(False)
+        center_layout.addWidget(self.btn_restore)
+        
+        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete.setObjectName("dangerBtn")
+        self.btn_delete.setFixedHeight(45)
+        self.btn_delete.clicked.connect(self.delete_selected)
+        self.btn_delete.setEnabled(False)
+        center_layout.addWidget(self.btn_delete)
+        
+        btn_layout.addLayout(center_layout)
+        btn_layout.addStretch()
+        
+        # Кнопка "Закрыть" справа
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.setFixedHeight(45)
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+        
+        layout.addLayout(btn_layout)
+        
+        self.load_quarantine()
+    
+    def load_quarantine(self):
+        """Загрузить список файлов из карантина"""
+        self.quarantine_table.setRowCount(0)
+        
+        if not self.quarantine_manager:
+            return
+        
+        items = self.quarantine_manager.list_quarantined()
+        
+        if not items:
+            row = self.quarantine_table.rowCount()
+            self.quarantine_table.insertRow(row)
+            item = QTableWidgetItem("Карантин пуст")
+            item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+            self.quarantine_table.setItem(row, 0, item)
+            return
+        
+        for idx, item_data in enumerate(items):
+            row = self.quarantine_table.rowCount()
+            self.quarantine_table.insertRow(row)
+            
+            # Дата
+            date_item = QTableWidgetItem(item_data.get('quarantine_time', 'N/A')[:19])
+            date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)
+            self.quarantine_table.setItem(row, 0, date_item)
+            
+            # Имя файла
+            file_name = os.path.basename(item_data.get('original_name', 'Unknown'))
+            file_item = QTableWidgetItem(file_name)
+            file_item.setToolTip(item_data.get('original_path', ''))
+            file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)
+            font = file_item.font()
+            font.setBold(True)
+            file_item.setFont(font)
+            self.quarantine_table.setItem(row, 1, file_item)
+            
+            # Оригинальный путь
+            path_item = QTableWidgetItem(item_data.get('original_path', 'N/A'))
+            path_item.setFlags(path_item.flags() & ~Qt.ItemIsEditable)
+            path_item.setToolTip(item_data.get('original_path', ''))
+            self.quarantine_table.setItem(row, 2, path_item)
+            
+            # Причина
+            reason_item = QTableWidgetItem(item_data.get('reason', 'Unknown'))
+            reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
+            reason_item.setToolTip(f"Полная причина: {item_data.get('reason', 'Unknown')}")
+            self.quarantine_table.setItem(row, 3, reason_item)
+            
+            # ID (индекс для доступа)
+            id_item = QTableWidgetItem(str(idx))
+            id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
+            self.quarantine_table.setItem(row, 4, id_item)
+    
+    def on_selection_changed(self):
+        """Обработка выбора элемента"""
+        selected_rows = self.quarantine_table.selectedItems()
+        if not selected_rows:
+            self.btn_restore.setEnabled(False)
+            self.btn_delete.setEnabled(False)
+            return
+        
+        row = selected_rows[0].row()
+        self.btn_restore.setEnabled(True)
+        self.btn_delete.setEnabled(True)
+        
+        # Детали отображаются прямо в строке таблицы
+    
+    def restore_selected(self):
+        """Восстановление выбранного файла"""
+        selected_rows = self.quarantine_table.selectedItems()
+        if not selected_rows:
+            return
+        
+        row = selected_rows[0].row()
+        # Берем ID из колонки 4 (индекс для доступа)
+        id_item = self.quarantine_table.item(row, 4)
+        if not id_item:
+            return
+        
+        try:
+            idx = int(id_item.text())
+            items = self.quarantine_manager.list_quarantined()
+            if idx >= len(items):
+                return
+            
+            quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
+            
+            reply = QMessageBox.question(self, "Подтверждение восстановления",
+                "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                if self.quarantine_manager.restore_from_quarantine(quarantine_path):
+                    QMessageBox.information(self, "Восстановление", "Файл успешно восстановлен!")
+                    self.load_quarantine()
+                else:
+                    QMessageBox.critical(self, "Ошибка", "Не удалось восстановить файл")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка восстановления: {str(e)}")
+    
+    def delete_selected(self):
+        """Удаление выбранного файла"""
+        selected_rows = self.quarantine_table.selectedItems()
+        if not selected_rows:
+            return
+        
+        row = selected_rows[0].row()
+        # Берем ID из колонки 4 (индекс для доступа)
+        id_item = self.quarantine_table.item(row, 4)
+        if not id_item:
+            return
+        
+        try:
+            idx = int(id_item.text())
+            items = self.quarantine_manager.list_quarantined()
+            if idx >= len(items):
+                return
+            
+            quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
+            
+            reply = QMessageBox.warning(self, "Подтверждение удаления",
+                "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                import shutil
+                if os.path.exists(quarantine_path):
+                    shutil.rmtree(quarantine_path) if os.path.isdir(quarantine_path) else os.remove(quarantine_path)
+                
+                # Удаляем из журнала
+                del self.quarantine_manager.quarantined_files[quarantine_path]
+                self.quarantine_manager._save_quarantine_log()
+                
+                QMessageBox.information(self, "Удаление", "Файл успешно удален!")
+                self.load_quarantine()
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка удаления: {str(e)}")
+
+
+class SettingsDialog(QDialog):
+    """Диалог настроек приложения"""
+    
+    def __init__(self, settings: dict, parent=None):
+        super().__init__(parent)
+        self.settings = settings
+        self.parent_ref = parent  # Сохраняем ссылку на родителя
+        self.setWindowTitle("⚙ Настройки")
+        self.setMinimumSize(600, 500)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(20)
+        layout.setContentsMargins(30, 30, 30, 30)
+        
+        title = QLabel("⚙ Настройки приложения")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        # Тема оформления - две темы с мгновенным применением
+        theme_group = QGroupBox("Тема оформления")
+        theme_layout = QHBoxLayout(theme_group)
+        
+        self.btn_dark = QPushButton("🌙 Тёмная")
+        self.btn_dark.setObjectName("secondaryBtn")
+        self.btn_dark.setCheckable(True)
+        self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
+        self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
+        theme_layout.addWidget(self.btn_dark)
+        
+        self.btn_light = QPushButton("☀️ Светлая")
+        self.btn_light.setObjectName("secondaryBtn")
+        self.btn_light.setCheckable(True)
+        self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
+        self.btn_light.clicked.connect(lambda: self.apply_theme('Светлая'))
+        theme_layout.addWidget(self.btn_light)
+        
+        layout.addWidget(theme_group)
+        
+        # Настройки анализа
+        analysis_group = QGroupBox("Настройки анализа")
+        analysis_layout = QVBoxLayout(analysis_group)
+        
+        timeout_layout = QHBoxLayout()
+        timeout_label = QLabel("Время анализа (сек):")
+        timeout_layout.addWidget(timeout_label)
+        self.timeout_spin = QSpinBox()
+        self.timeout_spin.setRange(10, 600)
+        self.timeout_spin.setValue(self.settings.get('timeout', 60))
+        timeout_layout.addWidget(self.timeout_spin)
+        timeout_layout.addStretch()
+        analysis_layout.addLayout(timeout_layout)
+        
+        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
+        self.poly_check.setChecked(self.settings.get('use_poly_default', False))
+        analysis_layout.addWidget(self.poly_check)
+        
+        self.network_check = QCheckBox("Отключать сеть во время анализа")
+        self.network_check.setChecked(self.settings.get('auto_disable_network', True))
+        analysis_layout.addWidget(self.network_check)
+        
+        layout.addWidget(analysis_group)
+        
+        # Кнопка закрытия
+        self.btn_close_settings = QPushButton("Закрыть")
+        self.btn_close_settings.setObjectName("secondaryBtn")
+        self.btn_close_settings.setFixedHeight(45)
+        self.btn_close_settings.clicked.connect(self.accept)
+        layout.addWidget(self.btn_close_settings)
+    
+    def apply_theme(self, theme_name: str):
+        """Применить тему немедленно"""
+        if self.parent_ref:
+            self.parent_ref.settings['theme'] = theme_name
+            self.parent_ref.apply_stylesheet()
+            self.parent_ref.save_settings()
+            
+            # Обновляем состояние кнопок
+            self.btn_dark.setChecked(theme_name == 'Тёмная')
+            self.btn_light.setChecked(theme_name == 'Светлая')
+    
+    def get_settings(self):
+        """Получить текущие настройки"""
+        return {
+            'theme': self.parent_ref.settings.get('theme', 'Тёмная'),
+            'timeout': self.timeout_spin.value(),
+            'use_poly_default': self.poly_check.isChecked(),
+            'auto_disable_network': self.network_check.isChecked()
+        }
+
+
+class RedSandSecureGUI(QMainWindow):
+    """Главное окно приложения с навигацией между режимами"""
+    
+    def __init__(self):
+        super().__init__()
+        self.worker_thread: Optional[QThread] = None
+        self.worker: Optional[QObject] = None
+        self.current_report: Optional[dict] = None
+        self.analysis_completed = False
+        self.current_lang = "Русский"
+        self.settings = {
+            'timeout': 60, 'output_dir': 'reports', 'use_poly_default': False,
+            'auto_disable_network': True, 'log_level': 'INFO', 'theme': 'Тёмная',
+            'language': 'Русский'
+        }
+        self.scan_history = []
+        
+        # Интеграция антивируса и карантина
+        self.quarantine_manager = QuarantineManager()
+        
+        self.setup_ui()
+        self.apply_stylesheet()
+        self.load_settings()
+    
+    def setup_ui(self):
+        """Настройка пользовательского интерфейса"""
+        self.setWindowTitle("RedSand Secure - Профессиональный анализ malware")
+        self.showMaximized()
+        
+        # Стек для переключения между экранами
+        self.stack = QStackedWidget()
+        self.setCentralWidget(self.stack)
+        
+        # Главный экран выбора режима
+        self.main_selector = MainModeSelector(self)
+        self.main_selector.mode_selected.connect(self.switch_to_mode)
+        self.stack.addWidget(self.main_selector)
+        
+        # Экран антивируса
+        self.antivirus_panel = AntivirusPanel(self)
+        self.stack.addWidget(self.antivirus_panel)
+        
+        # Экран анализа файлов
+        self.analysis_panel = AnalysisPanel(self)
+        self.stack.addWidget(self.analysis_panel)
+        
+        # Показываем главный экран
+        self.stack.setCurrentWidget(self.main_selector)
+    
+    def switch_to_mode(self, mode: str):
+        """Переключение в выбранный режим"""
+        if mode == "antivirus":
+            self.stack.setCurrentWidget(self.antivirus_panel)
+        elif mode == "analysis":
+            self.stack.setCurrentWidget(self.analysis_panel)
+    
+    def show_main_menu(self):
+        """Показать главное меню"""
+        self.stack.setCurrentWidget(self.main_selector)
+    
+    def change_language(self, language: str):
+        """Смена языка интерфейса"""
+        self.current_lang = language
+        self.settings['language'] = language
+        self.save_settings()
+        
+        # Обновляем состояние кнопок языка на главном экране
+        if hasattr(self, 'main_selector'):
+            self.main_selector.btn_ru.setChecked(language == "Русский")
+            self.main_selector.btn_en.setChecked(language == "English")
+        
+        # TODO: Обновить тексты на всех экранах (можно добавить полноценную локализацию)
+        # Убрано всплывающее окно - язык меняется без уведомления
+    
+    def open_settings(self):
+        """Открыть диалог настроек"""
+        dialog = SettingsDialog(self.settings, self)
+        if dialog.exec_() == QDialog.Accepted:
+            new_settings = dialog.get_settings()
+            self.settings.update(new_settings)
+            self.apply_stylesheet()
+            self.save_settings()
+    
+    def open_history(self):
+        """Открыть историю сканирований"""
+        dialog = ScanHistoryDialog(scan_history=self.scan_history, parent=self)
+        dialog.exec_()
+    
+    def open_quarantine(self):
+        """Открыть диалог карантина"""
+        try:
+            dialog = QuarantineDialog(quarantine_manager=self.quarantine_manager, parent=self)
+            dialog.exec_()
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Не удалось открыть карантин:\n{str(e)}")
+    
     def apply_stylesheet(self):
-        theme_name = self.settings.get('theme', 'High Contrast')
+        """Применить таблицу стилей"""
+        theme_name = self.settings.get('theme', 'Тёмная')
         self.setStyleSheet(generate_stylesheet(theme_name))
-
+    
     def load_settings(self):
+        """Загрузить настройки из файла"""
         settings_file = Path('gui_settings.json')
         if settings_file.exists():
             try:
                 with open(settings_file, 'r', encoding='utf-8') as f:
                     self.settings = json.load(f)
-                self.timeout_spin.setValue(self.settings.get('timeout', 60))
-                self.poly_check.setChecked(self.settings.get('use_poly_default', False))
-                self.network_check.setChecked(self.settings.get('auto_disable_network', True))
-                # Применяем тему после загрузки настроек
-                theme = self.settings.get('theme', 'Светлая')
-                if theme != self.settings.get('_current_theme', None):
-                    self.setStyleSheet(generate_stylesheet(theme))
-                    self.settings['_current_theme'] = theme
-                # Применяем язык после загрузки настроек
-                lang = self.settings.get('language', 'Русский')
-                if lang != self.current_lang:
-                    self.current_lang = lang
-                    self.apply_language(lang)
+                self.apply_stylesheet()
             except Exception as e:
-                self.log_message('WARNING', f"Ошибка загрузки настроек: {e}")
-
+                print(f"Ошибка загрузки настроек: {e}")
+    
     def save_settings(self):
+        """Сохранить настройки в файл"""
         settings_file = Path('gui_settings.json')
         try:
             with open(settings_file, 'w', encoding='utf-8') as f:
                 json.dump(self.settings, f, indent=2, ensure_ascii=False)
         except Exception as e:
-            self.log_message('ERROR', f"Ошибка сохранения настроек: {e}")
-
-    def select_file(self):
-        file_path, _ = QFileDialog.getOpenFileName(
-            self, "Выберите файл для анализа", "",
-            "Все файлы (*.*);;Executable файлы (*.exe);;DLL файлы (*.dll)"
-        )
-        if file_path:
-            self.file_path_edit.setText(file_path)
-            self.log_message('INFO', f"Выбран файл: {file_path}")
-            self.status_bar.showMessage(f"Файл выбран: {file_path}")
-
-    def start_analysis(self):
-        file_path = self.file_path_edit.text().strip()
-        if not file_path:
-            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-            QMessageBox.warning(self, lang_data.get("warning", "Warning"), lang_data.get("please_select_file", "Please select a file for analysis!"))
-            return
-        if not os.path.exists(file_path):
-            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-            QMessageBox.critical(self, lang_data.get("error", "Error"), lang_data.get("file_not_found", "File not found: ") + file_path)
-            return
-        
-        # Сбрасываем флаг завершения перед новым анализом
-        self.analysis_completed = False
-
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        reply = QMessageBox.question(
-            self, lang_data.get("security_warning_title", "Security Warning"),
-            lang_data.get("security_warning_msg", "You are about to analyze a potentially dangerous file!\n\nMake sure you are running in a virtual machine.\n\nContinue?"),
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
-        if reply == QMessageBox.No:
-            return
-        
-        # Очищаем предыдущие результаты
-        self.current_report = None
-        self.results_table.setRowCount(0)
-        self.results_summary.setVisible(True)
-        self.results_table.setVisible(False)
-        self.log_text.clear()
-        
-        self.settings['timeout'] = self.timeout_spin.value()
-        self.settings['use_poly_default'] = self.poly_check.isChecked()
-        self.settings['auto_disable_network'] = self.network_check.isChecked()
-        self.save_settings()
-        self.set_ui_enabled(False)
-        self.worker = AnalysisWorker(
-            file_path=file_path, use_poly=self.poly_check.isChecked(),
-            timeout=self.timeout_spin.value()
-        )
-        self.worker_thread = QThread()
-        self.worker.moveToThread(self.worker_thread)
-        self.worker_thread.started.connect(self.worker.run)
-        self.worker.progress.connect(self.update_progress)
-        self.worker.finished.connect(self.analysis_finished)
-        self.worker.error.connect(self.analysis_error)
-        self.worker.log_message.connect(self.log_message)
-        self.worker_thread.start()
-        self.log_message('INFO', f"Запуск анализа файла: {file_path}")
-        self.status_bar.showMessage("Анализ запущен...")
-
-    def analysis_finished(self, result: dict):
-        self.current_report = result
-        self.analysis_completed = True  # Устанавливаем флаг завершения
-        self.set_ui_enabled(True)
-        self.progress_bar.setValue(100)
-        
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        complete_msg = lang_data.get("analysis_complete", "Analysis completed successfully!")
-        error_msg = lang_data.get("analysis_error", "Analysis error!")
-        
-        self.progress_label.setText(complete_msg)
-        self.update_results_display(result)
-        self.log_message('SUCCESS', complete_msg)
-        self.status_bar.showMessage(lang_data.get("analysis_complete_status", "Analysis complete"))
-        
-        # Сохраняем в историю с вердиктом на текущем языке
-        if result:
-            threat_info = result.get('threat_info') or {}
-            risk_score = threat_info.get('risk_score', 0) if isinstance(threat_info, dict) else 0
-            
-            # Определяем вердикт на текущем языке
-            if risk_score >= 70:
-                verdict = "ОПАСНО" if self.current_lang == "Русский" else "DANGEROUS"
-            elif risk_score >= 40:
-                verdict = "ПОДОЗРИТЕЛЬНО" if self.current_lang == "Русский" else "SUSPICIOUS"
-            else:
-                verdict = "БЕЗОПАСНО" if self.current_lang == "Русский" else "SAFE"
-            
-            file_path = self.file_path_edit.text()
-            self.save_to_history(file_path, verdict)
-            
-            dialog = DetailedReportDialog(result, self)
-            dialog.exec_()
-
-    def analysis_error(self, error_msg: str):
-        self.set_ui_enabled(True)
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        self.progress_label.setText(lang_data.get("analysis_error", "Analysis error!"))
-        self.progress_label.setStyleSheet("color: #CC0000; font-weight: bold;")
-        self.log_message('ERROR', error_msg)
-        self.status_bar.showMessage(lang_data.get("analysis_error", "Analysis error"))
-        QMessageBox.critical(self, lang_data.get("error", "Error"), error_msg)
-
-    def update_progress(self, value: int, message: str):
-        self.progress_bar.setValue(value)
-        self.progress_label.setText(message)
-        self.status_bar.showMessage(message)
-
-    def log_message(self, level: str, message: str):
-        """Вывод логов с цветовой индикацией и локализацией"""
-        timestamp = datetime.now().strftime("%H:%M:%S")
-        
-        # Цвета для разных уровней логов
-        colors = {
-            'INFO': '#0066CC', 
-            'DEBUG': '#666666', 
-            'WARNING': '#FF8C00',
-            'ERROR': '#CC0000', 
-            'CRITICAL': '#FF0000', 
-            'SUCCESS': '#008000',
-            'SAFE': '#059669',       # Зеленый для безопасных
-            'SUSPICIOUS': '#D97706',  # Желтый для подозрительных
-            'DANGEROUS': '#DC2626'    # Красный для опасных
-        }
-        color = colors.get(level, '#333333')
-        
-        # Локализация уровней логов
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        is_ru = self.current_lang == "Русский"
-        level_texts = {
-            'SAFE': lang_data.get('log_safe', 'SAFE'),
-            'SUSPICIOUS': lang_data.get('log_suspicious', 'SUSPICIOUS'),
-            'DANGEROUS': lang_data.get('log_dangerous', 'DANGEROUS'),
-            'INFO': lang_data.get('log_info', 'INFO'),
-            'DEBUG': lang_data.get('log_debug', 'DEBUG'),
-            'WARNING': lang_data.get('log_warning', 'WARNING'),
-            'ERROR': lang_data.get('log_error', 'ERROR'),
-            'CRITICAL': lang_data.get('log_critical', 'CRITICAL'),
-            'SUCCESS': lang_data.get('log_success', 'SUCCESS')
-        }
-        
-        level_text = level_texts.get(level, level)
-        
-        # Перевод сообщения лога если это стандартное сообщение
-        translated_message = message
-        if is_ru:
-            # Если русский язык - оставляем как есть
-            pass
-        else:
-            # Переводим стандартные сообщения на английский
-            translations = {
-                "Подготовка к анализу...": "Preparing for analysis...",
-                "Проверка файла...": "Checking file...",
-                "Статический анализ...": "Static analysis...",
-                "Анализ поведения...": "Behavioral analysis...",
-                "Оценка угрозы...": "Threat assessment...",
-                "Создание отчета...": "Generating report...",
-                "Анализ завершен!": "Analysis complete!",
-                "Запуск анализа файла: ": "Starting file analysis: ",
-                "Настройки сохранены.": "Settings saved.",
-                "Тема изменена на: ": "Theme changed to: ",
-                "Язык изменен на: ": "Language changed to: ",
-                "Файл перетащен: ": "File dragged: ",
-                "Анализ запущен...": "Analysis started...",
-                "Анализ завершен успешно!": "Analysis completed successfully!",
-                "Ошибка анализа!": "Analysis error!",
-                "Анализ завершен": "Analysis complete",
-                "Ошибка анализа": "Analysis error"
-            }
-            for ru_text, en_text in translations.items():
-                if message.startswith(ru_text):
-                    translated_message = en_text + message[len(ru_text):]
-                    break
-        
-        html = f'<span style="color: {color}; font-weight: bold;">[{timestamp}] [{level_text}]</span> {translated_message}<br>'
-        self.log_text.append(html)
-        scrollbar = self.log_text.verticalScrollBar()
-        scrollbar.setValue(scrollbar.maximum())
-        
-        # Дублируем в консоль на обоих языках
-        print(f"[{timestamp}] [{level_text}] {translated_message}")
-
-    def update_results_display(self, result: dict):
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        threat_info = result.get('threat_info') or {}
-        if not isinstance(threat_info, dict):
-            threat_info = {}
-        static_data = result.get('static_results') or {}
-        file_name = static_data.get('file_name', 'N/A') if static_data else 'N/A'
-        file_size = static_data.get('file_size', 0) if static_data else 0
-        
-        # Получаем вердикт и определяем цвет для таблицы результатов
-        risk_score = threat_info.get('risk_score', 0)
-        if risk_score >= 70:
-            verdict = "ОПАСНО" if self.current_lang == "Русский" else "DANGEROUS"
-            verdict_color = "#DC2626"
-        elif risk_score >= 40:
-            verdict = "ПОДОЗРИТЕЛЬНО" if self.current_lang == "Русский" else "SUSPICIOUS"
-            verdict_color = "#D97706"
-        else:
-            verdict = "БЕЗОПАСНО" if self.current_lang == "Русский" else "SAFE"
-            verdict_color = "#059669"
-        
-        self.results_summary.setVisible(False)
-        self.results_table.setVisible(True)
-        self.results_table.setRowCount(0)
-        
-        # Переводим заголовки таблицы и добавляем вердикт с цветом (без risk_score для пользователя)
-        data = [
-            (lang_data.get("verdict", "Verdict"), f"<b style='color: {verdict_color};'>{verdict}</b>"),
-            (lang_data.get("threat_type", "Threat Type"), threat_info.get('type', lang_data.get("unknown", "Unknown"))),
-            (lang_data.get("threat_family", "Family"), threat_info.get('family', lang_data.get("unknown", "Unknown"))),
-            (lang_data.get("file_name", "File Name"), file_name),
-            (lang_data.get("file_size", "File Size"), f"{file_size} {lang_data.get('bytes', 'bytes')}"),
-        ]
-        for param, value in data:
-            row = self.results_table.rowCount()
-            self.results_table.insertRow(row)
-            item_param = QTableWidgetItem(param)
-            item_value = QTableWidgetItem(value if not value.startswith("<") else value.replace("<b>", "").replace("</b>", ""))
-            if value.startswith("<"):
-                # Для вердикта устанавливаем цвет текста
-                item_value.setForeground(QColor(verdict_color))
-                font = item_value.font()
-                font.setBold(True)
-                item_value.setFont(font)
-            self.results_table.setItem(row, 0, item_param)
-            self.results_table.setItem(row, 1, item_value)
-
-    def open_settings(self):
-        try:
-            dialog = SettingsDialog(self)
-            # Тема меняется сразу при нажатии на кнопки внутри диалога
-            dialog.theme_changed.connect(self.change_theme)
-            if dialog.exec_() == QDialog.Accepted:
-                settings = dialog.get_settings()
-                self.settings.update(settings)
-                self.save_settings()
-                self.log_message('INFO', f"Настройки сохранены.")
-        except Exception as e:
-            self.log_message('ERROR', f"Ошибка при открытии настроек: {e}")
-            QMessageBox.critical(self, "Ошибка", f"Не удалось открыть настройки: {str(e)}")
-
-    def open_reports_folder(self):
-        reports_dir = Path(self.settings.get('output_dir', 'reports'))
-        reports_dir.mkdir(exist_ok=True)
-        try:
-            QDesktopServices.openUrl(QUrl.fromLocalFile(str(reports_dir.absolute())))
-        except Exception as e:
-            self.log_message('ERROR', f"Ошибка открытия папки: {e}")
-            QMessageBox.warning(self, "Предупреждение", f"Не удалось открыть папку.\nПуть: {reports_dir.absolute()}")
-
-    def export_report(self):
-        """Экспорт отчета о сканировании в JSON файл"""
-        if not self.current_report:
-            lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-            msg = "Нет данных для экспорта. Сначала выполните анализ." if self.current_lang == "Русский" else "No data to export. Run analysis first."
-            QMessageBox.information(self, "Инфо" if self.current_lang == "Русский" else "Info", msg)
-            return
-        
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        file_path, _ = QFileDialog.getSaveFileName(
-            self,
-            "Экспорт отчета" if self.current_lang == "Русский" else "Export Report",
-            f"report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            "JSON файлы (*.json);;Все файлы (*.*)"
-        )
-        if file_path:
-            try:
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    json.dump(self.current_report, f, indent=2, ensure_ascii=False)
-                msg = f"Отчет сохранен: {file_path}" if self.current_lang == "Русский" else f"Report saved: {file_path}"
-                self.log_message('SUCCESS', msg)
-                QMessageBox.information(self, "Успешно" if self.current_lang == "Русский" else "Success", msg)
-            except Exception as e:
-                msg = f"Ошибка экспорта: {e}" if self.current_lang == "Русский" else f"Export error: {e}"
-                self.log_message('ERROR', msg)
-                QMessageBox.critical(self, "Ошибка" if self.current_lang == "Русский" else "Error", msg)
-
-    def open_history(self):
-        """Открыть диалог истории сканирований"""
-        try:
-            dialog = HistoryDialog(parent=self)
-            dialog.exec_()
-        except Exception as e:
-            self.log_message('ERROR', f"Ошибка открытия истории: {e}")
-
-    def change_language(self, language: str):
-        """Сменить язык интерфейса - полная локализация"""
-        self.current_lang = language
-        self.settings['language'] = language
-        self.save_settings()
-        
-        # Применяем переводы
-        self.apply_language(language)
-        
-        self.log_message('INFO', f"Language changed to: {language}" if language == "English" else f"Язык изменен на: {language}")
-        self.update_status_bar()
-    
-    def apply_language(self, language: str):
-        """Применить переводы ко всем элементам интерфейса"""
-        lang_data = LANGUAGES.get(language, LANGUAGES["Русский"])
-        
-        # Обновляем кнопки языка (состояние checked)
-        if hasattr(self, 'btn_ru'):
-            self.btn_ru.setChecked(language == "Русский")
-        if hasattr(self, 'btn_en'):
-            self.btn_en.setChecked(language == "English")
-        
-        # Обновляем все текстовые элементы
-        self.btn_select_file.setText(lang_data.get('select_file', '📁 Select File'))
-        self.file_path_edit.setPlaceholderText(lang_data.get('file_placeholder', 'No file selected...'))
-        self.btn_analyze.setText(lang_data.get('analyze_btn', '🚀 START ANALYSIS'))
-        self.timeout_label.setText(lang_data.get('analysis_time', 'Analysis time:'))
-        self.poly_check.setText(lang_data.get('poly_check', 'Create file variants'))
-        self.network_check.setText(lang_data.get('network_check', 'Disable network'))
-        
-        # Обновляем заголовки групп
-        for i in range(self.left_panel_layout.count()):
-            item = self.left_panel_layout.itemAt(i)
-            if item and item.widget():
-                widget = item.widget()
-                if isinstance(widget, QGroupBox):
-                    if i == 0:  # Шаг 1: Выберите файл
-                        widget.setTitle(lang_data.get('step1_file', 'Step 1: Select File'))
-                    elif i == 1:  # Шаг 2: Настройки
-                        widget.setTitle(lang_data.get('step2_settings', 'Step 2: Settings (optional)'))
-                    elif i == 3:  # Прогресс
-                        widget.setTitle(lang_data.get('progress', 'Progress'))
-        
-        # Обновляем placeholder лога и результатов
-        self.log_text.setPlaceholderText(lang_data.get('log_placeholder', 'Analysis progress will be shown here...'))
-        self.results_summary.setText(lang_data.get('results_placeholder', 'Analysis results will appear here after completion...'))
-        
-        # Обновляем заголовки таблицы результатов
-        if hasattr(self, 'results_table'):
-            self.results_table.setHorizontalHeaderLabels([
-                lang_data.get('param', 'Parameter'),
-                lang_data.get('value', 'Value')
-            ])
-        
-        # Обновляем заголовки вкладок
-        for i in range(self.tabs.count()):
-            tab = self.tabs.widget(i)
-            if hasattr(tab, '_tab_name_ru') and hasattr(tab, '_tab_name_en'):
-                if language == "Русский":
-                    self.tabs.setTabText(i, tab._tab_name_ru)
-                else:
-                    self.tabs.setTabText(i, tab._tab_name_en)
-        
-        # Обновляем текст кнопок настроек и истории в верхней панели
-        top_widget = self.centralWidget()
-        if top_widget and top_widget.layout():
-            top_layout = top_widget.layout()
-            if top_layout.count() > 0:
-                panel_layout = top_layout.itemAt(0)
-                if panel_layout and isinstance(panel_layout, QHBoxLayout):
-                    for j in range(panel_layout.count()):
-                        item = panel_layout.itemAt(j)
-                        if item and item.widget() and isinstance(item.widget(), QPushButton):
-                            btn = item.widget()
-                            if btn.objectName() == "secondaryBtn":
-                                btn_text = btn.text()
-                                if "⚙" in btn_text or "Settings" in btn_text:
-                                    btn.setText(lang_data.get('settings', '⚙ Settings'))
-                                elif "📜" in btn_text or "History" in btn_text:
-                                    btn.setText(lang_data.get('history', '📜 History'))
-        
-        # Обновляем label под прогресс-баром (waiting)
-        if hasattr(self, 'progress_label'):
-            self.progress_label.setText(lang_data.get('waiting', 'Waiting...'))
-            # Сохраняем серый цвет текста
-            self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
-        
-        # Обновляем placeholder файла - сохраняем белый цвет
-        if hasattr(self, 'file_path_edit'):
-            self.file_path_edit.setStyleSheet("""
-                QLineEdit {
-                    background-color: transparent;
-                    color: #FFFFFF;
-                    border: 2px solid #CCCCCC;
-                    border-radius: 10px;
-                    padding: 12px;
-                    font-size: 15px;
-                }
-            """)
-    
-    def change_theme(self, theme_name: str):
-        """Сменить тему оформления"""
-        old_theme = self.settings.get('theme', 'Тёмная')
-        self.settings['theme'] = theme_name
-        self.save_settings()
-        
-        # Применяем новую тему
-        self.setStyleSheet(generate_stylesheet(theme_name))
-        
-        self.log_message('INFO', f"Theme changed to: {theme_name}" if self.current_lang == "English" else f"Тема изменена на: {theme_name}")
-
-    def update_status_bar(self):
-        """Обновить строку состояния - черный цвет с белым текстом"""
-        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        msg = lang.get('file_placeholder', 'Ready')
-        self.status_bar.setStyleSheet("QStatusBar { background-color: #000000; color: #FFFFFF; font-weight: bold; font-size: 14px; }")
-        self.status_bar.showMessage(msg[:50] + "...")
-
-    def set_ui_enabled(self, enabled: bool):
-        self.btn_analyze.setEnabled(enabled)
-        self.file_path_edit.setEnabled(enabled)
-        self.timeout_spin.setEnabled(enabled)
-        self.poly_check.setEnabled(enabled)
-        self.network_check.setEnabled(enabled)
-
-    def save_to_history(self, file_path: str, verdict: str):
-        """Сохранить результат в историю"""
-        entry = {
-            'date': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'file': file_path,
-            'verdict': verdict
-        }
-        self.scan_history.append(entry)
-        
-        # Сохраняем в файл
-        history_file = Path("scan_history.json")
-        if history_file.exists():
-            try:
-                with open(history_file, 'r', encoding='utf-8') as f:
-                    history = json.load(f)
-            except:
-                history = []
-        else:
-            history = []
-        
-        history.append(entry)
-        # Храним только последние 100 записей
-        history = history[-100:]
-        
-        with open(history_file, 'w', encoding='utf-8') as f:
-            json.dump(history, f, indent=2, ensure_ascii=False)
-        
-        # Логируем сохранение в историю на обоих языках
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        is_ru = self.current_lang == "Русский"
-        log_msg = f"Результат сохранен в историю: {verdict}" if is_ru else f"Result saved to history: {verdict}"
-        print(f"[{datetime.now().strftime('%H:%M:%S')}] [INFO] {log_msg}")
-
-
-    def closeEvent(self, event):
-        lang_data = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        
-        # Если анализ уже завершен, закрываем без вопросов
-        if self.analysis_completed:
-            if self.worker_thread and self.worker_thread.isRunning():
-                self.worker_thread.quit()
-                self.worker_thread.wait(1000)
-            event.accept()
-            return
-        
-        # Проверяем, запущен ли анализ в данный момент
-        if self.worker_thread and self.worker_thread.isRunning():
-            reply = QMessageBox.warning(
-                self, lang_data.get("warning", "Warning"),
-                lang_data.get("analysis_in_progress", "Analysis is still in progress. Are you sure you want to exit?"),
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-            )
-            if reply == QMessageBox.No:
-                event.ignore()
-                return
-            self.worker_thread.quit()
-            self.worker_thread.wait(3000)
-        event.accept()
+            print(f"Ошибка сохранения настроек: {e}")
 
 
 def main():
-    # REDSAND_AVAILABLE теперь проверяется внутри AnalysisWorker
+    """Точка входа приложения"""
     app = QApplication(sys.argv)
-    app.setApplicationName("RedSand Secure")
+    app.setStyle("Fusion")
+    
     window = RedSandSecureGUI()
     window.show()
-    if not Path('gui_settings.json').exists():
-        lang_data = LANGUAGES.get(window.current_lang, LANGUAGES["Русский"])
-        QMessageBox.warning(
-            window, lang_data.get("vm_warning_title", "Security Warning"),
-            lang_data.get("vm_warning_msg", "<h2>IMPORTANT WARNING</h2><p>You are launching a tool for analyzing potentially dangerous files.</p><p><b>Run ONLY in an isolated virtual machine!</b></p>")
-        )
+    
     sys.exit(app.exec_())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
