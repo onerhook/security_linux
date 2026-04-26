@@ -715,7 +715,7 @@ class MainModeSelector(QWidget):
         
         # Обновляем метку языка - ищем QLabel по тексту
         for child in self.children():
-            if isinstance(child, QLabel):
+            if isinstance(child, QLabel) and hasattr(child, 'text'):
                 text = child.text()
                 if text.startswith("Язык/") or text.startswith("Language/"):
                     child.setText(self.lang["language_label"])
@@ -915,6 +915,61 @@ class AntivirusPanel(QWidget):
             self.log_event(f"Удалена папка: {folder_path}")
         
         self.btn_remove_folder.setEnabled(False)
+    
+    def update_language(self):
+        """Обновить тексты при смене языка"""
+        self.current_lang = self.parent_ref.current_lang if self.parent_ref else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        # Обновляем заголовки и метки
+        title_label = self.findChild(QLabel, "titleLabel")
+        if title_label:
+            title_label.setText(self.lang["av_title"])
+        
+        # Находим QGroupBox по индексу или типу
+        groups = self.findChildren(QGroupBox)
+        if len(groups) >= 1:
+            groups[0].setTitle(self.lang["av_status_group"])
+        if len(groups) >= 2:
+            groups[1].setTitle(self.lang["av_monitor_group"])
+        if len(groups) >= 3:
+            groups[2].setTitle(self.lang["av_log_group"])
+        
+        # Обновляем статус антивируса
+        if hasattr(self, 'av_status_label'):
+            if self.av_active:
+                self.av_status_label.setText(self.lang["av_status_on"])
+            else:
+                self.av_status_label.setText(self.lang["av_status_off"])
+        
+        # Обновляем кнопку включения/выключения
+        if hasattr(self, 'btn_toggle_av'):
+            if self.av_active:
+                self.btn_toggle_av.setText(self.lang["av_btn_off"])
+            else:
+                self.btn_toggle_av.setText(self.lang["av_btn_on"])
+        
+        # Обновляем кнопки папок
+        if hasattr(self, 'btn_add_folder'):
+            self.btn_add_folder.setText(self.lang["av_add_folder"])
+        if hasattr(self, 'btn_remove_folder'):
+            self.btn_remove_folder.setText(self.lang["av_remove_folder"])
+        
+        # Обновляем чекбоксы
+        if hasattr(self, 'chk_auto_quarantine'):
+            self.chk_auto_quarantine.setText(self.lang["auto_quarantine"])
+        if hasattr(self, 'chk_scan_on_access'):
+            self.chk_scan_on_access.setText(self.lang["scan_on_access"])
+        
+        # Обновляем плейсхолдер лога
+        if hasattr(self, 'av_log'):
+            self.av_log.setPlaceholderText(self.lang["av_log_placeholder"])
+        
+        # Обновляем кнопку назад
+        btn_back = self.findChild(QPushButton)
+        for btn in self.findChildren(QPushButton):
+            if btn.text() == "⬅️ Назад в главное меню" or btn.text() == "⬅️ Back to Main Menu":
+                btn.setText(self.lang["back_to_main"])
 
 
 class AnalysisPanel(QWidget):
@@ -1171,7 +1226,9 @@ class ScanHistoryDialog(QDialog):
         super().__init__(parent)
         self.scan_history = scan_history or []
         self.parent_ref = parent
-        self.setWindowTitle("📜 История сканирований")
+        self.current_lang = parent.current_lang if parent else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.setWindowTitle(self.lang["history_title"])
         self.setMinimumSize(1000, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1181,19 +1238,25 @@ class ScanHistoryDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("📋 История сканирований файлов")
+        title = QLabel(self.lang["history_header"])
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        info_label = QLabel("Здесь отображаются все файлы, которые были проанализированы.")
+        info_label = QLabel(self.lang["history_info"])
         info_label.setStyleSheet("color: #666; font-style: italic;")
         layout.addWidget(info_label)
         
         # Таблица истории
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(5)
-        self.history_table.setHorizontalHeaderLabels(["Дата", "Файл", "Статус", "Угрозы", "Путь"])
+        self.history_table.setHorizontalHeaderLabels([
+            self.lang["history_date"], 
+            self.lang["history_file"], 
+            self.lang["history_status"], 
+            self.lang["history_threats"], 
+            self.lang["history_path"]
+        ])
         self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -1209,25 +1272,56 @@ class ScanHistoryDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton(self.lang["btn_refresh"])
         self.btn_refresh.setObjectName("secondaryBtn")
         self.btn_refresh.clicked.connect(self.load_history)
         btn_layout.addWidget(self.btn_refresh)
         
-        self.btn_clear = QPushButton("🗑️ Очистить историю")
+        self.btn_clear = QPushButton(self.lang["btn_clear_history"])
         self.btn_clear.setObjectName("dangerBtn")
         self.btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(self.btn_clear)
         
         btn_layout.addStretch()
         
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.lang["btn_close"])
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
         layout.addLayout(btn_layout)
         
+        self.load_history()
+    
+    def update_language(self):
+        """Обновить тексты при смене языка"""
+        self.current_lang = self.parent_ref.current_lang if self.parent_ref else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        self.setWindowTitle(self.lang["history_title"])
+        
+        title = self.findChild(QLabel, "titleLabel")
+        if title:
+            title.setText(self.lang["history_header"])
+        
+        # Обновляем заголовки таблицы
+        self.history_table.setHorizontalHeaderLabels([
+            self.lang["history_date"], 
+            self.lang["history_file"], 
+            self.lang["history_status"], 
+            self.lang["history_threats"], 
+            self.lang["history_path"]
+        ])
+        
+        # Обновляем кнопки
+        if hasattr(self, 'btn_refresh'):
+            self.btn_refresh.setText(self.lang["btn_refresh"])
+        if hasattr(self, 'btn_clear'):
+            self.btn_clear.setText(self.lang["btn_clear_history"])
+        if hasattr(self, 'btn_close'):
+            self.btn_close.setText(self.lang["btn_close"])
+        
+        # Перезагружаем историю для обновления текста "История пуста"
         self.load_history()
     
     def load_history(self):
@@ -1548,6 +1642,47 @@ class QuarantineDialog(QDialog):
                 self.load_quarantine()
         except Exception as e:
             QMessageBox.critical(self, self.lang["error_title"], f"{self.lang['btn_delete']}: {str(e)}")
+    
+    def update_language(self):
+        """Обновить тексты при смене языка"""
+        self.current_lang = self.parent_ref.current_lang if self.parent_ref else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        self.setWindowTitle(self.lang["quarantine_title"])
+        
+        # Обновляем заголовок
+        title = self.findChild(QLabel)
+        for lbl in self.findChildren(QLabel):
+            if lbl.objectName() == "titleLabel":
+                lbl.setText(self.lang["quarantine_header"])
+                break
+        
+        # Обновляем info label
+        for lbl in self.findChildren(QLabel):
+            if lbl.text() == self.lang.get("quarantine_info", "") or lbl.text().startswith("Файлы в карантине") or lbl.text().startswith("Files in quarantine"):
+                lbl.setText(self.lang["quarantine_info"])
+        
+        # Обновляем заголовки таблицы
+        self.quarantine_table.setHorizontalHeaderLabels([
+            self.lang["quarantine_date"], 
+            self.lang["quarantine_filename"], 
+            self.lang["quarantine_path"], 
+            self.lang["quarantine_reason"], 
+            self.lang["quarantine_id"]
+        ])
+        
+        # Обновляем кнопки
+        if hasattr(self, 'btn_refresh'):
+            self.btn_refresh.setText(self.lang["btn_refresh"])
+        if hasattr(self, 'btn_restore'):
+            self.btn_restore.setText(self.lang["btn_restore"])
+        if hasattr(self, 'btn_delete'):
+            self.btn_delete.setText(self.lang["btn_delete"])
+        if hasattr(self, 'btn_close'):
+            self.btn_close.setText(self.lang["btn_close"])
+        
+        # Перезагружаем таблицу для обновления текста "Карантин пуст"
+        self.load_quarantine()
 
 
 class SettingsDialog(QDialog):
@@ -1557,7 +1692,9 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.settings = settings
         self.parent_ref = parent  # Сохраняем ссылку на родителя
-        self.setWindowTitle("⚙ Настройки")
+        self.current_lang = parent.current_lang if parent else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.setWindowTitle(self.lang["settings_title"])
         self.setMinimumSize(600, 500)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1567,23 +1704,23 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title = QLabel("⚙ Настройки приложения")
+        title = QLabel(self.lang["settings_header"])
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
         # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox("Тема оформления")
+        theme_group = QGroupBox(self.lang["settings_theme_group"])
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton("🌙 Тёмная")
+        self.btn_dark = QPushButton(self.lang["theme_dark"])
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
         self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
         self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
         theme_layout.addWidget(self.btn_dark)
         
-        self.btn_light = QPushButton("☀️ Светлая")
+        self.btn_light = QPushButton(self.lang["theme_light"])
         self.btn_light.setObjectName("secondaryBtn")
         self.btn_light.setCheckable(True)
         self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
@@ -1593,11 +1730,11 @@ class SettingsDialog(QDialog):
         layout.addWidget(theme_group)
         
         # Настройки анализа
-        analysis_group = QGroupBox("Настройки анализа")
+        analysis_group = QGroupBox(self.lang["settings_analysis_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Время анализа (сек):")
+        timeout_label = QLabel(self.lang["settings_timeout_label"])
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1606,22 +1743,56 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
+        self.poly_check = QCheckBox(self.lang["settings_poly_check"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
         analysis_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть во время анализа")
+        self.network_check = QCheckBox(self.lang["settings_network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         analysis_layout.addWidget(self.network_check)
         
         layout.addWidget(analysis_group)
         
         # Кнопка закрытия
-        self.btn_close_settings = QPushButton("Закрыть")
+        self.btn_close_settings = QPushButton(self.lang["btn_close"])
         self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
         layout.addWidget(self.btn_close_settings)
+    
+    def update_language(self):
+        """Обновить тексты при смене языка"""
+        self.current_lang = self.parent_ref.current_lang if self.parent_ref else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        self.setWindowTitle(self.lang["settings_title"])
+        
+        title = self.findChild(QLabel, "titleLabel")
+        if title:
+            title.setText(self.lang["settings_header"])
+        
+        groups = self.findChildren(QGroupBox)
+        if len(groups) >= 1:
+            groups[0].setTitle(self.lang["settings_theme_group"])
+        if len(groups) >= 2:
+            groups[1].setTitle(self.lang["settings_analysis_group"])
+        
+        if hasattr(self, 'btn_dark'):
+            self.btn_dark.setText(self.lang["theme_dark"])
+        if hasattr(self, 'btn_light'):
+            self.btn_light.setText(self.lang["theme_light"])
+        
+        timeout_label = self.findChild(QLabel)
+        for label in self.findChildren(QLabel):
+            if "timeout" in label.text().lower() or "Время" in label.text() or "Time" in label.text():
+                label.setText(self.lang["settings_timeout_label"])
+        
+        if hasattr(self, 'poly_check'):
+            self.poly_check.setText(self.lang["settings_poly_check"])
+        if hasattr(self, 'network_check'):
+            self.network_check.setText(self.lang["settings_network_check"])
+        if hasattr(self, 'btn_close_settings'):
+            self.btn_close_settings.setText(self.lang["btn_close"])
     
     def apply_theme(self, theme_name: str):
         """Применить тему немедленно"""
@@ -1718,6 +1889,14 @@ class RedSandSecureGUI(QMainWindow):
         # Обновляем тексты на главном экране через метод update_language
         if hasattr(self, 'main_selector'):
             self.main_selector.update_language()
+        
+        # Обновляем панель антивируса если она открыта
+        if hasattr(self, 'antivirus_panel') and self.antivirus_panel.isVisible():
+            self.antivirus_panel.update_language()
+        
+        # Обновляем панель анализа если она открыта
+        if hasattr(self, 'analysis_panel') and self.analysis_panel.isVisible():
+            self.analysis_panel.update_language()
         
         # Убрано всплывающее окно - язык меняется без уведомления
     
