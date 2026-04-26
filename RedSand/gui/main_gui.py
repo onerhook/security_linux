@@ -32,6 +32,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
+# Импорт компонентов ядра
+from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
+
 
 THEMES = {
     "Светлая": {
