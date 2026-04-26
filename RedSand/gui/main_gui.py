@@ -45,20 +45,6 @@ THEMES = {
         "danger": "#ff4444",
         "border": "#2a2a4e",
         "card_bg": "#1f1f3a"
-    },
-    "Светлая": {
-        "bg_primary": "#ffffff",
-        "bg_secondary": "#f5f7fa",
-        "bg_tertiary": "#e4e9f2",
-        "accent": "#2563eb",
-        "accent_hover": "#1d4ed8",
-        "text_primary": "#1e293b",
-        "text_secondary": "#64748b",
-        "success": "#059669",
-        "warning": "#d97706",
-        "danger": "#dc2626",
-        "border": "#e2e8f0",
-        "card_bg": "#f8fafc"
     }
 }
 
@@ -511,7 +497,7 @@ class AntivirusPanel(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Заголовок
-        title_label = QLabel("🛡️ АНТИВИРУС РЕАЛЬНОГО ВРЕМЕНИ")
+        title_label = QLabel("🛡️ АНТИВИРУС")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -547,6 +533,24 @@ class AntivirusPanel(QWidget):
         ])
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
+        
+        # Кнопки управления папками
+        folder_btn_layout = QHBoxLayout()
+        
+        self.btn_add_folder = QPushButton("📁 Добавить папку")
+        self.btn_add_folder.setObjectName("secondaryBtn")
+        self.btn_add_folder.clicked.connect(self.add_folder)
+        folder_btn_layout.addWidget(self.btn_add_folder)
+        
+        self.btn_remove_folder = QPushButton("🗑️ Удалить папку")
+        self.btn_remove_folder.setObjectName("dangerBtn")
+        self.btn_remove_folder.clicked.connect(self.remove_folder)
+        self.btn_remove_folder.setEnabled(False)
+        folder_btn_layout.addWidget(self.btn_remove_folder)
+        
+        monitor_layout.addLayout(folder_btn_layout)
+        
+        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
         self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
         self.chk_auto_quarantine.setChecked(True)
@@ -639,6 +643,33 @@ class AntivirusPanel(QWidget):
         """Запись события в лог"""
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.av_log.append(f"[{timestamp}] {message}")
+    
+    def add_folder(self):
+        """Добавить папку для мониторинга"""
+        folder = QFileDialog.getExistingDirectory(self, "Выберите папку для мониторинга")
+        if folder:
+            # Проверяем, нет ли уже такой папки в списке
+            for i in range(self.folder_list.count()):
+                if os.path.expanduser(self.folder_list.item(i).text()) == folder:
+                    QMessageBox.information(self, "Информация", "Эта папка уже добавлена")
+                    return
+            
+            self.folder_list.addItem(folder)
+            self.log_event(f"Добавлена папка: {folder}")
+    
+    def remove_folder(self):
+        """Удалить выбранную папку из мониторинга"""
+        selected_items = self.folder_list.selectedItems()
+        if not selected_items:
+            return
+        
+        for item in selected_items:
+            row = self.folder_list.row(item)
+            folder_path = item.text()
+            self.folder_list.takeItem(row)
+            self.log_event(f"Удалена папка: {folder_path}")
+        
+        self.btn_remove_folder.setEnabled(False)
 
 
 class AnalysisPanel(QWidget):
@@ -853,7 +884,7 @@ class AnalysisPanel(QWidget):
         # Показываем демо-результаты
         self.results_summary.setVisible(False)
         self.results_table.setVisible(True)
-        self.results_table.setRowCount(6)
+        self.results_table.setRowCount(5)  # Убрали Docker изоляцию
         
         results_data = [
             ("Файл", os.path.basename(file_path)),
@@ -867,10 +898,13 @@ class AnalysisPanel(QWidget):
             self.results_table.setItem(i, 0, QTableWidgetItem(param))
             self.results_table.setItem(i, 1, QTableWidgetItem(value))
         
-        # Обновляем запись в истории
+        # Обновляем запись в истории с правильным scan_time
         if self.parent_ref and len(self.parent_ref.scan_history) > 0:
             last_record = self.parent_ref.scan_history[-1]
-            last_record['status'] = 'CLEAN' if hash(file_path) % 2 == 0 else 'SUSPICIOUS'
+            last_record['scan_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            last_record['threat_level'] = 'CLEAN' if hash(file_path) % 2 == 0 else 'SUSPICIOUS'
+            last_record['detected_threats'] = [] if hash(file_path) % 2 == 0 else ['Pattern match', 'Suspicious behavior']
+            last_record['status'] = last_record['threat_level']  # Для совместимости
             last_record['threats'] = 0 if hash(file_path) % 2 == 0 else 2
         
         self.btn_analyze.setEnabled(True)
@@ -985,12 +1019,29 @@ class ScanHistoryDialog(QDialog):
             status = item_data.get('threat_level', 'UNKNOWN')
             status_item = QTableWidgetItem(status)
             status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
+            status_bg_color = QColor("#1a1a2e")  # Цвет фона для CLEAN
             if status == 'CLEAN':
                 status_item.setForeground(QColor("#00ff88"))
+                status_bg_color = QColor("#059669")
             elif status == 'SUSPICIOUS':
                 status_item.setForeground(QColor("#ffaa00"))
+                status_bg_color = QColor("#d97706")
             elif status == 'MALICIOUS':
                 status_item.setForeground(QColor("#ff4444"))
+                status_bg_color = QColor("#dc2626")
+            
+            # Делаем текст белым на цветном фоне
+            if status != 'CLEAN':
+                status_item.setBackground(status_bg_color)
+                status_item.setForeground(QColor("#ffffff"))
+            else:
+                status_item.setBackground(QColor("#059669"))
+                status_item.setForeground(QColor("#ffffff"))
+                
+            status_item.setTextAlignment(Qt.AlignCenter)
+            font = status_item.font()
+            font.setBold(True)
+            status_item.setFont(font)
             self.history_table.setItem(row, 2, status_item)
             
             # Угрозы
@@ -1050,12 +1101,13 @@ class QuarantineDialog(QDialog):
         
         # Таблица файлов
         self.quarantine_table = QTableWidget()
-        self.quarantine_table.setColumnCount(4)
-        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Причина", "ID"])
+        self.quarantine_table.setColumnCount(5)
+        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
         self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
-        self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
-        self.quarantine_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.ResizeToContents)
         self.quarantine_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.quarantine_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.quarantine_table.verticalHeader().setDefaultSectionSize(60)
@@ -1131,15 +1183,22 @@ class QuarantineDialog(QDialog):
             file_item.setFont(font)
             self.quarantine_table.setItem(row, 1, file_item)
             
+            # Оригинальный путь
+            path_item = QTableWidgetItem(item_data.get('original_path', 'N/A'))
+            path_item.setFlags(path_item.flags() & ~Qt.ItemIsEditable)
+            path_item.setToolTip(item_data.get('original_path', ''))
+            self.quarantine_table.setItem(row, 2, path_item)
+            
             # Причина
             reason_item = QTableWidgetItem(item_data.get('reason', 'Unknown'))
             reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
-            self.quarantine_table.setItem(row, 2, reason_item)
+            reason_item.setToolTip(f"Полная причина: {item_data.get('reason', 'Unknown')}")
+            self.quarantine_table.setItem(row, 3, reason_item)
             
             # ID (индекс для доступа)
             id_item = QTableWidgetItem(str(idx))
             id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
-            self.quarantine_table.setItem(row, 3, id_item)
+            self.quarantine_table.setItem(row, 4, id_item)
     
     def on_selection_changed(self):
         """Обработка выбора элемента"""
@@ -1247,23 +1306,16 @@ class SettingsDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Тема оформления
+        # Тема оформления - только тёмная тема
         theme_group = QGroupBox("Тема оформления")
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton("🌙 Тёмная")
+        self.btn_dark = QPushButton("🌙 Тёмная (единственная)")
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
-        self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
+        self.btn_dark.setChecked(True)
+        self.btn_dark.setEnabled(False)  # Отключена, так как тема только одна
         theme_layout.addWidget(self.btn_dark)
-        
-        self.btn_light = QPushButton("☀️ Светлая")
-        self.btn_light.setObjectName("secondaryBtn")
-        self.btn_light.setCheckable(True)
-        self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
-        self.btn_light.clicked.connect(lambda: self.apply_theme('Светлая'))
-        theme_layout.addWidget(self.btn_light)
         
         layout.addWidget(theme_group)
         
@@ -1295,24 +1347,10 @@ class SettingsDialog(QDialog):
         
         # Кнопки удалены - тема применяется сразу при нажатии
     
-    def apply_theme(self, theme_name: str):
-        """Применить тему оформления"""
-        if not self.parent_ref or not hasattr(self.parent_ref, 'settings'):
-            return
-        self.parent_ref.settings['theme'] = theme_name
-        if theme_name == 'Тёмная':
-            self.btn_dark.setChecked(True)
-            self.btn_light.setChecked(False)
-        else:
-            self.btn_dark.setChecked(False)
-            self.btn_light.setChecked(True)
-        self.parent_ref.apply_stylesheet()
-        self.parent_ref.save_settings()
-    
     def get_settings(self):
         """Получить текущие настройки"""
         return {
-            'theme': 'Тёмная' if self.btn_dark.isChecked() else 'Светлая',
+            'theme': 'Тёмная',  # Только одна тема
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked()
