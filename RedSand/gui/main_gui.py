@@ -762,15 +762,13 @@ class AntivirusPanel(QWidget):
         
         self.btn_add_folder = QPushButton(self.tr("Add"))
         self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setFixedHeight(32)
-        self.btn_add_folder.setFixedWidth(100)
+        self.btn_add_folder.setFixedHeight(45)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
         self.btn_remove_folder = QPushButton(self.tr("Remove"))
         self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setFixedHeight(32)
-        self.btn_remove_folder.setFixedWidth(100)
+        self.btn_remove_folder.setFixedHeight(45)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
@@ -1800,8 +1798,8 @@ class RedSandSecureGUI(QMainWindow):
     
     def setup_ui(self):
         """Настройка пользовательского интерфейса"""
-        self.setWindowTitle("RedSand Secure - Профессиональный анализ malware")
-        self.showMaximized()
+        self.setWindowTitle("RedSand Secure - Professional Malware Analysis")
+        self.showFullScreen()
         
         # Стек для переключения между экранами
         self.stack = QStackedWidget()
