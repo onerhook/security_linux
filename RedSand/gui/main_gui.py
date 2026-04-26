@@ -692,7 +692,7 @@ class AntivirusPanel(QWidget):
         monitor_group = QGroupBox("Мониторинг папок")
         monitor_layout = QVBoxLayout(monitor_group)
         
-        # Список папок - сначала список
+        # Список папок - сначала список с отступом снизу
         self.folder_list = QListWidget()
         self.folder_list.addItems([
             "~/Downloads",
@@ -702,8 +702,11 @@ class AntivirusPanel(QWidget):
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
         
-        # Кнопки управления папками - под списком папок
-        folder_btn_layout = QHBoxLayout()
+        # Кнопки управления папками - под списком папок, немного выше чтобы не перекрывалось
+        folder_btn_widget = QWidget()
+        folder_btn_layout = QHBoxLayout(folder_btn_widget)
+        folder_btn_layout.setContentsMargins(0, 5, 0, 10)
+        folder_btn_layout.setSpacing(10)
         
         self.btn_add_folder = QPushButton("📁 Добавить")
         self.btn_add_folder.setObjectName("secondaryBtn")
@@ -718,7 +721,7 @@ class AntivirusPanel(QWidget):
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
-        monitor_layout.addLayout(folder_btn_layout)
+        monitor_layout.addWidget(folder_btn_widget)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -1130,6 +1133,23 @@ class AnalysisPanel(QWidget):
         colors = {'INFO': '#4CAF50', 'WARNING': '#FF9800', 'ERROR': '#F44336', 'SUCCESS': '#00BCD4'}
         color = colors.get(level, '#FFFFFF')
         self.log_text.append(f'<span style="color: {color};">[{timestamp}] [{level}] {message}</span>')
+    
+    def update_texts(self):
+        """Обновление текстов при смене языка"""
+        if not self.parent_ref:
+            return
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
+        
+        # Обновляем заголовок
+        title_widgets = self.findChildren(QLabel, "titleLabel")
+        for widget in title_widgets:
+            if widget.objectName() == "titleLabel" and ("АНАЛИЗ" in widget.text() or "FILE ANALYSIS" in widget.text()):
+                widget.setText(lang["analysis_mode"])
+        
+        # Обновляем кнопки и лейблы
+        self.btn_select_file.setText(lang["select_file"])
+        self.btn_analyze.setText(lang["analyze_btn"])
 
 
 class ScanHistoryDialog(QDialog):
@@ -1342,7 +1362,10 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопки "Восстановить" и "Удалить навсегда" по центру
-        center_layout = QHBoxLayout()
+        center_widget = QWidget()
+        center_layout = QHBoxLayout(center_widget)
+        center_layout.setContentsMargins(0, 0, 0, 0)
+        center_layout.setSpacing(10)
         self.btn_restore = QPushButton("♻️ Restore")
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
@@ -1357,7 +1380,7 @@ class QuarantineDialog(QDialog):
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
         
-        btn_layout.addLayout(center_layout)
+        btn_layout.addWidget(center_widget)
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
