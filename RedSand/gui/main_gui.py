@@ -760,23 +760,23 @@ class AntivirusPanel(QWidget):
         folder_btn_layout.setContentsMargins(0, 0, 0, 5)
         folder_btn_layout.setSpacing(10)
         
-        self.btn_add_folder = QPushButton("📁 Добавить")
+        self.btn_add_folder = QPushButton(self.tr("Add"))
         self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setFixedHeight(36)
-        self.btn_add_folder.setFixedWidth(120)
+        self.btn_add_folder.setFixedHeight(32)
+        self.btn_add_folder.setFixedWidth(100)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
-        self.btn_remove_folder = QPushButton("🗑️ Удалить")
+        self.btn_remove_folder = QPushButton(self.tr("Remove"))
         self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setFixedHeight(36)
-        self.btn_remove_folder.setFixedWidth(120)
+        self.btn_remove_folder.setFixedHeight(32)
+        self.btn_remove_folder.setFixedWidth(100)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addWidget(folder_btn_widget)
-        monitor_layout.addSpacing(5)
+        monitor_layout.addSpacing(15)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -960,7 +960,7 @@ class AnalysisPanel(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Заголовок
-        title_label = QLabel("🔍 АНАЛИЗ ФАЙЛОВ")
+        title_label = QLabel("🔍 FILE ANALYSIS")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -974,16 +974,16 @@ class AnalysisPanel(QWidget):
         left_layout.setSpacing(20)
         
         # Выбор файла
-        file_group = QGroupBox("Шаг 1: Выберите файл")
+        file_group = QGroupBox("Step 1: Select File")
         file_layout = QVBoxLayout(file_group)
         
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText("Файл еще не выбран... или перетащите сюда")
+        self.file_path_edit.setPlaceholderText("No file selected... or drag and drop here")
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        self.btn_select_file = QPushButton("📁 Выбрать файл")
+        self.btn_select_file = QPushButton("📁 Select File")
         self.btn_select_file.setObjectName("actionBtn")
         self.btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(self.btn_select_file)
@@ -991,11 +991,11 @@ class AnalysisPanel(QWidget):
         left_layout.addWidget(file_group)
         
         # Настройки анализа
-        settings_group = QGroupBox("Шаг 2: Настройки анализа")
+        settings_group = QGroupBox("Step 2: Analysis Settings")
         settings_layout = QVBoxLayout(settings_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Время анализа:")
+        timeout_label = QLabel("Analysis Time:")
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1005,36 +1005,36 @@ class AnalysisPanel(QWidget):
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
+        self.poly_check = QCheckBox("Create file variants for analysis")
+        self.poly_check.setToolTip("Helps detect complex viruses")
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
+        self.network_check = QCheckBox("Disable network (recommended)")
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
+        self.network_check.setToolTip("Protects your network during analysis")
         settings_layout.addWidget(self.network_check)
         
-        docker_info = QLabel("ℹ️ Все файлы анализируются в изолированном Docker контейнере")
+        docker_info = QLabel("ℹ️ All files are analyzed in an isolated Docker container")
         docker_info.setStyleSheet("color: #00ff88; font-style: italic;")
         settings_layout.addWidget(docker_info)
         
         left_layout.addWidget(settings_group)
         
         # Кнопка анализа
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton("🚀 START ANALYSIS")
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.setMinimumHeight(60)
         self.btn_analyze.clicked.connect(self.start_analysis)
         left_layout.addWidget(self.btn_analyze)
         
         # Прогресс
-        progress_group = QGroupBox("Прогресс анализа")
+        progress_group = QGroupBox("Analysis Progress")
         progress_layout = QVBoxLayout(progress_group)
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel("Ожидание...")
+        self.progress_label = QLabel("Waiting...")
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
@@ -1055,23 +1055,23 @@ class AnalysisPanel(QWidget):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setFont(QFont("Consolas", 12))
-        self.log_text.setPlaceholderText("Здесь будет отображаться ход анализа...")
+        self.log_text.setPlaceholderText("Analysis progress will be displayed here...")
         logs_layout.addWidget(self.log_text)
         # Увеличена ширина кнопки вкладки Журнал через stylesheet
         logs_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(logs_widget, "📋 Журнал      ")
+        self.tabs.addTab(logs_widget, "📋 Log      ")
         
         # Вкладка результатов
         results_widget = QWidget()
         results_layout = QVBoxLayout(results_widget)
-        self.results_summary = QLabel("Результаты анализа появятся здесь после завершения...")
+        self.results_summary = QLabel("Analysis results will appear here after completion...")
         self.results_summary.setAlignment(Qt.AlignCenter)
         self.results_summary.setFont(QFont("Segoe UI", 16))
         self.results_summary.setStyleSheet("color: #666; padding: 50px;")
         results_layout.addWidget(self.results_summary)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
-        self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
+        self.results_table.setHorizontalHeaderLabels(["Parameter", "Value"])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.results_table.horizontalHeader().setMinimumSectionSize(250)  # Увеличена ширина первой колонки
@@ -1082,7 +1082,7 @@ class AnalysisPanel(QWidget):
         results_layout.addWidget(self.results_table)
         # Увеличена ширина кнопки вкладки Результаты через stylesheet
         results_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(results_widget, "📊 Результаты   ")
+        self.tabs.addTab(results_widget, "📊 Results   ")
         
         right_layout.addWidget(self.tabs)
         main_splitter.addWidget(right_widget)
@@ -1092,7 +1092,7 @@ class AnalysisPanel(QWidget):
         layout.addWidget(main_splitter)
         
         # Кнопка назад
-        btn_back = QPushButton("← Назад к главному меню")
+        btn_back = QPushButton("← Back to Main Menu")
         btn_back.setObjectName("secondaryBtn")
         btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
         layout.addWidget(btn_back)
@@ -1302,14 +1302,14 @@ class ScanHistoryDialog(QDialog):
         self.btn_refresh.clicked.connect(self.load_history)
         btn_layout.addWidget(self.btn_refresh)
         
-        self.btn_clear = QPushButton("🗑️ Очистить историю")
+        self.btn_clear = QPushButton(self.tr("Clear History"))
         self.btn_clear.setObjectName("dangerBtn")
         self.btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(self.btn_clear)
         
         btn_layout.addStretch()
         
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
@@ -1490,14 +1490,14 @@ class QuarantineDialog(QDialog):
         center_layout = QHBoxLayout(center_widget)
         center_layout.setContentsMargins(0, 0, 0, 0)
         center_layout.setSpacing(10)
-        self.btn_restore = QPushButton("♻️ Восстановить")
+        self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
-        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
         self.btn_delete.setFixedHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
@@ -1508,7 +1508,7 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
@@ -1687,7 +1687,7 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.settings = settings
         self.parent_ref = parent  # Сохраняем ссылку на родителя
-        self.setWindowTitle("⚙ Настройки")
+        self.setWindowTitle(self.tr("Settings"))
         self.setMinimumSize(600, 500)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1697,37 +1697,37 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title = QLabel("⚙ Настройки приложения")
+        title = QLabel(self.tr("Application Settings"))
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
         # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox("Тема оформления")
+        theme_group = QGroupBox(self.tr("Theme"))
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton("🌙 Тёмная")
+        self.btn_dark = QPushButton(self.tr("Dark"))
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
-        self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
+        self.btn_dark.setChecked(self.settings.get('theme', 'Dark') == 'Dark')
+        self.btn_dark.clicked.connect(lambda: self.apply_theme('Dark'))
         theme_layout.addWidget(self.btn_dark)
         
-        self.btn_light = QPushButton("☀️ Светлая")
+        self.btn_light = QPushButton(self.tr("Light"))
         self.btn_light.setObjectName("secondaryBtn")
         self.btn_light.setCheckable(True)
-        self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
-        self.btn_light.clicked.connect(lambda: self.apply_theme('Светлая'))
+        self.btn_light.setChecked(self.settings.get('theme', 'Dark') == 'Light')
+        self.btn_light.clicked.connect(lambda: self.apply_theme('Light'))
         theme_layout.addWidget(self.btn_light)
         
         layout.addWidget(theme_group)
         
         # Настройки анализа
-        analysis_group = QGroupBox("Настройки анализа")
+        analysis_group = QGroupBox(self.tr("Analysis Settings"))
         analysis_layout = QVBoxLayout(analysis_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Время анализа (сек):")
+        timeout_label = QLabel(self.tr("Analysis Timeout (sec):"))
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1736,18 +1736,18 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
+        self.poly_check = QCheckBox(self.tr("Create file variants for analysis"))
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
         analysis_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть во время анализа")
+        self.network_check = QCheckBox(self.tr("Disable network during analysis"))
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         analysis_layout.addWidget(self.network_check)
         
         layout.addWidget(analysis_group)
         
         # Кнопка закрытия
-        self.btn_close_settings = QPushButton("Закрыть")
+        self.btn_close_settings = QPushButton(self.tr("Close"))
         self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
