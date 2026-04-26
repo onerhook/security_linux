@@ -203,6 +203,11 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         color: white;
     }}
     
+    /* Стиль для placeholder текста в QLineEdit */
+    QLineEdit::placeholder {{
+        color: {theme['text_secondary']};
+    }}
+    
     QGroupBox {{
         font-weight: bold;
         font-size: 16px;
@@ -1156,8 +1161,9 @@ class QuarantineDialog(QDialog):
         self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
         layout.addWidget(self.quarantine_table)
         
-        # Кнопки управления - все в одну линию с правильным расположением
+        # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
         btn_layout = QHBoxLayout()
+        btn_layout.setContentsMargins(0, 10, 0, 10)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
@@ -1169,20 +1175,22 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопки "Восстановить" и "Удалить навсегда" по центру
+        center_layout = QHBoxLayout()
         self.btn_restore = QPushButton("♻️ Восстановить")
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
-        btn_layout.addWidget(self.btn_restore)
+        center_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton("🗑️ Удалить навсегда")
         self.btn_delete.setObjectName("dangerBtn")
         self.btn_delete.setFixedHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
-        btn_layout.addWidget(self.btn_delete)
+        center_layout.addWidget(self.btn_delete)
         
+        btn_layout.addLayout(center_layout)
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
