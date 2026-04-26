@@ -45,6 +45,20 @@ THEMES = {
         "danger": "#ff4444",
         "border": "#2a2a4e",
         "card_bg": "#1f1f3a"
+    },
+    "Светлая": {
+        "bg_primary": "#f5f7fa",
+        "bg_secondary": "#ffffff",
+        "bg_tertiary": "#e8ecf1",
+        "accent": "#e94560",
+        "accent_hover": "#d63651",
+        "text_primary": "#1a1a2e",
+        "text_secondary": "#4a5568",
+        "success": "#059669",
+        "warning": "#d97706",
+        "danger": "#dc2626",
+        "border": "#cbd5e1",
+        "card_bg": "#ffffff"
     }
 }
 
@@ -108,10 +122,13 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         min-width: 120px;
         min-height: 45px;
         font-size: 14px;
+        border: 2px solid {theme['border']};
     }}
     
     QPushButton#secondaryBtn:hover {{
-        background-color: {theme['border']};
+        background-color: {theme['accent']};
+        color: white;
+        border-color: {theme['accent']};
     }}
     
     QPushButton#actionBtn {{
@@ -414,8 +431,8 @@ class MainModeSelector(QWidget):
         modes_layout.setSpacing(40)
         modes_layout.setAlignment(Qt.AlignCenter)
         
-        # Кнопка Антивирус
-        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС\nРеального времени")
+        # Кнопка Антивирус - убрано "Реального времени"
+        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС")
         self.btn_antivirus.setObjectName("modeBtn")
         self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
         self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
@@ -1221,7 +1238,8 @@ class QuarantineDialog(QDialog):
             return
         
         row = selected_rows[0].row()
-        id_item = self.quarantine_table.item(row, 3)
+        # Берем ID из колонки 4 (индекс для доступа)
+        id_item = self.quarantine_table.item(row, 4)
         if not id_item:
             return
         
@@ -1253,7 +1271,8 @@ class QuarantineDialog(QDialog):
             return
         
         row = selected_rows[0].row()
-        id_item = self.quarantine_table.item(row, 3)
+        # Берем ID из колонки 4 (индекс для доступа)
+        id_item = self.quarantine_table.item(row, 4)
         if not id_item:
             return
         
@@ -1306,16 +1325,23 @@ class SettingsDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Тема оформления - только тёмная тема
+        # Тема оформления - две темы с мгновенным применением
         theme_group = QGroupBox("Тема оформления")
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton("🌙 Тёмная (единственная)")
+        self.btn_dark = QPushButton("🌙 Тёмная")
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(True)
-        self.btn_dark.setEnabled(False)  # Отключена, так как тема только одна
+        self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
+        self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
         theme_layout.addWidget(self.btn_dark)
+        
+        self.btn_light = QPushButton("☀️ Светлая")
+        self.btn_light.setObjectName("secondaryBtn")
+        self.btn_light.setCheckable(True)
+        self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
+        self.btn_light.clicked.connect(lambda: self.apply_theme('Светлая'))
+        theme_layout.addWidget(self.btn_light)
         
         layout.addWidget(theme_group)
         
@@ -1347,10 +1373,21 @@ class SettingsDialog(QDialog):
         
         # Кнопки удалены - тема применяется сразу при нажатии
     
+    def apply_theme(self, theme_name: str):
+        """Применить тему немедленно"""
+        if self.parent_ref:
+            self.parent_ref.settings['theme'] = theme_name
+            self.parent_ref.apply_stylesheet()
+            self.parent_ref.save_settings()
+            
+            # Обновляем состояние кнопок
+            self.btn_dark.setChecked(theme_name == 'Тёмная')
+            self.btn_light.setChecked(theme_name == 'Светлая')
+    
     def get_settings(self):
         """Получить текущие настройки"""
         return {
-            'theme': 'Тёмная',  # Только одна тема
+            'theme': self.parent_ref.settings.get('theme', 'Тёмная'),
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked()
