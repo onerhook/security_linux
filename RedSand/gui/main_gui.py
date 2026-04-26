@@ -394,7 +394,28 @@ LANGUAGES = {
         "network_check": "Отключать сеть (рекомендуется)",
         "monitored_folders": "Мониторинг папок:",
         "auto_quarantine": "Авто-карантин угроз",
-        "scan_on_access": "Сканирование при доступе"
+        "scan_on_access": "Сканирование при доступе",
+        "quarantine_title": "⚠️ Карантин",
+        "quarantine_header": "🛡️ Карантин - Обнаруженные угрозы",
+        "quarantine_info": "Файлы в карантине обезврежены и не могут нанести вред системе.",
+        "quarantine_date": "Дата",
+        "quarantine_filename": "Имя файла",
+        "quarantine_path": "Оригинальный путь",
+        "quarantine_reason": "Причина",
+        "quarantine_id": "ID",
+        "quarantine_empty": "Карантин пуст",
+        "btn_refresh": "🔄 Обновить",
+        "btn_restore": "♻️ Восстановить",
+        "btn_delete": "🗑️ Удалить навсегда",
+        "btn_close": "Закрыть",
+        "restore_confirm_title": "Подтверждение восстановления",
+        "restore_confirm_msg": "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
+        "restore_success": "Файл успешно восстановлен!",
+        "restore_error": "Не удалось восстановить файл",
+        "delete_confirm_title": "Подтверждение удаления",
+        "delete_confirm_msg": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+        "delete_success": "Файл успешно удален!",
+        "error_title": "Ошибка"
     },
     "English": {
         "title": "RedSand Secure",
@@ -421,7 +442,28 @@ LANGUAGES = {
         "network_check": "Disable network (recommended)",
         "monitored_folders": "Monitored Folders:",
         "auto_quarantine": "Auto-quarantine threats",
-        "scan_on_access": "Scan on access"
+        "scan_on_access": "Scan on access",
+        "quarantine_title": "⚠️ Quarantine",
+        "quarantine_header": "🛡️ Quarantine - Detected Threats",
+        "quarantine_info": "Files in quarantine are neutralized and cannot harm the system.",
+        "quarantine_date": "Date",
+        "quarantine_filename": "File Name",
+        "quarantine_path": "Original Path",
+        "quarantine_reason": "Reason",
+        "quarantine_id": "ID",
+        "quarantine_empty": "Quarantine is empty",
+        "btn_refresh": "🔄 Refresh",
+        "btn_restore": "♻️ Restore",
+        "btn_delete": "🗑️ Delete Permanently",
+        "btn_close": "Close",
+        "restore_confirm_title": "Restore Confirmation",
+        "restore_confirm_msg": "Are you sure you want to restore this file?\nMake sure it is safe!",
+        "restore_success": "File restored successfully!",
+        "restore_error": "Failed to restore file",
+        "delete_confirm_title": "Delete Confirmation",
+        "delete_confirm_msg": "Are you sure you want to delete this file PERMANENTLY?\nThis action is irreversible!",
+        "delete_success": "File deleted successfully!",
+        "error_title": "Error"
     }
 }
 
@@ -1128,7 +1170,9 @@ class QuarantineDialog(QDialog):
         super().__init__(parent)
         self.quarantine_manager = quarantine_manager
         self.parent_ref = parent
-        self.setWindowTitle("⚠️ Карантин")
+        self.current_lang = parent.current_lang if parent else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.setWindowTitle(self.lang["quarantine_title"])
         self.setMinimumSize(900, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1138,19 +1182,25 @@ class QuarantineDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        title = QLabel(self.lang["quarantine_header"])
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
+        info_label = QLabel(self.lang["quarantine_info"])
         info_label.setStyleSheet("color: #666; font-style: italic;")
         layout.addWidget(info_label)
         
         # Таблица файлов - увеличенная, занимает больше места
         self.quarantine_table = QTableWidget()
         self.quarantine_table.setColumnCount(5)
-        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
+        self.quarantine_table.setHorizontalHeaderLabels([
+            self.lang["quarantine_date"], 
+            self.lang["quarantine_filename"], 
+            self.lang["quarantine_path"], 
+            self.lang["quarantine_reason"], 
+            self.lang["quarantine_id"]
+        ])
         self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
@@ -1168,7 +1218,7 @@ class QuarantineDialog(QDialog):
         btn_layout.setContentsMargins(0, 10, 0, 10)
         
         # Кнопка "Обновить" слева
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton(self.lang["btn_refresh"])
         self.btn_refresh.setObjectName("secondaryBtn")
         self.btn_refresh.setFixedHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
@@ -1178,14 +1228,14 @@ class QuarantineDialog(QDialog):
         
         # Кнопки "Восстановить" и "Удалить навсегда" по центру
         center_layout = QHBoxLayout()
-        self.btn_restore = QPushButton("♻️ Восстановить")
+        self.btn_restore = QPushButton(self.lang["btn_restore"])
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
-        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete = QPushButton(self.lang["btn_delete"])
         self.btn_delete.setObjectName("dangerBtn")
         self.btn_delete.setFixedHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
@@ -1196,7 +1246,7 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.lang["btn_close"])
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
@@ -1218,7 +1268,7 @@ class QuarantineDialog(QDialog):
         if not items:
             row = self.quarantine_table.rowCount()
             self.quarantine_table.insertRow(row)
-            item = QTableWidgetItem("Карантин пуст")
+            item = QTableWidgetItem(self.lang["quarantine_empty"])
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             self.quarantine_table.setItem(row, 0, item)
             return
@@ -1293,18 +1343,18 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.question(self, "Подтверждение восстановления",
-                "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
+            reply = QMessageBox.question(self, self.lang["restore_confirm_title"],
+                self.lang["restore_confirm_msg"],
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
                 if self.quarantine_manager.restore_from_quarantine(quarantine_path):
-                    QMessageBox.information(self, "Восстановление", "Файл успешно восстановлен!")
+                    QMessageBox.information(self, self.lang["btn_restore"], self.lang["restore_success"])
                     self.load_quarantine()
                 else:
-                    QMessageBox.critical(self, "Ошибка", "Не удалось восстановить файл")
+                    QMessageBox.critical(self, self.lang["error_title"], self.lang["restore_error"])
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка восстановления: {str(e)}")
+            QMessageBox.critical(self, self.lang["error_title"], f"{self.lang['restore_error']}: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1326,8 +1376,8 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.warning(self, "Подтверждение удаления",
-                "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+            reply = QMessageBox.warning(self, self.lang["delete_confirm_title"],
+                self.lang["delete_confirm_msg"],
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
@@ -1339,10 +1389,10 @@ class QuarantineDialog(QDialog):
                 del self.quarantine_manager.quarantined_files[quarantine_path]
                 self.quarantine_manager._save_quarantine_log()
                 
-                QMessageBox.information(self, "Удаление", "Файл успешно удален!")
+                QMessageBox.information(self, self.lang["btn_delete"], self.lang["delete_success"])
                 self.load_quarantine()
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка удаления: {str(e)}")
+            QMessageBox.critical(self, self.lang["error_title"], f"{self.lang['btn_delete']}: {str(e)}")
 
 
 class SettingsDialog(QDialog):
@@ -1510,7 +1560,15 @@ class RedSandSecureGUI(QMainWindow):
             self.main_selector.btn_ru.setChecked(language == "Русский")
             self.main_selector.btn_en.setChecked(language == "English")
         
-        # TODO: Обновить тексты на всех экранах (можно добавить полноценную локализацию)
+        # Обновляем тексты на главном экране
+        if hasattr(self, 'main_selector'):
+            lang = LANGUAGES.get(language, LANGUAGES["Русский"])
+            self.main_selector.btn_antivirus.setText(lang["antivirus_mode"])
+            self.main_selector.btn_analysis.setText(lang["analysis_mode"])
+            self.main_selector.btn_settings.setText(lang["settings"])
+            self.main_selector.btn_history.setText(lang["history"])
+            self.main_selector.btn_quarantine.setText(lang["quarantine"])
+        
         # Убрано всплывающее окно - язык меняется без уведомления
     
     def open_settings(self):
@@ -1533,7 +1591,8 @@ class RedSandSecureGUI(QMainWindow):
             dialog = QuarantineDialog(quarantine_manager=self.quarantine_manager, parent=self)
             dialog.exec_()
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Не удалось открыть карантин:\n{str(e)}")
+            lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+            QMessageBox.critical(self, lang["error_title"], f"{lang['error_title']}: {str(e)}")
     
     def apply_stylesheet(self):
         """Применить таблицу стилей"""
