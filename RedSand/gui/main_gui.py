@@ -281,6 +281,14 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         font-size: 14px;
     }}
     
+    QSpinBox::disabled, QComboBox::disabled, QLineEdit::disabled {{
+        color: {theme['text_secondary']};
+    }}
+    
+    QLineEdit::placeholder {{
+        color: {theme['text_secondary']};
+    }}
+    
     QSpinBox:focus, QComboBox:focus, QLineEdit:focus {{
         border-color: {theme['accent']};
     }}
@@ -1148,23 +1156,19 @@ class QuarantineDialog(QDialog):
         self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
         layout.addWidget(self.quarantine_table)
         
-        # Кнопки управления - все в одну линию
+        # Кнопки управления - все в одну линию с правильным расположением
         btn_layout = QHBoxLayout()
         
+        # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
         self.btn_refresh.setObjectName("secondaryBtn")
         self.btn_refresh.setFixedHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
         btn_layout.addWidget(self.btn_refresh)
         
-        self.btn_close = QPushButton("Закрыть")
-        self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.setFixedHeight(45)
-        self.btn_close.clicked.connect(self.accept)
-        btn_layout.addWidget(self.btn_close)
-        
         btn_layout.addStretch()
         
+        # Кнопки "Восстановить" и "Удалить навсегда" по центру
         self.btn_restore = QPushButton("♻️ Восстановить")
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
@@ -1178,6 +1182,15 @@ class QuarantineDialog(QDialog):
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         btn_layout.addWidget(self.btn_delete)
+        
+        btn_layout.addStretch()
+        
+        # Кнопка "Закрыть" справа
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.setFixedHeight(45)
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
         
         layout.addLayout(btn_layout)
         
@@ -1388,9 +1401,12 @@ class SettingsDialog(QDialog):
         
         layout.addWidget(analysis_group)
         
-        layout.addStretch()
-        
-        # Кнопки удалены - тема применяется сразу при нажатии
+        # Кнопка закрытия
+        self.btn_close_settings = QPushButton("Закрыть")
+        self.btn_close_settings.setObjectName("secondaryBtn")
+        self.btn_close_settings.setFixedHeight(45)
+        self.btn_close_settings.clicked.connect(self.accept)
+        layout.addWidget(self.btn_close_settings)
     
     def apply_theme(self, theme_name: str):
         """Применить тему немедленно"""
