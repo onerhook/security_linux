@@ -702,10 +702,10 @@ class AntivirusPanel(QWidget):
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
         
-        # Кнопки управления папками - под списком папок, немного выше чтобы не перекрывалось
+        # Кнопки управления папками - под списком папок, подняты выше чтобы уголки сходились
         folder_btn_widget = QWidget()
         folder_btn_layout = QHBoxLayout(folder_btn_widget)
-        folder_btn_layout.setContentsMargins(0, 5, 0, 10)
+        folder_btn_layout.setContentsMargins(0, 0, 0, 5)
         folder_btn_layout.setSpacing(10)
         
         self.btn_add_folder = QPushButton("📁 Добавить")
@@ -722,6 +722,7 @@ class AntivirusPanel(QWidget):
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addWidget(folder_btn_widget)
+        monitor_layout.addSpacing(5)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
