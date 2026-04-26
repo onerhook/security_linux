@@ -1177,7 +1177,7 @@ class ScanHistoryDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton("🔄 Refresh")
         self.btn_refresh.setObjectName("secondaryBtn")
         self.btn_refresh.clicked.connect(self.load_history)
         btn_layout.addWidget(self.btn_refresh)
@@ -1189,7 +1189,7 @@ class ScanHistoryDialog(QDialog):
         
         btn_layout.addStretch()
         
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton("Close")
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
@@ -1293,7 +1293,7 @@ class QuarantineDialog(QDialog):
         super().__init__(parent)
         self.quarantine_manager = quarantine_manager
         self.parent_ref = parent
-        self.setWindowTitle("⚠️ Карантин")
+        self.setWindowTitle("⚠️ Quarantine")
         self.setMinimumSize(900, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1303,19 +1303,19 @@ class QuarantineDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        title = QLabel("🛡️ Quarantine - Detected Threats")
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
+        info_label = QLabel("Files in quarantine are neutralized and cannot harm the system.")
         info_label.setStyleSheet("color: #666; font-style: italic;")
         layout.addWidget(info_label)
         
         # Таблица файлов - увеличенная, занимает больше места
         self.quarantine_table = QTableWidget()
         self.quarantine_table.setColumnCount(5)
-        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
+        self.quarantine_table.setHorizontalHeaderLabels(["Date", "File Name", "Original Path", "Reason", "ID"])
         self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
@@ -1333,7 +1333,7 @@ class QuarantineDialog(QDialog):
         btn_layout.setContentsMargins(0, 10, 0, 10)
         
         # Кнопка "Обновить" слева
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton("🔄 Refresh")
         self.btn_refresh.setObjectName("secondaryBtn")
         self.btn_refresh.setFixedHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
@@ -1343,14 +1343,14 @@ class QuarantineDialog(QDialog):
         
         # Кнопки "Восстановить" и "Удалить навсегда" по центру
         center_layout = QHBoxLayout()
-        self.btn_restore = QPushButton("♻️ Восстановить")
+        self.btn_restore = QPushButton("♻️ Restore")
         self.btn_restore.setObjectName("actionBtn")
         self.btn_restore.setFixedHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
-        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete = QPushButton("🗑️ Delete Forever")
         self.btn_delete.setObjectName("dangerBtn")
         self.btn_delete.setFixedHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
@@ -1361,7 +1361,7 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton("Close")
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
@@ -1383,7 +1383,7 @@ class QuarantineDialog(QDialog):
         if not items:
             row = self.quarantine_table.rowCount()
             self.quarantine_table.insertRow(row)
-            item = QTableWidgetItem("Карантин пуст")
+            item = QTableWidgetItem("Quarantine is empty")
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             self.quarantine_table.setItem(row, 0, item)
             return
@@ -1416,7 +1416,7 @@ class QuarantineDialog(QDialog):
             # Причина
             reason_item = QTableWidgetItem(item_data.get('reason', 'Unknown'))
             reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
-            reason_item.setToolTip(f"Полная причина: {item_data.get('reason', 'Unknown')}")
+            reason_item.setToolTip(f"Full reason: {item_data.get('reason', 'Unknown')}")
             self.quarantine_table.setItem(row, 3, reason_item)
             
             # ID (индекс для доступа)
@@ -1458,18 +1458,17 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.question(self, "Подтверждение восстановления",
-                "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
+            reply = QMessageBox.question(self, "Restore Confirmation",
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
                 if self.quarantine_manager.restore_from_quarantine(quarantine_path):
-                    QMessageBox.information(self, "Восстановление", "Файл успешно восстановлен!")
+                    QMessageBox.information(self, "Restoration", "File successfully restored!")
                     self.load_quarantine()
                 else:
-                    QMessageBox.critical(self, "Ошибка", "Не удалось восстановить файл")
+                    QMessageBox.critical(self, "Error", "Failed to restore file")
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка восстановления: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Restoration error: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1491,8 +1490,8 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.warning(self, "Подтверждение удаления",
-                "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+            reply = QMessageBox.warning(self, "Delete Confirmation",
+                "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
@@ -1504,10 +1503,10 @@ class QuarantineDialog(QDialog):
                 del self.quarantine_manager.quarantined_files[quarantine_path]
                 self.quarantine_manager._save_quarantine_log()
                 
-                QMessageBox.information(self, "Удаление", "Файл успешно удален!")
+                QMessageBox.information(self, "Deletion", "File successfully deleted!")
                 self.load_quarantine()
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка удаления: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Deletion error: {str(e)}")
 
 
 class SettingsDialog(QDialog):
