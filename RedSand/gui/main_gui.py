@@ -949,16 +949,6 @@ class ScanHistoryDialog(QDialog):
         
         layout.addLayout(btn_layout)
         
-        # Детали выбранного элемента
-        details_group = QGroupBox("Детали сканирования")
-        details_layout = QVBoxLayout(details_group)
-        self.details_text = QTextEdit()
-        self.details_text.setReadOnly(True)
-        self.details_text.setMaximumHeight(150)
-        self.details_text.setPlaceholderText("Выберите элемент для просмотра деталей...")
-        details_layout.addWidget(self.details_text)
-        layout.addWidget(details_group)
-        
         self.load_history()
     
     def load_history(self):
@@ -1017,22 +1007,8 @@ class ScanHistoryDialog(QDialog):
     
     def on_selection_changed(self):
         """Обработка выбора элемента"""
-        selected_rows = self.history_table.selectedItems()
-        if not selected_rows:
-            self.details_text.clear()
-            return
-        
-        row = selected_rows[0].row()
-        
-        # Показываем детали
-        details = []
-        for col in range(self.history_table.columnCount()):
-            item = self.history_table.item(row, col)
-            if item:
-                header = self.history_table.horizontalHeaderItem(col).text()
-                details.append(f"{header}: {item.text()}")
-        
-        self.details_text.setText("\n".join(details))
+        # Детали больше не отображаются (удален details_text)
+        pass
     
     def clear_history(self):
         """Очистить историю"""
@@ -1177,7 +1153,6 @@ class QuarantineDialog(QDialog):
         self.btn_restore.setEnabled(True)
         self.btn_delete.setEnabled(True)
         
-        # Показываем детали в таблице (убран details_text так как он удален из UI)
         # Детали отображаются прямо в строке таблицы
     
     def restore_selected(self):
@@ -1256,6 +1231,7 @@ class SettingsDialog(QDialog):
     def __init__(self, settings: dict, parent=None):
         super().__init__(parent)
         self.settings = settings
+        self.parent_ref = parent  # Сохраняем ссылку на родителя
         self.setWindowTitle("⚙ Настройки")
         self.setMinimumSize(600, 500)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
@@ -1317,27 +1293,21 @@ class SettingsDialog(QDialog):
         
         layout.addStretch()
         
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
-        buttons.setFixedHeight(55)
-        buttons.button(QDialogButtonBox.Ok).setText("Сохранить")
-        buttons.button(QDialogButtonBox.Cancel).setText("Отмена")
-        buttons.accepted.connect(self.accept)
-        buttons.rejected.connect(self.reject)
-        layout.addWidget(buttons)
+        # Кнопки удалены - тема применяется сразу при нажатии
     
     def apply_theme(self, theme_name: str):
         """Применить тему оформления"""
-        if not self.parent or not hasattr(self.parent, 'settings'):
+        if not self.parent_ref or not hasattr(self.parent_ref, 'settings'):
             return
-        self.parent.settings['theme'] = theme_name
+        self.parent_ref.settings['theme'] = theme_name
         if theme_name == 'Тёмная':
             self.btn_dark.setChecked(True)
             self.btn_light.setChecked(False)
         else:
             self.btn_dark.setChecked(False)
             self.btn_light.setChecked(True)
-        self.parent.apply_stylesheet()
-        self.parent.save_settings()
+        self.parent_ref.apply_stylesheet()
+        self.parent_ref.save_settings()
     
     def get_settings(self):
         """Получить текущие настройки"""
