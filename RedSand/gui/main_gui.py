@@ -386,15 +386,16 @@ LANGUAGES = {
         "save": "Сохранить",
         "cancel": "Отмена",
         "back": "← Назад",
+        "back_to_main": "← Назад к главному меню",
         "theme": "Тема оформления",
         "dark_theme": "Тёмная",
         "light_theme": "Светлая",
         "analysis_time": "Время анализа:",
         "poly_check": "Создавать варианты файла для анализа",
         "network_check": "Отключать сеть (рекомендуется)",
-        "monitored_folders": "Мониторинг папок:",
-        "auto_quarantine": "Авто-карантин угроз",
-        "scan_on_access": "Сканирование при доступе",
+        "monitored_folders": "Мониторинг папок",
+        "auto_quarantine": "Автоматический карантин угроз",
+        "scan_on_access": "Сканирование при доступе к файлу",
         "quarantine_title": "⚠️ Карантин",
         "quarantine_header": "🛡️ Карантин - Обнаруженные угрозы",
         "quarantine_info": "Файлы в карантине обезврежены и не могут нанести вред системе.",
@@ -415,7 +416,68 @@ LANGUAGES = {
         "delete_confirm_title": "Подтверждение удаления",
         "delete_confirm_msg": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
         "delete_success": "Файл успешно удален!",
-        "error_title": "Ошибка"
+        "error_title": "Ошибка",
+        "history_title": "📜 История сканирований",
+        "history_header": "📋 История сканирований файлов",
+        "history_info": "Здесь отображаются все файлы, которые были проанализированы.",
+        "history_empty": "История пуста",
+        "history_date": "Дата",
+        "history_file": "Файл",
+        "history_status": "Статус",
+        "history_threats": "Угрозы",
+        "history_path": "Путь",
+        "history_clear": "🗑️ Очистить историю",
+        "history_clear_confirm": "Подтверждение",
+        "history_clear_msg": "Вы уверены, что хотите очистить всю историю сканирований?",
+        "av_title": "🛡️ АНТИВИРУС",
+        "av_status_group": "Статус защиты",
+        "av_monitor_group": "Мониторинг папок",
+        "av_add_folder": "📁 Добавить",
+        "av_remove_folder": "🗑️ Удалить",
+        "av_log_group": "Журнал событий антивируса",
+        "av_log_placeholder": "Здесь будут отображаться события антивируса...",
+        "av_start_warning": "Предупреждение",
+        "av_start_warning_msg": "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.",
+        "av_activated_title": "Антивирус активирован",
+        "av_activated_msg": "Защита реального времени включена!\n\nМониторимые папки:\n{folders}\n\nВсе подозрительные файлы будут автоматически помещены в карантин.",
+        "av_stop_error": "Ошибка остановки",
+        "av_start_error": "Ошибка запуска",
+        "av_start_failed": "Не удалось запустить антивирус",
+        "av_folder_added": "Добавлена папка",
+        "av_folder_exists": "Информация",
+        "av_folder_exists_msg": "Эта папка уже добавлена",
+        "av_folder_removed": "Удалена папка",
+        "analysis_title": "🔍 АНАЛИЗ ФАЙЛОВ",
+        "analysis_step1": "Шаг 1: Выберите файл",
+        "analysis_file_placeholder": "Файл еще не выбран... или перетащите сюда",
+        "analysis_browse": "📂 Обзор",
+        "analysis_step2": "Шаг 2: Параметры анализа",
+        "analysis_timeout": "Таймаут анализа (сек):",
+        "analysis_docker": "Использовать Docker изоляцию (рекомендуется)",
+        "analysis_variants": "Создать полиморфные варианты",
+        "analysis_network": "Отключить сеть в песочнице",
+        "analysis_step3": "Шаг 3: Запуск",
+        "analysis_log": "Результаты анализа",
+        "analysis_log_placeholder": "Здесь появятся результаты анализа после запуска...",
+        "analysis_drop_hint": "💡 Перетащите файл сюда или нажмите кнопку выше",
+        "analysis_no_file": "Ошибка",
+        "analysis_no_file_msg": "Пожалуйста, выберите файл для анализа",
+        "analysis_running": "Анализ запущен",
+        "analysis_complete": "Анализ завершен",
+        "settings_title": "⚙ Настройки приложения",
+        "settings_analysis": "Настройки анализа",
+        "settings_timeout": "Время анализа (сек):",
+        "settings_docker_default": "Docker изоляция по умолчанию",
+        "settings_poly_default": "Полиморфный анализ по умолчанию",
+        "settings_network_default": "Отключение сети по умолчанию",
+        "language_label": "Язык/Language:",
+        "status_clean": "CLEAN",
+        "status_suspicious": "SUSPICIOUS",
+        "status_malicious": "MALICIOUS",
+        "status_unknown": "UNKNOWN",
+        "no_threats": "Нет",
+        "full_reason": "Полная причина",
+        "folder_monitoring": "Мониторимые папки"
     },
     "English": {
         "title": "RedSand Secure",
@@ -434,15 +496,16 @@ LANGUAGES = {
         "save": "Save",
         "cancel": "Cancel",
         "back": "← Back",
+        "back_to_main": "← Back to Main Menu",
         "theme": "Theme",
         "dark_theme": "Dark",
         "light_theme": "Light",
         "analysis_time": "Analysis Time:",
         "poly_check": "Create file variants for analysis",
         "network_check": "Disable network (recommended)",
-        "monitored_folders": "Monitored Folders:",
+        "monitored_folders": "Folder Monitoring",
         "auto_quarantine": "Auto-quarantine threats",
-        "scan_on_access": "Scan on access",
+        "scan_on_access": "Scan on file access",
         "quarantine_title": "⚠️ Quarantine",
         "quarantine_header": "🛡️ Quarantine - Detected Threats",
         "quarantine_info": "Files in quarantine are neutralized and cannot harm the system.",
@@ -463,7 +526,68 @@ LANGUAGES = {
         "delete_confirm_title": "Delete Confirmation",
         "delete_confirm_msg": "Are you sure you want to delete this file PERMANENTLY?\nThis action is irreversible!",
         "delete_success": "File deleted successfully!",
-        "error_title": "Error"
+        "error_title": "Error",
+        "history_title": "📜 Scan History",
+        "history_header": "📋 File Scan History",
+        "history_info": "All analyzed files are displayed here.",
+        "history_empty": "History is empty",
+        "history_date": "Date",
+        "history_file": "File",
+        "history_status": "Status",
+        "history_threats": "Threats",
+        "history_path": "Path",
+        "history_clear": "🗑️ Clear History",
+        "history_clear_confirm": "Confirmation",
+        "history_clear_msg": "Are you sure you want to clear all scan history?",
+        "av_title": "🛡️ ANTIVIRUS",
+        "av_status_group": "Protection Status",
+        "av_monitor_group": "Folder Monitoring",
+        "av_add_folder": "📁 Add",
+        "av_remove_folder": "🗑️ Remove",
+        "av_log_group": "Antivirus Event Log",
+        "av_log_placeholder": "Antivirus events will be displayed here...",
+        "av_start_warning": "Warning",
+        "av_start_warning_msg": "No standard folders found for monitoring.\nAntivirus cannot be started.",
+        "av_activated_title": "Antivirus Activated",
+        "av_activated_msg": "Real-time protection enabled!\n\nMonitored Folders:\n{folders}\n\nAll suspicious files will be automatically quarantined.",
+        "av_stop_error": "Stop Error",
+        "av_start_error": "Start Error",
+        "av_start_failed": "Failed to start antivirus",
+        "av_folder_added": "Folder added",
+        "av_folder_exists": "Information",
+        "av_folder_exists_msg": "This folder is already added",
+        "av_folder_removed": "Folder removed",
+        "analysis_title": "🔍 FILE ANALYSIS",
+        "analysis_step1": "Step 1: Select File",
+        "analysis_file_placeholder": "No file selected... or drag and drop here",
+        "analysis_browse": "📂 Browse",
+        "analysis_step2": "Step 2: Analysis Options",
+        "analysis_timeout": "Analysis Timeout (sec):",
+        "analysis_docker": "Use Docker isolation (recommended)",
+        "analysis_variants": "Create polymorphic variants",
+        "analysis_network": "Disable network in sandbox",
+        "analysis_step3": "Step 3: Launch",
+        "analysis_log": "Analysis Results",
+        "analysis_log_placeholder": "Analysis results will appear here after launch...",
+        "analysis_drop_hint": "💡 Drag and drop a file here or click the button above",
+        "analysis_no_file": "Error",
+        "analysis_no_file_msg": "Please select a file for analysis",
+        "analysis_running": "Analysis Started",
+        "analysis_complete": "Analysis Complete",
+        "settings_title": "⚙ Application Settings",
+        "settings_analysis": "Analysis Settings",
+        "settings_timeout": "Analysis Time (sec):",
+        "settings_docker_default": "Docker isolation by default",
+        "settings_poly_default": "Polymorphic analysis by default",
+        "settings_network_default": "Network disable by default",
+        "language_label": "Language/Language:",
+        "status_clean": "CLEAN",
+        "status_suspicious": "SUSPICIOUS",
+        "status_malicious": "MALICIOUS",
+        "status_unknown": "UNKNOWN",
+        "no_threats": "None",
+        "full_reason": "Full reason",
+        "folder_monitoring": "Monitored Folders"
     }
 }
 
@@ -476,6 +600,8 @@ class MainModeSelector(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_ref = parent
+        self.current_lang = parent.current_lang if parent else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         self.setup_ui()
     
     def setup_ui(self):
@@ -489,7 +615,7 @@ class MainModeSelector(QWidget):
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        subtitle_label = QLabel("Профессиональная система анализа вредоносного ПО")
+        subtitle_label = QLabel(self.lang["subtitle"])
         subtitle_label.setObjectName("subtitleLabel")
         subtitle_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(subtitle_label)
@@ -502,17 +628,17 @@ class MainModeSelector(QWidget):
         modes_layout.setAlignment(Qt.AlignCenter)
         
         # Кнопка Антивирус - убрано "Реального времени"
-        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС")
+        self.btn_antivirus = QPushButton(self.lang["antivirus_mode"])
         self.btn_antivirus.setObjectName("modeBtn")
         self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
-        self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
+        self.btn_antivirus.setToolTip(self.lang["antivirus_mode"])
         modes_layout.addWidget(self.btn_antivirus)
         
         # Кнопка Анализ файлов
-        self.btn_analysis = QPushButton("🔍\nАНАЛИЗ\nФайлов")
+        self.btn_analysis = QPushButton(self.lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
-        self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
+        self.btn_analysis.setToolTip(self.lang["analysis_mode"])
         modes_layout.addWidget(self.btn_analysis)
         
         layout.addLayout(modes_layout)
@@ -525,7 +651,7 @@ class MainModeSelector(QWidget):
         
         # Выбор языка
         lang_layout = QHBoxLayout()
-        lang_label = QLabel("Язык/Language:")
+        lang_label = QLabel(self.lang["language_label"])
         lang_label.setStyleSheet("font-weight: bold; font-size: 16px;")
         lang_layout.addWidget(lang_label)
         lang_layout.addSpacing(10)
@@ -533,14 +659,14 @@ class MainModeSelector(QWidget):
         self.btn_ru = QPushButton("RU")
         self.btn_ru.setObjectName("langBtn")
         self.btn_ru.setCheckable(True)
-        self.btn_ru.setChecked(True)
+        self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.parent_ref.change_language("Русский") if self.parent_ref else None)
         lang_layout.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
         self.btn_en.setObjectName("langBtn")
         self.btn_en.setCheckable(True)
-        self.btn_en.setChecked(False)
+        self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.parent_ref.change_language("English") if self.parent_ref else None)
         lang_layout.addWidget(self.btn_en)
         
@@ -548,24 +674,42 @@ class MainModeSelector(QWidget):
         bottom_panel.addSpacing(50)
         
         # Кнопка настроек
-        self.btn_settings = QPushButton("⚙ Настройки")
+        self.btn_settings = QPushButton(self.lang["settings"])
         self.btn_settings.setObjectName("secondaryBtn")
         self.btn_settings.clicked.connect(lambda: self.parent_ref.open_settings() if self.parent_ref else None)
         bottom_panel.addWidget(self.btn_settings)
         
         # Кнопка истории
-        self.btn_history = QPushButton("📜 История")
+        self.btn_history = QPushButton(self.lang["history"])
         self.btn_history.setObjectName("secondaryBtn")
         self.btn_history.clicked.connect(lambda: self.parent_ref.open_history() if self.parent_ref else None)
         bottom_panel.addWidget(self.btn_history)
         
         # Кнопка карантина
-        self.btn_quarantine = QPushButton("⚠️ Карантин")
+        self.btn_quarantine = QPushButton(self.lang["quarantine"])
         self.btn_quarantine.setObjectName("secondaryBtn")
         self.btn_quarantine.clicked.connect(lambda: self.parent_ref.open_quarantine() if self.parent_ref else None)
         bottom_panel.addWidget(self.btn_quarantine)
         
         layout.addLayout(bottom_panel)
+    
+    def update_language(self):
+        """Обновить тексты при смене языка"""
+        self.current_lang = self.parent_ref.current_lang if self.parent_ref else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        # Обновляем все тексты
+        self.findChild(QLabel, "subtitleLabel").setText(self.lang["subtitle"])
+        self.btn_antivirus.setText(self.lang["antivirus_mode"])
+        self.btn_analysis.setText(self.lang["analysis_mode"])
+        self.btn_settings.setText(self.lang["settings"])
+        self.btn_history.setText(self.lang["history"])
+        self.btn_quarantine.setText(self.lang["quarantine"])
+        
+        # Обновляем метку языка
+        for child in self.children():
+            if isinstance(child, QLabel) and child.text().startswith("Язык/") or child.text().startswith("Language/"):
+                child.setText(self.lang["language_label"])
 
 
 class AntivirusPanel(QWidget):
@@ -574,6 +718,8 @@ class AntivirusPanel(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_ref = parent
+        self.current_lang = parent.current_lang if parent else "Русский"
+        self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         self.av_active = False
         self.av_monitor = None
         self.setup_ui()
@@ -584,21 +730,21 @@ class AntivirusPanel(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Заголовок
-        title_label = QLabel("🛡️ АНТИВИРУС")
+        title_label = QLabel(self.lang["av_title"])
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
         # Статус
-        status_group = QGroupBox("Статус защиты")
+        status_group = QGroupBox(self.lang["av_status_group"])
         status_layout = QVBoxLayout(status_group)
         
-        self.av_status_label = QLabel("🛡️ Антивирус: ВЫКЛ")
+        self.av_status_label = QLabel(self.lang["av_status_off"])
         self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
         self.av_status_label.setAlignment(Qt.AlignCenter)
         status_layout.addWidget(self.av_status_label)
         
-        self.btn_toggle_av = QPushButton("▶️ ВКЛ")
+        self.btn_toggle_av = QPushButton(self.lang["av_off"])
         self.btn_toggle_av.setObjectName("actionBtn")
         self.btn_toggle_av.setCheckable(True)
         self.btn_toggle_av.setChecked(False)
@@ -609,19 +755,19 @@ class AntivirusPanel(QWidget):
         layout.addWidget(status_group)
         
         # Настройки мониторинга
-        monitor_group = QGroupBox("Мониторинг папок")
+        monitor_group = QGroupBox(self.lang["av_monitor_group"])
         monitor_layout = QVBoxLayout(monitor_group)
         
         # Кнопки управления папками - сразу после заголовка, до списка
         folder_btn_layout = QHBoxLayout()
         
-        self.btn_add_folder = QPushButton("📁 Добавить")
+        self.btn_add_folder = QPushButton(self.lang["av_add_folder"])
         self.btn_add_folder.setObjectName("secondaryBtn")
         self.btn_add_folder.setFixedHeight(40)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
-        self.btn_remove_folder = QPushButton("🗑️ Удалить")
+        self.btn_remove_folder = QPushButton(self.lang["av_remove_folder"])
         self.btn_remove_folder.setObjectName("dangerBtn")
         self.btn_remove_folder.setFixedHeight(40)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
@@ -642,31 +788,31 @@ class AntivirusPanel(QWidget):
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
-        self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
+        self.chk_auto_quarantine = QCheckBox(self.lang["auto_quarantine"])
         self.chk_auto_quarantine.setChecked(True)
         monitor_layout.addWidget(self.chk_auto_quarantine)
         
-        self.chk_scan_on_access = QCheckBox("Сканирование при доступе к файлу")
+        self.chk_scan_on_access = QCheckBox(self.lang["scan_on_access"])
         self.chk_scan_on_access.setChecked(True)
         monitor_layout.addWidget(self.chk_scan_on_access)
         
         layout.addWidget(monitor_group)
         
         # Лог событий
-        log_group = QGroupBox("Журнал событий антивируса")
+        log_group = QGroupBox(self.lang["av_log_group"])
         log_layout = QVBoxLayout(log_group)
         
         self.av_log = QTextEdit()
         self.av_log.setReadOnly(True)
         self.av_log.setFont(QFont("Consolas", 12))
-        self.av_log.setPlaceholderText("Здесь будут отображаться события антивируса...")
+        self.av_log.setPlaceholderText(self.lang["av_log_placeholder"])
         self.av_log.setMinimumHeight(200)
         log_layout.addWidget(self.av_log)
         
         layout.addWidget(log_group)
         
         # Кнопка назад
-        btn_back = QPushButton("← Назад к главному меню")
+        btn_back = QPushButton(self.lang["back_to_main"])
         btn_back.setObjectName("secondaryBtn")
         btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
         layout.addWidget(btn_back)
@@ -1560,14 +1706,9 @@ class RedSandSecureGUI(QMainWindow):
             self.main_selector.btn_ru.setChecked(language == "Русский")
             self.main_selector.btn_en.setChecked(language == "English")
         
-        # Обновляем тексты на главном экране
+        # Обновляем тексты на главном экране через метод update_language
         if hasattr(self, 'main_selector'):
-            lang = LANGUAGES.get(language, LANGUAGES["Русский"])
-            self.main_selector.btn_antivirus.setText(lang["antivirus_mode"])
-            self.main_selector.btn_analysis.setText(lang["analysis_mode"])
-            self.main_selector.btn_settings.setText(lang["settings"])
-            self.main_selector.btn_history.setText(lang["history"])
-            self.main_selector.btn_quarantine.setText(lang["quarantine"])
+            self.main_selector.update_language()
         
         # Убрано всплывающее окно - язык меняется без уведомления
     
