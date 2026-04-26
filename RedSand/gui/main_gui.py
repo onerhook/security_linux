@@ -570,19 +570,7 @@ class AntivirusPanel(QWidget):
         monitor_group = QGroupBox("Мониторинг папок")
         monitor_layout = QVBoxLayout(monitor_group)
         
-        # Список папок - сначала он
-        self.folder_list = QListWidget()
-        self.folder_list.addItems([
-            "~/Downloads",
-            "~/Desktop", 
-            "~/Documents"
-        ])
-        self.folder_list.setMaximumHeight(150)
-        monitor_layout.addWidget(self.folder_list)
-        
-        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
-        
-        # Кнопки управления папками - сразу после списка
+        # Кнопки управления папками - сразу после заголовка, до списка
         folder_btn_layout = QHBoxLayout()
         
         self.btn_add_folder = QPushButton("📁 Добавить")
@@ -599,6 +587,18 @@ class AntivirusPanel(QWidget):
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addLayout(folder_btn_layout)
+        
+        # Список папок - после кнопок
+        self.folder_list = QListWidget()
+        self.folder_list.addItems([
+            "~/Downloads",
+            "~/Desktop", 
+            "~/Documents"
+        ])
+        self.folder_list.setMaximumHeight(150)
+        monitor_layout.addWidget(self.folder_list)
+        
+        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
         self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
         self.chk_auto_quarantine.setChecked(True)
@@ -1147,7 +1147,7 @@ class QuarantineDialog(QDialog):
         info_label.setStyleSheet("color: #666; font-style: italic;")
         layout.addWidget(info_label)
         
-        # Таблица файлов
+        # Таблица файлов - увеличенная, занимает больше места
         self.quarantine_table = QTableWidget()
         self.quarantine_table.setColumnCount(5)
         self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
@@ -1160,14 +1160,12 @@ class QuarantineDialog(QDialog):
         self.quarantine_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.quarantine_table.verticalHeader().setDefaultSectionSize(60)
         self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
-        layout.addWidget(self.quarantine_table)
+        # Увеличиваем таблицу с помощью stretch factor
+        layout.addWidget(self.quarantine_table, stretch=1)
         
         # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
-        # Добавляем растягивающий элемент сверху для центрирования кнопок
-        layout.addStretch()
-        
         btn_layout = QHBoxLayout()
-        btn_layout.setContentsMargins(0, 0, 0, 0)
+        btn_layout.setContentsMargins(0, 10, 0, 10)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
@@ -1205,9 +1203,6 @@ class QuarantineDialog(QDialog):
         btn_layout.addWidget(self.btn_close)
         
         layout.addLayout(btn_layout)
-        
-        # Добавляем растягивающий элемент снизу для центрирования кнопок
-        layout.addStretch()
         
         self.load_quarantine()
     
