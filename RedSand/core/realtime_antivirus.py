@@ -170,23 +170,21 @@ class FileMonitorHandler(FileSystemEventHandler):
         return True
     
     def on_created(self, event):
-        """Событие создания файла"""
+        """Событие создания файла - сканируем только новые файлы"""
         if isinstance(event, FileCreatedEvent) and not event.is_directory:
             file_path = event.src_path
             
+            # Ждем пока файл полностью запишется
+            time.sleep(0.3)
+            
             if self._should_scan(file_path):
-                self.logger_callback(f"\n[!] Обнаружен новый файл: {file_path}")
+                self.logger_callback(f"\n[!] Обнаружен НОВЫЙ файл: {file_path}")
                 self._queue_for_scanning(file_path)
     
     def on_modified(self, event):
-        """Событие изменения файла"""
-        if isinstance(event, FileModifiedEvent) and not event.is_directory:
-            file_path = event.src_path
-            
-            if self._should_scan(file_path):
-                # Сканируем только если файл был значительно изменен
-                self.logger_callback(f"[~] Файл изменен: {file_path}")
-                self._queue_for_scanning(file_path)
+        """Событие изменения файла - НЕ сканируем, чтобы избежать повторных срабатываний"""
+        # Игнорируем изменения, сканируем только при создании
+        pass
     
     def _queue_for_scanning(self, file_path: str):
         """Добавление файла в очередь на сканирование"""

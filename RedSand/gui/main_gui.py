@@ -47,17 +47,17 @@ THEMES = {
         "card_bg": "#1f1f3a"
     },
     "Светлая": {
-        "bg_primary": "#f5f7fa",
+        "bg_primary": "#f0f4f8",
         "bg_secondary": "#ffffff",
-        "bg_tertiary": "#e8ecf1",
-        "accent": "#e94560",
-        "accent_hover": "#d63651",
-        "text_primary": "#1a1a2e",
+        "bg_tertiary": "#e2e8f0",
+        "accent": "#c53030",
+        "accent_hover": "#9b2c2c",
+        "text_primary": "#1a202c",
         "text_secondary": "#4a5568",
-        "success": "#059669",
-        "warning": "#d97706",
-        "danger": "#dc2626",
-        "border": "#cbd5e1",
+        "success": "#2f855a",
+        "warning": "#c05621",
+        "danger": "#c53030",
+        "border": "#718096",
         "card_bg": "#ffffff"
     }
 }
@@ -123,6 +123,7 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         min-height: 45px;
         font-size: 14px;
         border: 2px solid {theme['border']};
+        font-weight: bold;
     }}
     
     QPushButton#secondaryBtn:hover {{
@@ -554,13 +555,15 @@ class AntivirusPanel(QWidget):
         # Кнопки управления папками
         folder_btn_layout = QHBoxLayout()
         
-        self.btn_add_folder = QPushButton("📁 Добавить папку")
+        self.btn_add_folder = QPushButton("📁 Добавить")
         self.btn_add_folder.setObjectName("secondaryBtn")
+        self.btn_add_folder.setFixedHeight(40)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
-        self.btn_remove_folder = QPushButton("🗑️ Удалить папку")
+        self.btn_remove_folder = QPushButton("🗑️ Удалить")
         self.btn_remove_folder.setObjectName("dangerBtn")
+        self.btn_remove_folder.setFixedHeight(40)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
@@ -1143,12 +1146,14 @@ class QuarantineDialog(QDialog):
         
         self.btn_restore = QPushButton("♻️ Восстановить")
         self.btn_restore.setObjectName("actionBtn")
+        self.btn_restore.setFixedHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         btn_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton("🗑️ Удалить навсегда")
         self.btn_delete.setObjectName("dangerBtn")
+        self.btn_delete.setFixedHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         btn_layout.addWidget(self.btn_delete)
