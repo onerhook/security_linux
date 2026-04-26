@@ -570,7 +570,19 @@ class AntivirusPanel(QWidget):
         monitor_group = QGroupBox("Мониторинг папок")
         monitor_layout = QVBoxLayout(monitor_group)
         
-        # Кнопки управления папками - сразу под заголовком
+        # Список папок - сначала он
+        self.folder_list = QListWidget()
+        self.folder_list.addItems([
+            "~/Downloads",
+            "~/Desktop", 
+            "~/Documents"
+        ])
+        self.folder_list.setMaximumHeight(150)
+        monitor_layout.addWidget(self.folder_list)
+        
+        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
+        
+        # Кнопки управления папками - сразу после списка
         folder_btn_layout = QHBoxLayout()
         
         self.btn_add_folder = QPushButton("📁 Добавить")
@@ -587,17 +599,6 @@ class AntivirusPanel(QWidget):
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addLayout(folder_btn_layout)
-        
-        self.folder_list = QListWidget()
-        self.folder_list.addItems([
-            "~/Downloads",
-            "~/Desktop", 
-            "~/Documents"
-        ])
-        self.folder_list.setMaximumHeight(150)
-        monitor_layout.addWidget(self.folder_list)
-        
-        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
         self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
         self.chk_auto_quarantine.setChecked(True)
@@ -1162,8 +1163,11 @@ class QuarantineDialog(QDialog):
         layout.addWidget(self.quarantine_table)
         
         # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
+        # Добавляем растягивающий элемент сверху для центрирования кнопок
+        layout.addStretch()
+        
         btn_layout = QHBoxLayout()
-        btn_layout.setContentsMargins(0, 10, 0, 0)
+        btn_layout.setContentsMargins(0, 0, 0, 0)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
@@ -1201,6 +1205,9 @@ class QuarantineDialog(QDialog):
         btn_layout.addWidget(self.btn_close)
         
         layout.addLayout(btn_layout)
+        
+        # Добавляем растягивающий элемент снизу для центрирования кнопок
+        layout.addStretch()
         
         self.load_quarantine()
     
