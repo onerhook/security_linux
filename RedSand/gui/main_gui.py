@@ -699,17 +699,26 @@ class MainModeSelector(QWidget):
         self.lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         
         # Обновляем все тексты
-        self.findChild(QLabel, "subtitleLabel").setText(self.lang["subtitle"])
-        self.btn_antivirus.setText(self.lang["antivirus_mode"])
-        self.btn_analysis.setText(self.lang["analysis_mode"])
-        self.btn_settings.setText(self.lang["settings"])
-        self.btn_history.setText(self.lang["history"])
-        self.btn_quarantine.setText(self.lang["quarantine"])
+        subtitle = self.findChild(QLabel, "subtitleLabel")
+        if subtitle:
+            subtitle.setText(self.lang["subtitle"])
+        if self.btn_antivirus:
+            self.btn_antivirus.setText(self.lang["antivirus_mode"])
+        if self.btn_analysis:
+            self.btn_analysis.setText(self.lang["analysis_mode"])
+        if self.btn_settings:
+            self.btn_settings.setText(self.lang["settings"])
+        if self.btn_history:
+            self.btn_history.setText(self.lang["history"])
+        if self.btn_quarantine:
+            self.btn_quarantine.setText(self.lang["quarantine"])
         
-        # Обновляем метку языка
+        # Обновляем метку языка - ищем QLabel по тексту
         for child in self.children():
-            if isinstance(child, QLabel) and child.text().startswith("Язык/") or child.text().startswith("Language/"):
-                child.setText(self.lang["language_label"])
+            if isinstance(child, QLabel):
+                text = child.text()
+                if text.startswith("Язык/") or text.startswith("Language/"):
+                    child.setText(self.lang["language_label"])
 
 
 class AntivirusPanel(QWidget):
