@@ -586,7 +586,7 @@ class AntivirusPanel(QWidget):
             # Выключаем
             try:
                 if self.av_monitor:
-                    self.av_monitor.stop_monitoring()
+                    self.av_monitor.stop()
                 self.av_active = False
                 self.btn_toggle_av.setChecked(False)
                 self.btn_toggle_av.setText("▶️ ВКЛ")
@@ -618,7 +618,8 @@ class AntivirusPanel(QWidget):
                 )
                 # Привязываем менеджер карантина из главного окна
                 self.av_monitor.quarantine_manager = self.parent_ref.quarantine_manager
-                self.av_monitor.start_monitoring()
+                self.av_monitor.enable()
+                self.av_monitor.start_background()
                 
                 self.av_active = True
                 self.btn_toggle_av.setText("⏹️ ВЫКЛ")
@@ -835,6 +836,167 @@ class AnalysisPanel(QWidget):
         self.log_text.append(f'<span style="color: {color};">[{timestamp}] [{level}] {message}</span>')
 
 
+class ScanHistoryDialog(QDialog):
+    """Диалог истории сканирований"""
+    
+    def __init__(self, scan_history=None, parent=None):
+        super().__init__(parent)
+        self.scan_history = scan_history or []
+        self.parent_ref = parent
+        self.setWindowTitle("📜 История сканирований")
+        self.setMinimumSize(1000, 600)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        title = QLabel("📋 История сканирований файлов")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        info_label = QLabel("Здесь отображаются все файлы, которые были проанализированы.")
+        info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(info_label)
+        
+        # Таблица истории
+        self.history_table = QTableWidget()
+        self.history_table.setColumnCount(5)
+        self.history_table.setHorizontalHeaderLabels(["Дата", "Файл", "Статус", "Угрозы", "Путь"])
+        self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
+        self.history_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        self.history_table.horizontalHeader().setSectionResizeMode(4, QHeaderView.Stretch)
+        self.history_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.history_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.history_table.verticalHeader().setDefaultSectionSize(50)
+        self.history_table.itemSelectionChanged.connect(self.on_selection_changed)
+        layout.addWidget(self.history_table)
+        
+        # Кнопки управления
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.clicked.connect(self.load_history)
+        btn_layout.addWidget(self.btn_refresh)
+        
+        self.btn_clear = QPushButton("🗑️ Очистить историю")
+        self.btn_clear.setObjectName("dangerBtn")
+        self.btn_clear.clicked.connect(self.clear_history)
+        btn_layout.addWidget(self.btn_clear)
+        
+        btn_layout.addStretch()
+        
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+        
+        layout.addLayout(btn_layout)
+        
+        # Детали выбранного элемента
+        details_group = QGroupBox("Детали сканирования")
+        details_layout = QVBoxLayout(details_group)
+        self.details_text = QTextEdit()
+        self.details_text.setReadOnly(True)
+        self.details_text.setMaximumHeight(150)
+        self.details_text.setPlaceholderText("Выберите элемент для просмотра деталей...")
+        details_layout.addWidget(self.details_text)
+        layout.addWidget(details_group)
+        
+        self.load_history()
+    
+    def load_history(self):
+        """Загрузить историю сканирований"""
+        self.history_table.setRowCount(0)
+        
+        if not self.scan_history:
+            row = self.history_table.rowCount()
+            self.history_table.insertRow(row)
+            item = QTableWidgetItem("История пуста")
+            item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+            self.history_table.setItem(row, 0, item)
+            return
+        
+        for item_data in self.scan_history:
+            row = self.history_table.rowCount()
+            self.history_table.insertRow(row)
+            
+            # Дата
+            date_item = QTableWidgetItem(item_data.get('scan_time', 'N/A'))
+            date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)
+            self.history_table.setItem(row, 0, date_item)
+            
+            # Имя файла
+            file_name = os.path.basename(item_data.get('file_path', 'Unknown'))
+            file_item = QTableWidgetItem(file_name)
+            file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)
+            font = file_item.font()
+            font.setBold(True)
+            file_item.setFont(font)
+            self.history_table.setItem(row, 1, file_item)
+            
+            # Статус
+            status = item_data.get('threat_level', 'UNKNOWN')
+            status_item = QTableWidgetItem(status)
+            status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
+            if status == 'CLEAN':
+                status_item.setForeground(QColor("#00ff88"))
+            elif status == 'SUSPICIOUS':
+                status_item.setForeground(QColor("#ffaa00"))
+            elif status == 'MALICIOUS':
+                status_item.setForeground(QColor("#ff4444"))
+            self.history_table.setItem(row, 2, status_item)
+            
+            # Угрозы
+            threats = ', '.join(item_data.get('detected_threats', []))
+            threats_item = QTableWidgetItem(threats if threats else 'Нет')
+            threats_item.setFlags(threats_item.flags() & ~Qt.ItemIsEditable)
+            self.history_table.setItem(row, 3, threats_item)
+            
+            # Путь
+            path_item = QTableWidgetItem(item_data.get('file_path', 'N/A'))
+            path_item.setFlags(path_item.flags() & ~Qt.ItemIsEditable)
+            path_item.setToolTip(item_data.get('file_path', ''))
+            self.history_table.setItem(row, 4, path_item)
+    
+    def on_selection_changed(self):
+        """Обработка выбора элемента"""
+        selected_rows = self.history_table.selectedItems()
+        if not selected_rows:
+            self.details_text.clear()
+            return
+        
+        row = selected_rows[0].row()
+        
+        # Показываем детали
+        details = []
+        for col in range(self.history_table.columnCount()):
+            item = self.history_table.item(row, col)
+            if item:
+                header = self.history_table.horizontalHeaderItem(col).text()
+                details.append(f"{header}: {item.text()}")
+        
+        self.details_text.setText("\n".join(details))
+    
+    def clear_history(self):
+        """Очистить историю"""
+        reply = QMessageBox.question(self, "Подтверждение",
+            "Вы уверены, что хотите очистить всю историю сканирований?",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        
+        if reply == QMessageBox.Yes and self.parent_ref:
+            self.parent_ref.scan_history = []
+            self.scan_history = []
+            self.load_history()
+
+
 class QuarantineDialog(QDialog):
     """Диалог управления карантином"""
     
@@ -906,16 +1068,6 @@ class QuarantineDialog(QDialog):
         
         layout.addLayout(btn_layout)
         
-        # Детали выбранного файла
-        details_group = QGroupBox("Детали файла")
-        details_layout = QVBoxLayout(details_group)
-        self.details_text = QTextEdit()
-        self.details_text.setReadOnly(True)
-        self.details_text.setMaximumHeight(120)
-        self.details_text.setPlaceholderText("Выберите файл для просмотра деталей...")
-        details_layout.addWidget(self.details_text)
-        layout.addWidget(details_group)
-        
         self.load_quarantine()
     
     def load_quarantine(self):
@@ -935,17 +1087,17 @@ class QuarantineDialog(QDialog):
             self.quarantine_table.setItem(row, 0, item)
             return
         
-        for item_data in items:
+        for idx, item_data in enumerate(items):
             row = self.quarantine_table.rowCount()
             self.quarantine_table.insertRow(row)
             
             # Дата
-            date_item = QTableWidgetItem(item_data.get('timestamp', 'N/A'))
+            date_item = QTableWidgetItem(item_data.get('quarantine_time', 'N/A')[:19])
             date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)
             self.quarantine_table.setItem(row, 0, date_item)
             
             # Имя файла
-            file_name = os.path.basename(item_data.get('original_path', 'Unknown'))
+            file_name = os.path.basename(item_data.get('original_name', 'Unknown'))
             file_item = QTableWidgetItem(file_name)
             file_item.setToolTip(item_data.get('original_path', ''))
             file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)
@@ -959,8 +1111,8 @@ class QuarantineDialog(QDialog):
             reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
             self.quarantine_table.setItem(row, 2, reason_item)
             
-            # ID (путь в карантине)
-            id_item = QTableWidgetItem(str(hash(quarantine_path))[-8:] if (quarantine_path := item_data.get('quarantine_path', '')) else 'N/A')
+            # ID (индекс для доступа)
+            id_item = QTableWidgetItem(str(idx))
             id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
             self.quarantine_table.setItem(row, 3, id_item)
     
@@ -998,13 +1150,26 @@ class QuarantineDialog(QDialog):
         if not id_item:
             return
         
-        reply = QMessageBox.question(self, "Подтверждение восстановления",
-            "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
-            QMessageBox.Yes | QMessageBox.No)
-        
-        if reply == QMessageBox.Yes:
-            # TODO: Реализовать восстановление через quarantine_manager
-            QMessageBox.information(self, "Восстановление", "Функция восстановления будет реализована")
+        try:
+            idx = int(id_item.text())
+            items = self.quarantine_manager.list_quarantined()
+            if idx >= len(items):
+                return
+            
+            quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
+            
+            reply = QMessageBox.question(self, "Подтверждение восстановления",
+                "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                if self.quarantine_manager.restore_from_quarantine(quarantine_path):
+                    QMessageBox.information(self, "Восстановление", "Файл успешно восстановлен!")
+                    self.load_quarantine()
+                else:
+                    QMessageBox.critical(self, "Ошибка", "Не удалось восстановить файл")
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка восстановления: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1017,13 +1182,31 @@ class QuarantineDialog(QDialog):
         if not id_item:
             return
         
-        reply = QMessageBox.warning(self, "Подтверждение удаления",
-            "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
-            QMessageBox.Yes | QMessageBox.No)
-        
-        if reply == QMessageBox.Yes:
-            # TODO: Реализовать удаление через quarantine_manager
-            QMessageBox.information(self, "Удаление", "Функция удаления будет реализована")
+        try:
+            idx = int(id_item.text())
+            items = self.quarantine_manager.list_quarantined()
+            if idx >= len(items):
+                return
+            
+            quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
+            
+            reply = QMessageBox.warning(self, "Подтверждение удаления",
+                "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+                QMessageBox.Yes | QMessageBox.No)
+            
+            if reply == QMessageBox.Yes:
+                import shutil
+                if os.path.exists(quarantine_path):
+                    shutil.rmtree(quarantine_path) if os.path.isdir(quarantine_path) else os.remove(quarantine_path)
+                
+                # Удаляем из журнала
+                del self.quarantine_manager.quarantined_files[quarantine_path]
+                self.quarantine_manager._save_quarantine_log()
+                
+                QMessageBox.information(self, "Удаление", "Файл успешно удален!")
+                self.load_quarantine()
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка", f"Ошибка удаления: {str(e)}")
 
 
 class SettingsDialog(QDialog):
@@ -1187,7 +1370,8 @@ class RedSandSecureGUI(QMainWindow):
     
     def open_history(self):
         """Открыть историю сканирований"""
-        QMessageBox.information(self, "История", "История сканирований будет реализована")
+        dialog = ScanHistoryDialog(scan_history=self.scan_history, parent=self)
+        dialog.exec_()
     
     def open_quarantine(self):
         """Открыть диалог карантина"""
