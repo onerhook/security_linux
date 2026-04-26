@@ -47,17 +47,17 @@ THEMES = {
         "card_bg": "#1f1f3a"
     },
     "Светлая": {
-        "bg_primary": "#f0f4f8",
+        "bg_primary": "#f8fafc",
         "bg_secondary": "#ffffff",
         "bg_tertiary": "#e2e8f0",
-        "accent": "#c53030",
-        "accent_hover": "#9b2c2c",
-        "text_primary": "#1a202c",
-        "text_secondary": "#4a5568",
-        "success": "#2f855a",
-        "warning": "#c05621",
-        "danger": "#c53030",
-        "border": "#718096",
+        "accent": "#dc2626",
+        "accent_hover": "#b91c1c",
+        "text_primary": "#0f172a",
+        "text_secondary": "#475569",
+        "success": "#16a34a",
+        "warning": "#ea580c",
+        "danger": "#dc2626",
+        "border": "#64748b",
         "card_bg": "#ffffff"
     }
 }
@@ -154,6 +154,7 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
     
     QPushButton#langBtn {{
         background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
         min-width: 50px;
         min-height: 50px;
         max-width: 50px;
@@ -161,10 +162,19 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         border-radius: 10px;
         font-size: 16px;
         font-weight: bold;
+        border: 2px solid {theme['border']};
     }}
     
     QPushButton#langBtn:checked {{
         background-color: {theme['accent']};
+        color: white;
+        border-color: {theme['accent']};
+    }}
+    
+    QPushButton#langBtn:hover:!checked {{
+        background-color: {theme['accent']};
+        color: white;
+        border-color: {theme['accent']};
     }}
     
     QPushButton#modeBtn {{
@@ -177,16 +187,20 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
         max-height: 280px;
         font-size: 24px;
         padding: 30px;
+        color: {theme['text_primary']};
+        font-weight: bold;
     }}
     
     QPushButton#modeBtn:hover {{
         border-color: {theme['accent']};
         background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
     }}
     
     QPushButton#modeBtn:checked {{
         border-color: {theme['accent']};
         background-color: {theme['accent']};
+        color: white;
     }}
     
     QGroupBox {{
@@ -1134,13 +1148,20 @@ class QuarantineDialog(QDialog):
         self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
         layout.addWidget(self.quarantine_table)
         
-        # Кнопки управления
+        # Кнопки управления - все в одну линию
         btn_layout = QHBoxLayout()
         
         self.btn_refresh = QPushButton("🔄 Обновить")
         self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.setFixedHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
         btn_layout.addWidget(self.btn_refresh)
+        
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.setFixedHeight(45)
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
         
         btn_layout.addStretch()
         
@@ -1157,13 +1178,6 @@ class QuarantineDialog(QDialog):
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         btn_layout.addWidget(self.btn_delete)
-        
-        btn_layout.addStretch()
-        
-        self.btn_close = QPushButton("Закрыть")
-        self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.clicked.connect(self.accept)
-        btn_layout.addWidget(self.btn_close)
         
         layout.addLayout(btn_layout)
         
