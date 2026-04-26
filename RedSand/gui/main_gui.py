@@ -333,6 +333,23 @@ def generate_stylesheet(theme_name: str = "Светлая") -> str:
         background-color: {theme['accent']};
         color: #FFFFFF;
     }}
+    QPushButton#langBtn {{
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
+        border: 2px solid {theme['accent']};
+        border-radius: 10px;
+        font-weight: bold;
+        font-size: 18px;
+        min-width: 50px;
+        max-width: 50px;
+        min-height: 50px;
+        max-height: 50px;
+        padding: 0px;
+    }}
+    QPushButton#langBtn:hover {{
+        background-color: {theme['accent']};
+        color: #FFFFFF;
+    }}
     QGroupBox {{
         background-color: {theme['bg_secondary']};
         border: 2px solid {theme['accent']};
@@ -1372,7 +1389,7 @@ class RedSandSecureGUI(QMainWindow):
         top_panel.addSpacing(5)  # Маленький отступ до кнопок
         
         self.btn_ru = QPushButton("RU")
-        self.btn_ru.setObjectName("secondaryBtn")
+        self.btn_ru.setObjectName("langBtn")
         self.btn_ru.setCheckable(True)
         self.btn_ru.setChecked(self.current_lang == "Русский")
         self.btn_ru.clicked.connect(lambda: self.change_language("Русский"))
@@ -1381,7 +1398,7 @@ class RedSandSecureGUI(QMainWindow):
         top_panel.addWidget(self.btn_ru)
         
         self.btn_en = QPushButton("EN")
-        self.btn_en.setObjectName("secondaryBtn")
+        self.btn_en.setObjectName("langBtn")
         self.btn_en.setCheckable(True)
         self.btn_en.setChecked(self.current_lang == "English")
         self.btn_en.clicked.connect(lambda: self.change_language("English"))
