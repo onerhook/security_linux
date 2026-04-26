@@ -570,16 +570,7 @@ class AntivirusPanel(QWidget):
         monitor_group = QGroupBox("Мониторинг папок")
         monitor_layout = QVBoxLayout(monitor_group)
         
-        self.folder_list = QListWidget()
-        self.folder_list.addItems([
-            "~/Downloads",
-            "~/Desktop", 
-            "~/Documents"
-        ])
-        self.folder_list.setMaximumHeight(150)
-        monitor_layout.addWidget(self.folder_list)
-        
-        # Кнопки управления папками
+        # Кнопки управления папками - сразу под заголовком
         folder_btn_layout = QHBoxLayout()
         
         self.btn_add_folder = QPushButton("📁 Добавить")
@@ -596,6 +587,15 @@ class AntivirusPanel(QWidget):
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addLayout(folder_btn_layout)
+        
+        self.folder_list = QListWidget()
+        self.folder_list.addItems([
+            "~/Downloads",
+            "~/Desktop", 
+            "~/Documents"
+        ])
+        self.folder_list.setMaximumHeight(150)
+        monitor_layout.addWidget(self.folder_list)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -1163,7 +1163,7 @@ class QuarantineDialog(QDialog):
         
         # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
         btn_layout = QHBoxLayout()
-        btn_layout.setContentsMargins(0, 10, 0, 10)
+        btn_layout.setContentsMargins(0, 10, 0, 0)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
