@@ -34,6 +34,7 @@ from core.report_generator import ReportGenerator
 from core.virus_scanner import VirusScanner
 from core.network_emulator import NetworkEmulator
 from core.anti_sandbox import AntiSandbox
+from core.docker_sandbox import DockerSandbox, analyze_in_docker
 
 
 @dataclass
@@ -92,10 +93,10 @@ def analyze_single_file_worker(args: Tuple[str, str, int, bool]) -> Dict[str, An
 class RedSandSecure:
     """Основной класс оркестратора анализа вредоносного ПО."""
 
-    def __init__(self, output_dir: str = 'reports', log_level: int = logging.INFO, max_workers: Optional[int] = None, use_docker: bool = False):
+    def __init__(self, output_dir: str = 'reports', log_level: int = logging.INFO, max_workers: Optional[int] = None, use_docker: bool = True):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
-        self.use_docker = use_docker  # Флаг использования Docker для изоляции
+        self.use_docker = use_docker  # Флаг использования Docker для изоляции (по умолчанию True)
 
         # Настройка логирования
         self._setup_logging(log_level)
@@ -107,6 +108,7 @@ class RedSandSecure:
         self.virus_scanner = VirusScanner()
         self.net_emulator: Optional[NetworkEmulator] = None
         self.anti_sandbox = AntiSandbox()
+        self.docker_sandbox: Optional[DockerSandbox] = None  # Docker песочница для безопасного запуска
 
         # Multiprocessing настройки
         self.max_workers = max_workers or mp.cpu_count()
@@ -301,19 +303,65 @@ class RedSandSecure:
         except Exception:
             pass  # Игнорируем ошибки чтения
 
-        # Запускаем образец
+        # БЕЗОПАСНЫЙ ЗАПУСК: Используем Docker для изоляции
+        if self.use_docker:
+            print("[*] Запуск в Docker контейнере для максимальной безопасности...")
+            try:
+                docker_result = analyze_in_docker(file_path, timeout=timeout, use_wine=file_path.lower().endswith('.exe'))
+                
+                if docker_result['success']:
+                    print("[+] Анализ в Docker завершен успешно")
+                    events_log = docker_result.get('events', [])
+                    events_log.append({'docker_isolated': True, 'method': docker_result['method']})
+                else:
+                    print("[-] Docker недоступен, используем локальный запуск (МЕНЕЕ БЕЗОПАСНО!)")
+                    events_log.append({'warning': 'Docker failed, fallback to local execution'})
+                    # Fallback на локальный запуск если Docker не доступен
+                    events_log.extend(self._run_local_analysis(file_path, timeout))
+            except Exception as e:
+                print(f"[-] Ошибка Docker: {e}, используем локальный запуск")
+                events_log.extend(self._run_local_analysis(file_path, timeout))
+        else:
+            # Локальный запуск (не рекомендуется для реального вредоносного ПО)
+            print("[!] ВНИМАНИЕ: Запуск без Docker изоляции! Это опасно!")
+            events_log.extend(self._run_local_analysis(file_path, timeout))
+
+        return events_log
+
+    def _run_local_analysis(self, file_path, timeout=60):
+        """Локальный запуск анализа (только если Docker недоступен)"""
+        events_log = []
+        
+        # Запускаем образец с дополнительными ограничениями
         try:
-            process = subprocess.Popen(
-                [file_path],
-                cwd=os.path.dirname(file_path),
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
-                universal_newlines=True,
-                encoding='utf-8',
-                errors='replace',
-                creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == 'win32' else 0
-            )
+            # Определяем тип файла и выбираем метод запуска
+            if sys.platform == 'win32' and file_path.lower().endswith('.exe'):
+                # На Windows используем CREATE_NO_WINDOW и ограниченные права
+                process = subprocess.Popen(
+                    [file_path],
+                    cwd=os.path.dirname(file_path),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
+                    encoding='utf-8',
+                    errors='replace',
+                    creationflags=subprocess.CREATE_NO_WINDOW | subprocess.DETACHED_PROCESS
+                )
+            else:
+                # На Linux/Unix используем setsid для изоляции
+                process = subprocess.Popen(
+                    [file_path],
+                    cwd=os.path.dirname(file_path),
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    preexec_fn=os.setsid if hasattr(os, 'setsid') else None,
+                    universal_newlines=True,
+                    encoding='utf-8',
+                    errors='replace'
+                )
+            
             self.processes_monitored.append(process.pid)
+            events_log.append({'process_started': process.pid, 'isolated': False})
 
             # Мониторинг процессов
             start_time = time.time()
@@ -325,6 +373,7 @@ class RedSandSecure:
                 if self.panic_button.check_critical_actions():
                     print("[!] Обнаружены критические действия! Экстренная остановка!")
                     self.panic_button.trigger()
+                    events_log.append({'panic_triggered': True})
                     break
 
                 time.sleep(1)
@@ -336,13 +385,14 @@ class RedSandSecure:
                     process.wait(timeout=5)
                 except subprocess.TimeoutExpired:
                     process.kill()
+                    events_log.append({'process_killed': True, 'reason': 'timeout'})
 
-            events_log = self.panic_button.get_events_log()
+            events_log.extend(self.panic_button.get_events_log())
 
         except Exception as e:
             print(f"[-] Ошибка выполнения: {e}")
-            events_log = [{'error': str(e)}]
-
+            events_log.append({'error': str(e)})
+        
         return events_log
 
     def classify_threat(self, static_results, dynamic_events):
