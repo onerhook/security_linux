@@ -755,7 +755,9 @@ class AnalysisPanel(QWidget):
         self.log_text.setFont(QFont("Consolas", 12))
         self.log_text.setPlaceholderText("Здесь будет отображаться ход анализа...")
         logs_layout.addWidget(self.log_text)
-        self.tabs.addTab(logs_widget, "📋 Журнал")
+        # Увеличена ширина кнопки вкладки Журнал через stylesheet
+        logs_widget.setStyleSheet("padding: 5px;")
+        self.tabs.addTab(logs_widget, "📋 Журнал      ")
         
         # Вкладка результатов
         results_widget = QWidget()
@@ -770,13 +772,15 @@ class AnalysisPanel(QWidget):
         self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
-        self.results_table.horizontalHeader().setMinimumSectionSize(200)  # Увеличена ширина первой колонки
+        self.results_table.horizontalHeader().setMinimumSectionSize(250)  # Увеличена ширина первой колонки
         self.results_table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.results_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.results_table.setSelectionBehavior(QTableWidget.SelectRows)
         self.results_table.setVisible(False)
         results_layout.addWidget(self.results_table)
-        self.tabs.addTab(results_widget, "📊 Результаты")
+        # Увеличена ширина кнопки вкладки Результаты через stylesheet
+        results_widget.setStyleSheet("padding: 5px;")
+        self.tabs.addTab(results_widget, "📊 Результаты   ")
         
         right_layout.addWidget(self.tabs)
         main_splitter.addWidget(right_widget)
@@ -856,8 +860,7 @@ class AnalysisPanel(QWidget):
             ("Статус", "✅ Чист" if hash(file_path) % 2 == 0 else "⚠️ Подозрительный"),
             ("Тип файла", "PE Executable (EXE)" if file_path.endswith('.exe') else "Другой тип"),
             ("Размер", f"{os.path.getsize(file_path)} байт"),
-            ("Время анализа", f"{datetime.now().strftime('%H:%M:%S')}"),
-            ("Docker изоляция", "✅ Активна")
+            ("Время анализа", f"{datetime.now().strftime('%H:%M:%S')}")
         ]
         
         for i, (param, value) in enumerate(results_data):
@@ -1168,22 +1171,14 @@ class QuarantineDialog(QDialog):
         if not selected_rows:
             self.btn_restore.setEnabled(False)
             self.btn_delete.setEnabled(False)
-            self.details_text.clear()
             return
         
         row = selected_rows[0].row()
         self.btn_restore.setEnabled(True)
         self.btn_delete.setEnabled(True)
         
-        # Показываем детали
-        details = []
-        for col in range(self.quarantine_table.columnCount()):
-            item = self.quarantine_table.item(row, col)
-            if item:
-                header = self.quarantine_table.horizontalHeaderItem(col).text()
-                details.append(f"{header}: {item.text()}")
-        
-        self.details_text.setText("\n".join(details))
+        # Показываем детали в таблице (убран details_text так как он удален из UI)
+        # Детали отображаются прямо в строке таблицы
     
     def restore_selected(self):
         """Восстановление выбранного файла"""
@@ -1332,6 +1327,8 @@ class SettingsDialog(QDialog):
     
     def apply_theme(self, theme_name: str):
         """Применить тему оформления"""
+        if not self.parent or not hasattr(self.parent, 'settings'):
+            return
         self.parent.settings['theme'] = theme_name
         if theme_name == 'Тёмная':
             self.btn_dark.setChecked(True)
@@ -1424,8 +1421,7 @@ class RedSandSecureGUI(QMainWindow):
             self.main_selector.btn_en.setChecked(language == "English")
         
         # TODO: Обновить тексты на всех экранах (можно добавить полноценную локализацию)
-        QMessageBox.information(self, "Язык/Language", 
-            f"Язык изменён на: {language}\nLanguage changed to: {language}")
+        # Убрано всплывающее окно - язык меняется без уведомления
     
     def open_settings(self):
         """Открыть диалог настроек"""
