@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-RedSand Secure GUI v10.0 - Исправленная версия
+RedSand Secure GUI v11.0 - Полная интеграция антивируса и карантина
 - Исправлен вылет при повторном анализе
 - Черная строка состояния с белым текстом
 - Увеличенная таблица результатов
 - Исправлено перекрытие кнопок вкладок
 - Добавлен тип вируса Memory Injector
 - Запуск в полноэкранном режиме
+- 🛡️ АНТИВИРУС РЕАЛЬНОГО ВРЕМЕНИ (включение/выключение)
+- ⚠️ КРАНТИН с управлением (восстановление/удаление)
+- 🔒 ВСЕГДА использует Docker для анализа файлов
 """
 
 import sys
@@ -1358,6 +1361,12 @@ class RedSandSecureGUI(QMainWindow):
             'language': 'Русский'
         }
         self.scan_history = []  # История сканирований
+        
+        # Интеграция антивируса реального времени и карантина
+        self.quarantine_manager = QuarantineManager()
+        self.av_active = False
+        self.av_monitor = None
+        
         self.setup_ui()
         self.apply_stylesheet()
         self.load_settings()
@@ -1513,6 +1522,26 @@ class RedSandSecureGUI(QMainWindow):
         self.network_check.setChecked(True)
         self.network_check.setToolTip("Защищает вашу сеть во время анализа" if self.current_lang == "Русский" else "Protects your network during analysis")
         settings_layout.addWidget(self.network_check)
+        
+        # Кнопка управления антивирусом реального времени
+        av_layout = QHBoxLayout()
+        self.av_status_label = QLabel("🛡️ Антивирус: ВЫКЛ")
+        self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 14px;")
+        av_layout.addWidget(self.av_status_label)
+        
+        self.btn_toggle_av = QPushButton("▶️ ВКЛ")
+        self.btn_toggle_av.setObjectName("secondaryBtn")
+        self.btn_toggle_av.setCheckable(True)
+        self.btn_toggle_av.setChecked(False)
+        self.btn_toggle_av.clicked.connect(self.toggle_antivirus)
+        av_layout.addWidget(self.btn_toggle_av)
+        
+        self.btn_quarantine = QPushButton("⚠️ Карантин")
+        self.btn_quarantine.setObjectName("secondaryBtn")
+        self.btn_quarantine.clicked.connect(self.open_quarantine)
+        av_layout.addWidget(self.btn_quarantine)
+        
+        settings_layout.addLayout(av_layout)
         
         settings_group.setLayout(settings_layout)
         self.left_panel_layout.addWidget(settings_group)
@@ -1906,6 +1935,63 @@ class RedSandSecureGUI(QMainWindow):
         except Exception as e:
             self.log_message('ERROR', f"Ошибка открытия истории: {e}")
 
+    def toggle_antivirus(self):
+        """Включить/выключить антивирус реального времени"""
+        if self.av_active:
+            # Выключаем
+            if self.av_monitor:
+                try:
+                    self.av_monitor.stop_monitoring()
+                except:
+                    pass
+            self.av_active = False
+            self.btn_toggle_av.setChecked(False)
+            self.btn_toggle_av.setText("▶️ ВКЛ")
+            self.av_status_label.setText("🛡️ Антивирус: ВЫКЛ")
+            self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 14px;")
+            self.log_message('INFO', "Антивирус реального времени остановлен")
+        else:
+            # Включаем
+            try:
+                from core.realtime_antivirus import RealTimeAntivirus
+                monitor_paths = [
+                    os.path.expanduser("~/Downloads"),
+                    os.path.expanduser("~/Desktop"),
+                    os.path.expanduser("~/Documents")
+                ]
+                valid_paths = [p for p in monitor_paths if os.path.exists(p)]
+                
+                if not valid_paths:
+                    QMessageBox.warning(self, "Предупреждение", 
+                        "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.")
+                    self.btn_toggle_av.setChecked(False)
+                    return
+                
+                self.av_monitor = RealTimeAntivirus(monitor_paths=valid_paths, quarantine_manager=self.quarantine_manager)
+                self.av_monitor.start_monitoring()
+                self.av_active = True
+                self.btn_toggle_av.setText("⏹️ ВЫКЛ")
+                self.av_status_label.setText("🛡️ Антивирус: ВКЛ")
+                self.av_status_label.setStyleSheet("color: #059669; font-weight: bold; font-size: 14px;")
+                self.log_message('SUCCESS', f"Антивирус запущен. Мониторинг: {', '.join(valid_paths)}")
+                
+                QMessageBox.information(self, "Антивирус активирован",
+                    f"Защита реального времени включена!\n\nМониторимые папки:\n{chr(10).join(valid_paths)}\n\nВсе подозрительные файлы будут автоматически помещены в карантин.")
+                    
+            except Exception as e:
+                self.log_message('ERROR', f"Ошибка запуска антивируса: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Не удалось запустить антивирус:\n{str(e)}")
+                self.btn_toggle_av.setChecked(False)
+
+    def open_quarantine(self):
+        """Открыть диалог карантина"""
+        try:
+            dialog = QuarantineDialog(quarantine_manager=self.quarantine_manager, parent=self)
+            dialog.exec_()
+        except Exception as e:
+            self.log_message('ERROR', f"Ошибка открытия карантина: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось открыть карантин:\n{str(e)}")
+
     def change_language(self, language: str):
         """Сменить язык интерфейса - полная локализация"""
         self.current_lang = language
@@ -2063,6 +2149,215 @@ class RedSandSecureGUI(QMainWindow):
         is_ru = self.current_lang == "Русский"
         log_msg = f"Результат сохранен в историю: {verdict}" if is_ru else f"Result saved to history: {verdict}"
         print(f"[{datetime.now().strftime('%H:%M:%S')}] [INFO] {log_msg}")
+
+
+class QuarantineDialog(QDialog):
+    """Диалог управления карантином с возможностью восстановления и удаления"""
+    
+    def __init__(self, quarantine_manager=None, parent=None):
+        super().__init__(parent)
+        self.quarantine_manager = quarantine_manager
+        self.parent_ref = parent
+        self.setWindowTitle("⚠️ Карантин")
+        self.setMinimumSize(900, 600)
+        self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        self.setup_ui()
+    
+    def setup_ui(self):
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        title = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        title.setObjectName("titleLabel")
+        title.setAlignment(Qt.AlignCenter)
+        layout.addWidget(title)
+        
+        info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
+        info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(info_label)
+        
+        # Таблица файлов
+        self.quarantine_table = QTableWidget()
+        self.quarantine_table.setColumnCount(4)
+        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Причина", "ID"])
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.quarantine_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.ResizeToContents)
+        self.quarantine_table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.quarantine_table.setEditTriggers(QTableWidget.NoEditTriggers)
+        self.quarantine_table.verticalHeader().setDefaultSectionSize(60)
+        self.quarantine_table.itemSelectionChanged.connect(self.on_selection_changed)
+        layout.addWidget(self.quarantine_table)
+        
+        # Кнопки управления
+        btn_layout = QHBoxLayout()
+        
+        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.clicked.connect(self.load_quarantine)
+        btn_layout.addWidget(self.btn_refresh)
+        
+        btn_layout.addStretch()
+        
+        self.btn_restore = QPushButton("♻️ Восстановить")
+        self.btn_restore.setObjectName("actionBtn")
+        self.btn_restore.clicked.connect(self.restore_selected)
+        self.btn_restore.setEnabled(False)
+        btn_layout.addWidget(self.btn_restore)
+        
+        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete.setObjectName("dangerBtn")
+        self.btn_delete.clicked.connect(self.delete_selected)
+        self.btn_delete.setEnabled(False)
+        btn_layout.addWidget(self.btn_delete)
+        
+        btn_layout.addStretch()
+        
+        self.btn_close = QPushButton("Закрыть")
+        self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.clicked.connect(self.accept)
+        btn_layout.addWidget(self.btn_close)
+        
+        layout.addLayout(btn_layout)
+        
+        # Детали выбранного файла
+        details_group = QGroupBox("Детали файла")
+        details_layout = QVBoxLayout(details_group)
+        self.details_text = QTextEdit()
+        self.details_text.setReadOnly(True)
+        self.details_text.setMaximumHeight(120)
+        self.details_text.setPlaceholderText("Выберите файл для просмотра деталей...")
+        details_layout.addWidget(self.details_text)
+        layout.addWidget(details_group)
+        
+        self.load_quarantine()
+    
+    def load_quarantine(self):
+        """Загрузить список файлов из карантина"""
+        self.quarantine_table.setRowCount(0)
+        
+        if not self.quarantine_manager:
+            return
+        
+        items = self.quarantine_manager.list_quarantined()
+        
+        if not items:
+            row = self.quarantine_table.rowCount()
+            self.quarantine_table.insertRow(row)
+            item = QTableWidgetItem("Карантин пуст")
+            item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+            self.quarantine_table.setItem(row, 0, item)
+            return
+        
+        for item_data in items:
+            row = self.quarantine_table.rowCount()
+            self.quarantine_table.insertRow(row)
+            
+            # Дата
+            date_item = QTableWidgetItem(item_data.get('timestamp', 'N/A'))
+            date_item.setFlags(date_item.flags() & ~Qt.ItemIsEditable)
+            self.quarantine_table.setItem(row, 0, date_item)
+            
+            # Имя файла
+            file_name = os.path.basename(item_data.get('original_path', 'Unknown'))
+            file_item = QTableWidgetItem(file_name)
+            file_item.setToolTip(item_data.get('original_path', ''))
+            file_item.setFlags(file_item.flags() & ~Qt.ItemIsEditable)
+            font = file_item.font()
+            font.setBold(True)
+            file_item.setFont(font)
+            self.quarantine_table.setItem(row, 1, file_item)
+            
+            # Причина
+            reason = item_data.get('reason', 'Не указано')
+            reason_item = QTableWidgetItem(reason)
+            reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
+            self.quarantine_table.setItem(row, 2, reason_item)
+            
+            # ID (quarantine path)
+            q_id = os.path.basename(item_data.get('quarantine_path', ''))
+            id_item = QTableWidgetItem(q_id)
+            id_item.setFlags(id_item.flags() & ~Qt.ItemIsEditable)
+            self.quarantine_table.setItem(row, 3, id_item)
+            
+            # Сохраняем данные в строке
+            self.quarantine_table.item(row, 0).setData(Qt.UserRole, item_data)
+    
+    def on_selection_changed(self):
+        """Обработка выбора строки"""
+        selected_rows = self.quarantine_table.selectedItems()
+        has_selection = len(selected_rows) > 0
+        
+        self.btn_restore.setEnabled(has_selection)
+        self.btn_delete.setEnabled(has_selection)
+        
+        if has_selection:
+            row = selected_rows[0].row()
+            item_data = self.quarantine_table.item(row, 0).data(Qt.UserRole)
+            if item_data:
+                details = f"Оригинальный путь: {item_data.get('original_path', 'N/A')}\n"
+                details += f"Дата помещения: {item_data.get('timestamp', 'N/A')}\n"
+                details += f"Причина: {item_data.get('reason', 'N/A')}\n"
+                details += f"ID карантина: {os.path.basename(item_data.get('quarantine_path', ''))}"
+                self.details_text.setText(details)
+    
+    def restore_selected(self):
+        """Восстановить выбранный файл"""
+        selected_items = self.quarantine_table.selectedItems()
+        if not selected_items:
+            return
+        
+        row = selected_items[0].row()
+        item_data = self.quarantine_table.item(row, 0).data(Qt.UserRole)
+        
+        if not item_data:
+            QMessageBox.warning(self, "Ошибка", "Не удалось получить данные о файле")
+            return
+        
+        reply = QMessageBox.question(
+            self, "Восстановление файла",
+            f"Вы уверены, что хотите восстановить этот файл?\n\n{os.path.basename(item_data.get('original_path', ''))}\n\nЭто может быть опасно!",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                self.quarantine_manager.restore_file(item_data['quarantine_path'])
+                QMessageBox.information(self, "Успех", "Файл восстановлен!")
+                self.load_quarantine()
+                self.details_text.clear()
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Не удалось восстановить файл:\n{str(e)}")
+    
+    def delete_selected(self):
+        """Удалить выбранный файл навсегда"""
+        selected_items = self.quarantine_table.selectedItems()
+        if not selected_items:
+            return
+        
+        row = selected_items[0].row()
+        item_data = self.quarantine_table.item(row, 0).data(Qt.UserRole)
+        
+        if not item_data:
+            QMessageBox.warning(self, "Ошибка", "Не удалось получить данные о файле")
+            return
+        
+        reply = QMessageBox.question(
+            self, "Удаление файла",
+            f"Вы уверены, что хотите удалить этот файл НАВСЕГДА?\n\n{os.path.basename(item_data.get('original_path', ''))}\n\nЭто действие НЕОБРАТИМО!",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            try:
+                self.quarantine_manager.delete_file(item_data['quarantine_path'])
+                QMessageBox.information(self, "Успех", "Файл удален из карантина!")
+                self.load_quarantine()
+                self.details_text.clear()
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить файл:\n{str(e)}")
 
 
     def closeEvent(self, event):
