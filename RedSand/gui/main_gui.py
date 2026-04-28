@@ -1917,27 +1917,30 @@ class RedSandSecureGUI(QMainWindow):
             if hasattr(dialog, 'update_texts'):
                 dialog.update_texts()
     
-    def open_settings(self):
-        """Открыть диалог настроек"""
-        dialog = SettingsDialog(self.settings, self)
-        if dialog.exec_() == QDialog.Accepted:
-            new_settings = dialog.get_settings()
-            self.settings.update(new_settings)
-            self.apply_stylesheet()
-            self.save_settings()
-    
     def open_history(self):
         """Открыть историю сканирований"""
         dialog = ScanHistoryDialog(scan_history=self.scan_history, parent=self)
+        dialog.update_texts()  # Обновляем тексты при открытии
         dialog.exec_()
     
     def open_quarantine(self):
         """Открыть диалог карантина"""
         try:
             dialog = QuarantineDialog(quarantine_manager=self.quarantine_manager, parent=self)
+            dialog.update_texts()  # Обновляем тексты при открытии
             dialog.exec_()
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось открыть карантин:\n{str(e)}")
+    
+    def open_settings(self):
+        """Открыть диалог настроек"""
+        dialog = SettingsDialog(self.settings, self)
+        dialog.update_texts()  # Обновляем тексты при открытии
+        if dialog.exec_() == QDialog.Accepted:
+            new_settings = dialog.get_settings()
+            self.settings.update(new_settings)
+            self.apply_stylesheet()
+            self.save_settings()
     
     def apply_stylesheet(self):
         """Применить таблицу стилей"""
