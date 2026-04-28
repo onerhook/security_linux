@@ -29,6 +29,7 @@ from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEn
 
 # Импорт компонентов ядра
 from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
+from core.virus_scanner import VirusScanner
 
 
 THEMES = {
@@ -373,7 +374,7 @@ LANGUAGES = {
         "title": "RedSand Secure",
         "subtitle": "Профессиональная система анализа вредоносного ПО",
         "antivirus_mode": "🛡️ АНТИВИРУС",
-        "analysis_mode": "🔍 АНАЛИЗ ФАЙЛОВ",
+        "analysis_mode": "АНАЛИЗ ФАЙЛОВ",
         "settings": "⚙ Настройки",
         "history": "📜 История",
         "quarantine": "⚠️ Карантин",
@@ -484,7 +485,7 @@ LANGUAGES = {
         "title": "RedSand Secure",
         "subtitle": "Professional Malware Analysis System",
         "antivirus_mode": "🛡️ ANTIVIRUS",
-        "analysis_mode": "🔍 FILE ANALYSIS",
+        "analysis_mode": "FILE ANALYSIS",
         "settings": "⚙ Settings",
         "history": "📜 History",
         "quarantine": "⚠️ Quarantine",
@@ -700,7 +701,7 @@ class MainModeSelector(QWidget):
         lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText(lang["analysis_mode"].replace("FILE ANALYSIS", "🔍\nFILE\nANALYSIS") if self.parent_ref.current_lang == "English" else lang["analysis_mode"])
+        self.btn_analysis.setText("🔍\nАНАЛИЗ\nФайлов" if self.parent_ref.current_lang == "Русский" else "🔍\nFILE\nANALYSIS")
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
@@ -1116,7 +1117,7 @@ class AnalysisPanel(QWidget):
             self.file_path_edit.setText(file_path)
     
     def start_analysis(self):
-        """Запуск анализа файла"""
+        """Запуск анализа файла с использованием VirusScanner"""
         file_path = self.file_path_edit.text().strip()
         if not file_path or not os.path.exists(file_path):
             QMessageBox.warning(self, "Ошибка", "Пожалуйста, выберите существующий файл для анализа.")
@@ -1128,8 +1129,11 @@ class AnalysisPanel(QWidget):
         self.results_summary.setVisible(True)
         self.results_table.setVisible(False)
         
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
+        
         self.log_message('INFO', f"Начало анализа файла: {file_path}")
-        self.log_message('INFO', "Используется Docker изоляция для безопасности")
+        self.log_message('INFO', "Используется VirusScanner для проверки на вирусы")
         
         # Добавляем запись в историю сканирований
         scan_record = {
@@ -1142,54 +1146,161 @@ class AnalysisPanel(QWidget):
         if self.parent_ref:
             self.parent_ref.scan_history.append(scan_record)
         
-        # Здесь будет логика анализа через orchestrator
-        # Для демонстрации показываем прогресс
+        # Прогресс анализа
         self.progress_bar.setValue(25)
-        self.progress_label.setText("Статический анализ...")
-        self.log_message('INFO', "Выполняется статический анализ файла...")
+        self.progress_label.setText("Статический анализ..." if is_ru else "Static analysis...")
+        self.log_message('INFO', "Выполняется статический анализ файла..." if is_ru else "Performing static file analysis...")
         
         self.progress_bar.setValue(50)
-        self.progress_label.setText("Динамический анализ в Docker...")
-        self.log_message('INFO', "Запуск в изолированном Docker контейнере...")
+        self.progress_label.setText("Проверка сигнатур вирусов..." if is_ru else "Virus signature check...")
+        self.log_message('INFO', "Проверка по базе вредоносных сигнатур..." if is_ru else "Checking against malware signatures database...")
         
         self.progress_bar.setValue(75)
-        self.progress_label.setText("Анализ поведения...")
-        self.log_message('INFO', "Анализ системных вызовов и сетевого поведения...")
+        self.progress_label.setText("Анализ поведения..." if is_ru else "Behavior analysis...")
+        self.log_message('INFO', "Анализ подозрительных паттернов..." if is_ru else "Analyzing suspicious patterns...")
         
-        # Имитация завершения анализа
+        # Используем VirusScanner для реального анализа
+        try:
+            scanner = VirusScanner()
+            scan_result = scanner.scan_file(file_path)
+            
+            threat_level = scan_result.get('threat_level', 'CLEAN')
+            risk_score = scan_result.get('risk_score', 0)
+            detected_threats = scan_result.get('detected_threats', [])
+            matched_signatures = scan_result.get('matched_signatures', [])
+            matched_patterns = scan_result.get('matched_patterns', [])
+            
+            # Определяем статус и цвет
+            if threat_level == 'MALICIOUS':
+                status_text = lang["status_malicious"]
+                status_color = "#dc2626"
+                final_threat_level = 'MALICIOUS'
+            elif threat_level == 'SUSPICIOUS':
+                status_text = lang["status_suspicious"]
+                status_color = "#d97706"
+                final_threat_level = 'SUSPICIOUS'
+            else:
+                status_text = lang["status_clean"]
+                status_color = "#059669"
+                final_threat_level = 'CLEAN'
+            
+            # Получаем рекомендацию
+            if threat_level == 'MALICIOUS':
+                recommendation = lang.get("rec_malicious", "DO NOT USE! File contains malicious code.")
+                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_delete", "Delete")
+            elif threat_level == 'SUSPICIOUS':
+                recommendation = lang.get("rec_suspicious", "Be careful. File contains suspicious elements.")
+                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_keep", "Keep")
+            else:
+                recommendation = lang.get("rec_clean", "File is safe. You can use it.")
+                action_text = lang.get("action_keep", "Keep")
+            
+            # Автоматически помещаем в карантин опасные и подозрительные файлы
+            if threat_level in ['MALICIOUS', 'SUSPICIOUS'] and self.parent_ref:
+                try:
+                    reason = f"{threat_level}: Risk Score {risk_score}"
+                    if detected_threats:
+                        reason += f" - {', '.join(detected_threats[:2])}"
+                    self.parent_ref.quarantine_manager.add_to_quarantine(
+                        file_path=file_path,
+                        reason=reason
+                    )
+                    self.log_message('WARNING', f"Файл помещен в карантин: {reason}" if is_ru else f"File quarantined: {reason}")
+                except Exception as e:
+                    self.log_message('ERROR', f"Ошибка карантина: {e}" if is_ru else f"Quarantine error: {e}")
+            
+        except Exception as e:
+            threat_level = 'ERROR'
+            status_text = "❌ Ошибка" if is_ru else "❌ Error"
+            status_color = "#666666"
+            final_threat_level = 'ERROR'
+            recommendation = str(e)
+            action_text = ""
+            detected_threats = []
+            matched_signatures = []
+            matched_patterns = []
+            risk_score = 0
+            self.log_message('ERROR', f"Ошибка сканирования: {e}" if is_ru else f"Scan error: {e}")
+        
         self.progress_bar.setValue(100)
-        self.progress_label.setText("Анализ завершен!")
-        self.log_message('SUCCESS', "Анализ успешно завершен!")
+        self.progress_label.setText(lang["analysis_complete"])
+        self.log_message('SUCCESS', lang["analysis_complete"])
         
-        # Показываем демо-результаты
+        # Показываем результаты
         self.results_summary.setVisible(False)
         self.results_table.setVisible(True)
-        self.results_table.setRowCount(5)  # Убрали Docker изоляцию
         
+        # Формируем данные для таблицы результатов
         results_data = [
-            ("Файл", os.path.basename(file_path)),
-            ("Статус", "✅ Чист" if hash(file_path) % 2 == 0 else "⚠️ Подозрительный"),
-            ("Тип файла", "PE Executable (EXE)" if file_path.endswith('.exe') else "Другой тип"),
-            ("Размер", f"{os.path.getsize(file_path)} байт"),
-            ("Время анализа", f"{datetime.now().strftime('%H:%M:%S')}")
+            (lang.get("col_file", "File"), os.path.basename(file_path)),
+            (lang.get("col_status", "Status"), status_text),
+            ("Risk Score", f"{risk_score}/100"),
+            ("Тип файла", "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")),
+            ("Размер", f"{os.path.getsize(file_path)} байт" if is_ru else f"{os.path.getsize(file_path)} bytes"),
+            (lang.get("recommendation", "Recommendation"), recommendation),
+            (lang.get("action_required", "Action Required"), action_text),
         ]
         
-        for i, (param, value) in enumerate(results_data):
-            self.results_table.setItem(i, 0, QTableWidgetItem(param))
-            self.results_table.setItem(i, 1, QTableWidgetItem(value))
+        # Добавляем обнаруженные угрозы если есть
+        if detected_threats:
+            threats_str = ', '.join(detected_threats) if is_ru else ', '.join(detected_threats)
+            results_data.append((lang.get("detected_threats", "Detected Threats"), threats_str))
         
-        # Обновляем запись в истории с правильным scan_time
+        # Добавляем_matched signatures если есть
+        if matched_signatures:
+            sig_str = ', '.join(matched_signatures[:3])
+            if len(matched_signatures) > 3:
+                sig_str += f" (+{len(matched_signatures)-3})"
+            results_data.append(("Matched Signatures", sig_str))
+        
+        # Добавляем matched patterns если есть
+        if matched_patterns:
+            pat_str = ', '.join(matched_patterns[:3])
+            if len(matched_patterns) > 3:
+                pat_str += f" (+{len(matched_patterns)-3})"
+            results_data.append(("Suspicious Patterns", pat_str))
+        
+        self.results_table.setRowCount(len(results_data))
+        for i, (param, value) in enumerate(results_data):
+            item_param = QTableWidgetItem(param)
+            item_param.setFlags(item_param.flags() & ~Qt.ItemIsEditable)
+            item_param.setFont(QFont("Segoe UI", 12, QFont.Bold))
+            self.results_table.setItem(i, 0, item_param)
+            
+            item_value = QTableWidgetItem(value)
+            item_value.setFlags(item_value.flags() & ~Qt.ItemIsEditable)
+            item_value.setFont(QFont("Segoe UI", 12))
+            # Подсветка статуса
+            if param == lang.get("col_status", "Status"):
+                item_value.setBackground(QColor(status_color))
+                item_value.setForeground(QColor("#ffffff"))
+                item_value.setTextAlignment(Qt.AlignCenter)
+            self.results_table.setItem(i, 1, item_value)
+        
+        # Обновляем запись в истории
         if self.parent_ref and len(self.parent_ref.scan_history) > 0:
             last_record = self.parent_ref.scan_history[-1]
             last_record['scan_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            last_record['threat_level'] = 'CLEAN' if hash(file_path) % 2 == 0 else 'SUSPICIOUS'
-            last_record['detected_threats'] = [] if hash(file_path) % 2 == 0 else ['Pattern match', 'Suspicious behavior']
-            last_record['status'] = last_record['threat_level']  # Для совместимости
-            last_record['threats'] = 0 if hash(file_path) % 2 == 0 else 2
+            last_record['threat_level'] = final_threat_level
+            last_record['detected_threats'] = detected_threats
+            last_record['status'] = final_threat_level
+            last_record['threats'] = len(detected_threats)
+            last_record['risk_score'] = risk_score
+            last_record['recommendation'] = recommendation
         
         self.btn_analyze.setEnabled(True)
-        QMessageBox.information(self, "Анализ завершен", 
-            f"Файл проанализирован в Docker контейнере.\nРезультаты доступны во вкладке 'Результаты'.")
+        
+        # Показываем результат
+        msg_title = lang["analysis_complete"]
+        if threat_level == 'MALICIOUS':
+            msg = f"⚠️ {lang['status_malicious']}!\n\n{recommendation}\n\n{lang.get('action_quarantine', 'Quarantine')}: {os.path.basename(file_path)}"
+            QMessageBox.warning(self, msg_title, msg)
+        elif threat_level == 'SUSPICIOUS':
+            msg = f"⚠️ {lang['status_suspicious']}!\n\n{recommendation}"
+            QMessageBox.warning(self, msg_title, msg)
+        else:
+            msg = f"✅ {lang['status_clean']}!\n\n{recommendation}"
+            QMessageBox.information(self, msg_title, msg)
     
     def log_message(self, level: str, message: str):
         """Запись сообщения в лог"""
@@ -1492,7 +1603,7 @@ class QuarantineDialog(QDialog):
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
         self.btn_refresh.setObjectName("secondaryBtn")
-        self.btn_refresh.setFixedHeight(45)
+        self.btn_refresh.setMinimumHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
         btn_layout.addWidget(self.btn_refresh)
         
@@ -1505,14 +1616,14 @@ class QuarantineDialog(QDialog):
         center_layout.setSpacing(10)
         self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
-        self.btn_restore.setFixedHeight(50)
+        self.btn_restore.setMinimumHeight(50)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
-        self.btn_delete.setFixedHeight(50)
+        self.btn_delete.setMinimumHeight(50)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
@@ -1523,7 +1634,7 @@ class QuarantineDialog(QDialog):
         # Кнопка "Закрыть" справа
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.setFixedHeight(45)
+        self.btn_close.setMinimumHeight(45)
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
