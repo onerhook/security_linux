@@ -134,23 +134,30 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
     }}
     
     QPushButton#actionBtn {{
-        background-color: {theme['success']};
+        background-color: {theme['accent']};
+        color: white;
         min-width: 140px;
         min-height: 50px;
+        border: 2px solid {theme['border']};
     }}
     
     QPushButton#actionBtn:hover {{
-        background-color: #00cc6a;
+        background-color: {theme['accent_hover']};
+        border-color: {theme['accent']};
     }}
     
     QPushButton#dangerBtn {{
-        background-color: {theme['danger']};
+        background-color: {theme['bg_tertiary']};
+        color: {theme['text_primary']};
         min-width: 140px;
         min-height: 50px;
+        border: 2px solid {theme['border']};
     }}
     
     QPushButton#dangerBtn:hover {{
-        background-color: #cc3333;
+        background-color: #ff6b6b;
+        color: white;
+        border-color: #ff6b6b;
     }}
     
     QPushButton#langBtn {{
@@ -372,7 +379,7 @@ def generate_stylesheet(theme_name: str = "Тёмная") -> str:
 LANGUAGES = {
     "Русский": {
         "title": "RedSand Secure",
-        "subtitle": "Профессиональная система анализа вредоносного ПО",
+        "subtitle": "",
         "antivirus_mode": "🛡️ АНТИВИРУС",
         "analysis_mode": "АНАЛИЗ ФАЙЛОВ",
         "settings": "⚙ Настройки",
@@ -429,9 +436,9 @@ LANGUAGES = {
         "col_status": "Статус",
         "col_threats": "Угрозы",
         "col_file": "Файл",
-        "status_clean": "✅ Чист",
-        "status_suspicious": "⚠️ Подозрительный",
-        "status_malicious": "🔴 Опасно",
+        "status_clean": "БЕЗОПАСНЫЙ",
+        "status_suspicious": "ПОДОЗРИТЕЛЬНЫЙ",
+        "status_malicious": "ОПАСНЫЙ",
         "settings_title": "⚙ Настройки приложения",
         "theme_group": "Тема оформления",
         "analysis_settings_group": "Настройки анализа",
@@ -483,7 +490,7 @@ LANGUAGES = {
     },
     "English": {
         "title": "RedSand Secure",
-        "subtitle": "Professional Malware Analysis System",
+        "subtitle": "",
         "antivirus_mode": "🛡️ ANTIVIRUS",
         "analysis_mode": "FILE ANALYSIS",
         "settings": "⚙ Settings",
@@ -540,9 +547,9 @@ LANGUAGES = {
         "col_status": "Status",
         "col_threats": "Threats",
         "col_file": "File",
-        "status_clean": "✅ Clean",
-        "status_suspicious": "⚠️ Suspicious",
-        "status_malicious": "🔴 Dangerous",
+        "status_clean": "SAFE",
+        "status_suspicious": "SUSPICIOUS",
+        "status_malicious": "DANGEROUS",
         "settings_title": "⚙ Application Settings",
         "theme_group": "Theme",
         "analysis_settings_group": "Analysis Settings",
@@ -616,7 +623,7 @@ class MainModeSelector(QWidget):
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
         
-        subtitle_label = QLabel("Профессиональная система анализа вредоносного ПО")
+        subtitle_label = QLabel("")
         subtitle_label.setObjectName("subtitleLabel")
         subtitle_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(subtitle_label)
@@ -636,7 +643,7 @@ class MainModeSelector(QWidget):
         modes_layout.addWidget(self.btn_antivirus)
         
         # Кнопка Анализ файлов
-        self.btn_analysis = QPushButton("🔍\nАНАЛИЗ\nФайлов")
+        self.btn_analysis = QPushButton("🔍\\n" + lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
         self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
@@ -701,7 +708,7 @@ class MainModeSelector(QWidget):
         lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText("🔍\nАНАЛИЗ\nФайлов" if self.parent_ref.current_lang == "Русский" else "🔍\nFILE\nANALYSIS")
+        self.btn_analysis.setText("🔍\\n" + lang["analysis_mode"])
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
@@ -761,27 +768,26 @@ class AntivirusPanel(QWidget):
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
         
-        # Кнопки управления папками - под списком папок, подняты выше чтобы уголки сходились
+        # Кнопки управления папками - под списком папок, впритык снизу
         folder_btn_widget = QWidget()
         folder_btn_layout = QHBoxLayout(folder_btn_widget)
-        folder_btn_layout.setContentsMargins(0, 0, 0, 5)
+        folder_btn_layout.setContentsMargins(0, 0, 0, 0)
         folder_btn_layout.setSpacing(10)
         
         self.btn_add_folder = QPushButton(self.tr("Add"))
         self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setFixedHeight(40)
+        self.btn_add_folder.setMinimumHeight(45)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
         self.btn_remove_folder = QPushButton(self.tr("Remove"))
         self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setFixedHeight(40)
+        self.btn_remove_folder.setMinimumHeight(45)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addWidget(folder_btn_widget)
-        monitor_layout.addSpacing(5)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -1231,34 +1237,54 @@ class AnalysisPanel(QWidget):
         self.results_table.setVisible(True)
         
         # Формируем данные для таблицы результатов
+        file_type_ru = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
+        file_type_en = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
+        file_type = file_type_ru if is_ru else file_type_en
+        
+        size_label_ru = "Размер"
+        size_label_en = "Size"
+        size_label = size_label_ru if is_ru else size_label_en
+        
+        size_value_ru = f"{os.path.getsize(file_path)} байт"
+        size_value_en = f"{os.path.getsize(file_path)} bytes"
+        size_value = size_value_ru if is_ru else size_value_en
+        
         results_data = [
             (lang.get("col_file", "File"), os.path.basename(file_path)),
             (lang.get("col_status", "Status"), status_text),
-            ("Risk Score", f"{risk_score}/100"),
-            ("Тип файла", "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")),
-            ("Размер", f"{os.path.getsize(file_path)} байт" if is_ru else f"{os.path.getsize(file_path)} bytes"),
             (lang.get("recommendation", "Recommendation"), recommendation),
             (lang.get("action_required", "Action Required"), action_text),
+            (file_type, file_type),
+            (size_label, size_value),
         ]
         
         # Добавляем обнаруженные угрозы если есть
         if detected_threats:
-            threats_str = ', '.join(detected_threats) if is_ru else ', '.join(detected_threats)
-            results_data.append((lang.get("detected_threats", "Detected Threats"), threats_str))
+            threats_label_ru = "Обнаруженные угрозы"
+            threats_label_en = "Detected Threats"
+            threats_label = threats_label_ru if is_ru else threats_label_en
+            threats_str = ', '.join(detected_threats)
+            results_data.append((threats_label, threats_str))
         
-        # Добавляем_matched signatures если есть
+        # Добавляем matched signatures если есть
         if matched_signatures:
+            sig_label_ru = "Совпавшие сигнатуры"
+            sig_label_en = "Matched Signatures"
+            sig_label = sig_label_ru if is_ru else sig_label_en
             sig_str = ', '.join(matched_signatures[:3])
             if len(matched_signatures) > 3:
                 sig_str += f" (+{len(matched_signatures)-3})"
-            results_data.append(("Matched Signatures", sig_str))
+            results_data.append((sig_label, sig_str))
         
         # Добавляем matched patterns если есть
         if matched_patterns:
+            pat_label_ru = "Подозрительные паттерны"
+            pat_label_en = "Suspicious Patterns"
+            pat_label = pat_label_ru if is_ru else pat_label_en
             pat_str = ', '.join(matched_patterns[:3])
             if len(matched_patterns) > 3:
                 pat_str += f" (+{len(matched_patterns)-3})"
-            results_data.append(("Suspicious Patterns", pat_str))
+            results_data.append((pat_label, pat_str))
         
         self.results_table.setRowCount(len(results_data))
         for i, (param, value) in enumerate(results_data):
@@ -1603,27 +1629,27 @@ class QuarantineDialog(QDialog):
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
         self.btn_refresh.setObjectName("secondaryBtn")
-        self.btn_refresh.setMinimumHeight(45)
+        self.btn_refresh.setMinimumHeight(50)
         self.btn_refresh.clicked.connect(self.load_quarantine)
         btn_layout.addWidget(self.btn_refresh)
         
         btn_layout.addStretch()
         
-        # Кнопки "Восстановить" и "Удалить навсегда" по центру
+        # Кнопки "Восстановить" и "Удалить навсегда" по центру - динамичные кнопки
         center_widget = QWidget()
         center_layout = QHBoxLayout(center_widget)
         center_layout.setContentsMargins(0, 0, 0, 0)
         center_layout.setSpacing(10)
         self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
-        self.btn_restore.setMinimumHeight(50)
+        self.btn_restore.setMinimumHeight(55)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
-        self.btn_delete.setMinimumHeight(50)
+        self.btn_delete.setMinimumHeight(55)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
