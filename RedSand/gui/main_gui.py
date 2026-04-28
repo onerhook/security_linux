@@ -394,7 +394,91 @@ LANGUAGES = {
         "network_check": "Отключать сеть (рекомендуется)",
         "monitored_folders": "Мониторинг папок:",
         "auto_quarantine": "Авто-карантин угроз",
-        "scan_on_access": "Сканирование при доступе"
+        "scan_on_access": "Сканирование при доступе",
+        "language_label": "Язык/Language:",
+        "add_folder": "📁 Добавить",
+        "remove_folder": "🗑️ Удалить",
+        "event_log": "Журнал событий антивируса",
+        "log_placeholder": "Здесь будут отображаться события антивируса...",
+        "protection_status": "Статус защиты",
+        "folder_monitoring": "Мониторинг папок",
+        "back_to_menu": "← Назад к главному меню",
+        "quarantine_title": "🛡️ Карантин - Обнаруженные угрозы",
+        "quarantine_info": "Файлы в карантине обезврежены и не могут нанести вред системе.",
+        "quarantine_empty": "Карантин пуст",
+        "refresh": "🔄 Обновить",
+        "restore": "♻️ Восстановить",
+        "delete_forever": "🗑️ Удалить навсегда",
+        "close": "Закрыть",
+        "col_date": "Дата",
+        "col_filename": "Имя файла",
+        "col_path": "Оригинальный путь",
+        "col_reason": "Причина",
+        "col_id": "ID",
+        "restore_confirm": "Вы уверены, что хотите восстановить этот файл?\\nУбедитесь, что он безопасен!",
+        "restore_success": "Файл успешно восстановлен!",
+        "restore_error": "Не удалось восстановить файл",
+        "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\\nЭто действие необратимо!",
+        "delete_success": "Файл успешно удален!",
+        "history_title": "📋 История сканирований файлов",
+        "history_info": "Здесь отображаются все файлы, которые были проанализированы.",
+        "history_empty": "История пуста",
+        "clear_history": "🗑️ Очистить историю",
+        "clear_history_confirm": "Вы уверены, что хотите очистить всю историю сканирований?",
+        "col_status": "Статус",
+        "col_threats": "Угрозы",
+        "col_file": "Файл",
+        "status_clean": "✅ Чист",
+        "status_suspicious": "⚠️ Подозрительный",
+        "status_malicious": "🔴 Опасно",
+        "settings_title": "⚙ Настройки приложения",
+        "theme_group": "Тема оформления",
+        "analysis_settings_group": "Настройки анализа",
+        "application_settings": "⚙ Настройки приложения",
+        "analysis_settings": "Настройки анализа",
+        "timeout_label": "Время анализа (сек):",
+        "app_language": "Язык интерфейса",
+        "av_running": "Антивирус запущен. Мониторинг: ",
+        "av_start_error": "Не удалось запустить антивирус:",
+        "av_stop_error": "Ошибка остановки: ",
+        "av_start_msg": "Защита реального времени включена!\\n\\nМониторимые папки:\\n",
+        "folder_exists": "Эта папка уже добавлена",
+        "folder_added": "Добавлена папка: ",
+        "folder_removed": "Удалена папка: ",
+        "no_folders": "Не найдены стандартные папки для мониторинга.\\nАнтивирус не может быть запущен.",
+        "docker_info": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
+        "file_selected": "Выбран файл: ",
+        "no_file": "Файл не выбран",
+        "analyzing": "Анализ файла...",
+        "analysis_complete": "Анализ завершён!",
+        "threat_level": "Уровень угрозы: ",
+        "detected_threats": "Обнаруженные угрозы:",
+        "step1_file": "Шаг 1: Выберите файл",
+        "step2_settings": "Шаг 2: Настройки анализа",
+        "file_placeholder": "Файл еще не выбран... или перетащите сюда",
+        "analysis_progress": "Прогресс анализа",
+        "waiting": "Ожидание...",
+        "logs_tab": "📋 Журнал      ",
+        "results_tab": "📊 Результаты   ",
+        "log_placeholder": "Здесь будет отображаться ход анализа...",
+        "results_placeholder": "Результаты анализа появятся здесь после завершения...",
+        "param_column": "Параметр",
+        "value_column": "Значение",
+        "static_analysis": "Статический анализ...",
+        "dynamic_analysis": "Динамический анализ в Docker...",
+        "behavior_analysis": "Анализ поведения...",
+        "docker_isolated": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
+        "select_file_title": "Выберите файл для анализа",
+        "file_filter": "Все файлы (*);;EXE файлы (*.exe);;PDF файлы (*.pdf);;Office документы (*.docx *.xlsx *.pptx)",
+        "no_file_error": "Пожалуйста, выберите существующий файл для анализа.",
+        "analysis_started": "Начало анализа файла: ",
+        "docker_security": "Используется Docker изоляция для безопасности",
+        "scan_time": "Время сканирования",
+        "clear_history_confirm_en": "Вы уверены, что хотите очистить всю историю сканирований?",
+        "settings_saved": "Настройки сохранены",
+        "theme_label": "Тема оформления",
+        "dark_theme_btn": "🌙 Тёмная",
+        "light_theme_btn": "☀️ Светлая"
     },
     "English": {
         "title": "RedSand Secure",
@@ -421,7 +505,91 @@ LANGUAGES = {
         "network_check": "Disable network (recommended)",
         "monitored_folders": "Monitored Folders:",
         "auto_quarantine": "Auto-quarantine threats",
-        "scan_on_access": "Scan on access"
+        "scan_on_access": "Scan on access",
+        "language_label": "Language/Language:",
+        "add_folder": "📁 Add",
+        "remove_folder": "🗑️ Remove",
+        "event_log": "Antivirus Event Log",
+        "log_placeholder": "Antivirus events will be displayed here...",
+        "protection_status": "Protection Status",
+        "folder_monitoring": "Folder Monitoring",
+        "back_to_menu": "← Back to Main Menu",
+        "quarantine_title": "🛡️ Quarantine - Detected Threats",
+        "quarantine_info": "Files in quarantine are neutralized and cannot harm the system.",
+        "quarantine_empty": "Quarantine is empty",
+        "refresh": "🔄 Refresh",
+        "restore": "♻️ Restore",
+        "delete_forever": "🗑️ Delete Forever",
+        "close": "Close",
+        "col_date": "Date",
+        "col_filename": "File Name",
+        "col_path": "Original Path",
+        "col_reason": "Reason",
+        "col_id": "ID",
+        "restore_confirm": "Are you sure you want to restore this file?\\nMake sure it is safe!",
+        "restore_success": "File successfully restored!",
+        "restore_error": "Failed to restore file",
+        "delete_confirm": "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!",
+        "delete_success": "File successfully deleted!",
+        "history_title": "📋 Scan History",
+        "history_info": "All analyzed files are displayed here.",
+        "history_empty": "History is empty",
+        "clear_history": "🗑️ Clear History",
+        "clear_history_confirm": "Are you sure you want to clear all scan history?",
+        "col_status": "Status",
+        "col_threats": "Threats",
+        "col_file": "File",
+        "status_clean": "✅ Clean",
+        "status_suspicious": "⚠️ Suspicious",
+        "status_malicious": "🔴 Dangerous",
+        "settings_title": "⚙ Application Settings",
+        "theme_group": "Theme",
+        "analysis_settings_group": "Analysis Settings",
+        "application_settings": "⚙ Application Settings",
+        "analysis_settings": "Analysis Settings",
+        "timeout_label": "Analysis Time (sec):",
+        "app_language": "Interface Language",
+        "av_running": "Antivirus running. Monitoring: ",
+        "av_start_error": "Failed to start antivirus:",
+        "av_stop_error": "Stop error: ",
+        "av_start_msg": "Real-time protection enabled!\\n\\nMonitored folders:\\n",
+        "folder_exists": "This folder is already added",
+        "folder_added": "Folder added: ",
+        "folder_removed": "Folder removed: ",
+        "no_folders": "No standard folders found for monitoring.\\nAntivirus cannot be started.",
+        "docker_info": "ℹ️ All files are analyzed in an isolated Docker container",
+        "file_selected": "Selected file: ",
+        "no_file": "No file selected",
+        "analyzing": "Analyzing file...",
+        "analysis_complete": "Analysis complete!",
+        "threat_level": "Threat level: ",
+        "detected_threats": "Detected threats:",
+        "step1_file": "Step 1: Select File",
+        "step2_settings": "Step 2: Analysis Settings",
+        "file_placeholder": "File not selected... or drag and drop here",
+        "analysis_progress": "Analysis Progress",
+        "waiting": "Waiting...",
+        "logs_tab": "📋 Logs      ",
+        "results_tab": "📊 Results   ",
+        "log_placeholder": "Analysis progress will be displayed here...",
+        "results_placeholder": "Analysis results will appear here after completion...",
+        "param_column": "Parameter",
+        "value_column": "Value",
+        "static_analysis": "Static analysis...",
+        "dynamic_analysis": "Dynamic analysis in Docker...",
+        "behavior_analysis": "Behavior analysis...",
+        "docker_isolated": "ℹ️ All files are analyzed in an isolated Docker container",
+        "select_file_title": "Select file for analysis",
+        "file_filter": "All files (*);;EXE files (*.exe);;PDF files (*.pdf);;Office documents (*.docx *.xlsx *.pptx)",
+        "no_file_error": "Please select an existing file for analysis.",
+        "analysis_started": "Starting file analysis: ",
+        "docker_security": "Using Docker isolation for security",
+        "scan_time": "Scan Time",
+        "clear_history_confirm_en": "Are you sure you want to clear all scan history?",
+        "settings_saved": "Settings saved",
+        "theme_label": "Theme",
+        "dark_theme_btn": "🌙 Dark",
+        "light_theme_btn": "☀️ Light"
     }
 }
 
@@ -517,13 +685,25 @@ class MainModeSelector(QWidget):
         self.btn_history.clicked.connect(lambda: self.parent_ref.open_history() if self.parent_ref else None)
         bottom_panel.addWidget(self.btn_history)
         
-        # Кнопка карантина
+        # Кнопка карантина - по центру свободного пространства
         self.btn_quarantine = QPushButton("⚠️ Карантин")
         self.btn_quarantine.setObjectName("secondaryBtn")
         self.btn_quarantine.clicked.connect(lambda: self.parent_ref.open_quarantine() if self.parent_ref else None)
         bottom_panel.addWidget(self.btn_quarantine)
         
         layout.addLayout(bottom_panel)
+    
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        if not self.parent_ref:
+            return
+        lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
+        
+        self.btn_antivirus.setText(lang["antivirus_mode"])
+        self.btn_analysis.setText(lang["analysis_mode"].replace("FILE ANALYSIS", "🔍\nFILE\nANALYSIS") if self.parent_ref.current_lang == "English" else lang["analysis_mode"])
+        self.btn_settings.setText(lang["settings"])
+        self.btn_history.setText(lang["history"])
+        self.btn_quarantine.setText(lang["quarantine"])
 
 
 class AntivirusPanel(QWidget):
@@ -570,25 +750,7 @@ class AntivirusPanel(QWidget):
         monitor_group = QGroupBox("Мониторинг папок")
         monitor_layout = QVBoxLayout(monitor_group)
         
-        # Кнопки управления папками - сразу после заголовка, до списка
-        folder_btn_layout = QHBoxLayout()
-        
-        self.btn_add_folder = QPushButton("📁 Добавить")
-        self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setFixedHeight(40)
-        self.btn_add_folder.clicked.connect(self.add_folder)
-        folder_btn_layout.addWidget(self.btn_add_folder)
-        
-        self.btn_remove_folder = QPushButton("🗑️ Удалить")
-        self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setFixedHeight(40)
-        self.btn_remove_folder.clicked.connect(self.remove_folder)
-        self.btn_remove_folder.setEnabled(False)
-        folder_btn_layout.addWidget(self.btn_remove_folder)
-        
-        monitor_layout.addLayout(folder_btn_layout)
-        
-        # Список папок - после кнопок
+        # Список папок - сначала список с отступом снизу
         self.folder_list = QListWidget()
         self.folder_list.addItems([
             "~/Downloads",
@@ -597,6 +759,28 @@ class AntivirusPanel(QWidget):
         ])
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
+        
+        # Кнопки управления папками - под списком папок, подняты выше чтобы уголки сходились
+        folder_btn_widget = QWidget()
+        folder_btn_layout = QHBoxLayout(folder_btn_widget)
+        folder_btn_layout.setContentsMargins(0, 0, 0, 5)
+        folder_btn_layout.setSpacing(10)
+        
+        self.btn_add_folder = QPushButton(self.tr("Add"))
+        self.btn_add_folder.setObjectName("secondaryBtn")
+        self.btn_add_folder.setFixedHeight(40)
+        self.btn_add_folder.clicked.connect(self.add_folder)
+        folder_btn_layout.addWidget(self.btn_add_folder)
+        
+        self.btn_remove_folder = QPushButton(self.tr("Remove"))
+        self.btn_remove_folder.setObjectName("dangerBtn")
+        self.btn_remove_folder.setFixedHeight(40)
+        self.btn_remove_folder.clicked.connect(self.remove_folder)
+        self.btn_remove_folder.setEnabled(False)
+        folder_btn_layout.addWidget(self.btn_remove_folder)
+        
+        monitor_layout.addWidget(folder_btn_widget)
+        monitor_layout.addSpacing(5)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -715,9 +899,52 @@ class AntivirusPanel(QWidget):
             row = self.folder_list.row(item)
             folder_path = item.text()
             self.folder_list.takeItem(row)
-            self.log_event(f"Удалена папка: {folder_path}")
+            self.log_event(self.get_text("folder_removed") + folder_path)
         
         self.btn_remove_folder.setEnabled(False)
+    
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        # Обновляем заголовок
+        title_widget = self.findChild(QLabel, "titleLabel")
+        if title_widget:
+            title_widget.setText(lang["antivirus_mode"])
+        
+        # Обновляем статусы
+        if self.av_active:
+            self.av_status_label.setText(lang["av_status_on"])
+            self.btn_toggle_av.setText(lang["av_on"])
+        else:
+            self.av_status_label.setText(lang["av_status_off"])
+            self.btn_toggle_av.setText(lang["av_off"])
+        
+        # Обновляем GroupBox
+        groups = self.findChildren(QGroupBox)
+        for group in groups:
+            if group.title() == "Статус защиты":
+                group.setTitle(lang["protection_status"])
+            elif group.title() == "Мониторинг папок":
+                group.setTitle(lang["folder_monitoring"])
+            elif group.title() == "Журнал событий антивируса":
+                group.setTitle(lang["event_log"])
+        
+        # Обновляем кнопки
+        self.btn_add_folder.setText(lang["add_folder"])
+        self.btn_remove_folder.setText(lang["remove_folder"])
+        
+        # Обновляем чекбоксы
+        self.chk_auto_quarantine.setText(lang["auto_quarantine"])
+        self.chk_scan_on_access.setText(lang["scan_on_access"])
+        
+        # Обновляем placeholder лога
+        self.av_log.setPlaceholderText(lang["log_placeholder"])
+        
+        # Находим кнопку назад и обновляем
+        for btn in self.findChildren(QPushButton):
+            if btn.text().startswith("←"):
+                btn.setText(lang["back_to_menu"])
 
 
 class AnalysisPanel(QWidget):
@@ -737,7 +964,7 @@ class AnalysisPanel(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Заголовок
-        title_label = QLabel("🔍 АНАЛИЗ ФАЙЛОВ")
+        title_label = QLabel("🔍 FILE ANALYSIS")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -751,16 +978,16 @@ class AnalysisPanel(QWidget):
         left_layout.setSpacing(20)
         
         # Выбор файла
-        file_group = QGroupBox("Шаг 1: Выберите файл")
+        file_group = QGroupBox("Step 1: Select File")
         file_layout = QVBoxLayout(file_group)
         
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText("Файл еще не выбран... или перетащите сюда")
+        self.file_path_edit.setPlaceholderText("No file selected... or drag and drop here")
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        self.btn_select_file = QPushButton("📁 Выбрать файл")
+        self.btn_select_file = QPushButton("📁 Select File")
         self.btn_select_file.setObjectName("actionBtn")
         self.btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(self.btn_select_file)
@@ -768,11 +995,11 @@ class AnalysisPanel(QWidget):
         left_layout.addWidget(file_group)
         
         # Настройки анализа
-        settings_group = QGroupBox("Шаг 2: Настройки анализа")
+        settings_group = QGroupBox("Step 2: Analysis Settings")
         settings_layout = QVBoxLayout(settings_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Время анализа:")
+        timeout_label = QLabel("Analysis Time:")
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -782,36 +1009,36 @@ class AnalysisPanel(QWidget):
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
-        self.poly_check.setToolTip("Помогает обнаружить сложные вирусы")
+        self.poly_check = QCheckBox("Create file variants for analysis")
+        self.poly_check.setToolTip("Helps detect complex viruses")
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть (рекомендуется)")
+        self.network_check = QCheckBox("Disable network (recommended)")
         self.network_check.setChecked(True)
-        self.network_check.setToolTip("Защищает вашу сеть во время анализа")
+        self.network_check.setToolTip("Protects your network during analysis")
         settings_layout.addWidget(self.network_check)
         
-        docker_info = QLabel("ℹ️ Все файлы анализируются в изолированном Docker контейнере")
+        docker_info = QLabel("ℹ️ All files are analyzed in an isolated Docker container")
         docker_info.setStyleSheet("color: #00ff88; font-style: italic;")
         settings_layout.addWidget(docker_info)
         
         left_layout.addWidget(settings_group)
         
         # Кнопка анализа
-        self.btn_analyze = QPushButton("🚀 ЗАПУСТИТЬ АНАЛИЗ")
+        self.btn_analyze = QPushButton("🚀 START ANALYSIS")
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.setMinimumHeight(60)
         self.btn_analyze.clicked.connect(self.start_analysis)
         left_layout.addWidget(self.btn_analyze)
         
         # Прогресс
-        progress_group = QGroupBox("Прогресс анализа")
+        progress_group = QGroupBox("Analysis Progress")
         progress_layout = QVBoxLayout(progress_group)
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel("Ожидание...")
+        self.progress_label = QLabel("Waiting...")
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
@@ -832,23 +1059,23 @@ class AnalysisPanel(QWidget):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setFont(QFont("Consolas", 12))
-        self.log_text.setPlaceholderText("Здесь будет отображаться ход анализа...")
+        self.log_text.setPlaceholderText("Analysis progress will be displayed here...")
         logs_layout.addWidget(self.log_text)
         # Увеличена ширина кнопки вкладки Журнал через stylesheet
         logs_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(logs_widget, "📋 Журнал      ")
+        self.tabs.addTab(logs_widget, "📋 Log      ")
         
         # Вкладка результатов
         results_widget = QWidget()
         results_layout = QVBoxLayout(results_widget)
-        self.results_summary = QLabel("Результаты анализа появятся здесь после завершения...")
+        self.results_summary = QLabel("Analysis results will appear here after completion...")
         self.results_summary.setAlignment(Qt.AlignCenter)
         self.results_summary.setFont(QFont("Segoe UI", 16))
         self.results_summary.setStyleSheet("color: #666; padding: 50px;")
         results_layout.addWidget(self.results_summary)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
-        self.results_table.setHorizontalHeaderLabels(["Параметр", "Значение"])
+        self.results_table.setHorizontalHeaderLabels(["Parameter", "Value"])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.results_table.horizontalHeader().setMinimumSectionSize(250)  # Увеличена ширина первой колонки
@@ -859,7 +1086,7 @@ class AnalysisPanel(QWidget):
         results_layout.addWidget(self.results_table)
         # Увеличена ширина кнопки вкладки Результаты через stylesheet
         results_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(results_widget, "📊 Результаты   ")
+        self.tabs.addTab(results_widget, "📊 Results   ")
         
         right_layout.addWidget(self.tabs)
         main_splitter.addWidget(right_widget)
@@ -869,7 +1096,7 @@ class AnalysisPanel(QWidget):
         layout.addWidget(main_splitter)
         
         # Кнопка назад
-        btn_back = QPushButton("← Назад к главному меню")
+        btn_back = QPushButton("← Back to Main Menu")
         btn_back.setObjectName("secondaryBtn")
         btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
         layout.addWidget(btn_back)
@@ -965,6 +1192,67 @@ class AnalysisPanel(QWidget):
         colors = {'INFO': '#4CAF50', 'WARNING': '#FF9800', 'ERROR': '#F44336', 'SUCCESS': '#00BCD4'}
         color = colors.get(level, '#FFFFFF')
         self.log_text.append(f'<span style="color: {color};">[{timestamp}] [{level}] {message}</span>')
+    
+    def update_texts(self):
+        """Обновление текстов при смене языка"""
+        if not self.parent_ref:
+            return
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
+        
+        # Обновляем заголовок
+        title_widgets = self.findChildren(QLabel, "titleLabel")
+        for widget in title_widgets:
+            if widget.objectName() == "titleLabel" and ("АНАЛИЗ" in widget.text() or "FILE ANALYSIS" in widget.text()):
+                widget.setText(lang["analysis_mode"])
+        
+        # Обновляем GroupBox
+        groups = self.findChildren(QGroupBox)
+        for group in groups:
+            if group.title().startswith("Шаг 1:") or "Select File" in group.title():
+                group.setTitle(lang["step1_file"])
+            elif group.title().startswith("Шаг 2:") or "Analysis Settings" in group.title():
+                group.setTitle(lang["step2_settings"])
+            elif group.title() == "Прогресс анализа" or group.title() == "Analysis Progress":
+                group.setTitle(lang["analysis_progress"])
+        
+        # Обновляем кнопки и лейблы
+        self.btn_select_file.setText(lang["select_file"])
+        self.btn_analyze.setText(lang["analyze_btn"])
+        
+        # Обновляем placeholder
+        self.file_path_edit.setPlaceholderText(lang["file_placeholder"])
+        self.log_text.setPlaceholderText(lang["log_placeholder"])
+        self.results_summary.setText(lang["results_placeholder"])
+        self.progress_label.setText(lang["waiting"])
+        
+        # Обновляем labels timeout
+        for label in self.findChildren(QLabel):
+            if label.text().startswith("Время анализа:") or label.text().startswith("Analysis Time:"):
+                label.setText(lang["timeout_label"])
+        
+        # Обновляем чекбоксы
+        self.poly_check.setText(lang["poly_check"])
+        self.network_check.setText(lang["network_check"])
+        
+        # Обновляем docker info
+        for label in self.findChildren(QLabel):
+            if "Docker" in label.text() and "ℹ️" in label.text():
+                label.setText(lang["docker_info"])
+        
+        # Обновляем вкладки
+        if self.tabs.count() >= 2:
+            self.tabs.setTabText(0, lang["logs_tab"])
+            self.tabs.setTabText(1, lang["results_tab"])
+        
+        # Обновляем заголовки таблицы
+        if self.results_table.columnCount() >= 2:
+            self.results_table.setHorizontalHeaderLabels([lang["param_column"], lang["value_column"]])
+        
+        # Находим кнопку назад и обновляем
+        for btn in self.findChildren(QPushButton):
+            if btn.text().startswith("←"):
+                btn.setText(lang["back_to_menu"])
 
 
 class ScanHistoryDialog(QDialog):
@@ -974,7 +1262,10 @@ class ScanHistoryDialog(QDialog):
         super().__init__(parent)
         self.scan_history = scan_history or []
         self.parent_ref = parent
-        self.setWindowTitle("📜 История сканирований")
+        self.current_lang = parent.current_lang if parent else "Русский"
+        lang_key = "history_window_title"
+        title_text = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"]).get(lang_key, "📜 История сканирований")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(1000, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -984,19 +1275,19 @@ class ScanHistoryDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("📋 История сканирований файлов")
-        title.setObjectName("titleLabel")
-        title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title)
+        self.title_label = QLabel("📋 История сканирований файлов")
+        self.title_label.setObjectName("titleLabel")
+        self.title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.title_label)
         
-        info_label = QLabel("Здесь отображаются все файлы, которые были проанализированы.")
-        info_label.setStyleSheet("color: #666; font-style: italic;")
-        layout.addWidget(info_label)
+        self.info_label = QLabel("Здесь отображаются все файлы, которые были проанализированы.")
+        self.info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(self.info_label)
         
         # Таблица истории
         self.history_table = QTableWidget()
         self.history_table.setColumnCount(5)
-        self.history_table.setHorizontalHeaderLabels(["Дата", "Файл", "Статус", "Угрозы", "Путь"])
+        self.update_table_headers()
         self.history_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.history_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.history_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
@@ -1017,14 +1308,14 @@ class ScanHistoryDialog(QDialog):
         self.btn_refresh.clicked.connect(self.load_history)
         btn_layout.addWidget(self.btn_refresh)
         
-        self.btn_clear = QPushButton("🗑️ Очистить историю")
+        self.btn_clear = QPushButton(self.tr("Clear History"))
         self.btn_clear.setObjectName("dangerBtn")
         self.btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(self.btn_clear)
         
         btn_layout.addStretch()
         
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
@@ -1033,14 +1324,35 @@ class ScanHistoryDialog(QDialog):
         
         self.load_history()
     
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.title_label.setText(lang["history_title"])
+        self.info_label.setText(lang["history_info"])
+        self.btn_refresh.setText(lang["refresh"])
+        self.btn_clear.setText(lang["clear_history"])
+        self.btn_close.setText(lang["close"])
+        self.update_table_headers()
+        self.load_history()
+    
+    def update_table_headers(self):
+        """Обновить заголовки таблицы"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.history_table.setHorizontalHeaderLabels([
+            lang["col_date"], lang["col_file"], lang["col_status"], 
+            lang["col_threats"], lang["col_path"]
+        ])
+    
     def load_history(self):
         """Загрузить историю сканирований"""
         self.history_table.setRowCount(0)
         
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         if not self.scan_history:
             row = self.history_table.rowCount()
             self.history_table.insertRow(row)
-            item = QTableWidgetItem("История пуста")
+            item = QTableWidgetItem(lang["history_empty"])
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             self.history_table.setItem(row, 0, item)
             return
@@ -1068,24 +1380,24 @@ class ScanHistoryDialog(QDialog):
             status_item = QTableWidgetItem(status)
             status_item.setFlags(status_item.flags() & ~Qt.ItemIsEditable)
             status_bg_color = QColor("#1a1a2e")  # Цвет фона для CLEAN
+            
+            # Перевод статуса
             if status == 'CLEAN':
-                status_item.setForeground(QColor("#00ff88"))
+                status_text = lang["status_clean"]
                 status_bg_color = QColor("#059669")
             elif status == 'SUSPICIOUS':
-                status_item.setForeground(QColor("#ffaa00"))
+                status_text = lang["status_suspicious"]
                 status_bg_color = QColor("#d97706")
             elif status == 'MALICIOUS':
-                status_item.setForeground(QColor("#ff4444"))
+                status_text = lang["status_malicious"]
                 status_bg_color = QColor("#dc2626")
-            
-            # Делаем текст белым на цветном фоне
-            if status != 'CLEAN':
-                status_item.setBackground(status_bg_color)
-                status_item.setForeground(QColor("#ffffff"))
             else:
-                status_item.setBackground(QColor("#059669"))
-                status_item.setForeground(QColor("#ffffff"))
-                
+                status_text = status
+            
+            status_item.setText(status_text)
+            # Делаем текст белым на цветном фоне
+            status_item.setBackground(status_bg_color)
+            status_item.setForeground(QColor("#ffffff"))
             status_item.setTextAlignment(Qt.AlignCenter)
             font = status_item.font()
             font.setBold(True)
@@ -1094,7 +1406,8 @@ class ScanHistoryDialog(QDialog):
             
             # Угрозы
             threats = ', '.join(item_data.get('detected_threats', []))
-            threats_item = QTableWidgetItem(threats if threats else 'Нет')
+            no_threats_text = "Нет" if self.current_lang == "Русский" else "None"
+            threats_item = QTableWidgetItem(threats if threats else no_threats_text)
             threats_item.setFlags(threats_item.flags() & ~Qt.ItemIsEditable)
             self.history_table.setItem(row, 3, threats_item)
             
@@ -1111,8 +1424,9 @@ class ScanHistoryDialog(QDialog):
     
     def clear_history(self):
         """Очистить историю"""
-        reply = QMessageBox.question(self, "Подтверждение",
-            "Вы уверены, что хотите очистить всю историю сканирований?",
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        reply = QMessageBox.question(self, lang["clear_history"],
+            lang["clear_history_confirm_en"] if self.current_lang == "English" else lang["clear_history_confirm_en"],
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
         if reply == QMessageBox.Yes and self.parent_ref:
@@ -1128,7 +1442,10 @@ class QuarantineDialog(QDialog):
         super().__init__(parent)
         self.quarantine_manager = quarantine_manager
         self.parent_ref = parent
-        self.setWindowTitle("⚠️ Карантин")
+        self.current_lang = parent.current_lang if parent else "Русский"
+        lang_key = "quarantine_window_title"
+        title_text = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"]).get(lang_key, "⚠️ Карантин")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(900, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1138,19 +1455,19 @@ class QuarantineDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        title = QLabel("🛡️ Карантин - Обнаруженные угрозы")
-        title.setObjectName("titleLabel")
-        title.setAlignment(Qt.AlignCenter)
-        layout.addWidget(title)
+        self.title_label = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        self.title_label.setObjectName("titleLabel")
+        self.title_label.setAlignment(Qt.AlignCenter)
+        layout.addWidget(self.title_label)
         
-        info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
-        info_label.setStyleSheet("color: #666; font-style: italic;")
-        layout.addWidget(info_label)
+        self.info_label = QLabel("Файлы в карантине обезврежены и не могут нанести вред системе.")
+        self.info_label.setStyleSheet("color: #666; font-style: italic;")
+        layout.addWidget(self.info_label)
         
         # Таблица файлов - увеличенная, занимает больше места
         self.quarantine_table = QTableWidget()
         self.quarantine_table.setColumnCount(5)
-        self.quarantine_table.setHorizontalHeaderLabels(["Дата", "Имя файла", "Оригинальный путь", "Причина", "ID"])
+        self.update_table_headers()
         self.quarantine_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
         self.quarantine_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
@@ -1165,7 +1482,7 @@ class QuarantineDialog(QDialog):
         
         # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
         btn_layout = QHBoxLayout()
-        btn_layout.setContentsMargins(0, 10, 0, 10)
+        btn_layout.setContentsMargins(0, 15, 0, 15)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
@@ -1177,26 +1494,29 @@ class QuarantineDialog(QDialog):
         btn_layout.addStretch()
         
         # Кнопки "Восстановить" и "Удалить навсегда" по центру
-        center_layout = QHBoxLayout()
-        self.btn_restore = QPushButton("♻️ Восстановить")
+        center_widget = QWidget()
+        center_layout = QHBoxLayout(center_widget)
+        center_layout.setContentsMargins(0, 0, 0, 0)
+        center_layout.setSpacing(10)
+        self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
-        self.btn_restore.setFixedHeight(45)
+        self.btn_restore.setFixedHeight(50)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
-        self.btn_delete = QPushButton("🗑️ Удалить навсегда")
+        self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
-        self.btn_delete.setFixedHeight(45)
+        self.btn_delete.setFixedHeight(50)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
         
-        btn_layout.addLayout(center_layout)
+        btn_layout.addWidget(center_widget)
         btn_layout.addStretch()
         
         # Кнопка "Закрыть" справа
-        self.btn_close = QPushButton("Закрыть")
+        self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
@@ -1206,9 +1526,31 @@ class QuarantineDialog(QDialog):
         
         self.load_quarantine()
     
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.title_label.setText(lang["quarantine_title"])
+        self.info_label.setText(lang["quarantine_info"])
+        self.btn_refresh.setText(lang["refresh"])
+        self.btn_restore.setText(lang["restore"])
+        self.btn_delete.setText(lang["delete_forever"])
+        self.btn_close.setText(lang["close"])
+        self.update_table_headers()
+        self.load_quarantine()
+    
+    def update_table_headers(self):
+        """Обновить заголовки таблицы"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        self.quarantine_table.setHorizontalHeaderLabels([
+            lang["col_date"], lang["col_filename"], lang["col_path"], 
+            lang["col_reason"], lang["col_id"]
+        ])
+    
     def load_quarantine(self):
         """Загрузить список файлов из карантина"""
         self.quarantine_table.setRowCount(0)
+        
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         
         if not self.quarantine_manager:
             return
@@ -1218,7 +1560,7 @@ class QuarantineDialog(QDialog):
         if not items:
             row = self.quarantine_table.rowCount()
             self.quarantine_table.insertRow(row)
-            item = QTableWidgetItem("Карантин пуст")
+            item = QTableWidgetItem(lang["quarantine_empty"])
             item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
             self.quarantine_table.setItem(row, 0, item)
             return
@@ -1251,7 +1593,7 @@ class QuarantineDialog(QDialog):
             # Причина
             reason_item = QTableWidgetItem(item_data.get('reason', 'Unknown'))
             reason_item.setFlags(reason_item.flags() & ~Qt.ItemIsEditable)
-            reason_item.setToolTip(f"Полная причина: {item_data.get('reason', 'Unknown')}")
+            reason_item.setToolTip(f"Full reason: {item_data.get('reason', 'Unknown')}")
             self.quarantine_table.setItem(row, 3, reason_item)
             
             # ID (индекс для доступа)
@@ -1292,19 +1634,20 @@ class QuarantineDialog(QDialog):
                 return
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
+            lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
             
-            reply = QMessageBox.question(self, "Подтверждение восстановления",
-                "Вы уверены, что хотите восстановить этот файл?\nУбедитесь, что он безопасен!",
-                QMessageBox.Yes | QMessageBox.No)
+            reply = QMessageBox.question(self, lang["restore"],
+                lang["restore_confirm"])
             
             if reply == QMessageBox.Yes:
                 if self.quarantine_manager.restore_from_quarantine(quarantine_path):
-                    QMessageBox.information(self, "Восстановление", "Файл успешно восстановлен!")
+                    QMessageBox.information(self, lang["restore"], lang["restore_success"])
                     self.load_quarantine()
                 else:
-                    QMessageBox.critical(self, "Ошибка", "Не удалось восстановить файл")
+                    QMessageBox.critical(self, "Error", lang["restore_error"])
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка восстановления: {str(e)}")
+            lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+            QMessageBox.critical(self, "Error", f"{lang['restore_error']}: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1326,8 +1669,8 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.warning(self, "Подтверждение удаления",
-                "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
+            reply = QMessageBox.warning(self, "Delete Confirmation",
+                "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
@@ -1339,10 +1682,10 @@ class QuarantineDialog(QDialog):
                 del self.quarantine_manager.quarantined_files[quarantine_path]
                 self.quarantine_manager._save_quarantine_log()
                 
-                QMessageBox.information(self, "Удаление", "Файл успешно удален!")
+                QMessageBox.information(self, "Deletion", "File successfully deleted!")
                 self.load_quarantine()
         except Exception as e:
-            QMessageBox.critical(self, "Ошибка", f"Ошибка удаления: {str(e)}")
+            QMessageBox.critical(self, "Error", f"Deletion error: {str(e)}")
 
 
 class SettingsDialog(QDialog):
@@ -1352,7 +1695,9 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.settings = settings
         self.parent_ref = parent  # Сохраняем ссылку на родителя
-        self.setWindowTitle("⚙ Настройки")
+        lang_key = "application_settings"
+        title_text = LANGUAGES.get(parent.current_lang if parent else "Русский", LANGUAGES["Русский"]).get(lang_key, "⚙ Настройки приложения")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(600, 500)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1362,37 +1707,39 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title = QLabel("⚙ Настройки приложения")
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        title = QLabel(lang["application_settings"])
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
         # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox("Тема оформления")
+        theme_group = QGroupBox(lang["theme_group"])
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton("🌙 Тёмная")
+        self.btn_dark = QPushButton(lang["dark_theme"])
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(self.settings.get('theme', 'Тёмная') == 'Тёмная')
-        self.btn_dark.clicked.connect(lambda: self.apply_theme('Тёмная'))
+        self.btn_dark.setChecked(self.settings.get('theme', 'Dark') == 'Dark')
+        self.btn_dark.clicked.connect(lambda: self.apply_theme('Dark'))
         theme_layout.addWidget(self.btn_dark)
         
-        self.btn_light = QPushButton("☀️ Светлая")
+        self.btn_light = QPushButton(lang["light_theme"])
         self.btn_light.setObjectName("secondaryBtn")
         self.btn_light.setCheckable(True)
-        self.btn_light.setChecked(self.settings.get('theme', 'Тёмная') == 'Светлая')
-        self.btn_light.clicked.connect(lambda: self.apply_theme('Светлая'))
+        self.btn_light.setChecked(self.settings.get('theme', 'Dark') == 'Light')
+        self.btn_light.clicked.connect(lambda: self.apply_theme('Light'))
         theme_layout.addWidget(self.btn_light)
         
         layout.addWidget(theme_group)
         
         # Настройки анализа
-        analysis_group = QGroupBox("Настройки анализа")
+        analysis_group = QGroupBox(lang["analysis_settings_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Время анализа (сек):")
+        timeout_label = QLabel(lang["timeout_label"])
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1401,18 +1748,18 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Создавать варианты файла для анализа")
+        self.poly_check = QCheckBox(lang["create_variants"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
         analysis_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Отключать сеть во время анализа")
+        self.network_check = QCheckBox(lang["disable_network"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         analysis_layout.addWidget(self.network_check)
         
         layout.addWidget(analysis_group)
         
         # Кнопка закрытия
-        self.btn_close_settings = QPushButton("Закрыть")
+        self.btn_close_settings = QPushButton(lang["close"])
         self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
@@ -1437,6 +1784,44 @@ class SettingsDialog(QDialog):
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked()
         }
+    
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        # Обновляем заголовок окна
+        self.setWindowTitle(lang["application_settings"])
+        
+        # Находим и обновляем titleLabel
+        title_widgets = self.findChildren(QLabel)
+        for widget in title_widgets:
+            if widget.objectName() == "titleLabel":
+                widget.setText(lang["application_settings"])
+                break
+        
+        # Обновляем GroupBox
+        groups = self.findChildren(QGroupBox)
+        for group in groups:
+            if group.title() == "Theme" or group.title() == "Тема" or group.title() == lang["theme_group"]:
+                group.setTitle(lang["theme_group"])
+            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
+                group.setTitle(lang["analysis_settings_group"])
+        
+        # Обновляем кнопки тем
+        self.btn_dark.setText(lang["dark_theme"])
+        self.btn_light.setText(lang["light_theme"])
+        
+        # Обновляем label timeout
+        for label in self.findChildren(QLabel):
+            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text() == lang["timeout_label"]:
+                label.setText(lang["timeout_label"])
+        
+        # Обновляем чекбоксы
+        self.poly_check.setText(lang["create_variants"])
+        self.network_check.setText(lang["disable_network"])
+        
+        # Обновляем кнопку закрытия
+        self.btn_close_settings.setText(lang["close"])
 
 
 class RedSandSecureGUI(QMainWindow):
@@ -1465,8 +1850,8 @@ class RedSandSecureGUI(QMainWindow):
     
     def setup_ui(self):
         """Настройка пользовательского интерфейса"""
-        self.setWindowTitle("RedSand Secure - Профессиональный анализ malware")
-        self.showMaximized()
+        self.setWindowTitle("RedSand Secure - Professional Malware Analysis")
+        self.showFullScreen()
         
         # Стек для переключения между экранами
         self.stack = QStackedWidget()
@@ -1510,30 +1895,54 @@ class RedSandSecureGUI(QMainWindow):
             self.main_selector.btn_ru.setChecked(language == "Русский")
             self.main_selector.btn_en.setChecked(language == "English")
         
-        # TODO: Обновить тексты на всех экранах (можно добавить полноценную локализацию)
-        # Убрано всплывающее окно - язык меняется без уведомления
+        # Обновляем тексты на всех экранах
+        self.update_all_texts()
     
-    def open_settings(self):
-        """Открыть диалог настроек"""
-        dialog = SettingsDialog(self.settings, self)
-        if dialog.exec_() == QDialog.Accepted:
-            new_settings = dialog.get_settings()
-            self.settings.update(new_settings)
-            self.apply_stylesheet()
-            self.save_settings()
+    def update_all_texts(self):
+        """Обновить все тексты интерфейса при смене языка"""
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
+        # Обновляем главный экран
+        if hasattr(self, 'main_selector'):
+            self.main_selector.update_texts()
+        
+        # Обновляем панель антивируса
+        if hasattr(self, 'antivirus_panel'):
+            self.antivirus_panel.update_texts()
+        
+        # Обновляем панель анализа
+        if hasattr(self, 'analysis_panel'):
+            self.analysis_panel.update_texts()
+        
+        # Обновляем открытые диалоги если они есть
+        for dialog in self.findChildren(QDialog):
+            if hasattr(dialog, 'update_texts'):
+                dialog.update_texts()
     
     def open_history(self):
         """Открыть историю сканирований"""
         dialog = ScanHistoryDialog(scan_history=self.scan_history, parent=self)
+        dialog.update_texts()  # Обновляем тексты при открытии
         dialog.exec_()
     
     def open_quarantine(self):
         """Открыть диалог карантина"""
         try:
             dialog = QuarantineDialog(quarantine_manager=self.quarantine_manager, parent=self)
+            dialog.update_texts()  # Обновляем тексты при открытии
             dialog.exec_()
         except Exception as e:
             QMessageBox.critical(self, "Ошибка", f"Не удалось открыть карантин:\n{str(e)}")
+    
+    def open_settings(self):
+        """Открыть диалог настроек"""
+        dialog = SettingsDialog(self.settings, self)
+        dialog.update_texts()  # Обновляем тексты при открытии
+        if dialog.exec_() == QDialog.Accepted:
+            new_settings = dialog.get_settings()
+            self.settings.update(new_settings)
+            self.apply_stylesheet()
+            self.save_settings()
     
     def apply_stylesheet(self):
         """Применить таблицу стилей"""
