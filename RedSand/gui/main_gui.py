@@ -895,11 +895,13 @@ class AntivirusPanel(QWidget):
         if not selected_items:
             return
         
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         for item in selected_items:
             row = self.folder_list.row(item)
             folder_path = item.text()
             self.folder_list.takeItem(row)
-            self.log_event(self.get_text("folder_removed") + folder_path)
+            self.log_event(lang["folder_removed"] + folder_path)
         
         self.btn_remove_folder.setEnabled(False)
     
@@ -963,8 +965,11 @@ class AnalysisPanel(QWidget):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
+        # Получаем язык для инициализации текстов
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         # Заголовок
-        title_label = QLabel("🔍 FILE ANALYSIS")
+        title_label = QLabel(lang["analysis_mode"])
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -978,16 +983,16 @@ class AnalysisPanel(QWidget):
         left_layout.setSpacing(20)
         
         # Выбор файла
-        file_group = QGroupBox("Step 1: Select File")
+        file_group = QGroupBox(lang["step1_file"])
         file_layout = QVBoxLayout(file_group)
         
         self.file_path_edit = QLineEdit()
-        self.file_path_edit.setPlaceholderText("No file selected... or drag and drop here")
+        self.file_path_edit.setPlaceholderText(lang["file_placeholder"])
         self.file_path_edit.setReadOnly(True)
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
-        self.btn_select_file = QPushButton("📁 Select File")
+        self.btn_select_file = QPushButton(lang["select_file"])
         self.btn_select_file.setObjectName("actionBtn")
         self.btn_select_file.clicked.connect(self.select_file)
         file_layout.addWidget(self.btn_select_file)
@@ -995,11 +1000,11 @@ class AnalysisPanel(QWidget):
         left_layout.addWidget(file_group)
         
         # Настройки анализа
-        settings_group = QGroupBox("Step 2: Analysis Settings")
+        settings_group = QGroupBox(lang["step2_settings"])
         settings_layout = QVBoxLayout(settings_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel("Analysis Time:")
+        timeout_label = QLabel(lang["timeout_label"])
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1009,36 +1014,36 @@ class AnalysisPanel(QWidget):
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox("Create file variants for analysis")
+        self.poly_check = QCheckBox(lang["poly_check"])
         self.poly_check.setToolTip("Helps detect complex viruses")
         settings_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox("Disable network (recommended)")
+        self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(True)
         self.network_check.setToolTip("Protects your network during analysis")
         settings_layout.addWidget(self.network_check)
         
-        docker_info = QLabel("ℹ️ All files are analyzed in an isolated Docker container")
+        docker_info = QLabel(lang["docker_info"])
         docker_info.setStyleSheet("color: #00ff88; font-style: italic;")
         settings_layout.addWidget(docker_info)
         
         left_layout.addWidget(settings_group)
         
         # Кнопка анализа
-        self.btn_analyze = QPushButton("🚀 START ANALYSIS")
+        self.btn_analyze = QPushButton(lang["analyze_btn"])
         self.btn_analyze.setObjectName("primaryBtn")
         self.btn_analyze.setMinimumHeight(60)
         self.btn_analyze.clicked.connect(self.start_analysis)
         left_layout.addWidget(self.btn_analyze)
         
         # Прогресс
-        progress_group = QGroupBox("Analysis Progress")
+        progress_group = QGroupBox(lang["analysis_progress"])
         progress_layout = QVBoxLayout(progress_group)
         self.progress_bar = QProgressBar()
         self.progress_bar.setValue(0)
         self.progress_bar.setMinimumHeight(35)
         progress_layout.addWidget(self.progress_bar)
-        self.progress_label = QLabel("Waiting...")
+        self.progress_label = QLabel(lang["waiting"])
         self.progress_label.setAlignment(Qt.AlignCenter)
         self.progress_label.setStyleSheet("color: #666; font-size: 16px;")
         progress_layout.addWidget(self.progress_label)
@@ -1059,23 +1064,23 @@ class AnalysisPanel(QWidget):
         self.log_text = QTextEdit()
         self.log_text.setReadOnly(True)
         self.log_text.setFont(QFont("Consolas", 12))
-        self.log_text.setPlaceholderText("Analysis progress will be displayed here...")
+        self.log_text.setPlaceholderText(lang["log_placeholder"])
         logs_layout.addWidget(self.log_text)
         # Увеличена ширина кнопки вкладки Журнал через stylesheet
         logs_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(logs_widget, "📋 Log      ")
+        self.tabs.addTab(logs_widget, lang["logs_tab"])
         
         # Вкладка результатов
         results_widget = QWidget()
         results_layout = QVBoxLayout(results_widget)
-        self.results_summary = QLabel("Analysis results will appear here after completion...")
+        self.results_summary = QLabel(lang["results_placeholder"])
         self.results_summary.setAlignment(Qt.AlignCenter)
         self.results_summary.setFont(QFont("Segoe UI", 16))
         self.results_summary.setStyleSheet("color: #666; padding: 50px;")
         results_layout.addWidget(self.results_summary)
         self.results_table = QTableWidget()
         self.results_table.setColumnCount(2)
-        self.results_table.setHorizontalHeaderLabels(["Parameter", "Value"])
+        self.results_table.setHorizontalHeaderLabels([lang["param_column"], lang["value_column"]])
         self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
         self.results_table.horizontalHeader().setMinimumSectionSize(250)  # Увеличена ширина первой колонки
@@ -1086,7 +1091,7 @@ class AnalysisPanel(QWidget):
         results_layout.addWidget(self.results_table)
         # Увеличена ширина кнопки вкладки Результаты через stylesheet
         results_widget.setStyleSheet("padding: 5px;")
-        self.tabs.addTab(results_widget, "📊 Results   ")
+        self.tabs.addTab(results_widget, lang["results_tab"])
         
         right_layout.addWidget(self.tabs)
         main_splitter.addWidget(right_widget)
@@ -1096,7 +1101,7 @@ class AnalysisPanel(QWidget):
         layout.addWidget(main_splitter)
         
         # Кнопка назад
-        btn_back = QPushButton("← Back to Main Menu")
+        btn_back = QPushButton(lang["back_to_menu"])
         btn_back.setObjectName("secondaryBtn")
         btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
         layout.addWidget(btn_back)
@@ -1748,11 +1753,11 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(lang["create_variants"])
+        self.poly_check = QCheckBox(lang["poly_check"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
         analysis_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox(lang["disable_network"])
+        self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         analysis_layout.addWidget(self.network_check)
         
@@ -1817,8 +1822,8 @@ class SettingsDialog(QDialog):
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
-        self.poly_check.setText(lang["create_variants"])
-        self.network_check.setText(lang["disable_network"])
+        self.poly_check.setText(lang["poly_check"])
+        self.network_check.setText(lang["network_check"])
         
         # Обновляем кнопку закрытия
         self.btn_close_settings.setText(lang["close"])
@@ -1955,8 +1960,15 @@ class RedSandSecureGUI(QMainWindow):
         if settings_file.exists():
             try:
                 with open(settings_file, 'r', encoding='utf-8') as f:
-                    self.settings = json.load(f)
+                    loaded_settings = json.load(f)
+                    # Обновляем только существующие ключи и сохраняем язык
+                    for key, value in loaded_settings.items():
+                        self.settings[key] = value
+                    # Применяем загруженный язык
+                    self.current_lang = self.settings.get('language', 'Русский')
                 self.apply_stylesheet()
+                # Обновляем все тексты после загрузки настроек
+                self.update_all_texts()
             except Exception as e:
                 print(f"Ошибка загрузки настроек: {e}")
     
