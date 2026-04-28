@@ -432,6 +432,8 @@ LANGUAGES = {
         "status_suspicious": "⚠️ Подозрительный",
         "status_malicious": "🔴 Опасно",
         "settings_title": "⚙ Настройки приложения",
+        "theme_group": "Тема оформления",
+        "analysis_settings_group": "Настройки анализа",
         "analysis_settings": "Настройки анализа",
         "timeout_label": "Время анализа (сек):",
         "app_language": "Язык интерфейса",
@@ -540,6 +542,8 @@ LANGUAGES = {
         "status_suspicious": "⚠️ Suspicious",
         "status_malicious": "🔴 Dangerous",
         "settings_title": "⚙ Application Settings",
+        "theme_group": "Theme",
+        "analysis_settings_group": "Analysis Settings",
         "analysis_settings": "Analysis Settings",
         "timeout_label": "Analysis Time (sec):",
         "app_language": "Interface Language",
@@ -762,19 +766,19 @@ class AntivirusPanel(QWidget):
         
         self.btn_add_folder = QPushButton(self.tr("Add"))
         self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setFixedHeight(45)
+        self.btn_add_folder.setFixedHeight(40)
         self.btn_add_folder.clicked.connect(self.add_folder)
         folder_btn_layout.addWidget(self.btn_add_folder)
         
         self.btn_remove_folder = QPushButton(self.tr("Remove"))
         self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setFixedHeight(45)
+        self.btn_remove_folder.setFixedHeight(40)
         self.btn_remove_folder.clicked.connect(self.remove_folder)
         self.btn_remove_folder.setEnabled(False)
         folder_btn_layout.addWidget(self.btn_remove_folder)
         
         monitor_layout.addWidget(folder_btn_widget)
-        monitor_layout.addSpacing(15)
+        monitor_layout.addSpacing(5)
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
@@ -1472,7 +1476,7 @@ class QuarantineDialog(QDialog):
         
         # Кнопки управления - все в одну линию с правильным расположением и вертикальным центрированием
         btn_layout = QHBoxLayout()
-        btn_layout.setContentsMargins(0, 10, 0, 10)
+        btn_layout.setContentsMargins(0, 15, 0, 15)
         
         # Кнопка "Обновить" слева
         self.btn_refresh = QPushButton("🔄 Обновить")
@@ -1490,14 +1494,14 @@ class QuarantineDialog(QDialog):
         center_layout.setSpacing(10)
         self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
-        self.btn_restore.setFixedHeight(45)
+        self.btn_restore.setFixedHeight(50)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
-        self.btn_delete.setFixedHeight(45)
+        self.btn_delete.setFixedHeight(50)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
@@ -1770,6 +1774,44 @@ class SettingsDialog(QDialog):
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked()
         }
+    
+    def update_texts(self):
+        """Обновить тексты при смене языка"""
+        lang = LANGUAGES.get(self.current_lang if hasattr(self, 'current_lang') else "Русский", LANGUAGES["Русский"])
+        
+        # Обновляем заголовок окна
+        self.setWindowTitle(lang["settings_title"])
+        
+        # Находим и обновляем titleLabel
+        title_widgets = self.findChildren(QLabel)
+        for widget in title_widgets:
+            if widget.objectName() == "titleLabel":
+                widget.setText(lang["settings_title"])
+                break
+        
+        # Обновляем GroupBox
+        groups = self.findChildren(QGroupBox)
+        for group in groups:
+            if group.title() == "Theme" or group.title() == "Тема":
+                group.setTitle(lang["theme_group"])
+            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа":
+                group.setTitle(lang["analysis_settings_group"])
+        
+        # Обновляем кнопки тем
+        self.btn_dark.setText(lang["dark_theme"])
+        self.btn_light.setText(lang["light_theme"])
+        
+        # Обновляем label timeout
+        for label in self.findChildren(QLabel):
+            if label.text().startswith("Analysis Timeout") or label.text().startswith("Время анализа"):
+                label.setText(lang["timeout_label"])
+        
+        # Обновляем чекбоксы
+        self.poly_check.setText(lang["poly_check"])
+        self.network_check.setText(lang["network_check"])
+        
+        # Обновляем кнопку закрытия
+        self.btn_close_settings.setText(lang["close"])
 
 
 class RedSandSecureGUI(QMainWindow):
@@ -1861,6 +1903,11 @@ class RedSandSecureGUI(QMainWindow):
         # Обновляем панель анализа
         if hasattr(self, 'analysis_panel'):
             self.analysis_panel.update_texts()
+        
+        # Обновляем открытые диалоги если они есть
+        for dialog in self.findChildren(QDialog):
+            if hasattr(dialog, 'update_texts'):
+                dialog.update_texts()
     
     def open_settings(self):
         """Открыть диалог настроек"""
