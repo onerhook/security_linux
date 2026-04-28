@@ -1261,7 +1261,9 @@ class ScanHistoryDialog(QDialog):
         self.scan_history = scan_history or []
         self.parent_ref = parent
         self.current_lang = parent.current_lang if parent else "Русский"
-        self.setWindowTitle("📜 История сканирований")
+        lang_key = "history_window_title"
+        title_text = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"]).get(lang_key, "📜 История сканирований")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(1000, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1439,7 +1441,9 @@ class QuarantineDialog(QDialog):
         self.quarantine_manager = quarantine_manager
         self.parent_ref = parent
         self.current_lang = parent.current_lang if parent else "Русский"
-        self.setWindowTitle("⚠️ Карантин")
+        lang_key = "quarantine_window_title"
+        title_text = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"]).get(lang_key, "⚠️ Карантин")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(900, 600)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1689,7 +1693,9 @@ class SettingsDialog(QDialog):
         super().__init__(parent)
         self.settings = settings
         self.parent_ref = parent  # Сохраняем ссылку на родителя
-        self.setWindowTitle(self.tr("Settings"))
+        lang_key = "application_settings"
+        title_text = LANGUAGES.get(parent.current_lang if parent else "Русский", LANGUAGES["Русский"]).get(lang_key, "⚙ Настройки приложения")
+        self.setWindowTitle(title_text)
         self.setMinimumSize(600, 500)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
@@ -1699,23 +1705,25 @@ class SettingsDialog(QDialog):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
-        title = QLabel(self.tr("Application Settings"))
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        title = QLabel(lang["application_settings"])
         title.setObjectName("titleLabel")
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
         # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox(self.tr("Theme"))
+        theme_group = QGroupBox(lang["theme_group"])
         theme_layout = QHBoxLayout(theme_group)
         
-        self.btn_dark = QPushButton(self.tr("Dark"))
+        self.btn_dark = QPushButton(lang["dark_theme"])
         self.btn_dark.setObjectName("secondaryBtn")
         self.btn_dark.setCheckable(True)
         self.btn_dark.setChecked(self.settings.get('theme', 'Dark') == 'Dark')
         self.btn_dark.clicked.connect(lambda: self.apply_theme('Dark'))
         theme_layout.addWidget(self.btn_dark)
         
-        self.btn_light = QPushButton(self.tr("Light"))
+        self.btn_light = QPushButton(lang["light_theme"])
         self.btn_light.setObjectName("secondaryBtn")
         self.btn_light.setCheckable(True)
         self.btn_light.setChecked(self.settings.get('theme', 'Dark') == 'Light')
@@ -1725,11 +1733,11 @@ class SettingsDialog(QDialog):
         layout.addWidget(theme_group)
         
         # Настройки анализа
-        analysis_group = QGroupBox(self.tr("Analysis Settings"))
+        analysis_group = QGroupBox(lang["analysis_settings_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
         timeout_layout = QHBoxLayout()
-        timeout_label = QLabel(self.tr("Analysis Timeout (sec):"))
+        timeout_label = QLabel(lang["timeout_label"])
         timeout_layout.addWidget(timeout_label)
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
@@ -1738,18 +1746,18 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(self.tr("Create file variants for analysis"))
+        self.poly_check = QCheckBox(lang["create_variants"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
         analysis_layout.addWidget(self.poly_check)
         
-        self.network_check = QCheckBox(self.tr("Disable network during analysis"))
+        self.network_check = QCheckBox(lang["disable_network"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         analysis_layout.addWidget(self.network_check)
         
         layout.addWidget(analysis_group)
         
         # Кнопка закрытия
-        self.btn_close_settings = QPushButton(self.tr("Close"))
+        self.btn_close_settings = QPushButton(lang["close"])
         self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
@@ -1777,24 +1785,24 @@ class SettingsDialog(QDialog):
     
     def update_texts(self):
         """Обновить тексты при смене языка"""
-        lang = LANGUAGES.get(self.current_lang if hasattr(self, 'current_lang') else "Русский", LANGUAGES["Русский"])
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         
         # Обновляем заголовок окна
-        self.setWindowTitle(lang["settings_title"])
+        self.setWindowTitle(lang["application_settings"])
         
         # Находим и обновляем titleLabel
         title_widgets = self.findChildren(QLabel)
         for widget in title_widgets:
             if widget.objectName() == "titleLabel":
-                widget.setText(lang["settings_title"])
+                widget.setText(lang["application_settings"])
                 break
         
         # Обновляем GroupBox
         groups = self.findChildren(QGroupBox)
         for group in groups:
-            if group.title() == "Theme" or group.title() == "Тема":
+            if group.title() == "Theme" or group.title() == "Тема" or group.title() == lang["theme_group"]:
                 group.setTitle(lang["theme_group"])
-            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа":
+            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
                 group.setTitle(lang["analysis_settings_group"])
         
         # Обновляем кнопки тем
@@ -1803,12 +1811,12 @@ class SettingsDialog(QDialog):
         
         # Обновляем label timeout
         for label in self.findChildren(QLabel):
-            if label.text().startswith("Analysis Timeout") or label.text().startswith("Время анализа"):
+            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text() == lang["timeout_label"]:
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
-        self.poly_check.setText(lang["poly_check"])
-        self.network_check.setText(lang["network_check"])
+        self.poly_check.setText(lang["create_variants"])
+        self.network_check.setText(lang["disable_network"])
         
         # Обновляем кнопку закрытия
         self.btn_close_settings.setText(lang["close"])
