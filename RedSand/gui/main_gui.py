@@ -713,7 +713,10 @@ LANGUAGES = {
         "docker_tooltip": "Run suspicious files in Docker container",
         "behavioral_tooltip": "Use Windows API emulation for behavior analysis",
         "panic_button_tooltip": "Display button for immediate stop of all processes",
-        "auto_update_tooltip": "Automatically update virus signatures database"
+        "auto_update_tooltip": "Automatically update virus signatures database",
+        "reset_defaults": "Reset Settings",
+        "confirm_reset": "Confirm Reset",
+        "reset_confirm_msg": "Are you sure you want to reset all settings?"
     }
 }
 
