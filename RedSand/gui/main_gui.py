@@ -1917,7 +1917,7 @@ class QuarantineDialog(QDialog):
         # Кнопка "Закрыть" справа
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.setMinimumHeight(45)
+        self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
