@@ -480,6 +480,9 @@ LANGUAGES = {
         "analysis_settings": "Настройки анализа",
         "timeout_label": "Время анализа (сек):",
         "app_language": "Язык интерфейса",
+        "reset_defaults": "Сбросить настройки",
+        "confirm_reset": "Подтверждение",
+        "reset_confirm_msg": "Вы уверены, что хотите сбросить все настройки?",
         "av_running": "Антивирус запущен. Мониторинг: ",
         "av_start_error": "Не удалось запустить антивирус:",
         "av_stop_error": "Ошибка остановки: ",
@@ -632,6 +635,9 @@ LANGUAGES = {
         "analysis_settings": "Analysis Settings",
         "timeout_label": "Analysis Time (sec):",
         "app_language": "Interface Language",
+        "reset_defaults": "Reset to Defaults",
+        "confirm_reset": "Confirm Reset",
+        "reset_confirm_msg": "Are you sure you want to reset all settings?",
         "av_running": "Antivirus running. Monitoring: ",
         "av_start_error": "Failed to start antivirus:",
         "av_stop_error": "Stop error: ",
@@ -2138,11 +2144,6 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(lang["poly_check"])
-        self.poly_check.setChecked(self.settings.get('use_poly_default', False))
-        self.poly_check.setToolTip(lang.get("poly_check_tooltip", "Использовать полиморфный движок по умолчанию"))
-        analysis_layout.addWidget(self.poly_check)
-        
         self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         self.network_check.setToolTip(lang.get("network_check_tooltip", "Автоматически отключать сеть при анализе"))
@@ -2190,18 +2191,6 @@ class SettingsDialog(QDialog):
         self.scan_on_access_check.setChecked(self.settings.get('scan_on_access', True))
         self.scan_on_access_check.setToolTip(lang.get("scan_on_access_tooltip", "Сканировать файлы при каждом обращении к ним"))
         av_layout.addWidget(self.scan_on_access_check)
-        
-        self.monitor_downloads_check = QCheckBox(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
-        self.monitor_downloads_check.setChecked(self.settings.get('monitor_downloads', True))
-        av_layout.addWidget(self.monitor_downloads_check)
-        
-        self.monitor_desktop_check = QCheckBox(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
-        self.monitor_desktop_check.setChecked(self.settings.get('monitor_desktop', True))
-        av_layout.addWidget(self.monitor_desktop_check)
-        
-        self.monitor_documents_check = QCheckBox(lang.get("monitor_documents_check", "Мониторить Документы"))
-        self.monitor_documents_check.setChecked(self.settings.get('monitor_documents', True))
-        av_layout.addWidget(self.monitor_documents_check)
         
         sensitivity_layout = QHBoxLayout()
         sensitivity_label = QLabel(lang.get("sensitivity_label", "Чувствительность:"))
@@ -2364,7 +2353,6 @@ class SettingsDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             self.timeout_spin.setValue(60)
-            self.poly_check.setChecked(False)
             self.network_check.setChecked(True)
             self.deep_scan_check.setChecked(True)
             self.ml_analysis_check.setChecked(True)
@@ -2372,9 +2360,6 @@ class SettingsDialog(QDialog):
             self.thread_spin.setValue(4)
             self.auto_quarantine_check.setChecked(True)
             self.scan_on_access_check.setChecked(True)
-            self.monitor_downloads_check.setChecked(True)
-            self.monitor_desktop_check.setChecked(True)
-            self.monitor_documents_check.setChecked(True)
             self.sensitivity_combo.setCurrentIndex(1)
             self.docker_check.setChecked(True)
             self.behavioral_check.setChecked(True)
@@ -2397,7 +2382,6 @@ class SettingsDialog(QDialog):
         return {
             'theme': 'Dark',  # Теперь только тёмная тема
             'timeout': self.timeout_spin.value(),
-            'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
             'deep_scan': self.deep_scan_check.isChecked(),
             'ml_analysis': self.ml_analysis_check.isChecked(),
@@ -2405,9 +2389,6 @@ class SettingsDialog(QDialog):
             'thread_count': self.thread_spin.value(),
             'auto_quarantine': self.auto_quarantine_check.isChecked(),
             'scan_on_access': self.scan_on_access_check.isChecked(),
-            'monitor_downloads': self.monitor_downloads_check.isChecked(),
-            'monitor_desktop': self.monitor_desktop_check.isChecked(),
-            'monitor_documents': self.monitor_documents_check.isChecked(),
             'sensitivity': sensitivity_map.get(self.sensitivity_combo.currentIndex(), 'medium'),
             'use_docker': self.docker_check.isChecked(),
             'behavioral_analysis': self.behavioral_check.isChecked(),
@@ -2475,9 +2456,6 @@ class SettingsDialog(QDialog):
         self.multi_thread_check.setText(lang.get("multi_thread_check", "Многопоточное сканирование"))
         self.auto_quarantine_check.setText(lang.get("auto_quarantine_check", "Автоматический карантин"))
         self.scan_on_access_check.setText(lang.get("scan_on_access_check", "Сканирование при доступе"))
-        self.monitor_downloads_check.setText(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
-        self.monitor_desktop_check.setText(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
-        self.monitor_documents_check.setText(lang.get("monitor_documents_check", "Мониторить Документы"))
         self.docker_check.setText(lang.get("docker_check", "Использовать Docker изоляцию"))
         self.behavioral_check.setText(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
         self.notifications_check.setText(lang.get("notifications_check", "Показывать уведомления"))
