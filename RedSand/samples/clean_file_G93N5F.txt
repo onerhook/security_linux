@@ -1,6 +1,0 @@
-CLEAN_FILE_MARKER
-GENERATED: 2026-04-15T14:39:35.881165
-RANDOM_ID: 0GMNGHZ9WQGM
-
-This is a completely safe file with no malicious content.
-Used for testing false positive detection in RedSand Sandbox.

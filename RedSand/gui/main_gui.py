@@ -511,7 +511,13 @@ LANGUAGES = {
         "file_quarantined_log": "Файл помещен в карантин:",
         "no_file_selected_error": "Пожалуйста, выберите существующий файл для анализа.",
         "analysis_start_log": "Начало анализа файла:",
-        "using_virus_scanner": "Используется VirusScanner для проверки на вирусы"
+        "using_virus_scanner": "Используется VirusScanner для проверки на вирусы",
+        "warning": "Предупреждение",
+        "information": "Информация",
+        "error": "Ошибка",
+        "av_activated": "Антивирус активирован",
+        "deletion_error": "Ошибка удаления:",
+        "no_threats": "Нет угроз"
     },
     "English": {
         "title": "RedSand Secure",
@@ -647,7 +653,13 @@ LANGUAGES = {
         "file_quarantined_log": "File quarantined:",
         "no_file_selected_error": "Please select an existing file for analysis.",
         "analysis_start_log": "Starting file analysis:",
-        "using_virus_scanner": "Using VirusScanner for virus detection"
+        "using_virus_scanner": "Using VirusScanner for virus detection",
+        "warning": "Warning",
+        "information": "Information",
+        "error": "Error",
+        "av_activated": "Antivirus Activated",
+        "deletion_error": "Deletion error:",
+        "no_threats": "None"
     }
 }
 
@@ -1178,8 +1190,12 @@ class AnalysisPanel(QWidget):
     def start_analysis(self):
         """Запуск анализа файла с использованием VirusScanner"""
         file_path = self.file_path_edit.text().strip()
+        
+        # Получаем язык ПЕРЕД использованием
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         if not file_path or not os.path.exists(file_path):
-            QMessageBox.warning(self, lang.get("no_file_selected_error", "Please select an existing file for analysis."), 
+            QMessageBox.warning(self, lang.get("warning", "Warning"), 
                                lang.get("no_file_selected_error", "Please select an existing file for analysis."))
             return
         
@@ -1189,7 +1205,6 @@ class AnalysisPanel(QWidget):
         self.results_summary.setVisible(True)
         self.results_table.setVisible(False)
         
-        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
         
         self.log_message('INFO', f"{lang['analysis_start_log']} {file_path}")
@@ -1589,7 +1604,7 @@ class ScanHistoryDialog(QDialog):
             
             # Угрозы
             threats = ', '.join(item_data.get('detected_threats', []))
-            no_threats_text = "Нет" if self.current_lang == "Русский" else "None"
+            no_threats_text = lang.get("no_threats", "Нет" if self.current_lang == "Русский" else "None")
             threats_item = QTableWidgetItem(threats if threats else no_threats_text)
             threats_item.setFlags(threats_item.flags() & ~Qt.ItemIsEditable)
             self.history_table.setItem(row, 3, threats_item)
@@ -1608,8 +1623,9 @@ class ScanHistoryDialog(QDialog):
     def clear_history(self):
         """Очистить историю"""
         lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        confirm_key = "clear_history_confirm" if self.current_lang == "Русский" else "clear_history_confirm_en"
         reply = QMessageBox.question(self, lang["clear_history"],
-            lang["clear_history_confirm_en"] if self.current_lang == "English" else lang["clear_history_confirm_en"],
+            lang.get(confirm_key, lang["clear_history_confirm"]),
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
         if reply == QMessageBox.Yes and self.parent_ref:
