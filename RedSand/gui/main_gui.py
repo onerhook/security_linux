@@ -1372,7 +1372,7 @@ class AnalysisPanel(QWidget):
         
         # Обновляем labels timeout
         for label in self.findChildren(QLabel):
-            if label.text().startswith("Время анализа:") or label.text().startswith("Analysis Time:"):
+            if label.text().startswith("Время анализа") or label.text().startswith("Analysis Time"):
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
@@ -1957,7 +1957,7 @@ class SettingsDialog(QDialog):
         
         # Обновляем label timeout
         for label in self.findChildren(QLabel):
-            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text() == lang["timeout_label"]:
+            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text().startswith("Analysis Time"):
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
