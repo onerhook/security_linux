@@ -416,7 +416,7 @@ LANGUAGES = {
     "Русский": {
         "title": "RedSand Secure",
         "subtitle": "",
-        "antivirus_mode": "🛡️ АНТИВИРУС",
+        "antivirus_mode": "АНТИВИРУС",
         "analysis_mode": "АНАЛИЗ ФАЙЛОВ",
         "settings": "⚙ Настройки",
         "history": "📜 История",
@@ -425,8 +425,8 @@ LANGUAGES = {
         "analyze_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
         "av_on": "⏹️ ВЫКЛ",
         "av_off": "▶️ ВКЛ",
-        "av_status_on": "🛡️ Антивирус: ВКЛ",
-        "av_status_off": "🛡️ Антивирус: ВЫКЛ",
+        "av_status_on": "Антивирус: ВКЛ",
+        "av_status_off": "Антивирус: ВЫКЛ",
         "save": "Сохранить",
         "cancel": "Отмена",
         "back": "← Назад",
@@ -444,7 +444,7 @@ LANGUAGES = {
         "protection_status": "Статус защиты",
         "folder_monitoring": "Мониторинг папок",
         "back_to_menu": "← Назад к главному меню",
-        "quarantine_title": "🛡️ Карантин - Обнаруженные угрозы",
+        "quarantine_title": "Карантин - Обнаруженные угрозы",
         "quarantine_info": "Файлы в карантине обезврежены и не могут нанести вред системе.",
         "quarantine_empty": "Карантин пуст",
         "refresh": "🔄 Обновить",
@@ -567,7 +567,7 @@ LANGUAGES = {
     "English": {
         "title": "RedSand Secure",
         "subtitle": "",
-        "antivirus_mode": "🛡️ ANTIVIRUS",
+        "antivirus_mode": "ANTIVIRUS",
         "analysis_mode": "FILE ANALYSIS",
         "settings": "⚙ Settings",
         "history": "📜 History",
@@ -576,8 +576,8 @@ LANGUAGES = {
         "analyze_btn": "🚀 START ANALYSIS",
         "av_on": "⏹️ OFF",
         "av_off": "▶️ ON",
-        "av_status_on": "🛡️ Antivirus: ON",
-        "av_status_off": "🛡️ Antivirus: OFF",
+        "av_status_on": "Antivirus: ON",
+        "av_status_off": "Antivirus: OFF",
         "save": "Save",
         "cancel": "Cancel",
         "back": "← Back",
@@ -595,7 +595,7 @@ LANGUAGES = {
         "protection_status": "Protection Status",
         "folder_monitoring": "Folder Monitoring",
         "back_to_menu": "← Back to Main Menu",
-        "quarantine_title": "🛡️ Quarantine - Detected Threats",
+        "quarantine_title": "Quarantine - Detected Threats",
         "quarantine_info": "Files in quarantine are neutralized and cannot harm the system.",
         "quarantine_empty": "Quarantine is empty",
         "refresh": "🔄 Refresh",
@@ -886,7 +886,7 @@ class AntivirusPanel(QWidget):
         layout.setContentsMargins(30, 30, 30, 30)
         
         # Заголовок
-        title_label = QLabel("🛡️ АНТИВИРУС")
+        title_label = QLabel("АНТИВИРУС")
         title_label.setObjectName("titleLabel")
         title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(title_label)
@@ -895,7 +895,7 @@ class AntivirusPanel(QWidget):
         status_group = QGroupBox("Статус защиты")
         status_layout = QVBoxLayout(status_group)
         
-        self.av_status_label = QLabel("🛡️ Антивирус: ВЫКЛ")
+        self.av_status_label = QLabel("Антивирус: ВЫКЛ")
         self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
         self.av_status_label.setAlignment(Qt.AlignCenter)
         status_layout.addWidget(self.av_status_label)
@@ -996,7 +996,7 @@ class AntivirusPanel(QWidget):
                 self.av_active = False
                 self.btn_toggle_av.setChecked(False)
                 self.btn_toggle_av.setText("▶️ ВКЛ")
-                self.av_status_label.setText("🛡️ Антивирус: ВЫКЛ")
+                self.av_status_label.setText("Антивирус: ВЫКЛ")
                 self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
                 self.log_event("Антивирус остановлен")
             except Exception as e:
@@ -1697,6 +1697,7 @@ class ScanHistoryDialog(QDialog):
         
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
+        self.btn_close.setFixedHeight(45)
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
@@ -1847,7 +1848,7 @@ class QuarantineDialog(QDialog):
         layout.setSpacing(15)
         layout.setContentsMargins(20, 20, 20, 20)
         
-        self.title_label = QLabel("🛡️ Карантин - Обнаруженные угрозы")
+        self.title_label = QLabel("Карантин - Обнаруженные угрозы")
         self.title_label.setObjectName("titleLabel")
         self.title_label.setAlignment(Qt.AlignCenter)
         layout.addWidget(self.title_label)
@@ -2179,18 +2180,6 @@ class SettingsDialog(QDialog):
         self.scan_on_access_check.setToolTip(lang.get("scan_on_access_tooltip", "Сканировать файлы при каждом обращении к ним"))
         av_layout.addWidget(self.scan_on_access_check)
         
-        self.monitor_downloads_check = QCheckBox(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
-        self.monitor_downloads_check.setChecked(self.settings.get('monitor_downloads', True))
-        av_layout.addWidget(self.monitor_downloads_check)
-        
-        self.monitor_desktop_check = QCheckBox(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
-        self.monitor_desktop_check.setChecked(self.settings.get('monitor_desktop', True))
-        av_layout.addWidget(self.monitor_desktop_check)
-        
-        self.monitor_documents_check = QCheckBox(lang.get("monitor_documents_check", "Мониторить Документы"))
-        self.monitor_documents_check.setChecked(self.settings.get('monitor_documents', True))
-        av_layout.addWidget(self.monitor_documents_check)
-        
         sensitivity_layout = QHBoxLayout()
         sensitivity_label = QLabel(lang.get("sensitivity_label", "Чувствительность:"))
         sensitivity_layout.addWidget(sensitivity_label)
@@ -2359,9 +2348,6 @@ class SettingsDialog(QDialog):
             self.thread_spin.setValue(4)
             self.auto_quarantine_check.setChecked(True)
             self.scan_on_access_check.setChecked(True)
-            self.monitor_downloads_check.setChecked(True)
-            self.monitor_desktop_check.setChecked(True)
-            self.monitor_documents_check.setChecked(True)
             self.sensitivity_combo.setCurrentIndex(1)
             self.docker_check.setChecked(True)
             self.behavioral_check.setChecked(True)
@@ -2391,9 +2377,6 @@ class SettingsDialog(QDialog):
             'thread_count': self.thread_spin.value(),
             'auto_quarantine': self.auto_quarantine_check.isChecked(),
             'scan_on_access': self.scan_on_access_check.isChecked(),
-            'monitor_downloads': self.monitor_downloads_check.isChecked(),
-            'monitor_desktop': self.monitor_desktop_check.isChecked(),
-            'monitor_documents': self.monitor_documents_check.isChecked(),
             'sensitivity': sensitivity_map.get(self.sensitivity_combo.currentIndex(), 'medium'),
             'use_docker': self.docker_check.isChecked(),
             'behavioral_analysis': self.behavioral_check.isChecked(),
@@ -2460,9 +2443,6 @@ class SettingsDialog(QDialog):
         self.multi_thread_check.setText(lang.get("multi_thread_check", "Многопоточное сканирование"))
         self.auto_quarantine_check.setText(lang.get("auto_quarantine_check", "Автоматический карантин"))
         self.scan_on_access_check.setText(lang.get("scan_on_access_check", "Сканирование при доступе"))
-        self.monitor_downloads_check.setText(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
-        self.monitor_desktop_check.setText(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
-        self.monitor_documents_check.setText(lang.get("monitor_documents_check", "Мониторить Документы"))
         self.docker_check.setText(lang.get("docker_check", "Использовать Docker изоляцию"))
         self.behavioral_check.setText(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
         self.notifications_check.setText(lang.get("notifications_check", "Показывать уведомления"))
