@@ -1,0 +1,9 @@
+{
+  "timeout": 60,
+  "output_dir": "reports",
+  "use_poly_default": false,
+  "auto_disable_network": true,
+  "log_level": "INFO",
+  "theme": "Dark",
+  "language": "Русский"
+}
