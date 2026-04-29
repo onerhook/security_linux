@@ -450,7 +450,8 @@ LANGUAGES = {
         "refresh": "🔄 Обновить",
         "restore": "♻️ Восстановить",
         "delete_forever": "🗑️ Удалить навсегда",
-        "close": "Закрыть",
+        "close": "Close",
+        "reset_defaults": "Reset Settings",
         "col_date": "Дата",
         "col_filename": "Имя файла",
         "col_path": "Оригинальный путь",
@@ -474,34 +475,34 @@ LANGUAGES = {
         "status_malicious": "ОПАСНЫЙ",
         "settings_title": "⚙ Настройки приложения",
         "theme_group": "Тема оформления",
-        "analysis_settings_group": "Настройки анализа",
-        "application_settings": "⚙ Настройки приложения",
-        "analysis_settings": "Настройки анализа",
-        "timeout_label": "Время анализа (сек):",
-        "app_language": "Язык интерфейса",
-        "av_running": "Антивирус запущен. Мониторинг: ",
-        "av_start_error": "Не удалось запустить антивирус:",
-        "av_stop_error": "Ошибка остановки: ",
-        "av_start_msg": "Защита реального времени включена!\\n\\nМониторимые папки:\\n",
-        "folder_exists": "Эта папка уже добавлена",
-        "folder_added": "Добавлена папка: ",
-        "folder_removed": "Удалена папка: ",
-        "no_folders": "Не найдены стандартные папки для мониторинга.\\nАнтивирус не может быть запущен.",
-        "docker_info": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
-        "file_selected": "Выбран файл: ",
-        "no_file": "Файл не выбран",
-        "analyzing": "Анализ файла...",
-        "analysis_complete": "Анализ завершён!",
-        "threat_level": "Уровень угрозы: ",
-        "detected_threats": "Обнаруженные угрозы:",
-        "step1_file": "Шаг 1: Выберите файл",
-        "step2_settings": "Шаг 2: Настройки анализа",
-        "file_placeholder": "Файл еще не выбран... или перетащите сюда",
-        "analysis_progress": "Прогресс анализа",
-        "waiting": "Ожидание...",
-        "logs_tab": "📋 Журнал      ",
-        "results_tab": "📊 Результаты   ",
-        "log_placeholder": "Здесь будет отображаться ход анализа...",
+        "analysis_settings_group": "Analysis Settings",
+        "application_settings": "⚙ Application Settings",
+        "analysis_settings": "Analysis Settings",
+        "timeout_label": "Analysis Time (sec):",
+        "app_language": "Interface Language",
+        "av_running": "Antivirus running. Monitoring: ",
+        "av_start_error": "Failed to start antivirus:",
+        "av_stop_error": "Stop error: ",
+        "av_start_msg": "Real-time protection enabled!\\n\\nMonitored folders:\\n",
+        "folder_exists": "This folder is already added",
+        "folder_added": "Folder added: ",
+        "folder_removed": "Folder removed: ",
+        "no_folders": "No standard folders found for monitoring.\\nAntivirus cannot be started.",
+        "docker_info": "ℹ️ All files are analyzed in an isolated Docker container",
+        "file_selected": "Selected file: ",
+        "no_file": "No file selected",
+        "analyzing": "Analyzing file...",
+        "analysis_complete": "Analysis complete!",
+        "threat_level": "Threat level: ",
+        "detected_threats": "Detected threats:",
+        "step1_file": "Step 1: Select File",
+        "step2_settings": "Step 2: Analysis Settings",
+        "file_placeholder": "File not selected... or drag and drop here",
+        "analysis_progress": "Analysis Progress",
+        "waiting": "Waiting...",
+        "logs_tab": "📋 Logs      ",
+        "results_tab": "📊 Results   ",
+        "log_placeholder": "Analysis progress will be displayed here...",
         "results_placeholder": "Результаты анализа появятся здесь после завершения...",
         "param_column": "Параметр",
         "value_column": "Значение",
@@ -892,15 +893,15 @@ class AntivirusPanel(QWidget):
         layout.addWidget(title_label)
         
         # Статус
-        status_group = QGroupBox("Статус защиты")
+        status_group = QGroupBox(lang.get("protection_status", "Protection Status"))
         status_layout = QVBoxLayout(status_group)
         
-        self.av_status_label = QLabel("Антивирус: ВЫКЛ")
+        self.av_status_label = QLabel(lang.get("av_status_off", "Antivirus: OFF"))
         self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
         self.av_status_label.setAlignment(Qt.AlignCenter)
         status_layout.addWidget(self.av_status_label)
         
-        self.btn_toggle_av = QPushButton("▶️ ВКЛ")
+        self.btn_toggle_av = QPushButton(lang.get("av_off", "▶️ ON"))
         self.btn_toggle_av.setObjectName("actionBtn")
         self.btn_toggle_av.setCheckable(True)
         self.btn_toggle_av.setChecked(False)
@@ -910,68 +911,29 @@ class AntivirusPanel(QWidget):
         
         layout.addWidget(status_group)
         
-        # Настройки мониторинга
-        monitor_group = QGroupBox("Мониторинг папок")
-        monitor_layout = QVBoxLayout(monitor_group)
-        
-        # Список папок - сначала список с отступом снизу
-        self.folder_list = QListWidget()
-        self.folder_list.addItems([
-            "~/Downloads",
-            "~/Desktop", 
-            "~/Documents"
-        ])
-        self.folder_list.setMaximumHeight(150)
-        monitor_layout.addWidget(self.folder_list)
-        
-        # Кнопки управления папками - под списком папок, впритык снизу
-        folder_btn_widget = QWidget()
-        folder_btn_layout = QHBoxLayout(folder_btn_widget)
-        folder_btn_layout.setContentsMargins(0, 0, 0, 0)
-        folder_btn_layout.setSpacing(10)
-        
-        self.btn_add_folder = QPushButton(self.tr("Add"))
-        self.btn_add_folder.setObjectName("secondaryBtn")
-        self.btn_add_folder.setMinimumHeight(45)
-        self.btn_add_folder.clicked.connect(self.add_folder)
-        folder_btn_layout.addWidget(self.btn_add_folder)
-        
-        self.btn_remove_folder = QPushButton(self.tr("Remove"))
-        self.btn_remove_folder.setObjectName("dangerBtn")
-        self.btn_remove_folder.setMinimumHeight(45)
-        self.btn_remove_folder.clicked.connect(self.remove_folder)
-        self.btn_remove_folder.setEnabled(False)
-        folder_btn_layout.addWidget(self.btn_remove_folder)
-        
-        monitor_layout.addWidget(folder_btn_widget)
-        
-        self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
-        
-        self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
+        self.chk_auto_quarantine = QCheckBox(lang.get("auto_quarantine", "Auto-quarantine threats"))
         self.chk_auto_quarantine.setChecked(True)
-        monitor_layout.addWidget(self.chk_auto_quarantine)
+        layout.addWidget(self.chk_auto_quarantine)
         
-        self.chk_scan_on_access = QCheckBox("Сканирование при доступе к файлу")
+        self.chk_scan_on_access = QCheckBox(lang.get("scan_on_access", "Scan on access"))
         self.chk_scan_on_access.setChecked(True)
-        monitor_layout.addWidget(self.chk_scan_on_access)
-        
-        layout.addWidget(monitor_group)
+        layout.addWidget(self.chk_scan_on_access)
         
         # Лог событий
-        log_group = QGroupBox("Журнал событий антивируса")
+        log_group = QGroupBox(lang.get("event_log", "Antivirus Event Log"))
         log_layout = QVBoxLayout(log_group)
         
         self.av_log = QTextEdit()
         self.av_log.setReadOnly(True)
         self.av_log.setFont(QFont("Consolas", 12))
-        self.av_log.setPlaceholderText("Здесь будут отображаться события антивируса...")
+        self.av_log.setPlaceholderText(lang.get("log_placeholder", "Antivirus events will be displayed here..."))
         self.av_log.setMinimumHeight(200)
         log_layout.addWidget(self.av_log)
         
         layout.addWidget(log_group)
         
         # Кнопка назад
-        btn_back = QPushButton("← Назад к главному меню")
+        btn_back = QPushButton(lang.get("back_to_menu", "← Back to Main Menu"))
         btn_back.setObjectName("secondaryBtn")
         btn_back.clicked.connect(lambda: self.parent_ref.show_main_menu() if self.parent_ref else None)
         layout.addWidget(btn_back)
@@ -995,10 +957,10 @@ class AntivirusPanel(QWidget):
                     self.file_watcher = None
                 self.av_active = False
                 self.btn_toggle_av.setChecked(False)
-                self.btn_toggle_av.setText("▶️ ВКЛ")
-                self.av_status_label.setText("Антивирус: ВЫКЛ")
+                self.btn_toggle_av.setText(lang.get("av_off", "▶️ ON"))
+                self.av_status_label.setText(lang.get("av_status_off", "Antivirus: OFF"))
                 self.av_status_label.setStyleSheet("color: #DC2626; font-weight: bold; font-size: 24px;")
-                self.log_event("Антивирус остановлен")
+                self.log_event(lang.get("av_stop_msg", "Antivirus stopped"))
             except Exception as e:
                 self.log_event(f"Ошибка остановки: {e}")
         else:
@@ -2312,14 +2274,14 @@ class SettingsDialog(QDialog):
         buttons_layout = QHBoxLayout()
         buttons_layout.addStretch()
         
-        self.btn_reset = QPushButton(lang.get("reset_defaults", "Сбросить настройки"))
+        self.btn_reset = QPushButton(lang.get("reset_defaults", "Reset to Defaults"))
         self.btn_reset.setObjectName("secondaryBtn")
         self.btn_reset.setFixedHeight(45)
         self.btn_reset.clicked.connect(self.reset_to_defaults)
         buttons_layout.addWidget(self.btn_reset)
         
-        self.btn_close_settings = QPushButton(lang["close"])
-        self.btn_close_settings.setObjectName("primaryBtn")
+        self.btn_close_settings = QPushButton(lang.get("close", "Close"))
+        self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
         buttons_layout.addWidget(self.btn_close_settings)
@@ -2458,8 +2420,8 @@ class SettingsDialog(QDialog):
                                          lang.get("sensitivity_high", "Высокая")])
         
         # Обновляем кнопки
-        self.btn_reset.setText(lang.get("reset_defaults", "Сбросить настройки"))
-        self.btn_close_settings.setText(lang["close"])
+        self.btn_reset.setText(lang.get("reset_defaults", "Reset to Defaults"))
+        self.btn_close_settings.setText(lang.get("close", "Close"))
 
 
 class RedSandSecureGUI(QMainWindow):
