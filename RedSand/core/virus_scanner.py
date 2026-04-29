@@ -126,6 +126,23 @@ class VirusScanner:
             r'CheckRemoteDebuggerPresent',  # Проверка на отладчик
         ]
         
+        # Специфичные паттерны для .exe файлов (PE файлы)
+        self.exe_malicious_patterns = [
+            # Опасные импорты для .exe
+            r'CreateRemoteThread',  # Инъекция кода
+            r'VirtualAllocEx.*PAGE_EXECUTE_READWRITE',  # Выделение исполняемой памяти
+            r'WriteProcessMemory',  # Запись в память процесса
+            r'NtUnmapViewOfSection',  # Process Hollowing
+            r'SetWindowsHookEx.*WH_KEYBOARD',  # Кейлоггер
+            r'GetAsyncKeyState',  # Перехват клавиш
+            r'RegSetValueEx.*Run',  # Автозагрузка
+            r'URLDownloadToFile',  # Скачивание файлов
+            r'InternetOpenUrl',  # HTTP запросы
+            r'CryptEncrypt',  # Шифрование (ransomware)
+            r'vssadmin.*delete.*shadows',  # Удаление теневых копий
+            r'StopService.*WinDefend',  # Отключение защитника Windows
+        ]
+        
         # Нормальные строки, которые НЕ должны триггерить детект
         self.whitelisted_strings = [
             r'pytest',  # Тестирование
@@ -141,6 +158,15 @@ class VirusScanner:
             r'argparse',  # Парсинг аргументов
             r'json\.loads',  # Парсинг JSON
             r'json\.dumps',  # Сериализация JSON
+            # Легитимные библиотеки и фреймворки
+            r'tkinter',  # GUI библиотека
+            r'PyQt',  # GUI фреймворк
+            r'wxPython',  # GUI фреймворк
+            r'numpy',  # Научная библиотека
+            r'pandas',  # Анализ данных
+            r'requests',  # HTTP библиотека
+            r'flask',  # Веб фреймворк
+            r'django',  # Веб фреймворк
         ]
     
     def scan_file(self, file_path: str) -> Dict:
@@ -210,23 +236,29 @@ class VirusScanner:
             return 'N/A'
     
     def _read_file_content(self, file_path: str) -> Optional[str]:
-        """Чтение содержимого файла."""
+        """Чтение содержимого файла с оптимизацией для больших файлов."""
         try:
+            file_size = os.path.getsize(file_path)
+            
+            # Для больших файлов читаем только первые 2MB (достаточно для сигнатур)
+            max_size = 2 * 1024 * 1024  # 2MB
+            read_size = min(file_size, max_size) if file_size > max_size else file_size
+            
             # Пробуем прочитать как текст
             with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                return f.read()
+                return f.read(read_size)
         except Exception:
             # Если не получилось, читаем как бинарный и конвертируем
             try:
                 with open(file_path, 'rb') as f:
-                    data = f.read()
+                    data = f.read(read_size)
                     # Извлекаем printable ASCII символы
                     return ''.join(chr(b) for b in data if 32 <= b <= 126)
             except Exception:
                 return None
     
     def _analyze_content(self, content: str, result: Dict):
-        """Анализ содержимого файла."""
+        """Анализ содержимого файла с оптимизацией."""
         malicious_count = 0
         suspicious_count = 0
         
@@ -239,23 +271,32 @@ class VirusScanner:
             result['risk_score'] = 0
             return
         
-        # Проверка на явные вредоносные строки
+        # Компилируем паттерны один раз для ускорения
+        compiled_malicious = []
         for pattern in self.malware_signatures['malicious_strings']:
             try:
-                if re.search(pattern, content, re.IGNORECASE):
-                    malicious_count += 1
-                    result['matched_signatures'].append(f"Malicious pattern: {pattern}")
+                compiled_malicious.append((pattern, re.compile(pattern, re.IGNORECASE)))
             except re.error:
                 continue
         
-        # Проверка на подозрительные паттерны
+        compiled_suspicious = []
         for pattern in self.suspicious_patterns:
             try:
-                if re.search(pattern, content, re.IGNORECASE):
-                    suspicious_count += 1
-                    result['matched_patterns'].append(f"Suspicious pattern: {pattern}")
+                compiled_suspicious.append((pattern, re.compile(pattern, re.IGNORECASE)))
             except re.error:
                 continue
+        
+        # Проверка на явные вредоносные строки
+        for pattern, regex in compiled_malicious:
+            if regex.search(content):
+                malicious_count += 1
+                result['matched_signatures'].append(f"Malicious pattern: {pattern}")
+        
+        # Проверка на подозрительные паттерны
+        for pattern, regex in compiled_suspicious:
+            if regex.search(content):
+                suspicious_count += 1
+                result['matched_patterns'].append(f"Suspicious pattern: {pattern}")
         
         # Проверка на индикаторы угроз в тестовых файлах (симуляция малвари)
         threat_indicators = self._check_threat_indicators(content)

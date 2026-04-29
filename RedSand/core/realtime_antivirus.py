@@ -309,38 +309,67 @@ class RealTimeAntivirus:
         return [f for f in default_folders if os.path.exists(f)]
     
     def scan_file(self, file_path: str) -> ScanResult:
-        """Сканирование одного файла через ExtendedVirusScanner"""
-        self.logger.info(f"Сканирование файла: {file_path}")
+        """Сканирование одного файла через ExtendedVirusScanner с детальным логированием"""
+        self.logger.info(f"=" * 60)
+        self.logger.info(f"НАЧАЛО СКАНИРОВАНИЯ: {file_path}")
+        self.logger.info(f"=" * 60)
         
         start_time = time.time()
         
         # Используем ExtendedVirusScanner для более точного анализа
         from core.extended_scanner import ExtendedVirusScanner
         scanner = ExtendedVirusScanner()
+        
+        self.logger.info(f"Запуск анализа файла...")
         scan_result = scanner.scan_file(file_path)
+        
+        # Логируем детали обнаружения
+        threat_level_str = scan_result.threat_level.value if hasattr(scan_result.threat_level, 'value') else str(scan_result.threat_level)
+        is_malicious = threat_level_str == 'MALICIOUS'
+        
+        self.logger.info(f"Результат сканирования:")
+        self.logger.info(f"  - Уровень угрозы: {threat_level_str}")
+        self.logger.info(f"  - Риск: {scan_result.score}/100")
+        self.logger.info(f"  - SHA256: {scan_result.sha256[:16]}...")
+        
+        if scan_result.threats_found:
+            self.logger.info(f"  - Обнаруженные угрозы:")
+            for threat in scan_result.threats_found:
+                self.logger.info(f"    ⚠️ {threat}")
+        
+        if hasattr(scan_result, 'matched_patterns') and scan_result.matched_patterns:
+            self.logger.info(f"  - Совпадения паттернов:")
+            for pattern in scan_result.matched_patterns[:5]:
+                self.logger.info(f"    🔍 {pattern}")
         
         # Определяем действие
         action_taken = "NONE"
         message = "Файл безопасен"
         
-        threat_level_str = scan_result.threat_level.value if hasattr(scan_result.threat_level, 'value') else str(scan_result.threat_level)
-        is_malicious = threat_level_str == 'MALICIOUS'
-        
         if is_malicious:
+            self.logger.warning(f"🚨 ОБНАРУЖЕНА УГРОЗА! 🚨")
+            self.logger.warning(f"Тип угрозы: {threat_level_str}")
+            self.logger.warning(f"Количество совпадений: {len(scan_result.threats_found)}")
+            
             if self.auto_quarantine:
                 if self.quarantine_manager.move_to_quarantine(file_path, threat_level_str):
                     action_taken = "QUARANTINE"
                     message = "Файл перемещен в карантин"
+                    self.logger.info(f"✅ Файл перемещен в карантин")
                 else:
                     action_taken = "ALERT"
                     message = "Обнаружена угроза! Требуется ручное вмешательство"
+                    self.logger.error(f"❌ Не удалось переместить в карантин")
             else:
                 action_taken = "ALERT"
                 message = "Обнаружена угроза! Требуется ручное вмешательство"
+                self.logger.warning(f"⚠️ Авто-карантин отключен")
         
         elif threat_level_str == 'SUSPICIOUS':
+            self.logger.warning(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ")
             action_taken = "ALERT"
             message = "Подозрительный файл. Рекомендуется проверка."
+            self.logger.info(f"ℹ️ Рекомендуется дополнительная проверка файла")
         
         # Создаем результат
         result = ScanResult(
@@ -363,13 +392,16 @@ class RealTimeAntivirus:
         # Генерируем отчет для угроз
         if is_malicious or threat_level_str == 'SUSPICIOUS':
             self._generate_scan_report(result)
+            self.logger.info(f"📄 Отчет сохранен в директорию отчетов")
         
         # Уведомляем callback
         if self.notification_callback:
             self.notification_callback(result)
         
         elapsed = time.time() - start_time
-        self.logger.info(f"Сканирование завершено за {elapsed:.2f}с: {threat_level_str}")
+        self.logger.info(f"=" * 60)
+        self.logger.info(f"СКАНИРОВАНИЕ ЗАВЕРШЕНО за {elapsed:.2f}с: {threat_level_str}")
+        self.logger.info(f"=" * 60)
         
         return result
     
