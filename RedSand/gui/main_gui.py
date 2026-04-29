@@ -1891,7 +1891,7 @@ class SettingsDialog(QDialog):
         lang_key = "application_settings"
         title_text = LANGUAGES.get(parent.current_lang if parent else "Русский", LANGUAGES["Русский"]).get(lang_key, "⚙ Настройки приложения")
         self.setWindowTitle(title_text)
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(700, 650)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
     
@@ -1907,7 +1907,17 @@ class SettingsDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Настройки анализа (тема оформления теперь только тёмная)
+        # Создаем скролл-область для настроек
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setSpacing(20)
+        scroll_layout.setContentsMargins(10, 10, 10, 10)
+        
+        # === Настройки анализа ===
         analysis_group = QGroupBox(lang["analysis_settings_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
@@ -1917,34 +1927,283 @@ class SettingsDialog(QDialog):
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(self.settings.get('timeout', 60))
+        self.timeout_spin.setSuffix(" сек")
         timeout_layout.addWidget(self.timeout_spin)
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
         self.poly_check = QCheckBox(lang["poly_check"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
+        self.poly_check.setToolTip(lang.get("poly_check_tooltip", "Использовать полиморфный движок по умолчанию"))
         analysis_layout.addWidget(self.poly_check)
         
         self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
+        self.network_check.setToolTip(lang.get("network_check_tooltip", "Автоматически отключать сеть при анализе"))
         analysis_layout.addWidget(self.network_check)
         
-        layout.addWidget(analysis_group)
+        # Дополнительные настройки анализа
+        self.deep_scan_check = QCheckBox(lang.get("deep_scan_check", "Глубокий анализ файлов"))
+        self.deep_scan_check.setChecked(self.settings.get('deep_scan', True))
+        self.deep_scan_check.setToolTip(lang.get("deep_scan_tooltip", "Выполнять полный эвристический анализ"))
+        analysis_layout.addWidget(self.deep_scan_check)
         
-        # Кнопка закрытия
+        self.ml_analysis_check = QCheckBox(lang.get("ml_analysis_check", "Использовать ML классификатор"))
+        self.ml_analysis_check.setChecked(self.settings.get('ml_analysis', True))
+        self.ml_analysis_check.setToolTip(lang.get("ml_analysis_tooltip", "Использовать машинное обучение для классификации угроз"))
+        analysis_layout.addWidget(self.ml_analysis_check)
+        
+        self.multi_thread_check = QCheckBox(lang.get("multi_thread_check", "Многопоточное сканирование"))
+        self.multi_thread_check.setChecked(self.settings.get('multi_thread', True))
+        self.multi_thread_check.setToolTip(lang.get("multi_thread_tooltip", "Использовать несколько потоков для ускорения сканирования"))
+        analysis_layout.addWidget(self.multi_thread_check)
+        
+        thread_layout = QHBoxLayout()
+        thread_label = QLabel(lang.get("thread_count_label", "Количество потоков:"))
+        thread_layout.addWidget(thread_label)
+        self.thread_spin = QSpinBox()
+        self.thread_spin.setRange(1, 16)
+        self.thread_spin.setValue(self.settings.get('thread_count', 4))
+        self.thread_spin.setSuffix(" шт")
+        thread_layout.addWidget(self.thread_spin)
+        thread_layout.addStretch()
+        analysis_layout.addLayout(thread_layout)
+        
+        scroll_layout.addWidget(analysis_group)
+        
+        # === Настройки антивируса реального времени ===
+        antivirus_group = QGroupBox(lang.get("antivirus_settings_group", "Настройки антивируса"))
+        av_layout = QVBoxLayout(antivirus_group)
+        
+        self.auto_quarantine_check = QCheckBox(lang.get("auto_quarantine_check", "Автоматический карантин"))
+        self.auto_quarantine_check.setChecked(self.settings.get('auto_quarantine', True))
+        self.auto_quarantine_check.setToolTip(lang.get("auto_quarantine_tooltip", "Автоматически помещать подозрительные файлы в карантин"))
+        av_layout.addWidget(self.auto_quarantine_check)
+        
+        self.scan_on_access_check = QCheckBox(lang.get("scan_on_access_check", "Сканирование при доступе"))
+        self.scan_on_access_check.setChecked(self.settings.get('scan_on_access', True))
+        self.scan_on_access_check.setToolTip(lang.get("scan_on_access_tooltip", "Сканировать файлы при каждом обращении к ним"))
+        av_layout.addWidget(self.scan_on_access_check)
+        
+        self.monitor_downloads_check = QCheckBox(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
+        self.monitor_downloads_check.setChecked(self.settings.get('monitor_downloads', True))
+        av_layout.addWidget(self.monitor_downloads_check)
+        
+        self.monitor_desktop_check = QCheckBox(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
+        self.monitor_desktop_check.setChecked(self.settings.get('monitor_desktop', True))
+        av_layout.addWidget(self.monitor_desktop_check)
+        
+        self.monitor_documents_check = QCheckBox(lang.get("monitor_documents_check", "Мониторить Документы"))
+        self.monitor_documents_check.setChecked(self.settings.get('monitor_documents', True))
+        av_layout.addWidget(self.monitor_documents_check)
+        
+        sensitivity_layout = QHBoxLayout()
+        sensitivity_label = QLabel(lang.get("sensitivity_label", "Чувствительность:"))
+        sensitivity_layout.addWidget(sensitivity_label)
+        self.sensitivity_combo = QComboBox()
+        self.sensitivity_combo.addItems([lang.get("sensitivity_low", "Низкая"), 
+                                         lang.get("sensitivity_medium", "Средняя"), 
+                                         lang.get("sensitivity_high", "Высокая")])
+        sens_idx = self.settings.get('sensitivity', 1)
+        self.sensitivity_combo.setCurrentIndex(sens_idx)
+        sensitivity_layout.addWidget(self.sensitivity_combo)
+        sensitivity_layout.addStretch()
+        av_layout.addLayout(sensitivity_layout)
+        
+        scroll_layout.addWidget(antivirus_group)
+        
+        # === Настройки песочницы ===
+        sandbox_group = QGroupBox(lang.get("sandbox_settings_group", "Настройки песочницы"))
+        sandbox_layout = QVBoxLayout(sandbox_group)
+        
+        self.docker_check = QCheckBox(lang.get("docker_check", "Использовать Docker изоляцию"))
+        self.docker_check.setChecked(self.settings.get('use_docker', True))
+        self.docker_check.setToolTip(lang.get("docker_tooltip", "Запускать подозрительные файлы в Docker контейнере"))
+        sandbox_layout.addWidget(self.docker_check)
+        
+        self.behavioral_check = QCheckBox(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
+        self.behavioral_check.setChecked(self.settings.get('behavioral_analysis', True))
+        self.behavioral_check.setToolTip(lang.get("behavioral_tooltip", "Использовать эмуляцию Windows API для анализа поведения"))
+        sandbox_layout.addWidget(self.behavioral_check)
+        
+        emu_timeout_layout = QHBoxLayout()
+        emu_timeout_label = QLabel(lang.get("emu_timeout_label", "Таймаут эмуляции (сек):"))
+        emu_timeout_layout.addWidget(emu_timeout_label)
+        self.emu_timeout_spin = QSpinBox()
+        self.emu_timeout_spin.setRange(5, 120)
+        self.emu_timeout_spin.setValue(self.settings.get('emu_timeout', 10))
+        self.emu_timeout_spin.setSuffix(" сек")
+        emu_timeout_layout.addWidget(self.emu_timeout_spin)
+        emu_timeout_layout.addStretch()
+        sandbox_layout.addLayout(emu_timeout_layout)
+        
+        scroll_layout.addWidget(sandbox_group)
+        
+        # === Настройки интерфейса ===
+        interface_group = QGroupBox(lang.get("interface_settings_group", "Настройки интерфейса"))
+        interface_layout = QVBoxLayout(interface_group)
+        
+        lang_interface_layout = QHBoxLayout()
+        lang_interface_label = QLabel(lang.get("interface_language_label", "Язык интерфейса:"))
+        lang_interface_layout.addWidget(lang_interface_label)
+        self.interface_lang_combo = QComboBox()
+        self.interface_lang_combo.addItems(["Русский", "English"])
+        current_lang_idx = 0 if self.settings.get('language', 'Русский') == 'Русский' else 1
+        self.interface_lang_combo.setCurrentIndex(current_lang_idx)
+        self.interface_lang_combo.currentTextChanged.connect(self.on_language_changed)
+        lang_interface_layout.addWidget(self.interface_lang_combo)
+        lang_interface_layout.addStretch()
+        interface_layout.addLayout(lang_interface_layout)
+        
+        self.notifications_check = QCheckBox(lang.get("notifications_check", "Показывать уведомления"))
+        self.notifications_check.setChecked(self.settings.get('show_notifications', True))
+        interface_layout.addWidget(self.notifications_check)
+        
+        self.sound_check = QCheckBox(lang.get("sound_check", "Звуковые уведомления"))
+        self.sound_check.setChecked(self.settings.get('sound_enabled', False))
+        interface_layout.addWidget(self.sound_check)
+        
+        self.minimize_tray_check = QCheckBox(lang.get("minimize_tray_check", "Сворачивать в трей"))
+        self.minimize_tray_check.setChecked(self.settings.get('minimize_to_tray', False))
+        interface_layout.addWidget(self.minimize_tray_check)
+        
+        scroll_layout.addWidget(interface_group)
+        
+        # === Настройки безопасности ===
+        security_group = QGroupBox(lang.get("security_settings_group", "Настройки безопасности"))
+        security_layout = QVBoxLayout(security_group)
+        
+        self.panic_button_check = QCheckBox(lang.get("panic_button_check", "Кнопка экстренной остановки"))
+        self.panic_button_check.setChecked(self.settings.get('panic_button_enabled', True))
+        self.panic_button_check.setToolTip(lang.get("panic_button_tooltip", "Отображать кнопку для немедленной остановки всех процессов"))
+        security_layout.addWidget(self.panic_button_check)
+        
+        self.auto_update_check = QCheckBox(lang.get("auto_update_check", "Автообновление сигнатур"))
+        self.auto_update_check.setChecked(self.settings.get('auto_update_signatures', True))
+        self.auto_update_check.setToolTip(lang.get("auto_update_tooltip", "Автоматически обновлять базу сигнатур вирусов"))
+        security_layout.addWidget(self.auto_update_check)
+        
+        update_interval_layout = QHBoxLayout()
+        update_interval_label = QLabel(lang.get("update_interval_label", "Интервал обновления (часы):"))
+        update_interval_layout.addWidget(update_interval_label)
+        self.update_interval_spin = QSpinBox()
+        self.update_interval_spin.setRange(1, 168)
+        self.update_interval_spin.setValue(self.settings.get('update_interval', 24))
+        self.update_interval_spin.setSuffix(" ч")
+        update_interval_layout.addWidget(self.update_interval_spin)
+        update_interval_layout.addStretch()
+        security_layout.addLayout(update_interval_layout)
+        
+        self.log_level_layout = QHBoxLayout()
+        log_level_label = QLabel(lang.get("log_level_label", "Уровень логирования:"))
+        self.log_level_layout.addWidget(log_level_label)
+        self.log_level_combo = QComboBox()
+        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        log_level = self.settings.get('log_level', 'INFO')
+        log_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+        try:
+            log_idx = log_levels.index(log_level)
+        except ValueError:
+            log_idx = 1
+        self.log_level_combo.setCurrentIndex(log_idx)
+        self.log_level_layout.addWidget(self.log_level_combo)
+        self.log_level_layout.addStretch()
+        security_layout.addLayout(self.log_level_layout)
+        
+        scroll_layout.addWidget(security_group)
+        
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch()
+        
+        self.btn_reset = QPushButton(lang.get("reset_defaults", "Сбросить настройки"))
+        self.btn_reset.setObjectName("secondaryBtn")
+        self.btn_reset.setFixedHeight(45)
+        self.btn_reset.clicked.connect(self.reset_to_defaults)
+        buttons_layout.addWidget(self.btn_reset)
+        
         self.btn_close_settings = QPushButton(lang["close"])
-        self.btn_close_settings.setObjectName("secondaryBtn")
+        self.btn_close_settings.setObjectName("primaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
-        layout.addWidget(self.btn_close_settings)
+        buttons_layout.addWidget(self.btn_close_settings)
+        
+        layout.addLayout(buttons_layout)
+    
+    def on_language_changed(self, new_lang):
+        """Обработчик смены языка в настройках"""
+        if self.parent_ref:
+            self.parent_ref.change_language(new_lang)
+    
+    def reset_to_defaults(self):
+        """Сброс настроек к значениям по умолчанию"""
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        reply = QMessageBox.question(self, lang.get("confirm_reset", "Подтверждение"),
+                                    lang.get("reset_confirm_msg", "Вы уверены, что хотите сбросить все настройки?"),
+                                    QMessageBox.Yes | QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            self.timeout_spin.setValue(60)
+            self.poly_check.setChecked(False)
+            self.network_check.setChecked(True)
+            self.deep_scan_check.setChecked(True)
+            self.ml_analysis_check.setChecked(True)
+            self.multi_thread_check.setChecked(True)
+            self.thread_spin.setValue(4)
+            self.auto_quarantine_check.setChecked(True)
+            self.scan_on_access_check.setChecked(True)
+            self.monitor_downloads_check.setChecked(True)
+            self.monitor_desktop_check.setChecked(True)
+            self.monitor_documents_check.setChecked(True)
+            self.sensitivity_combo.setCurrentIndex(1)
+            self.docker_check.setChecked(True)
+            self.behavioral_check.setChecked(True)
+            self.emu_timeout_spin.setValue(10)
+            self.interface_lang_combo.setCurrentIndex(0)
+            self.notifications_check.setChecked(True)
+            self.sound_check.setChecked(False)
+            self.minimize_tray_check.setChecked(False)
+            self.panic_button_check.setChecked(True)
+            self.auto_update_check.setChecked(True)
+            self.update_interval_spin.setValue(24)
+            self.log_level_combo.setCurrentIndex(1)
+            
+            QMessageBox.information(self, lang.get("information", "Информация"),
+                                   lang.get("reset_success", "Настройки сброшены к значениям по умолчанию"))
     
     def get_settings(self):
         """Получить текущие настройки"""
+        sensitivity_map = {0: 'low', 1: 'medium', 2: 'high'}
         return {
             'theme': 'Dark',  # Теперь только тёмная тема
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
-            'auto_disable_network': self.network_check.isChecked()
+            'auto_disable_network': self.network_check.isChecked(),
+            'deep_scan': self.deep_scan_check.isChecked(),
+            'ml_analysis': self.ml_analysis_check.isChecked(),
+            'multi_thread': self.multi_thread_check.isChecked(),
+            'thread_count': self.thread_spin.value(),
+            'auto_quarantine': self.auto_quarantine_check.isChecked(),
+            'scan_on_access': self.scan_on_access_check.isChecked(),
+            'monitor_downloads': self.monitor_downloads_check.isChecked(),
+            'monitor_desktop': self.monitor_desktop_check.isChecked(),
+            'monitor_documents': self.monitor_documents_check.isChecked(),
+            'sensitivity': sensitivity_map.get(self.sensitivity_combo.currentIndex(), 'medium'),
+            'use_docker': self.docker_check.isChecked(),
+            'behavioral_analysis': self.behavioral_check.isChecked(),
+            'emu_timeout': self.emu_timeout_spin.value(),
+            'language': self.interface_lang_combo.currentText(),
+            'show_notifications': self.notifications_check.isChecked(),
+            'sound_enabled': self.sound_check.isChecked(),
+            'minimize_to_tray': self.minimize_tray_check.isChecked(),
+            'panic_button_enabled': self.panic_button_check.isChecked(),
+            'auto_update_signatures': self.auto_update_check.isChecked(),
+            'update_interval': self.update_interval_spin.value(),
+            'log_level': self.log_level_combo.currentText()
         }
     
     def update_texts(self):
@@ -1961,22 +2220,64 @@ class SettingsDialog(QDialog):
                 widget.setText(lang["application_settings"])
                 break
         
-        # Обновляем GroupBox
+        # Обновляем все GroupBox
         groups = self.findChildren(QGroupBox)
-        for group in groups:
-            if group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
-                group.setTitle(lang["analysis_settings_group"])
+        group_map = {
+            0: lang["analysis_settings_group"],
+            1: lang.get("antivirus_settings_group", "Настройки антивируса"),
+            2: lang.get("sandbox_settings_group", "Настройки песочницы"),
+            3: lang.get("interface_settings_group", "Настройки интерфейса"),
+            4: lang.get("security_settings_group", "Настройки безопасности")
+        }
+        for i, group in enumerate(groups):
+            if i in group_map:
+                group.setTitle(group_map[i])
         
-        # Обновляем label timeout
+        # Обновляем все label, checkbox, button
         for label in self.findChildren(QLabel):
-            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text().startswith("Analysis Time"):
+            text = label.text()
+            if any(kw in text.lower() for kw in ["timeout", "time", "время анализа", "analysis time"]):
                 label.setText(lang["timeout_label"])
+            elif any(kw in text.lower() for kw in ["thread", "поток"]):
+                label.setText(lang.get("thread_count_label", "Количество потоков:"))
+            elif any(kw in text.lower() for kw in ["sensitivity", "чувствительность"]):
+                label.setText(lang.get("sensitivity_label", "Чувствительность:"))
+            elif any(kw in text.lower() for kw in ["emu timeout", "таймаут эмуляции"]):
+                label.setText(lang.get("emu_timeout_label", "Таймаут эмуляции (сек):"))
+            elif any(kw in text.lower() for kw in ["language", "язык интерфейса"]):
+                label.setText(lang.get("interface_language_label", "Язык интерфейса:"))
+            elif any(kw in text.lower() for kw in ["update interval", "интервал обновления"]):
+                label.setText(lang.get("update_interval_label", "Интервал обновления (часы):"))
+            elif any(kw in text.lower() for kw in ["log level", "уровень логирования"]):
+                label.setText(lang.get("log_level_label", "Уровень логирования:"))
         
         # Обновляем чекбоксы
         self.poly_check.setText(lang["poly_check"])
         self.network_check.setText(lang["network_check"])
+        self.deep_scan_check.setText(lang.get("deep_scan_check", "Глубокий анализ файлов"))
+        self.ml_analysis_check.setText(lang.get("ml_analysis_check", "Использовать ML классификатор"))
+        self.multi_thread_check.setText(lang.get("multi_thread_check", "Многопоточное сканирование"))
+        self.auto_quarantine_check.setText(lang.get("auto_quarantine_check", "Автоматический карантин"))
+        self.scan_on_access_check.setText(lang.get("scan_on_access_check", "Сканирование при доступе"))
+        self.monitor_downloads_check.setText(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
+        self.monitor_desktop_check.setText(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
+        self.monitor_documents_check.setText(lang.get("monitor_documents_check", "Мониторить Документы"))
+        self.docker_check.setText(lang.get("docker_check", "Использовать Docker изоляцию"))
+        self.behavioral_check.setText(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
+        self.notifications_check.setText(lang.get("notifications_check", "Показывать уведомления"))
+        self.sound_check.setText(lang.get("sound_check", "Звуковые уведомления"))
+        self.minimize_tray_check.setText(lang.get("minimize_tray_check", "Сворачивать в трей"))
+        self.panic_button_check.setText(lang.get("panic_button_check", "Кнопка экстренной остановки"))
+        self.auto_update_check.setText(lang.get("auto_update_check", "Автообновление сигнатур"))
         
-        # Обновляем кнопку закрытия
+        # Обновляем combobox sensitivity
+        self.sensitivity_combo.clear()
+        self.sensitivity_combo.addItems([lang.get("sensitivity_low", "Низкая"), 
+                                         lang.get("sensitivity_medium", "Средняя"), 
+                                         lang.get("sensitivity_high", "Высокая")])
+        
+        # Обновляем кнопки
+        self.btn_reset.setText(lang.get("reset_defaults", "Сбросить настройки"))
         self.btn_close_settings.setText(lang["close"])
 
 
