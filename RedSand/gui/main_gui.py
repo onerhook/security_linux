@@ -886,6 +886,9 @@ class AntivirusPanel(QWidget):
         layout.setSpacing(20)
         layout.setContentsMargins(30, 30, 30, 30)
         
+        # Получаем текущий язык
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         # Заголовок
         title_label = QLabel("АНТИВИРУС")
         title_label.setObjectName("titleLabel")
