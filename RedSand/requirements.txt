@@ -1,3 +1,0 @@
-pefile
-yara-python
-psutil
