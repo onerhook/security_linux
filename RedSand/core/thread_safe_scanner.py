@@ -1,68 +1,62 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Thread-Safe Virus Scanner - Многопоточный сканер вирусов с кэшированием
-Оптимизирован для высокой производительности при сканировании больших объёмов файлов
-Поддержка многопоточности, кэширования результатов и прогресс-баров
+RedSand Secure - Многопоточный сканер с кэшированием результатов
+Поддерживает параллельное сканирование, прогресс-бары и экспорт результатов
 """
 
 import os
-import hashlib
 import re
-import threading
+import json
+import hashlib
 import time
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Set, Any
+from typing import Dict, List, Tuple, Optional, Any
+from dataclasses import dataclass
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from collections import OrderedDict
-from dataclasses import dataclass
-import json
+from datetime import datetime
+import threading
 
-from core.virus_scanner import VirusScanner
+from .extended_scanner import ExtendedVirusScanner, ScanResult, ThreatLevel
 
 
 @dataclass
-class ScanProgress:
-    """Прогресс сканирования."""
-    total_files: int
-    scanned_files: int
-    malicious_found: int
-    suspicious_found: int
-    clean_files: int
-    current_file: str
-    elapsed_time: float
-    files_per_second: float
+class CacheEntry:
+    result: ScanResult
+    timestamp: float
+    access_count: int
 
 
 class LRUCache:
-    """LRU кэш для хранения результатов сканирования."""
+    """LRU кэш для результатов сканирования"""
     
     def __init__(self, max_size: int = 10000):
         self.max_size = max_size
-        self.cache: OrderedDict[str, Dict] = OrderedDict()
+        self.cache: OrderedDict[str, CacheEntry] = OrderedDict()
         self.lock = threading.Lock()
         self.hits = 0
         self.misses = 0
     
-    def get(self, key: str) -> Optional[Dict]:
+    def get(self, key: str) -> Optional[ScanResult]:
         with self.lock:
             if key in self.cache:
+                entry = self.cache[key]
                 # Перемещаем в конец (recently used)
                 self.cache.move_to_end(key)
+                entry.access_count += 1
                 self.hits += 1
-                return self.cache[key]
+                return entry.result
             self.misses += 1
             return None
     
-    def put(self, key: str, value: Dict):
+    def put(self, key: str, result: ScanResult):
         with self.lock:
             if key in self.cache:
                 self.cache.move_to_end(key)
+                self.cache[key] = CacheEntry(result, time.time(), 1)
             else:
                 if len(self.cache) >= self.max_size:
                     # Удаляем oldest entry
                     self.cache.popitem(last=False)
-            self.cache[key] = value
+                self.cache[key] = CacheEntry(result, time.time(), 1)
     
     def clear(self):
         with self.lock:
@@ -70,314 +64,269 @@ class LRUCache:
             self.hits = 0
             self.misses = 0
     
-    def get_stats(self) -> Dict[str, Any]:
-        with self.lock:
-            total = self.hits + self.misses
-            hit_rate = (self.hits / total * 100) if total > 0 else 0
-            return {
-                'size': len(self.cache),
-                'max_size': self.max_size,
-                'hits': self.hits,
-                'misses': self.misses,
-                'hit_rate': f"{hit_rate:.2f}%"
-            }
+    def get_stats(self) -> Dict:
+        total = self.hits + self.misses
+        return {
+            'size': len(self.cache),
+            'max_size': self.max_size,
+            'hits': self.hits,
+            'misses': self.misses,
+            'hit_rate': self.hits / total if total > 0 else 0
+        }
 
 
-class ThreadSafeVirusScanner(VirusScanner):
+@dataclass
+class ScanProgress:
+    current_file: str
+    completed: int
+    total: int
+    progress_percent: float
+    elapsed_time: float
+    estimated_remaining: float
+    results_summary: Dict
+
+
+class ThreadSafeVirusScanner:
     """
-    Многопоточный сканер вирусов с кэшированием.
-    Наследуется от базового VirusScanner, добавляя многопоточность и кэш.
+    Многопоточный сканер вирусов с кэшированием
     """
     
-    def __init__(self, max_workers: int = 4, cache_size: int = 10000):
-        super().__init__()
+    def __init__(self, max_workers: Optional[int] = None, cache_size: int = 10000):
+        self.scanner = ExtendedVirusScanner()
         self.max_workers = max_workers or os.cpu_count() or 4
         self.cache = LRUCache(cache_size)
-        self.scan_lock = threading.Lock()
-        self.progress_callback = None
-        self.stop_flag = False
+        self.executor = ThreadPoolExecutor(max_workers=self.max_workers)
+        self.lock = threading.Lock()
+        self.scan_history: List[Dict] = []
+        
+        # Статистика
+        self.total_files_scanned = 0
+        self.threats_detected = 0
+        self.clean_files = 0
     
-    def set_progress_callback(self, callback):
-        """Установка callback функции для обновления прогресса."""
-        self.progress_callback = callback
-    
-    def stop_scan(self):
-        """Остановка текущего сканирования."""
-        self.stop_flag = True
-    
-    def reset_stop_flag(self):
-        """Сброс флага остановки."""
-        self.stop_flag = False
-    
-    def _calculate_hash_fast(self, file_path: str) -> str:
-        """Быстрое вычисление хеша с использованием буфера большего размера."""
-        sha256_hash = hashlib.sha256()
+    def _get_file_hash(self, file_path: str) -> str:
+        """Быстрый хеш для кэширования"""
         try:
-            with open(file_path, "rb") as f:
-                # Читаем большими блоками для скорости
-                for byte_block in iter(lambda: f.read(65536), b""):
-                    sha256_hash.update(byte_block)
-            return sha256_hash.hexdigest()
+            stat = os.stat(file_path)
+            content_hash = hashlib.md5()
+            with open(file_path, 'rb') as f:
+                # Хэшируем только первые и последние 8KB для скорости
+                content_hash.update(f.read(8192))
+                f.seek(-min(8192, stat.st_size), 2)
+                content_hash.update(f.read())
+            return f"{stat.st_mtime}_{stat.st_size}_{content_hash.hexdigest()}"
         except Exception:
-            return 'N/A'
+            return "unknown"
     
-    def scan_file_cached(self, file_path: str) -> Dict:
-        """
-        Сканирование файла с использованием кэша.
-        Если файл уже сканировался, возвращает кэшированный результат.
-        """
-        # Вычисляем хеш для ключа кэша
-        file_hash = self._calculate_hash_fast(file_path)
-        cache_key = f"{file_path}:{file_hash}"
+    def scan_file(self, file_path: str, use_cache: bool = True) -> ScanResult:
+        """Сканирование одного файла с кэшированием"""
+        if use_cache:
+            cache_key = self._get_file_hash(file_path)
+            cached_result = self.cache.get(cache_key)
+            if cached_result:
+                return cached_result
         
-        # Проверяем кэш
-        cached_result = self.cache.get(cache_key)
-        if cached_result:
-            return cached_result
-        
-        # Сканируем файл
-        result = self.scan_file(file_path)
+        # Полное сканирование
+        result = self.scanner.scan_file(file_path)
         
         # Сохраняем в кэш
-        self.cache.put(cache_key, result)
+        if use_cache:
+            self.cache.put(cache_key, result)
+        
+        # Обновляем статистику
+        with self.lock:
+            self.total_files_scanned += 1
+            if result.threat_level == ThreatLevel.CLEAN:
+                self.clean_files += 1
+            else:
+                self.threats_detected += 1
         
         return result
     
-    def scan_directory(self, directory: str, recursive: bool = True,
-                      extensions: Optional[List[str]] = None,
-                      exclude_dirs: Optional[List[str]] = None) -> List[Dict]:
-        """
-        Сканирование директории с использованием многопоточности.
-        
-        Args:
-            directory: Путь к директории
-            recursive: Рекурсивное сканирование
-            extensions: Список расширений для сканирования (None = все)
-            exclude_dirs: Список директорий для исключения
-        
-        Returns:
-            Список результатов сканирования
-        """
-        self.reset_stop_flag()
-        
-        # Сбор списка файлов
-        files_to_scan = self._collect_files(
-            directory, recursive, extensions, exclude_dirs
-        )
-        
-        if not files_to_scan:
+    def scan_files_parallel(self, file_paths: List[str], 
+                           progress_callback: Optional[callable] = None) -> List[ScanResult]:
+        """Параллельное сканирование множества файлов"""
+        if not file_paths:
             return []
         
         results = []
         start_time = time.time()
-        malicious_count = 0
-        suspicious_count = 0
-        clean_count = 0
+        completed = 0
+        total = len(file_paths)
         
-        # Многопоточное сканирование
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            future_to_file = {
-                executor.submit(self.scan_file_cached, f): f
-                for f in files_to_scan
-            }
+        def scan_with_progress(file_path):
+            nonlocal completed
+            result = self.scan_file(file_path)
+            with self.lock:
+                completed += 1
+                current_time = time.time()
+                elapsed = current_time - start_time
+                avg_time = elapsed / completed if completed > 0 else 0
+                remaining = (total - completed) * avg_time
+                
+                progress = ScanProgress(
+                    current_file=file_path,
+                    completed=completed,
+                    total=total,
+                    progress_percent=(completed / total) * 100,
+                    elapsed_time=elapsed,
+                    estimated_remaining=remaining,
+                    results_summary={
+                        'clean': sum(1 for r in results if r.threat_level == ThreatLevel.CLEAN),
+                        'suspicious': sum(1 for r in results if r.threat_level == ThreatLevel.SUSPICIOUS),
+                        'malicious': sum(1 for r in results if r.threat_level == ThreatLevel.MALICIOUS)
+                    }
+                )
+                
+                if progress_callback:
+                    progress_callback(progress)
             
-            completed = 0
-            total = len(future_to_file)
-            
-            for future in as_completed(future_to_file):
-                if self.stop_flag:
-                    # Отменяем оставшиеся задачи
-                    for f in future_to_file:
-                        f.cancel()
-                    break
-                
-                file_path = future_to_file[future]
-                
-                try:
-                    result = future.result()
-                    results.append(result)
-                    
-                    # Статистика
-                    if result.get('threat_level') == 'MALICIOUS':
-                        malicious_count += 1
-                    elif result.get('threat_level') == 'SUSPICIOUS':
-                        suspicious_count += 1
-                    else:
-                        clean_count += 1
-                    
-                    completed += 1
-                    elapsed = time.time() - start_time
-                    
-                    # Callback прогресса
-                    if self.progress_callback:
-                        progress = ScanProgress(
-                            total_files=total,
-                            scanned_files=completed,
-                            malicious_found=malicious_count,
-                            suspicious_found=suspicious_count,
-                            clean_files=clean_count,
-                            current_file=os.path.basename(file_path),
-                            elapsed_time=elapsed,
-                            files_per_second=completed / elapsed if elapsed > 0 else 0
-                        )
-                        self.progress_callback(progress)
-                
-                except Exception as e:
-                    results.append({
-                        'file_path': file_path,
-                        'error': str(e),
-                        'threat_level': 'ERROR'
-                    })
+            return result
+        
+        # Запуск в пуле потоков
+        futures = {self.executor.submit(scan_with_progress, fp): fp for fp in file_paths}
+        
+        for future in as_completed(futures):
+            try:
+                result = future.result()
+                results.append(result)
+            except Exception as e:
+                file_path = futures[future]
+                results.append(ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.SUSPICIOUS,
+                    score=50,
+                    threats_found=[f"ERROR: {str(e)}"],
+                    threat_types=['ERROR'],
+                    sha256="error",
+                    details={'error': str(e)}
+                ))
         
         return results
     
-    def _collect_files(self, directory: str, recursive: bool,
-                      extensions: Optional[List[str]],
-                      exclude_dirs: Optional[List[str]]) -> List[str]:
-        """Сбор списка файлов для сканирования."""
-        files = []
-        exclude_dirs = exclude_dirs or [
-            '__pycache__', '.git', 'node_modules', 
-            'venv', '.venv', 'env', '.env'
-        ]
-        
-        directory = Path(directory)
-        
-        if not directory.exists():
-            return files
+    def scan_directory(self, directory: str, 
+                      recursive: bool = True,
+                      extensions: Optional[List[str]] = None,
+                      progress_callback: Optional[callable] = None) -> List[ScanResult]:
+        """Сканирование директории"""
+        file_paths = []
         
         if recursive:
-            iterator = directory.rglob('*')
+            for root, dirs, files in os.walk(directory):
+                # Пропускаем системные директории
+                dirs[:] = [d for d in dirs if d not in ['.git', '__pycache__', 'node_modules']]
+                for file in files:
+                    file_path = os.path.join(root, file)
+                    if extensions is None or any(file.endswith(ext) for ext in extensions):
+                        file_paths.append(file_path)
         else:
-            iterator = directory.glob('*')
+            for file in os.listdir(directory):
+                file_path = os.path.join(directory, file)
+                if os.path.isfile(file_path):
+                    if extensions is None or any(file.endswith(ext) for ext in extensions):
+                        file_paths.append(file_path)
         
-        for path in iterator:
-            if path.is_file():
-                # Проверка расширений
-                if extensions:
-                    ext = path.suffix.lower()
-                    if ext not in [e.lower() if e.startswith('.') else f'.{e.lower()}' 
-                                   for e in extensions]:
-                        continue
-                
-                # Проверка исключённых директорий
-                path_parts = path.parts
-                if any(excl in path_parts for excl in exclude_dirs):
-                    continue
-                
-                files.append(str(path))
-        
-        return files
+        return self.scan_files_parallel(file_paths, progress_callback)
     
-    def scan_files_batch(self, file_list: List[str]) -> List[Dict]:
-        """
-        Пакетное сканирование списка файлов.
-        Оптимизировано для обработки большого количества файлов.
-        """
-        self.reset_stop_flag()
+    def quick_scan(self, critical_paths: Optional[List[str]] = None) -> Dict:
+        """Быстрое сканирование критических мест системы"""
+        if critical_paths is None:
+            critical_paths = [
+                os.path.expanduser("~/Downloads"),
+                os.path.expanduser("~/Desktop"),
+                "/tmp",
+                "/var/tmp"
+            ]
         
-        if not file_list:
-            return []
-        
-        results = []
         start_time = time.time()
+        all_results = []
         
-        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
-            future_to_file = {
-                executor.submit(self.scan_file_cached, f): f
-                for f in file_list
-            }
-            
-            for future in as_completed(future_to_file):
-                if self.stop_flag:
-                    for f in future_to_file:
-                        f.cancel()
-                    break
-                
-                file_path = future_to_file[future]
-                
-                try:
-                    result = future.result()
-                    results.append(result)
-                except Exception as e:
-                    results.append({
-                        'file_path': file_path,
-                        'error': str(e),
-                        'threat_level': 'ERROR'
-                    })
-        
-        return results
-    
-    def quick_scan(self, paths: List[str]) -> Dict[str, Any]:
-        """
-        Быстрое сканирование критических мест системы.
-        Возвращает сводную статистику.
-        """
-        self.reset_stop_flag()
-        
-        critical_paths = paths or [
-            os.path.expanduser('~\\Downloads'),
-            os.path.expanduser('~\\Desktop'),
-            os.path.expanduser('~\\Documents'),
-        ]
-        
-        all_files = []
         for path in critical_paths:
             if os.path.exists(path):
-                all_files.extend(self._collect_files(path, recursive=True))
-        
-        start_time = time.time()
-        results = self.scan_files_batch(all_files[:1000])  # Ограничение на 1000 файлов
+                results = self.scan_directory(path, recursive=False, progress_callback=None)
+                all_results.extend(results)
         
         elapsed = time.time() - start_time
         
-        # Статистика
-        stats = {
-            'total_scanned': len(results),
-            'malicious': sum(1 for r in results if r.get('threat_level') == 'MALICIOUS'),
-            'suspicious': sum(1 for r in results if r.get('threat_level') == 'SUSPICIOUS'),
-            'clean': sum(1 for r in results if r.get('threat_level') == 'CLEAN'),
-            'errors': sum(1 for r in results if r.get('threat_level') == 'ERROR'),
-            'elapsed_time': elapsed,
-            'files_per_second': len(results) / elapsed if elapsed > 0 else 0,
-            'cache_stats': self.cache.get_stats()
+        return {
+            'scan_type': 'quick_scan',
+            'timestamp': datetime.now().isoformat(),
+            'elapsed_seconds': elapsed,
+            'files_scanned': len(all_results),
+            'threats_found': sum(1 for r in all_results if r.threat_level != ThreatLevel.CLEAN),
+            'clean_files': sum(1 for r in all_results if r.threat_level == ThreatLevel.CLEAN),
+            'suspicious_files': sum(1 for r in all_results if r.threat_level == ThreatLevel.SUSPICIOUS),
+            'malicious_files': sum(1 for r in all_results if r.threat_level == ThreatLevel.MALICIOUS),
+            'cache_stats': self.cache.get_stats(),
+            'results': [
+                {
+                    'file': r.file_path,
+                    'level': r.threat_level.value,
+                    'score': r.score,
+                    'threats': r.threat_types
+                }
+                for r in all_results[:100]  # Ограничиваем вывод
+            ]
         }
-        
-        return stats
     
-    def get_cache_stats(self) -> Dict[str, Any]:
-        """Получение статистики кэша."""
-        return self.cache.get_stats()
-    
-    def clear_cache(self):
-        """Очистка кэша."""
-        self.cache.clear()
-    
-    def export_results(self, results: List[Dict], output_file: str, 
-                      format: str = 'json'):
-        """Экспорт результатов сканирования в файл."""
+    def export_results(self, results: List[ScanResult], output_path: str, format: str = 'json'):
+        """Экспорт результатов сканирования"""
         if format == 'json':
-            with open(output_file, 'w', encoding='utf-8') as f:
-                json.dump(results, f, indent=2, ensure_ascii=False)
+            data = {
+                'scan_timestamp': datetime.now().isoformat(),
+                'total_files': len(results),
+                'summary': {
+                    'clean': sum(1 for r in results if r.threat_level == ThreatLevel.CLEAN),
+                    'suspicious': sum(1 for r in results if r.threat_level == ThreatLevel.SUSPICIOUS),
+                    'malicious': sum(1 for r in results if r.threat_level == ThreatLevel.MALICIOUS)
+                },
+                'results': [
+                    {
+                        'file_path': r.file_path,
+                        'threat_level': r.threat_level.value,
+                        'score': r.score,
+                        'sha256': r.sha256,
+                        'threats_found': r.threats_found,
+                        'threat_types': r.threat_types,
+                        'details': r.details
+                    }
+                    for r in results
+                ]
+            }
+            with open(output_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, indent=2, ensure_ascii=False)
+        
         elif format == 'csv':
             import csv
-            if results:
-                keys = results[0].keys()
-                with open(output_file, 'w', newline='', encoding='utf-8') as f:
-                    dict_writer = csv.DictWriter(f, fieldnames=keys)
-                    dict_writer.writeheader()
-                    dict_writer.writerows(results)
-        
-        print(f"[+] Результаты экспортированы в {output_file}")
-
-
-# Для совместимости
-if __name__ == "__main__":
-    # Пример использования
-    scanner = ThreadSafeVirusScanner(max_workers=4)
+            with open(output_path, 'w', newline='', encoding='utf-8') as f:
+                writer = csv.writer(f)
+                writer.writerow(['File Path', 'Threat Level', 'Score', 'SHA256', 'Threat Types', 'Details'])
+                for r in results:
+                    writer.writerow([
+                        r.file_path,
+                        r.threat_level.value,
+                        r.score,
+                        r.sha256,
+                        '|'.join(r.threat_types),
+                        json.dumps(r.details)
+                    ])
     
-    # Быстрое сканирование
-    stats = scanner.quick_scan([])
-    print(f"Отсканировано: {stats['total_scanned']}")
-    print(f"Найдено угроз: {stats['malicious']}")
-    print(f"Статистика кэша: {stats['cache_stats']}")
+    def get_statistics(self) -> Dict:
+        """Получение статистики сканера"""
+        return {
+            'total_files_scanned': self.total_files_scanned,
+            'threats_detected': self.threats_detected,
+            'clean_files': self.clean_files,
+            'cache_stats': self.cache.get_stats(),
+            'scanner_stats': self.scanner.get_statistics(),
+            'max_workers': self.max_workers,
+            'scan_history_count': len(self.scan_history)
+        }
+    
+    def clear_cache(self):
+        """Очистка кэша"""
+        self.cache.clear()
+    
+    def shutdown(self):
+        """Корректное завершение работы"""
+        self.executor.shutdown(wait=True)
