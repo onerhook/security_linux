@@ -32,8 +32,9 @@ from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
 from core.virus_scanner import VirusScanner
 
 
+# Только тёмная тема оформления
 THEMES = {
-    "Тёмная": {
+    "Dark": {
         "bg_primary": "#1a1a2e",
         "bg_secondary": "#16213e",
         "bg_tertiary": "#0f3460",
@@ -46,27 +47,13 @@ THEMES = {
         "danger": "#ff4444",
         "border": "#2a2a4e",
         "card_bg": "#1f1f3a"
-    },
-    "Светлая": {
-        "bg_primary": "#f8fafc",
-        "bg_secondary": "#ffffff",
-        "bg_tertiary": "#e2e8f0",
-        "accent": "#dc2626",
-        "accent_hover": "#b91c1c",
-        "text_primary": "#0f172a",
-        "text_secondary": "#475569",
-        "success": "#16a34a",
-        "warning": "#ea580c",
-        "danger": "#dc2626",
-        "border": "#64748b",
-        "card_bg": "#ffffff"
     }
 }
 
 
-def generate_stylesheet(theme_name: str = "Тёмная") -> str:
+def generate_stylesheet(theme_name: str = "Dark") -> str:
     """Генерация CSS стилей для приложения"""
-    theme = THEMES.get(theme_name, THEMES["Тёмная"])
+    theme = THEMES.get(theme_name, THEMES["Dark"])
     
     return f"""
     QMainWindow {{
@@ -395,8 +382,6 @@ LANGUAGES = {
         "cancel": "Отмена",
         "back": "← Назад",
         "theme": "Тема оформления",
-        "dark_theme": "Тёмная",
-        "light_theme": "Светлая",
         "analysis_time": "Время анализа:",
         "poly_check": "Создавать варианты файла для анализа",
         "network_check": "Отключать сеть (рекомендуется)",
@@ -484,9 +469,6 @@ LANGUAGES = {
         "scan_time": "Время сканирования",
         "clear_history_confirm_en": "Вы уверены, что хотите очистить всю историю сканирований?",
         "settings_saved": "Настройки сохранены",
-        "theme_label": "Тема оформления",
-        "dark_theme_btn": "🌙 Тёмная",
-        "light_theme_btn": "☀️ Светлая",
         "rec_malicious": "НЕ ИСПОЛЬЗОВАТЬ! Файл содержит вредоносный код.",
         "rec_suspicious": "Будьте осторожны. Файл содержит подозрительные элементы.",
         "rec_clean": "Файл безопасен. Вы можете его использовать.",
@@ -537,8 +519,6 @@ LANGUAGES = {
         "cancel": "Cancel",
         "back": "← Back",
         "theme": "Theme",
-        "dark_theme": "Dark",
-        "light_theme": "Light",
         "analysis_time": "Analysis Time:",
         "poly_check": "Create file variants for analysis",
         "network_check": "Disable network (recommended)",
@@ -626,9 +606,6 @@ LANGUAGES = {
         "scan_time": "Scan Time",
         "clear_history_confirm_en": "Are you sure you want to clear all scan history?",
         "settings_saved": "Settings saved",
-        "theme_label": "Theme",
-        "dark_theme_btn": "🌙 Dark",
-        "light_theme_btn": "☀️ Light",
         "rec_malicious": "DO NOT USE! File contains malicious code.",
         "rec_suspicious": "Be careful. File contains suspicious elements.",
         "rec_clean": "File is safe. You can use it.",
@@ -1913,27 +1890,7 @@ class SettingsDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox(lang["theme_group"])
-        theme_layout = QHBoxLayout(theme_group)
-        
-        self.btn_dark = QPushButton(lang["dark_theme"])
-        self.btn_dark.setObjectName("secondaryBtn")
-        self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(self.settings.get('theme', 'Dark') == 'Dark')
-        self.btn_dark.clicked.connect(lambda: self.apply_theme('Dark'))
-        theme_layout.addWidget(self.btn_dark)
-        
-        self.btn_light = QPushButton(lang["light_theme"])
-        self.btn_light.setObjectName("secondaryBtn")
-        self.btn_light.setCheckable(True)
-        self.btn_light.setChecked(self.settings.get('theme', 'Dark') == 'Light')
-        self.btn_light.clicked.connect(lambda: self.apply_theme('Light'))
-        theme_layout.addWidget(self.btn_light)
-        
-        layout.addWidget(theme_group)
-        
-        # Настройки анализа
+        # Настройки анализа (тема оформления теперь только тёмная)
         analysis_group = QGroupBox(lang["analysis_settings_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
@@ -1964,21 +1921,10 @@ class SettingsDialog(QDialog):
         self.btn_close_settings.clicked.connect(self.accept)
         layout.addWidget(self.btn_close_settings)
     
-    def apply_theme(self, theme_name: str):
-        """Применить тему немедленно"""
-        if self.parent_ref:
-            self.parent_ref.settings['theme'] = theme_name
-            self.parent_ref.apply_stylesheet()
-            self.parent_ref.save_settings()
-            
-            # Обновляем состояние кнопок
-            self.btn_dark.setChecked(theme_name == 'Тёмная')
-            self.btn_light.setChecked(theme_name == 'Светлая')
-    
     def get_settings(self):
         """Получить текущие настройки"""
         return {
-            'theme': self.parent_ref.settings.get('theme', 'Тёмная'),
+            'theme': 'Dark',  # Теперь только тёмная тема
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked()
@@ -2001,14 +1947,8 @@ class SettingsDialog(QDialog):
         # Обновляем GroupBox
         groups = self.findChildren(QGroupBox)
         for group in groups:
-            if group.title() == "Theme" or group.title() == "Тема" or group.title() == lang["theme_group"]:
-                group.setTitle(lang["theme_group"])
-            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
+            if group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
                 group.setTitle(lang["analysis_settings_group"])
-        
-        # Обновляем кнопки тем
-        self.btn_dark.setText(lang["dark_theme"])
-        self.btn_light.setText(lang["light_theme"])
         
         # Обновляем label timeout
         for label in self.findChildren(QLabel):
