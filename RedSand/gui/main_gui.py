@@ -432,7 +432,6 @@ LANGUAGES = {
         "back": "← Назад",
         "theme": "Тема оформления",
         "analysis_time": "Время анализа:",
-        "poly_check": "Создавать варианты файла для анализа",
         "network_check": "Отключать сеть (рекомендуется)",
         "monitored_folders": "Мониторинг папок:",
         "auto_quarantine": "Авто-карантин угроз",
@@ -584,7 +583,6 @@ LANGUAGES = {
         "back": "← Back",
         "theme": "Theme",
         "analysis_time": "Analysis Time:",
-        "poly_check": "Create file variants for analysis",
         "network_check": "Disable network (recommended)",
         "monitored_folders": "Monitored Folders:",
         "auto_quarantine": "Auto-quarantine threats",
@@ -1242,10 +1240,6 @@ class AnalysisPanel(QWidget):
         timeout_layout.addStretch()
         settings_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(lang["poly_check"])
-        self.poly_check.setToolTip("Helps detect complex viruses")
-        settings_layout.addWidget(self.poly_check)
-        
         self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(True)
         self.network_check.setToolTip("Protects your network during analysis")
@@ -1619,7 +1613,6 @@ class AnalysisPanel(QWidget):
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
-        self.poly_check.setText(lang["poly_check"])
         self.network_check.setText(lang["network_check"])
         
         # Обновляем docker info
@@ -2138,11 +2131,6 @@ class SettingsDialog(QDialog):
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
-        self.poly_check = QCheckBox(lang["poly_check"])
-        self.poly_check.setChecked(self.settings.get('use_poly_default', False))
-        self.poly_check.setToolTip(lang.get("poly_check_tooltip", "Использовать полиморфный движок по умолчанию"))
-        analysis_layout.addWidget(self.poly_check)
-        
         self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
         self.network_check.setToolTip(lang.get("network_check_tooltip", "Автоматически отключать сеть при анализе"))
@@ -2364,7 +2352,6 @@ class SettingsDialog(QDialog):
         
         if reply == QMessageBox.Yes:
             self.timeout_spin.setValue(60)
-            self.poly_check.setChecked(False)
             self.network_check.setChecked(True)
             self.deep_scan_check.setChecked(True)
             self.ml_analysis_check.setChecked(True)
@@ -2397,7 +2384,6 @@ class SettingsDialog(QDialog):
         return {
             'theme': 'Dark',  # Теперь только тёмная тема
             'timeout': self.timeout_spin.value(),
-            'use_poly_default': self.poly_check.isChecked(),
             'auto_disable_network': self.network_check.isChecked(),
             'deep_scan': self.deep_scan_check.isChecked(),
             'ml_analysis': self.ml_analysis_check.isChecked(),
@@ -2468,7 +2454,6 @@ class SettingsDialog(QDialog):
                 label.setText(lang.get("log_level_label", "Уровень логирования:"))
         
         # Обновляем чекбоксы
-        self.poly_check.setText(lang["poly_check"])
         self.network_check.setText(lang["network_check"])
         self.deep_scan_check.setText(lang.get("deep_scan_check", "Глубокий анализ файлов"))
         self.ml_analysis_check.setText(lang.get("ml_analysis_check", "Использовать ML классификатор"))
