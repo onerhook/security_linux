@@ -36,7 +36,7 @@ from core.extended_scanner import ExtendedVirusScanner
 class AnalysisWorker(QThread):
     """Рабочий поток для анализа файлов без блокировки GUI"""
     progress = pyqtSignal(int, str)  # прогресс, текст
-    result_ready = pyqtSignal(dict)  # результаты анализа
+    result_ready = pyqtSignal(dict)  # результаты анализа как словарь
     error_occurred = pyqtSignal(str)  # ошибка
     
     def __init__(self, file_path: str, use_poly: bool = False, timeout: int = 60):
@@ -63,7 +63,19 @@ class AnalysisWorker(QThread):
             # Прогресс 100% - завершено
             self.progress.emit(100, "Analysis complete!")
             
-            self.result_ready.emit(scan_result)
+            # Конвертируем ScanResult в словарь для передачи через сигнал
+            result_dict = {
+                'file_path': scan_result.file_path,
+                'threat_level': scan_result.threat_level.value if hasattr(scan_result.threat_level, 'value') else str(scan_result.threat_level),
+                'risk_score': scan_result.score,
+                'detected_threats': scan_result.threats_found,
+                'threat_types': scan_result.threat_types,
+                'sha256': scan_result.sha256,
+                'matched_signatures': scan_result.details.get('matched_signatures', []),
+                'matched_patterns': scan_result.details.get('matched_patterns', []),
+                'details': scan_result.details
+            }
+            self.result_ready.emit(result_dict)
             
         except Exception as e:
             self.error_occurred.emit(str(e))
@@ -830,7 +842,7 @@ class MainModeSelector(QWidget):
 
 
 class AntivirusPanel(QWidget):
-    """Панель управления антивирусом"""
+    """Панель управления антивирусом с мониторингом новых файлов"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -838,6 +850,7 @@ class AntivirusPanel(QWidget):
         self.av_active = False
         self.av_monitor = None
         self.setup_ui()
+        self.file_watcher = None  # QFileSystemWatcher для отслеживания новых файлов
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -936,7 +949,7 @@ class AntivirusPanel(QWidget):
         layout.addWidget(btn_back)
     
     def toggle_antivirus(self):
-        """Включение/выключение антивируса"""
+        """Включение/выключение антивируса с мониторингом новых файлов"""
         if not self.parent_ref:
             return
             
@@ -948,6 +961,10 @@ class AntivirusPanel(QWidget):
             try:
                 if self.av_monitor:
                     self.av_monitor.stop()
+                # Останавливаем QFileSystemWatcher
+                if self.file_watcher:
+                    self.file_watcher.deleteLater()
+                    self.file_watcher = None
                 self.av_active = False
                 self.btn_toggle_av.setChecked(False)
                 self.btn_toggle_av.setText("▶️ ВКЛ")
@@ -982,6 +999,12 @@ class AntivirusPanel(QWidget):
                 self.av_monitor.enable()
                 self.av_monitor.start_background()
                 
+                # Инициализируем QFileSystemWatcher для отслеживания новых файлов
+                from PyQt5.QtCore import QFileSystemWatcher
+                self.file_watcher = QFileSystemWatcher()
+                self.file_watcher.addPaths(monitor_paths)
+                self.file_watcher.directoryChanged.connect(self.on_directory_changed)
+                
                 self.av_active = True
                 self.btn_toggle_av.setText(lang["av_on"])
                 self.av_status_label.setText(lang["av_status_on"])
@@ -995,6 +1018,55 @@ class AntivirusPanel(QWidget):
                 self.log_event(f"{lang.get('av_start_error', 'Failed to start antivirus:')} {e}")
                 QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\\n{str(e)}")
                 self.btn_toggle_av.setChecked(False)
+    
+    def on_directory_changed(self, directory_path):
+        """Обработка изменений в директории - обнаружение новых файлов"""
+        try:
+            # Небольшая задержка чтобы файл полностью записался
+            import time
+            time.sleep(0.3)
+            
+            # Проверяем файлы в директории
+            if os.path.exists(directory_path):
+                files = os.listdir(directory_path)
+                for filename in files:
+                    file_path = os.path.join(directory_path, filename)
+                    # Проверяем только новые файлы (созданные в последнюю минуту)
+                    try:
+                        mtime = os.path.getmtime(file_path)
+                        import datetime
+                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту
+                            # Проверяем расширение
+                            ext = os.path.splitext(filename)[1].lower()
+                            monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com']
+                            if ext in monitored_exts and not filename.startswith('~$'):
+                                self.log_event(f"[!] Обнаружен новый файл: {filename}")
+                                # Запускаем сканирование в отдельном потоке
+                                worker = AnalysisWorker(file_path)
+                                worker.result_ready.connect(self.on_new_file_scanned)
+                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Ошибка сканирования {filename}: {err}"))
+                                worker.start()
+                    except (OSError, IOError):
+                        pass  # Файл может быть еще не готов
+                        
+            # Перезапускаем watcher если директория изменилась
+            if self.file_watcher and directory_path not in self.file_watcher.directories():
+                self.file_watcher.addPath(directory_path)
+        except Exception as e:
+            self.log_event(f"Ошибка обработки изменений: {e}")
+    
+    def on_new_file_scanned(self, scan_result: dict):
+        """Обработка результатов сканирования нового файла"""
+        threat_level = scan_result.get('threat_level', 'CLEAN')
+        file_path = scan_result.get('file_path', 'Unknown')
+        file_name = os.path.basename(file_path)
+        
+        if threat_level == 'MALICIOUS':
+            self.log_event(f"🚨 УГРОЗА! Файл {file_name} помещен в карантин")
+        elif threat_level == 'SUSPICIOUS':
+            self.log_event(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ файл: {file_name}")
+        else:
+            self.log_event(f"✅ Безопасный файл: {file_name}")
     
     def log_event(self, message: str):
         """Запись события в лог"""

@@ -301,21 +301,26 @@ class RealTimeAntivirus:
         return [f for f in default_folders if os.path.exists(f)]
     
     def scan_file(self, file_path: str) -> ScanResult:
-        """Сканирование одного файла"""
+        """Сканирование одного файла через ExtendedVirusScanner"""
         self.logger.info(f"Сканирование файла: {file_path}")
         
         start_time = time.time()
         
-        # Сканируем через VirusScanner
-        scan_result = self.virus_scanner.scan_file(file_path)
+        # Используем ExtendedVirusScanner для более точного анализа
+        from core.extended_scanner import ExtendedVirusScanner
+        scanner = ExtendedVirusScanner()
+        scan_result = scanner.scan_file(file_path)
         
         # Определяем действие
         action_taken = "NONE"
         message = "Файл безопасен"
         
-        if scan_result['threat_level'] == 'MALICIOUS':
+        threat_level_str = scan_result.threat_level.value if hasattr(scan_result.threat_level, 'value') else str(scan_result.threat_level)
+        is_malicious = threat_level_str == 'MALICIOUS'
+        
+        if is_malicious:
             if self.auto_quarantine:
-                if self.quarantine_manager.move_to_quarantine(file_path, scan_result['threat_level']):
+                if self.quarantine_manager.move_to_quarantine(file_path, threat_level_str):
                     action_taken = "QUARANTINE"
                     message = "Файл перемещен в карантин"
                 else:
@@ -325,7 +330,7 @@ class RealTimeAntivirus:
                 action_taken = "ALERT"
                 message = "Обнаружена угроза! Требуется ручное вмешательство"
         
-        elif scan_result['threat_level'] == 'SUSPICIOUS':
+        elif threat_level_str == 'SUSPICIOUS':
             action_taken = "ALERT"
             message = "Подозрительный файл. Рекомендуется проверка."
         
@@ -333,13 +338,13 @@ class RealTimeAntivirus:
         result = ScanResult(
             file_path=file_path,
             file_name=os.path.basename(file_path),
-            file_size=scan_result.get('file_size', 0),
-            file_hash=scan_result.get('file_hash', ''),
+            file_size=scan_result.score,  # используем score как размер для совместимости
+            file_hash=scan_result.sha256,
             scan_time=datetime.now().isoformat(),
-            threat_level=scan_result['threat_level'],
-            risk_score=scan_result.get('risk_score', 0),
-            is_malicious=scan_result.get('is_malicious', False),
-            detected_threats=scan_result.get('detected_threats', []),
+            threat_level=threat_level_str,
+            risk_score=scan_result.score,
+            is_malicious=is_malicious,
+            detected_threats=scan_result.threats_found,
             action_taken=action_taken,
             message=message
         )
@@ -348,7 +353,7 @@ class RealTimeAntivirus:
         self.scan_results.append(result)
         
         # Генерируем отчет для угроз
-        if result.is_malicious or result.threat_level == 'SUSPICIOUS':
+        if is_malicious or threat_level_str == 'SUSPICIOUS':
             self._generate_scan_report(result)
         
         # Уведомляем callback
@@ -356,7 +361,7 @@ class RealTimeAntivirus:
             self.notification_callback(result)
         
         elapsed = time.time() - start_time
-        self.logger.info(f"Сканирование завершено за {elapsed:.2f}с: {result.threat_level}")
+        self.logger.info(f"Сканирование завершено за {elapsed:.2f}с: {threat_level_str}")
         
         return result
     
