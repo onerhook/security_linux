@@ -789,17 +789,17 @@ class MainModeSelector(QWidget):
         modes_layout.setSpacing(40)
         modes_layout.setAlignment(Qt.AlignCenter)
         
-        # Кнопка Антивирус - убрано "Реального времени"
-        self.btn_antivirus = QPushButton("\nАНТИВИРУС")
+        # Кнопка Антивирус - убрано "Реального времени" и эмодзи
+        self.btn_antivirus = QPushButton("АНТИВИРУС")
         self.btn_antivirus.setObjectName("modeBtn")
         self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
         self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
         modes_layout.addWidget(self.btn_antivirus)
         
-        # Кнопка Анализ файлов
+        # Кнопка Анализ файлов - без переноса строки
         # Используем язык по умолчанию (Русский) при инициализации
         default_lang = LANGUAGES["Русский"]
-        self.btn_analysis = QPushButton("\n" + default_lang["analysis_mode"])
+        self.btn_analysis = QPushButton(default_lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
         self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
@@ -923,10 +923,9 @@ class AntivirusPanel(QWidget):
         
         # Список папок - сначала список с отступом снизу
         self.folder_list = QListWidget()
+        # Удалены папки Downloads, Desktop, Documents по требованию
         self.folder_list.addItems([
-            "~/Downloads",
-            "~/Desktop", 
-            "~/Documents"
+            # Папки добавляются пользователем вручную
         ])
         self.folder_list.setMaximumHeight(150)
         monitor_layout.addWidget(self.folder_list)
@@ -1702,6 +1701,7 @@ class ScanHistoryDialog(QDialog):
         
         btn_layout.addStretch()
         
+        # Кнопка "Закрыть" - уменьшена до размера кнопки "Сбросить настройки"
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
@@ -1915,7 +1915,7 @@ class QuarantineDialog(QDialog):
         btn_layout.addWidget(center_widget)
         btn_layout.addStretch()
         
-        # Кнопка "Закрыть" справа
+        # Кнопка "Закрыть" - уменьшена до размера кнопки "Сбросить настройки"
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
         self.btn_close.setFixedHeight(45)
@@ -2319,13 +2319,15 @@ class SettingsDialog(QDialog):
         buttons_layout = QHBoxLayout()
         buttons_layout.addStretch()
         
-        self.btn_reset = QPushButton(lang.get("reset_defaults", "Сбросить настройки"))
+        # Кнопка "Сбросить настройки" - переводится на английский
+        self.btn_reset = QPushButton(lang.get("reset_defaults", "Reset Settings"))
         self.btn_reset.setObjectName("secondaryBtn")
         self.btn_reset.setFixedHeight(45)
         self.btn_reset.clicked.connect(self.reset_to_defaults)
         buttons_layout.addWidget(self.btn_reset)
         
-        self.btn_close_settings = QPushButton(lang["close"])
+        # Кнопка "Закрыть" - переводится на английский
+        self.btn_close_settings = QPushButton(lang.get("close", "Close"))
         self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
@@ -2464,9 +2466,9 @@ class SettingsDialog(QDialog):
                                          lang.get("sensitivity_medium", "Средняя"), 
                                          lang.get("sensitivity_high", "Высокая")])
         
-        # Обновляем кнопки
-        self.btn_reset.setText(lang.get("reset_defaults", "Сбросить настройки"))
-        self.btn_close_settings.setText(lang["close"])
+        # Обновляем кнопки - перевод на английский
+        self.btn_reset.setText(lang.get("reset_defaults", "Reset Settings"))
+        self.btn_close_settings.setText(lang.get("close", "Close"))
 
 
 class RedSandSecureGUI(QMainWindow):
