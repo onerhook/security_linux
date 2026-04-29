@@ -716,7 +716,11 @@ LANGUAGES = {
         "auto_update_tooltip": "Automatically update virus signatures database",
         "reset_defaults": "Reset Settings",
         "confirm_reset": "Confirm Reset",
-        "reset_confirm_msg": "Are you sure you want to reset all settings?"
+        "reset_confirm_msg": "Are you sure you want to reset all settings?",
+        "antivirus_settings_group": "Real-time Antivirus Settings",
+        "protection_status": "Protection Status",
+        "folder_monitoring": "Folder Monitoring",
+        "select_folder_title": "Select folder for monitoring"
     }
 }
 
@@ -2322,7 +2326,7 @@ class SettingsDialog(QDialog):
         buttons_layout.addWidget(self.btn_reset)
         
         self.btn_close_settings = QPushButton(lang["close"])
-        self.btn_close_settings.setObjectName("primaryBtn")
+        self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
         buttons_layout.addWidget(self.btn_close_settings)
