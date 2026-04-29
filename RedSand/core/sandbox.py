@@ -413,11 +413,13 @@ class DynamicSandbox:
 
         return output_path
 
-# --- Точка входа для тестирования ---
+# Алиас для совместимости
+SandboxAnalyzer = DynamicSandbox
+
 if __name__ == "__main__":
     print("RedSand Sandbox Module Initialized.")
     print("Для анализа используйте: DynamicSandbox().analyze_file('path/to/script.py')")
-
+    
     # Пример создания тестового вредоносного скрипта
     test_script = """
 import os

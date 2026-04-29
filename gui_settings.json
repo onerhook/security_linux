@@ -4,6 +4,6 @@
   "use_poly_default": false,
   "auto_disable_network": true,
   "log_level": "INFO",
-  "theme": "Тёмная",
+  "theme": "Dark",
   "language": "Русский"
 }

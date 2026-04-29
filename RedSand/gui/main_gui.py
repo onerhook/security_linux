@@ -24,16 +24,66 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
     QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QStackedWidget
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
 # Импорт компонентов ядра
 from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
 from core.virus_scanner import VirusScanner
+from core.extended_scanner import ExtendedVirusScanner
 
 
+class AnalysisWorker(QThread):
+    """Рабочий поток для анализа файлов без блокировки GUI"""
+    progress = pyqtSignal(int, str)  # прогресс, текст
+    result_ready = pyqtSignal(dict)  # результаты анализа как словарь
+    error_occurred = pyqtSignal(str)  # ошибка
+    
+    def __init__(self, file_path: str, use_poly: bool = False, timeout: int = 60):
+        super().__init__()
+        self.file_path = file_path
+        self.use_poly = use_poly
+        self.timeout = timeout
+        self.scanner = ExtendedVirusScanner()
+    
+    def run(self):
+        try:
+            # Прогресс 25% - начало анализа
+            self.progress.emit(25, "Starting analysis...")
+            
+            # Прогресс 50% - статический анализ
+            self.progress.emit(50, "Static analysis...")
+            
+            # Прогресс 75% - проверка сигнатур
+            self.progress.emit(75, "Signature check...")
+            
+            # Реальный анализ файла
+            scan_result = self.scanner.scan_file(self.file_path)
+            
+            # Прогресс 100% - завершено
+            self.progress.emit(100, "Analysis complete!")
+            
+            # Конвертируем ScanResult в словарь для передачи через сигнал
+            result_dict = {
+                'file_path': scan_result.file_path,
+                'threat_level': scan_result.threat_level.value if hasattr(scan_result.threat_level, 'value') else str(scan_result.threat_level),
+                'risk_score': scan_result.score,
+                'detected_threats': scan_result.threats_found,
+                'threat_types': scan_result.threat_types,
+                'sha256': scan_result.sha256,
+                'matched_signatures': scan_result.details.get('matched_signatures', []),
+                'matched_patterns': scan_result.details.get('matched_patterns', []),
+                'details': scan_result.details
+            }
+            self.result_ready.emit(result_dict)
+            
+        except Exception as e:
+            self.error_occurred.emit(str(e))
+
+
+# Только тёмная тема оформления
 THEMES = {
-    "Тёмная": {
+    "Dark": {
         "bg_primary": "#1a1a2e",
         "bg_secondary": "#16213e",
         "bg_tertiary": "#0f3460",
@@ -46,27 +96,13 @@ THEMES = {
         "danger": "#ff4444",
         "border": "#2a2a4e",
         "card_bg": "#1f1f3a"
-    },
-    "Светлая": {
-        "bg_primary": "#f8fafc",
-        "bg_secondary": "#ffffff",
-        "bg_tertiary": "#e2e8f0",
-        "accent": "#dc2626",
-        "accent_hover": "#b91c1c",
-        "text_primary": "#0f172a",
-        "text_secondary": "#475569",
-        "success": "#16a34a",
-        "warning": "#ea580c",
-        "danger": "#dc2626",
-        "border": "#64748b",
-        "card_bg": "#ffffff"
     }
 }
 
 
-def generate_stylesheet(theme_name: str = "Тёмная") -> str:
+def generate_stylesheet(theme_name: str = "Dark") -> str:
     """Генерация CSS стилей для приложения"""
-    theme = THEMES.get(theme_name, THEMES["Тёмная"])
+    theme = THEMES.get(theme_name, THEMES["Dark"])
     
     return f"""
     QMainWindow {{
@@ -395,8 +431,6 @@ LANGUAGES = {
         "cancel": "Отмена",
         "back": "← Назад",
         "theme": "Тема оформления",
-        "dark_theme": "Тёмная",
-        "light_theme": "Светлая",
         "analysis_time": "Время анализа:",
         "poly_check": "Создавать варианты файла для анализа",
         "network_check": "Отключать сеть (рекомендуется)",
@@ -484,9 +518,52 @@ LANGUAGES = {
         "scan_time": "Время сканирования",
         "clear_history_confirm_en": "Вы уверены, что хотите очистить всю историю сканирований?",
         "settings_saved": "Настройки сохранены",
-        "theme_label": "Тема оформления",
-        "dark_theme_btn": "🌙 Тёмная",
-        "light_theme_btn": "☀️ Светлая"
+        "rec_malicious": "НЕ ИСПОЛЬЗОВАТЬ! Файл содержит вредоносный код.",
+        "rec_suspicious": "Будьте осторожны. Файл содержит подозрительные элементы.",
+        "rec_clean": "Файл безопасен. Вы можете его использовать.",
+        "action_quarantine": "Карантин",
+        "action_delete": "Удалить",
+        "action_keep": "Оставить",
+        "action_required": "Требуемое действие",
+        "recommendation": "Рекомендация",
+        "file_type": "Тип файла",
+        "size": "Размер",
+        "detected_threats": "Обнаруженные угрозы",
+        "matched_signatures": "Совпавшие сигнатуры",
+        "matched_patterns": "Подозрительные паттерны",
+        "static_analysis_progress": "Статический анализ...",
+        "signature_check_progress": "Проверка сигнатур вирусов...",
+        "behavior_analysis_progress": "Анализ поведения...",
+        "static_analysis_log": "Выполняется статический анализ файла...",
+        "signature_check_log": "Проверка по базе вредоносных сигнатур...",
+        "behavior_analysis_log": "Анализ подозрительных паттернов...",
+        "scan_error_log": "Ошибка сканирования:",
+        "quarantine_error_log": "Ошибка карантина:",
+        "file_quarantined_log": "Файл помещен в карантин:",
+        "no_file_selected_error": "Пожалуйста, выберите существующий файл для анализа.",
+        "analysis_start_log": "Начало анализа файла:",
+        "using_virus_scanner": "Используется VirusScanner для проверки на вирусы",
+        "warning": "Предупреждение",
+        "information": "Информация",
+        "error": "Ошибка",
+        "av_activated": "Антивирус активирован",
+        "deletion_error": "Ошибка удаления:",
+        "no_threats": "Нет угроз",
+        "yes": "Да",
+        "no": "Нет",
+        "suspicious_file_warning": "Подозрительный файл обнаружен. Рекомендуется дополнительная проверка.",
+        # Подсказки настроек
+        "poly_check_tooltip": "Использовать полиморфный движок по умолчанию (устарело)",
+        "network_check_tooltip": "Автоматически отключать сеть при анализе",
+        "deep_scan_tooltip": "Выполнять полный эвристический анализ",
+        "ml_analysis_tooltip": "Использовать машинное обучение для классификации угроз",
+        "multi_thread_tooltip": "Использовать несколько потоков для ускорения сканирования",
+        "auto_quarantine_tooltip": "Автоматически помещать опасные файлы в карантин",
+        "scan_on_access_tooltip": "Сканировать файлы при каждом обращении к ним",
+        "docker_tooltip": "Запускать подозрительные файлы в Docker контейнере",
+        "behavioral_tooltip": "Использовать эмуляцию Windows API для анализа поведения",
+        "panic_button_tooltip": "Отображать кнопку для немедленной остановки всех процессов",
+        "auto_update_tooltip": "Автоматически обновлять базу сигнатур вирусов"
     },
     "English": {
         "title": "RedSand Secure",
@@ -506,8 +583,6 @@ LANGUAGES = {
         "cancel": "Cancel",
         "back": "← Back",
         "theme": "Theme",
-        "dark_theme": "Dark",
-        "light_theme": "Light",
         "analysis_time": "Analysis Time:",
         "poly_check": "Create file variants for analysis",
         "network_check": "Disable network (recommended)",
@@ -595,9 +670,52 @@ LANGUAGES = {
         "scan_time": "Scan Time",
         "clear_history_confirm_en": "Are you sure you want to clear all scan history?",
         "settings_saved": "Settings saved",
-        "theme_label": "Theme",
-        "dark_theme_btn": "🌙 Dark",
-        "light_theme_btn": "☀️ Light"
+        "rec_malicious": "DO NOT USE! File contains malicious code.",
+        "rec_suspicious": "Be careful. File contains suspicious elements.",
+        "rec_clean": "File is safe. You can use it.",
+        "action_quarantine": "Quarantine",
+        "action_delete": "Delete",
+        "action_keep": "Keep",
+        "action_required": "Action Required",
+        "recommendation": "Recommendation",
+        "file_type": "File Type",
+        "size": "Size",
+        "detected_threats": "Detected Threats",
+        "matched_signatures": "Matched Signatures",
+        "matched_patterns": "Suspicious Patterns",
+        "static_analysis_progress": "Static analysis...",
+        "signature_check_progress": "Virus signature check...",
+        "behavior_analysis_progress": "Behavior analysis...",
+        "static_analysis_log": "Performing static file analysis...",
+        "signature_check_log": "Checking against malware signatures database...",
+        "behavior_analysis_log": "Analyzing suspicious patterns...",
+        "scan_error_log": "Scan error:",
+        "quarantine_error_log": "Quarantine error:",
+        "file_quarantined_log": "File quarantined:",
+        "no_file_selected_error": "Please select an existing file for analysis.",
+        "analysis_start_log": "Starting file analysis:",
+        "using_virus_scanner": "Using VirusScanner for virus detection",
+        "warning": "Warning",
+        "information": "Information",
+        "error": "Error",
+        "av_activated": "Antivirus Activated",
+        "deletion_error": "Deletion error:",
+        "no_threats": "None",
+        "yes": "Yes",
+        "no": "No",
+        "suspicious_file_warning": "Suspicious file detected. Additional verification recommended.",
+        # Settings tooltips
+        "poly_check_tooltip": "Use polymorphic engine by default (deprecated)",
+        "network_check_tooltip": "Automatically disable network during analysis",
+        "deep_scan_tooltip": "Perform full heuristic analysis",
+        "ml_analysis_tooltip": "Use machine learning for threat classification",
+        "multi_thread_tooltip": "Use multiple threads to speed up scanning",
+        "auto_quarantine_tooltip": "Automatically quarantine dangerous files",
+        "scan_on_access_tooltip": "Scan files on every access",
+        "docker_tooltip": "Run suspicious files in Docker container",
+        "behavioral_tooltip": "Use Windows API emulation for behavior analysis",
+        "panic_button_tooltip": "Display button for immediate stop of all processes",
+        "auto_update_tooltip": "Automatically update virus signatures database"
     }
 }
 
@@ -616,6 +734,37 @@ class MainModeSelector(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(30)
         layout.setContentsMargins(50, 50, 50, 50)
+        
+        # Верхняя панель с кнопкой выхода
+        top_panel = QHBoxLayout()
+        top_panel.addStretch()
+        
+        # Кнопка выхода в правом верхнем углу (маленькая, прямоугольная, без эмодзи)
+        self.btn_exit = QPushButton("Выйти")
+        self.btn_exit.setObjectName("exitBtn")
+        self.btn_exit.setFixedSize(80, 30)  # Маленький прямоугольный размер
+        self.btn_exit.setStyleSheet("""
+            QPushButton#exitBtn {
+                background-color: #c0392b;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+                padding: 5px 10px;
+            }
+            QPushButton#exitBtn:hover {
+                background-color: #e74c3c;
+            }
+            QPushButton#exitBtn:pressed {
+                background-color: #a93226;
+            }
+        """)
+        self.btn_exit.clicked.connect(lambda: self.parent_ref.close() if self.parent_ref else None)
+        self.btn_exit.setToolTip("Закрыть приложение / Exit")
+        top_panel.addWidget(self.btn_exit)
+        
+        layout.addLayout(top_panel)
         
         # Заголовок
         title_label = QLabel("RedSand Secure")
@@ -636,14 +785,16 @@ class MainModeSelector(QWidget):
         modes_layout.setAlignment(Qt.AlignCenter)
         
         # Кнопка Антивирус - убрано "Реального времени"
-        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС")
+        self.btn_antivirus = QPushButton("\nАНТИВИРУС")
         self.btn_antivirus.setObjectName("modeBtn")
         self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
         self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
         modes_layout.addWidget(self.btn_antivirus)
         
         # Кнопка Анализ файлов
-        self.btn_analysis = QPushButton("🔍\\n" + lang["analysis_mode"])
+        # Используем язык по умолчанию (Русский) при инициализации
+        default_lang = LANGUAGES["Русский"]
+        self.btn_analysis = QPushButton("\n" + default_lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
         self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
@@ -707,15 +858,21 @@ class MainModeSelector(QWidget):
             return
         lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
         
+        # Exit button translation
+        if self.parent_ref.current_lang == "English":
+            self.btn_exit.setText("Exit")
+        else:
+            self.btn_exit.setText("Выйти")
+        
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText("🔍\\n" + lang["analysis_mode"])
+        self.btn_analysis.setText("\n" + lang["analysis_mode"])
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
 
 
 class AntivirusPanel(QWidget):
-    """Панель управления антивирусом"""
+    """Панель управления антивирусом с мониторингом новых файлов"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -723,6 +880,7 @@ class AntivirusPanel(QWidget):
         self.av_active = False
         self.av_monitor = None
         self.setup_ui()
+        self.file_watcher = None  # QFileSystemWatcher для отслеживания новых файлов
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -821,15 +979,22 @@ class AntivirusPanel(QWidget):
         layout.addWidget(btn_back)
     
     def toggle_antivirus(self):
-        """Включение/выключение антивируса"""
+        """Включение/выключение антивируса с мониторингом новых файлов"""
         if not self.parent_ref:
             return
             
+        # Получаем текущий язык
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         if self.av_active:
             # Выключаем
             try:
                 if self.av_monitor:
                     self.av_monitor.stop()
+                # Останавливаем QFileSystemWatcher
+                if self.file_watcher:
+                    self.file_watcher.deleteLater()
+                    self.file_watcher = None
                 self.av_active = False
                 self.btn_toggle_av.setChecked(False)
                 self.btn_toggle_av.setText("▶️ ВКЛ")
@@ -849,8 +1014,8 @@ class AntivirusPanel(QWidget):
                         monitor_paths.append(expanded)
                 
                 if not monitor_paths:
-                    QMessageBox.warning(self, "Предупреждение", 
-                        "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.")
+                    QMessageBox.warning(self, lang.get("warning", "Warning"), 
+                        lang.get("no_folders", "No standard folders found for monitoring.\nAntivirus cannot be started."))
                     self.btn_toggle_av.setChecked(False)
                     return
                 
@@ -864,19 +1029,74 @@ class AntivirusPanel(QWidget):
                 self.av_monitor.enable()
                 self.av_monitor.start_background()
                 
-                self.av_active = True
-                self.btn_toggle_av.setText("⏹️ ВЫКЛ")
-                self.av_status_label.setText("🛡️ Антивирус: ВКЛ")
-                self.av_status_label.setStyleSheet("color: #059669; font-weight: bold; font-size: 24px;")
-                self.log_event(f"Антивирус запущен. Мониторинг: {', '.join(monitor_paths)}")
+                # Инициализируем QFileSystemWatcher для отслеживания новых файлов
+                from PyQt5.QtCore import QFileSystemWatcher
+                self.file_watcher = QFileSystemWatcher()
+                self.file_watcher.addPaths(monitor_paths)
+                self.file_watcher.directoryChanged.connect(self.on_directory_changed)
                 
-                QMessageBox.information(self, "Антивирус активирован",
-                    f"Защита реального времени включена!\n\nМониторимые папки:\n{chr(10).join(monitor_paths)}\n\nВсе подозрительные файлы будут автоматически помещены в карантин.")
+                self.av_active = True
+                self.btn_toggle_av.setText(lang["av_on"])
+                self.av_status_label.setText(lang["av_status_on"])
+                self.av_status_label.setStyleSheet("color: #059669; font-weight: bold; font-size: 24px;")
+                self.log_event(f"{lang['av_running']} {', '.join(monitor_paths)}")
+                
+                QMessageBox.information(self, lang.get("av_activated", "Antivirus Activated"),
+                    f"{lang.get('av_start_msg', 'Real-time protection enabled!')}\n\n{lang.get('monitored_folders', 'Monitored folders:')}\n{chr(10).join(monitor_paths)}\n\n{lang.get('auto_quarantine_msg', 'All suspicious files will be automatically quarantined.')}")
                     
             except Exception as e:
-                self.log_event(f"Ошибка запуска: {e}")
-                QMessageBox.critical(self, "Ошибка", f"Не удалось запустить антивирус:\n{str(e)}")
+                self.log_event(f"{lang.get('av_start_error', 'Failed to start antivirus:')} {e}")
+                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\\n{str(e)}")
                 self.btn_toggle_av.setChecked(False)
+    
+    def on_directory_changed(self, directory_path):
+        """Обработка изменений в директории - обнаружение новых файлов"""
+        try:
+            # Небольшая задержка чтобы файл полностью записался
+            import time
+            time.sleep(0.3)
+            
+            # Проверяем файлы в директории
+            if os.path.exists(directory_path):
+                files = os.listdir(directory_path)
+                for filename in files:
+                    file_path = os.path.join(directory_path, filename)
+                    # Проверяем только новые файлы (созданные в последнюю минуту)
+                    try:
+                        mtime = os.path.getmtime(file_path)
+                        import datetime
+                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту
+                            # Проверяем расширение
+                            ext = os.path.splitext(filename)[1].lower()
+                            monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com']
+                            if ext in monitored_exts and not filename.startswith('~$'):
+                                self.log_event(f"[!] Обнаружен новый файл: {filename}")
+                                # Запускаем сканирование в отдельном потоке
+                                worker = AnalysisWorker(file_path)
+                                worker.result_ready.connect(self.on_new_file_scanned)
+                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Ошибка сканирования {filename}: {err}"))
+                                worker.start()
+                    except (OSError, IOError):
+                        pass  # Файл может быть еще не готов
+                        
+            # Перезапускаем watcher если директория изменилась
+            if self.file_watcher and directory_path not in self.file_watcher.directories():
+                self.file_watcher.addPath(directory_path)
+        except Exception as e:
+            self.log_event(f"Ошибка обработки изменений: {e}")
+    
+    def on_new_file_scanned(self, scan_result: dict):
+        """Обработка результатов сканирования нового файла"""
+        threat_level = scan_result.get('threat_level', 'CLEAN')
+        file_path = scan_result.get('file_path', 'Unknown')
+        file_name = os.path.basename(file_path)
+        
+        if threat_level == 'MALICIOUS':
+            self.log_event(f"🚨 УГРОЗА! Файл {file_name} помещен в карантин")
+        elif threat_level == 'SUSPICIOUS':
+            self.log_event(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ файл: {file_name}")
+        else:
+            self.log_event(f"✅ Безопасный файл: {file_name}")
     
     def log_event(self, message: str):
         """Запись события в лог"""
@@ -885,16 +1105,17 @@ class AntivirusPanel(QWidget):
     
     def add_folder(self):
         """Добавить папку для мониторинга"""
-        folder = QFileDialog.getExistingDirectory(self, "Выберите папку для мониторинга")
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        folder = QFileDialog.getExistingDirectory(self, lang.get("select_folder_title", "Select folder for monitoring"))
         if folder:
             # Проверяем, нет ли уже такой папки в списке
             for i in range(self.folder_list.count()):
                 if os.path.expanduser(self.folder_list.item(i).text()) == folder:
-                    QMessageBox.information(self, "Информация", "Эта папка уже добавлена")
+                    QMessageBox.information(self, lang.get("information", "Information"), lang.get("folder_exists", "This folder is already added"))
                     return
             
             self.folder_list.addItem(folder)
-            self.log_event(f"Добавлена папка: {folder}")
+            self.log_event(lang.get("folder_added", "Folder added: ") + folder)
     
     def remove_folder(self):
         """Удалить выбранную папку из мониторинга"""
@@ -1123,10 +1344,21 @@ class AnalysisPanel(QWidget):
             self.file_path_edit.setText(file_path)
     
     def start_analysis(self):
-        """Запуск анализа файла с использованием VirusScanner"""
+        """Запуск анализа файла в отдельном потоке без блокировки GUI"""
         file_path = self.file_path_edit.text().strip()
+        
+        # Получаем язык ПЕРЕД использованием
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         if not file_path or not os.path.exists(file_path):
-            QMessageBox.warning(self, "Ошибка", "Пожалуйста, выберите существующий файл для анализа.")
+            QMessageBox.warning(self, lang.get("warning", "Warning"), 
+                               lang.get("no_file_selected_error", "Please select an existing file for analysis."))
+            return
+        
+        # Проверяем, не запущен ли уже анализ
+        if self.worker and self.worker.isRunning():
+            QMessageBox.warning(self, lang.get("warning", "Warning"),
+                               lang.get("analysis_in_progress", "Analysis is already in progress!"))
             return
         
         self.btn_analyze.setEnabled(False)
@@ -1134,12 +1366,10 @@ class AnalysisPanel(QWidget):
         self.log_text.clear()
         self.results_summary.setVisible(True)
         self.results_table.setVisible(False)
+        self.analysis_completed = False
         
-        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
-        is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
-        
-        self.log_message('INFO', f"Начало анализа файла: {file_path}")
-        self.log_message('INFO', "Используется VirusScanner для проверки на вирусы")
+        self.log_message('INFO', f"{lang['analysis_start_log']} {file_path}")
+        self.log_message('INFO', lang['using_virus_scanner'])
         
         # Добавляем запись в историю сканирований
         scan_record = {
@@ -1152,81 +1382,79 @@ class AnalysisPanel(QWidget):
         if self.parent_ref:
             self.parent_ref.scan_history.append(scan_record)
         
-        # Прогресс анализа
-        self.progress_bar.setValue(25)
-        self.progress_label.setText("Статический анализ..." if is_ru else "Static analysis...")
-        self.log_message('INFO', "Выполняется статический анализ файла..." if is_ru else "Performing static file analysis...")
+        # Создаём и запускаем worker в отдельном потоке
+        use_poly = self.poly_check.isChecked() if hasattr(self, 'poly_check') else False
+        timeout = self.timeout_spin.value() if hasattr(self, 'timeout_spin') else 60
         
-        self.progress_bar.setValue(50)
-        self.progress_label.setText("Проверка сигнатур вирусов..." if is_ru else "Virus signature check...")
-        self.log_message('INFO', "Проверка по базе вредоносных сигнатур..." if is_ru else "Checking against malware signatures database...")
+        self.worker = AnalysisWorker(file_path, use_poly=use_poly, timeout=timeout)
+        self.worker.progress.connect(self.update_progress)
+        self.worker.result_ready.connect(self.on_analysis_complete)
+        self.worker.error_occurred.connect(self.on_analysis_error)
+        self.worker.start()
+    
+    def update_progress(self, value: int, text: str):
+        """Обновление прогресс-бара из потока"""
+        self.progress_bar.setValue(value)
+        self.progress_label.setText(text)
+        self.log_message('INFO', text)
+    
+    def on_analysis_complete(self, scan_result: dict):
+        """Обработка результатов анализа (вызывается в главном потоке)"""
+        if self.analysis_completed:
+            return
+        self.analysis_completed = True
         
-        self.progress_bar.setValue(75)
-        self.progress_label.setText("Анализ поведения..." if is_ru else "Behavior analysis...")
-        self.log_message('INFO', "Анализ подозрительных паттернов..." if is_ru else "Analyzing suspicious patterns...")
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
         
-        # Используем VirusScanner для реального анализа
-        try:
-            scanner = VirusScanner()
-            scan_result = scanner.scan_file(file_path)
-            
-            threat_level = scan_result.get('threat_level', 'CLEAN')
-            risk_score = scan_result.get('risk_score', 0)
-            detected_threats = scan_result.get('detected_threats', [])
-            matched_signatures = scan_result.get('matched_signatures', [])
-            matched_patterns = scan_result.get('matched_patterns', [])
-            
-            # Определяем статус и цвет
-            if threat_level == 'MALICIOUS':
-                status_text = lang["status_malicious"]
-                status_color = "#dc2626"
-                final_threat_level = 'MALICIOUS'
-            elif threat_level == 'SUSPICIOUS':
-                status_text = lang["status_suspicious"]
-                status_color = "#d97706"
-                final_threat_level = 'SUSPICIOUS'
-            else:
-                status_text = lang["status_clean"]
-                status_color = "#059669"
-                final_threat_level = 'CLEAN'
-            
-            # Получаем рекомендацию
-            if threat_level == 'MALICIOUS':
-                recommendation = lang.get("rec_malicious", "DO NOT USE! File contains malicious code.")
-                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_delete", "Delete")
-            elif threat_level == 'SUSPICIOUS':
-                recommendation = lang.get("rec_suspicious", "Be careful. File contains suspicious elements.")
-                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_keep", "Keep")
-            else:
-                recommendation = lang.get("rec_clean", "File is safe. You can use it.")
-                action_text = lang.get("action_keep", "Keep")
-            
-            # Автоматически помещаем в карантин опасные и подозрительные файлы
-            if threat_level in ['MALICIOUS', 'SUSPICIOUS'] and self.parent_ref:
-                try:
-                    reason = f"{threat_level}: Risk Score {risk_score}"
-                    if detected_threats:
-                        reason += f" - {', '.join(detected_threats[:2])}"
-                    self.parent_ref.quarantine_manager.add_to_quarantine(
-                        file_path=file_path,
-                        reason=reason
-                    )
-                    self.log_message('WARNING', f"Файл помещен в карантин: {reason}" if is_ru else f"File quarantined: {reason}")
-                except Exception as e:
-                    self.log_message('ERROR', f"Ошибка карантина: {e}" if is_ru else f"Quarantine error: {e}")
-            
-        except Exception as e:
-            threat_level = 'ERROR'
-            status_text = "❌ Ошибка" if is_ru else "❌ Error"
-            status_color = "#666666"
-            final_threat_level = 'ERROR'
-            recommendation = str(e)
-            action_text = ""
-            detected_threats = []
-            matched_signatures = []
-            matched_patterns = []
-            risk_score = 0
-            self.log_message('ERROR', f"Ошибка сканирования: {e}" if is_ru else f"Scan error: {e}")
+        threat_level = scan_result.get('threat_level', 'CLEAN')
+        risk_score = scan_result.get('risk_score', 0)
+        detected_threats = scan_result.get('detected_threats', [])
+        matched_signatures = scan_result.get('matched_signatures', [])
+        matched_patterns = scan_result.get('matched_patterns', [])
+        
+        # Определяем статус и цвет
+        if threat_level == 'MALICIOUS':
+            status_text = lang["status_malicious"]
+            status_color = "#dc2626"
+            final_threat_level = 'MALICIOUS'
+        elif threat_level == 'SUSPICIOUS':
+            status_text = lang["status_suspicious"]
+            status_color = "#d97706"
+            final_threat_level = 'SUSPICIOUS'
+        else:
+            status_text = lang["status_clean"]
+            status_color = "#059669"
+            final_threat_level = 'CLEAN'
+        
+        # Получаем рекомендацию
+        if threat_level == 'MALICIOUS':
+            recommendation = lang.get("rec_malicious", "DO NOT USE! File contains malicious code.")
+            action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_delete", "Delete")
+        elif threat_level == 'SUSPICIOUS':
+            recommendation = lang.get("rec_suspicious", "Be careful. File contains suspicious elements.")
+            action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_keep", "Keep")
+        else:
+            recommendation = lang.get("rec_clean", "File is safe. You can use it.")
+            action_text = lang.get("action_keep", "Keep")
+        
+        # Автоматически помещаем в карантин ТОЛЬКО опасные файлы (MALICIOUS)
+        if threat_level == 'MALICIOUS' and self.parent_ref:
+            try:
+                reason = f"{threat_level}: Risk Score {risk_score}"
+                if detected_threats:
+                    reason += f" - {', '.join(detected_threats[:2])}"
+                # Используем правильный метод move_to_quarantine
+                self.parent_ref.quarantine_manager.move_to_quarantine(
+                    file_path=self.file_path_edit.text().strip(),
+                    reason=reason
+                )
+                self.log_message('WARNING', f"{lang['file_quarantined_log']} {reason}")
+            except Exception as e:
+                self.log_message('ERROR', f"{lang['quarantine_error_log']} {e}")
+        elif threat_level == 'SUSPICIOUS':
+            # Для подозрительных файлов только предупреждение, без карантина
+            self.log_message('INFO', lang.get('suspicious_file_warning', 'Подозрительный файл обнаружен. Рекомендуется дополнительная проверка.'))
         
         self.progress_bar.setValue(100)
         self.progress_label.setText(lang["analysis_complete"])
@@ -1237,20 +1465,12 @@ class AnalysisPanel(QWidget):
         self.results_table.setVisible(True)
         
         # Формируем данные для таблицы результатов
-        file_type_ru = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
-        file_type_en = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
-        file_type = file_type_ru if is_ru else file_type_en
-        
-        size_label_ru = "Размер"
-        size_label_en = "Size"
-        size_label = size_label_ru if is_ru else size_label_en
-        
-        size_value_ru = f"{os.path.getsize(file_path)} байт"
-        size_value_en = f"{os.path.getsize(file_path)} bytes"
-        size_value = size_value_ru if is_ru else size_value_en
+        file_type = lang.get("file_type", "File Type")
+        size_label = lang.get("size", "Size")
+        size_value = f"{os.path.getsize(self.file_path_edit.text().strip())} bytes"
         
         results_data = [
-            (lang.get("col_file", "File"), os.path.basename(file_path)),
+            (lang.get("col_file", "File"), os.path.basename(self.file_path_edit.text().strip())),
             (lang.get("col_status", "Status"), status_text),
             (lang.get("recommendation", "Recommendation"), recommendation),
             (lang.get("action_required", "Action Required"), action_text),
@@ -1260,17 +1480,13 @@ class AnalysisPanel(QWidget):
         
         # Добавляем обнаруженные угрозы если есть
         if detected_threats:
-            threats_label_ru = "Обнаруженные угрозы"
-            threats_label_en = "Detected Threats"
-            threats_label = threats_label_ru if is_ru else threats_label_en
+            threats_label = lang.get("detected_threats", "Detected Threats")
             threats_str = ', '.join(detected_threats)
             results_data.append((threats_label, threats_str))
         
         # Добавляем matched signatures если есть
         if matched_signatures:
-            sig_label_ru = "Совпавшие сигнатуры"
-            sig_label_en = "Matched Signatures"
-            sig_label = sig_label_ru if is_ru else sig_label_en
+            sig_label = lang.get("matched_signatures", "Matched Signatures")
             sig_str = ', '.join(matched_signatures[:3])
             if len(matched_signatures) > 3:
                 sig_str += f" (+{len(matched_signatures)-3})"
@@ -1278,9 +1494,7 @@ class AnalysisPanel(QWidget):
         
         # Добавляем matched patterns если есть
         if matched_patterns:
-            pat_label_ru = "Подозрительные паттерны"
-            pat_label_en = "Suspicious Patterns"
-            pat_label = pat_label_ru if is_ru else pat_label_en
+            pat_label = lang.get("matched_patterns", "Suspicious Patterns")
             pat_str = ', '.join(matched_patterns[:3])
             if len(matched_patterns) > 3:
                 pat_str += f" (+{len(matched_patterns)-3})"
@@ -1319,7 +1533,7 @@ class AnalysisPanel(QWidget):
         # Показываем результат
         msg_title = lang["analysis_complete"]
         if threat_level == 'MALICIOUS':
-            msg = f"⚠️ {lang['status_malicious']}!\n\n{recommendation}\n\n{lang.get('action_quarantine', 'Quarantine')}: {os.path.basename(file_path)}"
+            msg = f"⚠️ {lang['status_malicious']}!\n\n{recommendation}\n\n{lang.get('action_quarantine', 'Quarantine')}: {os.path.basename(self.file_path_edit.text().strip())}"
             QMessageBox.warning(self, msg_title, msg)
         elif threat_level == 'SUSPICIOUS':
             msg = f"⚠️ {lang['status_suspicious']}!\n\n{recommendation}"
@@ -1327,6 +1541,37 @@ class AnalysisPanel(QWidget):
         else:
             msg = f"✅ {lang['status_clean']}!\n\n{recommendation}"
             QMessageBox.information(self, msg_title, msg)
+    
+    def on_analysis_error(self, error_msg: str):
+        """Обработка ошибки анализа (вызывается в главном потоке)"""
+        if self.analysis_completed:
+            return
+        self.analysis_completed = True
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        self.progress_bar.setValue(100)
+        self.progress_label.setText(f"❌ Error: {error_msg}")
+        self.log_message('ERROR', f"{lang.get('scan_error_log', 'Scan error:')} {error_msg}")
+        
+        self.results_summary.setVisible(False)
+        self.results_table.setVisible(True)
+        self.results_table.setRowCount(1)
+        
+        error_param = QTableWidgetItem(lang.get("error", "Error"))
+        error_param.setFlags(error_param.flags() & ~Qt.ItemIsEditable)
+        error_param.setFont(QFont("Segoe UI", 12, QFont.Bold))
+        self.results_table.setItem(0, 0, error_param)
+        
+        error_value = QTableWidgetItem(error_msg)
+        error_value.setFlags(error_value.flags() & ~Qt.ItemIsEditable)
+        error_value.setFont(QFont("Segoe UI", 12))
+        error_value.setBackground(QColor("#666666"))
+        error_value.setForeground(QColor("#ffffff"))
+        self.results_table.setItem(0, 1, error_value)
+        
+        self.btn_analyze.setEnabled(True)
+        QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('analysis_error', 'Analysis failed:')} {error_msg}")
     
     def log_message(self, level: str, message: str):
         """Запись сообщения в лог"""
@@ -1370,7 +1615,7 @@ class AnalysisPanel(QWidget):
         
         # Обновляем labels timeout
         for label in self.findChildren(QLabel):
-            if label.text().startswith("Время анализа:") or label.text().startswith("Analysis Time:"):
+            if label.text().startswith("Время анализа") or label.text().startswith("Analysis Time"):
                 label.setText(lang["timeout_label"])
         
         # Обновляем чекбоксы
@@ -1548,7 +1793,7 @@ class ScanHistoryDialog(QDialog):
             
             # Угрозы
             threats = ', '.join(item_data.get('detected_threats', []))
-            no_threats_text = "Нет" if self.current_lang == "Русский" else "None"
+            no_threats_text = lang.get("no_threats", "Нет" if self.current_lang == "Русский" else "None")
             threats_item = QTableWidgetItem(threats if threats else no_threats_text)
             threats_item.setFlags(threats_item.flags() & ~Qt.ItemIsEditable)
             self.history_table.setItem(row, 3, threats_item)
@@ -1567,11 +1812,23 @@ class ScanHistoryDialog(QDialog):
     def clear_history(self):
         """Очистить историю"""
         lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-        reply = QMessageBox.question(self, lang["clear_history"],
-            lang["clear_history_confirm_en"] if self.current_lang == "English" else lang["clear_history_confirm_en"],
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        confirm_key = "clear_history_confirm" if self.current_lang == "Русский" else "clear_history_confirm_en"
         
-        if reply == QMessageBox.Yes and self.parent_ref:
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle(lang["clear_history"])
+        msg_box.setText(lang.get(confirm_key, lang["clear_history_confirm"]))
+        
+        # Локализованные кнопки
+        yes_btn = QPushButton(lang.get("yes", "Да"))
+        no_btn = QPushButton(lang.get("no", "Нет"))
+        
+        msg_box.addButton(yes_btn, QMessageBox.YesRole)
+        msg_box.addButton(no_btn, QMessageBox.NoRole)
+        
+        reply = msg_box.exec()
+        
+        if reply == 0 and self.parent_ref:  # 0 = YesRole
             self.parent_ref.scan_history = []
             self.scan_history = []
             self.load_history()
@@ -1786,10 +2043,10 @@ class QuarantineDialog(QDialog):
                     QMessageBox.information(self, lang["restore"], lang["restore_success"])
                     self.load_quarantine()
                 else:
-                    QMessageBox.critical(self, "Error", lang["restore_error"])
+                    QMessageBox.critical(self, lang.get("error", "Error"), lang["restore_error"])
         except Exception as e:
             lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-            QMessageBox.critical(self, "Error", f"{lang['restore_error']}: {str(e)}")
+            QMessageBox.critical(self, lang.get("error", "Error"), f"{lang['restore_error']}: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1811,8 +2068,8 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.warning(self, "Delete Confirmation",
-                "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
+            reply = QMessageBox.warning(self, lang.get("delete_forever", "Delete Forever"),
+                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!"),
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
@@ -1824,10 +2081,10 @@ class QuarantineDialog(QDialog):
                 del self.quarantine_manager.quarantined_files[quarantine_path]
                 self.quarantine_manager._save_quarantine_log()
                 
-                QMessageBox.information(self, "Deletion", "File successfully deleted!")
+                QMessageBox.information(self, lang.get("delete_success", "Deletion"), lang.get("delete_success", "File successfully deleted!"))
                 self.load_quarantine()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Deletion error: {str(e)}")
+            QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('deletion_error', 'Deletion error:')} {str(e)}")
 
 
 class SettingsDialog(QDialog):
@@ -1840,7 +2097,7 @@ class SettingsDialog(QDialog):
         lang_key = "application_settings"
         title_text = LANGUAGES.get(parent.current_lang if parent else "Русский", LANGUAGES["Русский"]).get(lang_key, "⚙ Настройки приложения")
         self.setWindowTitle(title_text)
-        self.setMinimumSize(600, 500)
+        self.setMinimumSize(700, 650)
         self.setWindowFlags(self.windowFlags() & ~Qt.WindowContextHelpButtonHint)
         self.setup_ui()
     
@@ -1856,27 +2113,17 @@ class SettingsDialog(QDialog):
         title.setAlignment(Qt.AlignCenter)
         layout.addWidget(title)
         
-        # Тема оформления - две темы с мгновенным применением
-        theme_group = QGroupBox(lang["theme_group"])
-        theme_layout = QHBoxLayout(theme_group)
+        # Создаем скролл-область для настроек
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         
-        self.btn_dark = QPushButton(lang["dark_theme"])
-        self.btn_dark.setObjectName("secondaryBtn")
-        self.btn_dark.setCheckable(True)
-        self.btn_dark.setChecked(self.settings.get('theme', 'Dark') == 'Dark')
-        self.btn_dark.clicked.connect(lambda: self.apply_theme('Dark'))
-        theme_layout.addWidget(self.btn_dark)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        scroll_layout.setSpacing(20)
+        scroll_layout.setContentsMargins(10, 10, 10, 10)
         
-        self.btn_light = QPushButton(lang["light_theme"])
-        self.btn_light.setObjectName("secondaryBtn")
-        self.btn_light.setCheckable(True)
-        self.btn_light.setChecked(self.settings.get('theme', 'Dark') == 'Light')
-        self.btn_light.clicked.connect(lambda: self.apply_theme('Light'))
-        theme_layout.addWidget(self.btn_light)
-        
-        layout.addWidget(theme_group)
-        
-        # Настройки анализа
+        # === Настройки анализа ===
         analysis_group = QGroupBox(lang["analysis_settings_group"])
         analysis_layout = QVBoxLayout(analysis_group)
         
@@ -1886,45 +2133,293 @@ class SettingsDialog(QDialog):
         self.timeout_spin = QSpinBox()
         self.timeout_spin.setRange(10, 600)
         self.timeout_spin.setValue(self.settings.get('timeout', 60))
+        self.timeout_spin.setSuffix(" сек")
         timeout_layout.addWidget(self.timeout_spin)
         timeout_layout.addStretch()
         analysis_layout.addLayout(timeout_layout)
         
         self.poly_check = QCheckBox(lang["poly_check"])
         self.poly_check.setChecked(self.settings.get('use_poly_default', False))
+        self.poly_check.setToolTip(lang.get("poly_check_tooltip", "Использовать полиморфный движок по умолчанию"))
         analysis_layout.addWidget(self.poly_check)
         
         self.network_check = QCheckBox(lang["network_check"])
         self.network_check.setChecked(self.settings.get('auto_disable_network', True))
+        self.network_check.setToolTip(lang.get("network_check_tooltip", "Автоматически отключать сеть при анализе"))
         analysis_layout.addWidget(self.network_check)
         
-        layout.addWidget(analysis_group)
+        # Дополнительные настройки анализа
+        self.deep_scan_check = QCheckBox(lang.get("deep_scan_check", "Глубокий анализ файлов"))
+        self.deep_scan_check.setChecked(self.settings.get('deep_scan', True))
+        self.deep_scan_check.setToolTip(lang.get("deep_scan_tooltip", "Выполнять полный эвристический анализ"))
+        analysis_layout.addWidget(self.deep_scan_check)
         
-        # Кнопка закрытия
+        self.ml_analysis_check = QCheckBox(lang.get("ml_analysis_check", "Использовать ML классификатор"))
+        self.ml_analysis_check.setChecked(self.settings.get('ml_analysis', True))
+        self.ml_analysis_check.setToolTip(lang.get("ml_analysis_tooltip", "Использовать машинное обучение для классификации угроз"))
+        analysis_layout.addWidget(self.ml_analysis_check)
+        
+        self.multi_thread_check = QCheckBox(lang.get("multi_thread_check", "Многопоточное сканирование"))
+        self.multi_thread_check.setChecked(self.settings.get('multi_thread', True))
+        self.multi_thread_check.setToolTip(lang.get("multi_thread_tooltip", "Использовать несколько потоков для ускорения сканирования"))
+        analysis_layout.addWidget(self.multi_thread_check)
+        
+        thread_layout = QHBoxLayout()
+        thread_label = QLabel(lang.get("thread_count_label", "Количество потоков:"))
+        thread_layout.addWidget(thread_label)
+        self.thread_spin = QSpinBox()
+        self.thread_spin.setRange(1, 16)
+        self.thread_spin.setValue(self.settings.get('thread_count', 4))
+        self.thread_spin.setSuffix(" шт")
+        thread_layout.addWidget(self.thread_spin)
+        thread_layout.addStretch()
+        analysis_layout.addLayout(thread_layout)
+        
+        scroll_layout.addWidget(analysis_group)
+        
+        # === Настройки антивируса реального времени ===
+        antivirus_group = QGroupBox(lang.get("antivirus_settings_group", "Настройки антивируса"))
+        av_layout = QVBoxLayout(antivirus_group)
+        
+        self.auto_quarantine_check = QCheckBox(lang.get("auto_quarantine_check", "Автоматический карантин"))
+        self.auto_quarantine_check.setChecked(self.settings.get('auto_quarantine', True))
+        self.auto_quarantine_check.setToolTip(lang.get("auto_quarantine_tooltip", "Автоматически помещать подозрительные файлы в карантин"))
+        av_layout.addWidget(self.auto_quarantine_check)
+        
+        self.scan_on_access_check = QCheckBox(lang.get("scan_on_access_check", "Сканирование при доступе"))
+        self.scan_on_access_check.setChecked(self.settings.get('scan_on_access', True))
+        self.scan_on_access_check.setToolTip(lang.get("scan_on_access_tooltip", "Сканировать файлы при каждом обращении к ним"))
+        av_layout.addWidget(self.scan_on_access_check)
+        
+        self.monitor_downloads_check = QCheckBox(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
+        self.monitor_downloads_check.setChecked(self.settings.get('monitor_downloads', True))
+        av_layout.addWidget(self.monitor_downloads_check)
+        
+        self.monitor_desktop_check = QCheckBox(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
+        self.monitor_desktop_check.setChecked(self.settings.get('monitor_desktop', True))
+        av_layout.addWidget(self.monitor_desktop_check)
+        
+        self.monitor_documents_check = QCheckBox(lang.get("monitor_documents_check", "Мониторить Документы"))
+        self.monitor_documents_check.setChecked(self.settings.get('monitor_documents', True))
+        av_layout.addWidget(self.monitor_documents_check)
+        
+        sensitivity_layout = QHBoxLayout()
+        sensitivity_label = QLabel(lang.get("sensitivity_label", "Чувствительность:"))
+        sensitivity_layout.addWidget(sensitivity_label)
+        self.sensitivity_combo = QComboBox()
+        self.sensitivity_combo.addItems([lang.get("sensitivity_low", "Низкая"), 
+                                         lang.get("sensitivity_medium", "Средняя"), 
+                                         lang.get("sensitivity_high", "Высокая")])
+        sens_idx = self.settings.get('sensitivity', 1)
+        # Гарантируем, что индекс целочисленный
+        if isinstance(sens_idx, str):
+            try:
+                sens_idx = int(sens_idx)
+            except ValueError:
+                sens_idx = 1
+        elif not isinstance(sens_idx, int):
+            sens_idx = 1
+        # Проверяем диапазон
+        sens_idx = max(0, min(2, sens_idx))
+        self.sensitivity_combo.setCurrentIndex(sens_idx)
+        sensitivity_layout.addWidget(self.sensitivity_combo)
+        sensitivity_layout.addStretch()
+        av_layout.addLayout(sensitivity_layout)
+        
+        scroll_layout.addWidget(antivirus_group)
+        
+        # === Настройки песочницы ===
+        sandbox_group = QGroupBox(lang.get("sandbox_settings_group", "Настройки песочницы"))
+        sandbox_layout = QVBoxLayout(sandbox_group)
+        
+        self.docker_check = QCheckBox(lang.get("docker_check", "Использовать Docker изоляцию"))
+        self.docker_check.setChecked(self.settings.get('use_docker', True))
+        self.docker_check.setToolTip(lang.get("docker_tooltip", "Запускать подозрительные файлы в Docker контейнере"))
+        sandbox_layout.addWidget(self.docker_check)
+        
+        self.behavioral_check = QCheckBox(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
+        self.behavioral_check.setChecked(self.settings.get('behavioral_analysis', True))
+        self.behavioral_check.setToolTip(lang.get("behavioral_tooltip", "Использовать эмуляцию Windows API для анализа поведения"))
+        sandbox_layout.addWidget(self.behavioral_check)
+        
+        emu_timeout_layout = QHBoxLayout()
+        emu_timeout_label = QLabel(lang.get("emu_timeout_label", "Таймаут эмуляции (сек):"))
+        emu_timeout_layout.addWidget(emu_timeout_label)
+        self.emu_timeout_spin = QSpinBox()
+        self.emu_timeout_spin.setRange(5, 120)
+        self.emu_timeout_spin.setValue(self.settings.get('emu_timeout', 10))
+        self.emu_timeout_spin.setSuffix(" сек")
+        emu_timeout_layout.addWidget(self.emu_timeout_spin)
+        emu_timeout_layout.addStretch()
+        sandbox_layout.addLayout(emu_timeout_layout)
+        
+        scroll_layout.addWidget(sandbox_group)
+        
+        # === Настройки интерфейса ===
+        interface_group = QGroupBox(lang.get("interface_settings_group", "Настройки интерфейса"))
+        interface_layout = QVBoxLayout(interface_group)
+        
+        lang_interface_layout = QHBoxLayout()
+        lang_interface_label = QLabel(lang.get("interface_language_label", "Язык интерфейса:"))
+        lang_interface_layout.addWidget(lang_interface_label)
+        self.interface_lang_combo = QComboBox()
+        self.interface_lang_combo.addItems(["Русский", "English"])
+        current_lang_idx = 0 if self.settings.get('language', 'Русский') == 'Русский' else 1
+        self.interface_lang_combo.setCurrentIndex(current_lang_idx)
+        self.interface_lang_combo.currentTextChanged.connect(self.on_language_changed)
+        lang_interface_layout.addWidget(self.interface_lang_combo)
+        lang_interface_layout.addStretch()
+        interface_layout.addLayout(lang_interface_layout)
+        
+        self.notifications_check = QCheckBox(lang.get("notifications_check", "Показывать уведомления"))
+        self.notifications_check.setChecked(self.settings.get('show_notifications', True))
+        interface_layout.addWidget(self.notifications_check)
+        
+        self.sound_check = QCheckBox(lang.get("sound_check", "Звуковые уведомления"))
+        self.sound_check.setChecked(self.settings.get('sound_enabled', False))
+        interface_layout.addWidget(self.sound_check)
+        
+        self.minimize_tray_check = QCheckBox(lang.get("minimize_tray_check", "Сворачивать в трей"))
+        self.minimize_tray_check.setChecked(self.settings.get('minimize_to_tray', False))
+        interface_layout.addWidget(self.minimize_tray_check)
+        
+        scroll_layout.addWidget(interface_group)
+        
+        # === Настройки безопасности ===
+        security_group = QGroupBox(lang.get("security_settings_group", "Настройки безопасности"))
+        security_layout = QVBoxLayout(security_group)
+        
+        self.panic_button_check = QCheckBox(lang.get("panic_button_check", "Кнопка экстренной остановки"))
+        self.panic_button_check.setChecked(self.settings.get('panic_button_enabled', True))
+        self.panic_button_check.setToolTip(lang.get("panic_button_tooltip", "Отображать кнопку для немедленной остановки всех процессов"))
+        security_layout.addWidget(self.panic_button_check)
+        
+        self.auto_update_check = QCheckBox(lang.get("auto_update_check", "Автообновление сигнатур"))
+        self.auto_update_check.setChecked(self.settings.get('auto_update_signatures', True))
+        self.auto_update_check.setToolTip(lang.get("auto_update_tooltip", "Автоматически обновлять базу сигнатур вирусов"))
+        security_layout.addWidget(self.auto_update_check)
+        
+        update_interval_layout = QHBoxLayout()
+        update_interval_label = QLabel(lang.get("update_interval_label", "Интервал обновления (часы):"))
+        update_interval_layout.addWidget(update_interval_label)
+        self.update_interval_spin = QSpinBox()
+        self.update_interval_spin.setRange(1, 168)
+        self.update_interval_spin.setValue(self.settings.get('update_interval', 24))
+        self.update_interval_spin.setSuffix(" ч")
+        update_interval_layout.addWidget(self.update_interval_spin)
+        update_interval_layout.addStretch()
+        security_layout.addLayout(update_interval_layout)
+        
+        self.log_level_layout = QHBoxLayout()
+        log_level_label = QLabel(lang.get("log_level_label", "Уровень логирования:"))
+        self.log_level_layout.addWidget(log_level_label)
+        self.log_level_combo = QComboBox()
+        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
+        log_level = self.settings.get('log_level', 'INFO')
+        log_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+        try:
+            log_idx = log_levels.index(log_level)
+        except ValueError:
+            log_idx = 1
+        self.log_level_combo.setCurrentIndex(log_idx)
+        self.log_level_layout.addWidget(self.log_level_combo)
+        self.log_level_layout.addStretch()
+        security_layout.addLayout(self.log_level_layout)
+        
+        scroll_layout.addWidget(security_group)
+        
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # Кнопки управления
+        buttons_layout = QHBoxLayout()
+        buttons_layout.addStretch()
+        
+        self.btn_reset = QPushButton(lang.get("reset_defaults", "Сбросить настройки"))
+        self.btn_reset.setObjectName("secondaryBtn")
+        self.btn_reset.setFixedHeight(45)
+        self.btn_reset.clicked.connect(self.reset_to_defaults)
+        buttons_layout.addWidget(self.btn_reset)
+        
         self.btn_close_settings = QPushButton(lang["close"])
-        self.btn_close_settings.setObjectName("secondaryBtn")
+        self.btn_close_settings.setObjectName("primaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
-        layout.addWidget(self.btn_close_settings)
+        buttons_layout.addWidget(self.btn_close_settings)
+        
+        layout.addLayout(buttons_layout)
     
-    def apply_theme(self, theme_name: str):
-        """Применить тему немедленно"""
+    def on_language_changed(self, new_lang):
+        """Обработчик смены языка в настройках"""
         if self.parent_ref:
-            self.parent_ref.settings['theme'] = theme_name
-            self.parent_ref.apply_stylesheet()
-            self.parent_ref.save_settings()
+            self.parent_ref.change_language(new_lang)
+    
+    def reset_to_defaults(self):
+        """Сброс настроек к значениям по умолчанию"""
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        reply = QMessageBox.question(self, lang.get("confirm_reset", "Подтверждение"),
+                                    lang.get("reset_confirm_msg", "Вы уверены, что хотите сбросить все настройки?"),
+                                    QMessageBox.Yes | QMessageBox.No)
+        
+        if reply == QMessageBox.Yes:
+            self.timeout_spin.setValue(60)
+            self.poly_check.setChecked(False)
+            self.network_check.setChecked(True)
+            self.deep_scan_check.setChecked(True)
+            self.ml_analysis_check.setChecked(True)
+            self.multi_thread_check.setChecked(True)
+            self.thread_spin.setValue(4)
+            self.auto_quarantine_check.setChecked(True)
+            self.scan_on_access_check.setChecked(True)
+            self.monitor_downloads_check.setChecked(True)
+            self.monitor_desktop_check.setChecked(True)
+            self.monitor_documents_check.setChecked(True)
+            self.sensitivity_combo.setCurrentIndex(1)
+            self.docker_check.setChecked(True)
+            self.behavioral_check.setChecked(True)
+            self.emu_timeout_spin.setValue(10)
+            self.interface_lang_combo.setCurrentIndex(0)
+            self.notifications_check.setChecked(True)
+            self.sound_check.setChecked(False)
+            self.minimize_tray_check.setChecked(False)
+            self.panic_button_check.setChecked(True)
+            self.auto_update_check.setChecked(True)
+            self.update_interval_spin.setValue(24)
+            self.log_level_combo.setCurrentIndex(1)
             
-            # Обновляем состояние кнопок
-            self.btn_dark.setChecked(theme_name == 'Тёмная')
-            self.btn_light.setChecked(theme_name == 'Светлая')
+            QMessageBox.information(self, lang.get("information", "Информация"),
+                                   lang.get("reset_success", "Настройки сброшены к значениям по умолчанию"))
     
     def get_settings(self):
         """Получить текущие настройки"""
+        sensitivity_map = {0: 'low', 1: 'medium', 2: 'high'}
         return {
-            'theme': self.parent_ref.settings.get('theme', 'Тёмная'),
+            'theme': 'Dark',  # Теперь только тёмная тема
             'timeout': self.timeout_spin.value(),
             'use_poly_default': self.poly_check.isChecked(),
-            'auto_disable_network': self.network_check.isChecked()
+            'auto_disable_network': self.network_check.isChecked(),
+            'deep_scan': self.deep_scan_check.isChecked(),
+            'ml_analysis': self.ml_analysis_check.isChecked(),
+            'multi_thread': self.multi_thread_check.isChecked(),
+            'thread_count': self.thread_spin.value(),
+            'auto_quarantine': self.auto_quarantine_check.isChecked(),
+            'scan_on_access': self.scan_on_access_check.isChecked(),
+            'monitor_downloads': self.monitor_downloads_check.isChecked(),
+            'monitor_desktop': self.monitor_desktop_check.isChecked(),
+            'monitor_documents': self.monitor_documents_check.isChecked(),
+            'sensitivity': sensitivity_map.get(self.sensitivity_combo.currentIndex(), 'medium'),
+            'use_docker': self.docker_check.isChecked(),
+            'behavioral_analysis': self.behavioral_check.isChecked(),
+            'emu_timeout': self.emu_timeout_spin.value(),
+            'language': self.interface_lang_combo.currentText(),
+            'show_notifications': self.notifications_check.isChecked(),
+            'sound_enabled': self.sound_check.isChecked(),
+            'minimize_to_tray': self.minimize_tray_check.isChecked(),
+            'panic_button_enabled': self.panic_button_check.isChecked(),
+            'auto_update_signatures': self.auto_update_check.isChecked(),
+            'update_interval': self.update_interval_spin.value(),
+            'log_level': self.log_level_combo.currentText()
         }
     
     def update_texts(self):
@@ -1941,28 +2436,64 @@ class SettingsDialog(QDialog):
                 widget.setText(lang["application_settings"])
                 break
         
-        # Обновляем GroupBox
+        # Обновляем все GroupBox
         groups = self.findChildren(QGroupBox)
-        for group in groups:
-            if group.title() == "Theme" or group.title() == "Тема" or group.title() == lang["theme_group"]:
-                group.setTitle(lang["theme_group"])
-            elif group.title() == "Analysis Settings" or group.title() == "Настройки анализа" or group.title() == lang["analysis_settings_group"]:
-                group.setTitle(lang["analysis_settings_group"])
+        group_map = {
+            0: lang["analysis_settings_group"],
+            1: lang.get("antivirus_settings_group", "Настройки антивируса"),
+            2: lang.get("sandbox_settings_group", "Настройки песочницы"),
+            3: lang.get("interface_settings_group", "Настройки интерфейса"),
+            4: lang.get("security_settings_group", "Настройки безопасности")
+        }
+        for i, group in enumerate(groups):
+            if i in group_map:
+                group.setTitle(group_map[i])
         
-        # Обновляем кнопки тем
-        self.btn_dark.setText(lang["dark_theme"])
-        self.btn_light.setText(lang["light_theme"])
-        
-        # Обновляем label timeout
+        # Обновляем все label, checkbox, button
         for label in self.findChildren(QLabel):
-            if "timeout" in label.text().lower() or "time" in label.text().lower() or label.text().startswith("Время анализа") or label.text() == lang["timeout_label"]:
+            text = label.text()
+            if any(kw in text.lower() for kw in ["timeout", "time", "время анализа", "analysis time"]):
                 label.setText(lang["timeout_label"])
+            elif any(kw in text.lower() for kw in ["thread", "поток"]):
+                label.setText(lang.get("thread_count_label", "Количество потоков:"))
+            elif any(kw in text.lower() for kw in ["sensitivity", "чувствительность"]):
+                label.setText(lang.get("sensitivity_label", "Чувствительность:"))
+            elif any(kw in text.lower() for kw in ["emu timeout", "таймаут эмуляции"]):
+                label.setText(lang.get("emu_timeout_label", "Таймаут эмуляции (сек):"))
+            elif any(kw in text.lower() for kw in ["language", "язык интерфейса"]):
+                label.setText(lang.get("interface_language_label", "Язык интерфейса:"))
+            elif any(kw in text.lower() for kw in ["update interval", "интервал обновления"]):
+                label.setText(lang.get("update_interval_label", "Интервал обновления (часы):"))
+            elif any(kw in text.lower() for kw in ["log level", "уровень логирования"]):
+                label.setText(lang.get("log_level_label", "Уровень логирования:"))
         
         # Обновляем чекбоксы
         self.poly_check.setText(lang["poly_check"])
         self.network_check.setText(lang["network_check"])
+        self.deep_scan_check.setText(lang.get("deep_scan_check", "Глубокий анализ файлов"))
+        self.ml_analysis_check.setText(lang.get("ml_analysis_check", "Использовать ML классификатор"))
+        self.multi_thread_check.setText(lang.get("multi_thread_check", "Многопоточное сканирование"))
+        self.auto_quarantine_check.setText(lang.get("auto_quarantine_check", "Автоматический карантин"))
+        self.scan_on_access_check.setText(lang.get("scan_on_access_check", "Сканирование при доступе"))
+        self.monitor_downloads_check.setText(lang.get("monitor_downloads_check", "Мониторить папку Загрузки"))
+        self.monitor_desktop_check.setText(lang.get("monitor_desktop_check", "Мониторить Рабочий стол"))
+        self.monitor_documents_check.setText(lang.get("monitor_documents_check", "Мониторить Документы"))
+        self.docker_check.setText(lang.get("docker_check", "Использовать Docker изоляцию"))
+        self.behavioral_check.setText(lang.get("behavioral_check", "Поведенческий анализ v2.0"))
+        self.notifications_check.setText(lang.get("notifications_check", "Показывать уведомления"))
+        self.sound_check.setText(lang.get("sound_check", "Звуковые уведомления"))
+        self.minimize_tray_check.setText(lang.get("minimize_tray_check", "Сворачивать в трей"))
+        self.panic_button_check.setText(lang.get("panic_button_check", "Кнопка экстренной остановки"))
+        self.auto_update_check.setText(lang.get("auto_update_check", "Автообновление сигнатур"))
         
-        # Обновляем кнопку закрытия
+        # Обновляем combobox sensitivity
+        self.sensitivity_combo.clear()
+        self.sensitivity_combo.addItems([lang.get("sensitivity_low", "Низкая"), 
+                                         lang.get("sensitivity_medium", "Средняя"), 
+                                         lang.get("sensitivity_high", "Высокая")])
+        
+        # Обновляем кнопки
+        self.btn_reset.setText(lang.get("reset_defaults", "Сбросить настройки"))
         self.btn_close_settings.setText(lang["close"])
 
 

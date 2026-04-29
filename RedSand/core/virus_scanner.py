@@ -20,37 +20,89 @@ class VirusScanner:
     """
     
     def __init__(self):
-        # ТОЛЬКО явные сигнатуры вредоносного ПО
+        # ТОЛЬКО явные сигнатуры вредоносного ПО (расширенная база)
         self.malware_signatures = {
             # Known malware hashes (примеры)
             'known_bad_hashes': set(),
             
-            # Явные строки, которые встречаются ТОЛЬКО в малвари
+            # Явные строки, которые встречаются ТОЛЬКО в малвари (расширено)
             # Это НЕ просто упоминания, а конкретные паттерны использования
             'malicious_strings': [
-                # Инъекция кода - только если используется с вредоносными намерениями
+                # === ИНЪЕКЦИЯ КОДА ===
                 r'CreateRemoteThread\s*\(\s*NULL',  # Инъекция в NULL процесс
                 r'VirtualAllocEx\s*\([^)]*PAGE_EXECUTE_READWRITE',  # Выделение исполняемой памяти
                 r'WriteProcessMemory\s*\([^)]*explorer\.exe',  # Запись в explorer
                 r'WriteProcessMemory\s*\([^)]*svchost\.exe',  # Запись в svchost
+                r'WriteProcessMemory\s*\([^)]*lsass\.exe',  # Запись в lsass (кража паролей)
                 r'NtCreateThreadEx\s*\([^)]*HIDE_THREAD',  # Скрытие потока
-                # Автозагрузка через реестр - только подозрительные пути
+                r'NtUnmapViewOfSection',  # Process Hollowing
+                r'SetThreadContext.*Rip.*Eip',  # Манипуляция с указателем инструкций
+                r'QueueUserAPC.*memory',  # APC инъекция
+                
+                # === АВТОЗАГРУЗКА ЧЕРЕЗ РЕЕСТР ===
                 r'RegSetValueEx.*Run.*\\\\Temp\\\\',  # Автозагрузка из Temp
                 r'RegSetValueEx.*Run.*\\\\AppData\\\\',  # Автозагрузка из AppData
-                # Скачивание и запуск - только скрытые загрузки
+                r'RegSetValueEx.*RunOnce.*powershell',  # Одноразовая автозагрузка PowerShell
+                r'RegCreateKey.*SOFTWARE\\\\Microsoft\\\\Windows\\\\CurrentVersion\\\\Run',
+                
+                # === СКАЧИВАНИЕ И ЗАПУСК ===
                 r'URLDownloadToFile.*\.exe.*hidden',  # Скрытая загрузка exe
                 r'InternetOpenUrl.*\.exe.*silent',  # Тихая загрузка exe
-                # Шифрование файлов - только ransomware паттерны
+                r'WinHttpOpen.*download.*execute',  # HTTP загрузка + выполнение
+                r'certutil.*-urlcache.*-f.*\.exe',  # Обход через certutil
+                r'bitsadmin.*transfer.*download',  # Обход через BITS
+                
+                # === ШИФРОВАНИЕ ФАЙЛОВ (RANSOMWARE) ===
                 r'CryptEncrypt.*\.(locked|crypto|wallet)',  # Шифрование с расширением
                 r'your files.*encrypted.*bitcoin',  # Уведомление о шифровании + выкуп
                 r'send.*bitcoin.*decrypt.*files',  # Требование выкупа
-                # Отключение защиты - только вредоносное
+                r'vssadmin.*delete.*shadows',  # Удаление теневых копий
+                r'wmic.*shadowcopy.*delete',  # Альтернативное удаление теней
+                r'bcdedit.*recoveryenabled.*no',  # Отключение восстановления
+                r'wbadmin.*delete.*backup',  # Удаление бэкапов
+                
+                # === ОТКЛЮЧЕНИЕ ЗАЩИТЫ ===
                 r'StopService.*Windows Defender',  # Остановка защитника Windows
                 r'StopService.*Security Center',  # Остановка центра безопасности
+                r'StopService.*MsSecSvc',  # Microsoft Security Service
                 r'RegDeleteKey.*DisableAntiSpyware',  # Отключение антиспайваре
-                # Маскировка под системные процессы
+                r'RegSetValue.*DisableRealtimeMonitoring.*1',  # Отключение мониторинга
+                r'Set-MpPreference.*DisableRealtimeMonitoring.*\$true',  # PowerShell отключение
+                r'Add-MpPreference.*ExclusionPath',  # Добавление исключений
+                
+                # === МАСКИРОВКА ПОД СИСТЕМНЫЕ ПРОЦЕССЫ ===
                 r'CreateProcess.*mspaint.*svchost',  # Маскировка под svchost
                 r'RenameFile.*taskmgr',  # Переименование диспетчера задач
+                r'StrComp.*svchost.*exe.*vbBinaryCompare',  # Сравнение с svchost
+                r'GetModuleHandle.*ntoskrnl',  # Доступ к ядру
+                
+                # === КЕЙЛОГГИНГ И СЛЕЖКА ===
+                r'SetWindowsHookEx.*WH_KEYBOARD',  # Перехват клавиатуры
+                r'GetAsyncKeyState',  # Получение состояния клавиш
+                r'GetForegroundWindow.*keylog',  # Логирование активного окна
+                r'BitBlt.*screen.*capture',  # Скриншоты
+                r'GetClipboardData.*text',  # Кража из буфера обмена
+                
+                # === СЕТЕВЫЕ УГРОЗЫ ===
+                r'socket.*AF_INET.*SOCK_STREAM.*connect',  # TCP соединение
+                r'send.*credit.*card.*data',  # Отправка данных карт
+                r'connect.*pool\..*mining',  # Подключение к майнинг пулу
+                r'IRC.*PRIVMSG.*bot',  # IRC ботнет
+                r'User-Agent.*Mozilla.*botnet',  # Ботнет User-Agent
+                
+                # === КРИПТОМАЙНИНГ ===
+                r'stratum\+tcp://',  # Stratum протокол майнинга
+                r'cryptonight.*hash',  # Алгоритм Cryptonight
+                r'xmrig.*donate.*level',  # XMRig майнер
+                r'cpuminer.*--url',  # CPU майнер
+                r'gpu.*miner.*pool',  # GPU майнинг пул
+                
+                # === RAT (REMOTE ACCESS TROJAN) ===
+                r'vnc.*server.*start',  # VNC сервер
+                r'remote.*desktop.*bypass',  # Обход RDP
+                r'webcam.*capture.*stream',  # Трансляция веб-камеры
+                r'microphone.*record.*send',  # Запись микрофона
+                r'shell.*command.*execute.*remote',  # Удалённое выполнение команд
             ],
         }
         
@@ -64,6 +116,14 @@ class VirusScanner:
             r'iex\s*\(\s*New-Object.*WebClient',  # WebClient + iex
             r'wscript\.shell.*run.*hide',  # Скрытый запуск VBScript
             r'mshta.*javascript:.*eval',  # MSHTA с eval
+            r'cscript.*//B.*\.vbs',  # Скрытый запуск VBScript
+            r'forfiles.*cmd.*calc',  # Техника живущего вне файла
+            r'reg.*add.*HKCU.*Run',  # Добавление в автозагрузку
+            r'schtasks.*create.*hidden',  # Создание скрытой задачи
+            r'at\s+\d+:\d+.*cmd',  # Планировщик задач
+            r'WScript\.Sleep.*\d{5,}',  # Длительная задержка (возможно анти-песочница)
+            r'IsDebuggerPresent.*false',  # Обход отладчика
+            r'CheckRemoteDebuggerPresent',  # Проверка на отладчик
         ]
         
         # Нормальные строки, которые НЕ должны триггерить детект
