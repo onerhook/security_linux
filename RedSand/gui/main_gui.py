@@ -643,7 +643,9 @@ class MainModeSelector(QWidget):
         modes_layout.addWidget(self.btn_antivirus)
         
         # Кнопка Анализ файлов
-        self.btn_analysis = QPushButton("🔍\\n" + lang["analysis_mode"])
+        # Используем язык по умолчанию (Русский) при инициализации
+        default_lang = LANGUAGES["Русский"]
+        self.btn_analysis = QPushButton("🔍\n" + default_lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
         self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
@@ -708,7 +710,7 @@ class MainModeSelector(QWidget):
         lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText("🔍\\n" + lang["analysis_mode"])
+        self.btn_analysis.setText("🔍\n" + lang["analysis_mode"])
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
