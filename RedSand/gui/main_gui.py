@@ -24,12 +24,49 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
     QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QStackedWidget
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
 # Импорт компонентов ядра
 from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
 from core.virus_scanner import VirusScanner
+from core.extended_scanner import ExtendedVirusScanner
+
+
+class AnalysisWorker(QThread):
+    """Рабочий поток для анализа файлов без блокировки GUI"""
+    progress = pyqtSignal(int, str)  # прогресс, текст
+    result_ready = pyqtSignal(dict)  # результаты анализа
+    error_occurred = pyqtSignal(str)  # ошибка
+    
+    def __init__(self, file_path: str, use_poly: bool = False, timeout: int = 60):
+        super().__init__()
+        self.file_path = file_path
+        self.use_poly = use_poly
+        self.timeout = timeout
+        self.scanner = ExtendedVirusScanner()
+    
+    def run(self):
+        try:
+            # Прогресс 25% - начало анализа
+            self.progress.emit(25, "Starting analysis...")
+            
+            # Прогресс 50% - статический анализ
+            self.progress.emit(50, "Static analysis...")
+            
+            # Прогресс 75% - проверка сигнатур
+            self.progress.emit(75, "Signature check...")
+            
+            # Реальный анализ файла
+            scan_result = self.scanner.scan_file(self.file_path)
+            
+            # Прогресс 100% - завершено
+            self.progress.emit(100, "Analysis complete!")
+            
+            self.result_ready.emit(scan_result)
+            
+        except Exception as e:
+            self.error_occurred.emit(str(e))
 
 
 # Только тёмная тема оформления
@@ -660,12 +697,29 @@ class MainModeSelector(QWidget):
         top_panel = QHBoxLayout()
         top_panel.addStretch()
         
-        # Кнопка выхода в правом верхнем углу
-        self.btn_exit = QPushButton("❌ Выйти")
+        # Кнопка выхода в правом верхнем углу (маленькая, прямоугольная, без эмодзи)
+        self.btn_exit = QPushButton("Выйти")
         self.btn_exit.setObjectName("exitBtn")
-        self.btn_exit.setFixedSize(120, 40)
+        self.btn_exit.setFixedSize(80, 30)  # Маленький прямоугольный размер
+        self.btn_exit.setStyleSheet("""
+            QPushButton#exitBtn {
+                background-color: #c0392b;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                font-size: 12px;
+                font-weight: bold;
+                padding: 5px 10px;
+            }
+            QPushButton#exitBtn:hover {
+                background-color: #e74c3c;
+            }
+            QPushButton#exitBtn:pressed {
+                background-color: #a93226;
+            }
+        """)
         self.btn_exit.clicked.connect(lambda: self.parent_ref.close() if self.parent_ref else None)
-        self.btn_exit.setToolTip("Закрыть приложение")
+        self.btn_exit.setToolTip("Закрыть приложение / Exit")
         top_panel.addWidget(self.btn_exit)
         
         layout.addLayout(top_panel)
@@ -761,6 +815,12 @@ class MainModeSelector(QWidget):
         if not self.parent_ref:
             return
         lang = LANGUAGES.get(self.parent_ref.current_lang, LANGUAGES["Русский"])
+        
+        # Exit button translation
+        if self.parent_ref.current_lang == "English":
+            self.btn_exit.setText("Exit")
+        else:
+            self.btn_exit.setText("Выйти")
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
         self.btn_analysis.setText("🔍\n" + lang["analysis_mode"])
@@ -1182,7 +1242,7 @@ class AnalysisPanel(QWidget):
             self.file_path_edit.setText(file_path)
     
     def start_analysis(self):
-        """Запуск анализа файла с использованием VirusScanner"""
+        """Запуск анализа файла в отдельном потоке без блокировки GUI"""
         file_path = self.file_path_edit.text().strip()
         
         # Получаем язык ПЕРЕД использованием
@@ -1193,13 +1253,18 @@ class AnalysisPanel(QWidget):
                                lang.get("no_file_selected_error", "Please select an existing file for analysis."))
             return
         
+        # Проверяем, не запущен ли уже анализ
+        if self.worker and self.worker.isRunning():
+            QMessageBox.warning(self, lang.get("warning", "Warning"),
+                               lang.get("analysis_in_progress", "Analysis is already in progress!"))
+            return
+        
         self.btn_analyze.setEnabled(False)
         self.progress_bar.setValue(0)
         self.log_text.clear()
         self.results_summary.setVisible(True)
         self.results_table.setVisible(False)
-        
-        is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
+        self.analysis_completed = False
         
         self.log_message('INFO', f"{lang['analysis_start_log']} {file_path}")
         self.log_message('INFO', lang['using_virus_scanner'])
@@ -1215,81 +1280,75 @@ class AnalysisPanel(QWidget):
         if self.parent_ref:
             self.parent_ref.scan_history.append(scan_record)
         
-        # Прогресс анализа
-        self.progress_bar.setValue(25)
-        self.progress_label.setText(lang['static_analysis_progress'])
-        self.log_message('INFO', lang['static_analysis_log'])
+        # Создаём и запускаем worker в отдельном потоке
+        use_poly = self.poly_check.isChecked() if hasattr(self, 'poly_check') else False
+        timeout = self.timeout_spin.value() if hasattr(self, 'timeout_spin') else 60
         
-        self.progress_bar.setValue(50)
-        self.progress_label.setText(lang['signature_check_progress'])
-        self.log_message('INFO', lang['signature_check_log'])
+        self.worker = AnalysisWorker(file_path, use_poly=use_poly, timeout=timeout)
+        self.worker.progress.connect(self.update_progress)
+        self.worker.result_ready.connect(self.on_analysis_complete)
+        self.worker.error_occurred.connect(self.on_analysis_error)
+        self.worker.start()
+    
+    def update_progress(self, value: int, text: str):
+        """Обновление прогресс-бара из потока"""
+        self.progress_bar.setValue(value)
+        self.progress_label.setText(text)
+        self.log_message('INFO', text)
+    
+    def on_analysis_complete(self, scan_result: dict):
+        """Обработка результатов анализа (вызывается в главном потоке)"""
+        if self.analysis_completed:
+            return
+        self.analysis_completed = True
         
-        self.progress_bar.setValue(75)
-        self.progress_label.setText(lang['behavior_analysis_progress'])
-        self.log_message('INFO', lang['behavior_analysis_log'])
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
         
-        # Используем VirusScanner для реального анализа
-        try:
-            scanner = VirusScanner()
-            scan_result = scanner.scan_file(file_path)
-            
-            threat_level = scan_result.get('threat_level', 'CLEAN')
-            risk_score = scan_result.get('risk_score', 0)
-            detected_threats = scan_result.get('detected_threats', [])
-            matched_signatures = scan_result.get('matched_signatures', [])
-            matched_patterns = scan_result.get('matched_patterns', [])
-            
-            # Определяем статус и цвет
-            if threat_level == 'MALICIOUS':
-                status_text = lang["status_malicious"]
-                status_color = "#dc2626"
-                final_threat_level = 'MALICIOUS'
-            elif threat_level == 'SUSPICIOUS':
-                status_text = lang["status_suspicious"]
-                status_color = "#d97706"
-                final_threat_level = 'SUSPICIOUS'
-            else:
-                status_text = lang["status_clean"]
-                status_color = "#059669"
-                final_threat_level = 'CLEAN'
-            
-            # Получаем рекомендацию
-            if threat_level == 'MALICIOUS':
-                recommendation = lang.get("rec_malicious", "DO NOT USE! File contains malicious code.")
-                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_delete", "Delete")
-            elif threat_level == 'SUSPICIOUS':
-                recommendation = lang.get("rec_suspicious", "Be careful. File contains suspicious elements.")
-                action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_keep", "Keep")
-            else:
-                recommendation = lang.get("rec_clean", "File is safe. You can use it.")
-                action_text = lang.get("action_keep", "Keep")
-            
-            # Автоматически помещаем в карантин опасные и подозрительные файлы
-            if threat_level in ['MALICIOUS', 'SUSPICIOUS'] and self.parent_ref:
-                try:
-                    reason = f"{threat_level}: Risk Score {risk_score}"
-                    if detected_threats:
-                        reason += f" - {', '.join(detected_threats[:2])}"
-                    self.parent_ref.quarantine_manager.add_to_quarantine(
-                        file_path=file_path,
-                        reason=reason
-                    )
-                    self.log_message('WARNING', f"{lang['file_quarantined_log']} {reason}")
-                except Exception as e:
-                    self.log_message('ERROR', f"{lang['quarantine_error_log']} {e}")
-            
-        except Exception as e:
-            threat_level = 'ERROR'
-            status_text = "❌ " + lang.get("status_malicious", "Error") if is_ru else "❌ Error"
-            status_color = "#666666"
-            final_threat_level = 'ERROR'
-            recommendation = str(e)
-            action_text = ""
-            detected_threats = []
-            matched_signatures = []
-            matched_patterns = []
-            risk_score = 0
-            self.log_message('ERROR', f"{lang['scan_error_log']} {e}")
+        threat_level = scan_result.get('threat_level', 'CLEAN')
+        risk_score = scan_result.get('risk_score', 0)
+        detected_threats = scan_result.get('detected_threats', [])
+        matched_signatures = scan_result.get('matched_signatures', [])
+        matched_patterns = scan_result.get('matched_patterns', [])
+        
+        # Определяем статус и цвет
+        if threat_level == 'MALICIOUS':
+            status_text = lang["status_malicious"]
+            status_color = "#dc2626"
+            final_threat_level = 'MALICIOUS'
+        elif threat_level == 'SUSPICIOUS':
+            status_text = lang["status_suspicious"]
+            status_color = "#d97706"
+            final_threat_level = 'SUSPICIOUS'
+        else:
+            status_text = lang["status_clean"]
+            status_color = "#059669"
+            final_threat_level = 'CLEAN'
+        
+        # Получаем рекомендацию
+        if threat_level == 'MALICIOUS':
+            recommendation = lang.get("rec_malicious", "DO NOT USE! File contains malicious code.")
+            action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_delete", "Delete")
+        elif threat_level == 'SUSPICIOUS':
+            recommendation = lang.get("rec_suspicious", "Be careful. File contains suspicious elements.")
+            action_text = lang.get("action_quarantine", "Quarantine") + " / " + lang.get("action_keep", "Keep")
+        else:
+            recommendation = lang.get("rec_clean", "File is safe. You can use it.")
+            action_text = lang.get("action_keep", "Keep")
+        
+        # Автоматически помещаем в карантин опасные и подозрительные файлы
+        if threat_level in ['MALICIOUS', 'SUSPICIOUS'] and self.parent_ref:
+            try:
+                reason = f"{threat_level}: Risk Score {risk_score}"
+                if detected_threats:
+                    reason += f" - {', '.join(detected_threats[:2])}"
+                self.parent_ref.quarantine_manager.add_to_quarantine(
+                    file_path=self.file_path_edit.text().strip(),
+                    reason=reason
+                )
+                self.log_message('WARNING', f"{lang['file_quarantined_log']} {reason}")
+            except Exception as e:
+                self.log_message('ERROR', f"{lang['quarantine_error_log']} {e}")
         
         self.progress_bar.setValue(100)
         self.progress_label.setText(lang["analysis_complete"])
@@ -1301,12 +1360,11 @@ class AnalysisPanel(QWidget):
         
         # Формируем данные для таблицы результатов
         file_type = lang.get("file_type", "File Type")
-        
         size_label = lang.get("size", "Size")
-        size_value = f"{os.path.getsize(file_path)} bytes"
+        size_value = f"{os.path.getsize(self.file_path_edit.text().strip())} bytes"
         
         results_data = [
-            (lang.get("col_file", "File"), os.path.basename(file_path)),
+            (lang.get("col_file", "File"), os.path.basename(self.file_path_edit.text().strip())),
             (lang.get("col_status", "Status"), status_text),
             (lang.get("recommendation", "Recommendation"), recommendation),
             (lang.get("action_required", "Action Required"), action_text),
@@ -1369,7 +1427,7 @@ class AnalysisPanel(QWidget):
         # Показываем результат
         msg_title = lang["analysis_complete"]
         if threat_level == 'MALICIOUS':
-            msg = f"⚠️ {lang['status_malicious']}!\n\n{recommendation}\n\n{lang.get('action_quarantine', 'Quarantine')}: {os.path.basename(file_path)}"
+            msg = f"⚠️ {lang['status_malicious']}!\n\n{recommendation}\n\n{lang.get('action_quarantine', 'Quarantine')}: {os.path.basename(self.file_path_edit.text().strip())}"
             QMessageBox.warning(self, msg_title, msg)
         elif threat_level == 'SUSPICIOUS':
             msg = f"⚠️ {lang['status_suspicious']}!\n\n{recommendation}"
@@ -1377,6 +1435,37 @@ class AnalysisPanel(QWidget):
         else:
             msg = f"✅ {lang['status_clean']}!\n\n{recommendation}"
             QMessageBox.information(self, msg_title, msg)
+    
+    def on_analysis_error(self, error_msg: str):
+        """Обработка ошибки анализа (вызывается в главном потоке)"""
+        if self.analysis_completed:
+            return
+        self.analysis_completed = True
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        self.progress_bar.setValue(100)
+        self.progress_label.setText(f"❌ Error: {error_msg}")
+        self.log_message('ERROR', f"{lang.get('scan_error_log', 'Scan error:')} {error_msg}")
+        
+        self.results_summary.setVisible(False)
+        self.results_table.setVisible(True)
+        self.results_table.setRowCount(1)
+        
+        error_param = QTableWidgetItem(lang.get("error", "Error"))
+        error_param.setFlags(error_param.flags() & ~Qt.ItemIsEditable)
+        error_param.setFont(QFont("Segoe UI", 12, QFont.Bold))
+        self.results_table.setItem(0, 0, error_param)
+        
+        error_value = QTableWidgetItem(error_msg)
+        error_value.setFlags(error_value.flags() & ~Qt.ItemIsEditable)
+        error_value.setFont(QFont("Segoe UI", 12))
+        error_value.setBackground(QColor("#666666"))
+        error_value.setForeground(QColor("#ffffff"))
+        self.results_table.setItem(0, 1, error_value)
+        
+        self.btn_analyze.setEnabled(True)
+        QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('analysis_error', 'Analysis failed:')} {error_msg}")
     
     def log_message(self, level: str, message: str):
         """Запись сообщения в лог"""
