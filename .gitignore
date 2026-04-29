@@ -1,1 +1,27 @@
-Nothing should be ignored in this case, as only a Python source file (`RedSand/gui/main_gui.py`) was modified and there are no build artifacts, dependencies, or temporary files in the changes.
+# Compiled Python files
+*.pyc
+__pycache__/
+
+# Dependencies
+.venv/
+venv/
+pip-tools/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# Environment variables
+.env
+.env.local
+*.env.*
+
+# Editors
+.vscode/
+.idea/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/

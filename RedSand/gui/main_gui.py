@@ -866,6 +866,9 @@ class AntivirusPanel(QWidget):
         if not self.parent_ref:
             return
             
+        # Получаем текущий язык
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
         if self.av_active:
             # Выключаем
             try:
