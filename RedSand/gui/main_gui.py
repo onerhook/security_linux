@@ -2312,14 +2312,14 @@ class SettingsDialog(QDialog):
         buttons_layout = QHBoxLayout()
         buttons_layout.addStretch()
         
-        self.btn_reset = QPushButton(lang.get("reset_defaults", "Сбросить настройки"))
+        self.btn_reset = QPushButton(lang.get("reset_defaults", "Reset to Defaults"))
         self.btn_reset.setObjectName("secondaryBtn")
         self.btn_reset.setFixedHeight(45)
         self.btn_reset.clicked.connect(self.reset_to_defaults)
         buttons_layout.addWidget(self.btn_reset)
         
-        self.btn_close_settings = QPushButton(lang["close"])
-        self.btn_close_settings.setObjectName("primaryBtn")
+        self.btn_close_settings = QPushButton(lang.get("close", "Close"))
+        self.btn_close_settings.setObjectName("secondaryBtn")
         self.btn_close_settings.setFixedHeight(45)
         self.btn_close_settings.clicked.connect(self.accept)
         buttons_layout.addWidget(self.btn_close_settings)
@@ -2458,8 +2458,8 @@ class SettingsDialog(QDialog):
                                          lang.get("sensitivity_high", "Высокая")])
         
         # Обновляем кнопки
-        self.btn_reset.setText(lang.get("reset_defaults", "Сбросить настройки"))
-        self.btn_close_settings.setText(lang["close"])
+        self.btn_reset.setText(lang.get("reset_defaults", "Reset to Defaults"))
+        self.btn_close_settings.setText(lang.get("close", "Close"))
 
 
 class RedSandSecureGUI(QMainWindow):
