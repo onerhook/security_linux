@@ -656,6 +656,20 @@ class MainModeSelector(QWidget):
         layout.setSpacing(30)
         layout.setContentsMargins(50, 50, 50, 50)
         
+        # Верхняя панель с кнопкой выхода
+        top_panel = QHBoxLayout()
+        top_panel.addStretch()
+        
+        # Кнопка выхода в правом верхнем углу
+        self.btn_exit = QPushButton("❌ Выйти")
+        self.btn_exit.setObjectName("exitBtn")
+        self.btn_exit.setFixedSize(120, 40)
+        self.btn_exit.clicked.connect(lambda: self.parent_ref.close() if self.parent_ref else None)
+        self.btn_exit.setToolTip("Закрыть приложение")
+        top_panel.addWidget(self.btn_exit)
+        
+        layout.addLayout(top_panel)
+        
         # Заголовок
         title_label = QLabel("RedSand Secure")
         title_label.setObjectName("titleLabel")

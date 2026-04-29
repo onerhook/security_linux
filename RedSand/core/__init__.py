@@ -23,10 +23,9 @@ RedSand Core - Основные модули системы безопаснос
 from .virus_scanner import VirusScanner
 from .extended_scanner import ExtendedVirusScanner
 from .threat_classifier import ThreatClassifier
-from .sandbox import SandboxAnalyzer
-from .orchestrator import AnalysisOrchestrator
-from .realtime_antivirus import RealTimeAntivirus
-from .quarantine_manager import QuarantineManager
+from .sandbox import SandboxAnalyzer, DynamicSandbox
+from .orchestrator import RedSandSecure as AnalysisOrchestrator
+from .realtime_antivirus import RealTimeAntivirus, QuarantineManager
 from .report_generator import ReportGenerator
 
 __all__ = [
@@ -34,6 +33,7 @@ __all__ = [
     'ExtendedVirusScanner',
     'ThreatClassifier',
     'SandboxAnalyzer',
+    'DynamicSandbox',
     'AnalysisOrchestrator',
     'RealTimeAntivirus',
     'QuarantineManager',
