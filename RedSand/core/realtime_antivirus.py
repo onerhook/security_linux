@@ -15,9 +15,17 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any, List, Callable
 from dataclasses import dataclass, asdict
-from watchdog.observers import Observer
-from watchdog.events import FileSystemEventHandler, FileCreatedEvent, FileModifiedEvent
 import logging
+
+# Исправленный импорт для watchdog 6.x
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, FileCreatedEvent, FileModifiedEvent
+except ImportError:
+    # Для старых версий watchdog
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.events import FileCreatedEvent, FileModifiedEvent
 
 # Добавляем путь к модулям
 sys.path.insert(0, os.path.join(os.path.dirname(__file__)))
