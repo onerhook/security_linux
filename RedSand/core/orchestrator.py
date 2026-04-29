@@ -469,10 +469,7 @@ class RedSandSecure:
             # Статический анализ
             static_results = self.analyze_static(file_path)
 
-            # Полиморфная генерация (опционально)
-            if use_poly:
-                poly_variants = self.poly_engine.generate_variants(file_path, count=3)
-                static_results['poly_variants'] = poly_variants
+            # Полиморфная генерация удалена - функция больше не используется
 
             # Динамический анализ
             dynamic_events = self.run_dynamic_analysis(file_path, timeout)

@@ -548,7 +548,22 @@ LANGUAGES = {
         "error": "Ошибка",
         "av_activated": "Антивирус активирован",
         "deletion_error": "Ошибка удаления:",
-        "no_threats": "Нет угроз"
+        "no_threats": "Нет угроз",
+        "yes": "Да",
+        "no": "Нет",
+        "suspicious_file_warning": "Подозрительный файл обнаружен. Рекомендуется дополнительная проверка.",
+        # Подсказки настроек
+        "poly_check_tooltip": "Использовать полиморфный движок по умолчанию (устарело)",
+        "network_check_tooltip": "Автоматически отключать сеть при анализе",
+        "deep_scan_tooltip": "Выполнять полный эвристический анализ",
+        "ml_analysis_tooltip": "Использовать машинное обучение для классификации угроз",
+        "multi_thread_tooltip": "Использовать несколько потоков для ускорения сканирования",
+        "auto_quarantine_tooltip": "Автоматически помещать опасные файлы в карантин",
+        "scan_on_access_tooltip": "Сканировать файлы при каждом обращении к ним",
+        "docker_tooltip": "Запускать подозрительные файлы в Docker контейнере",
+        "behavioral_tooltip": "Использовать эмуляцию Windows API для анализа поведения",
+        "panic_button_tooltip": "Отображать кнопку для немедленной остановки всех процессов",
+        "auto_update_tooltip": "Автоматически обновлять базу сигнатур вирусов"
     },
     "English": {
         "title": "RedSand Secure",
@@ -685,7 +700,22 @@ LANGUAGES = {
         "error": "Error",
         "av_activated": "Antivirus Activated",
         "deletion_error": "Deletion error:",
-        "no_threats": "None"
+        "no_threats": "None",
+        "yes": "Yes",
+        "no": "No",
+        "suspicious_file_warning": "Suspicious file detected. Additional verification recommended.",
+        # Settings tooltips
+        "poly_check_tooltip": "Use polymorphic engine by default (deprecated)",
+        "network_check_tooltip": "Automatically disable network during analysis",
+        "deep_scan_tooltip": "Perform full heuristic analysis",
+        "ml_analysis_tooltip": "Use machine learning for threat classification",
+        "multi_thread_tooltip": "Use multiple threads to speed up scanning",
+        "auto_quarantine_tooltip": "Automatically quarantine dangerous files",
+        "scan_on_access_tooltip": "Scan files on every access",
+        "docker_tooltip": "Run suspicious files in Docker container",
+        "behavioral_tooltip": "Use Windows API emulation for behavior analysis",
+        "panic_button_tooltip": "Display button for immediate stop of all processes",
+        "auto_update_tooltip": "Automatically update virus signatures database"
     }
 }
 
@@ -755,7 +785,7 @@ class MainModeSelector(QWidget):
         modes_layout.setAlignment(Qt.AlignCenter)
         
         # Кнопка Антивирус - убрано "Реального времени"
-        self.btn_antivirus = QPushButton("🛡️\nАНТИВИРУС")
+        self.btn_antivirus = QPushButton("\nАНТИВИРУС")
         self.btn_antivirus.setObjectName("modeBtn")
         self.btn_antivirus.clicked.connect(lambda: self.mode_selected.emit("antivirus"))
         self.btn_antivirus.setToolTip("Мониторинг системы и автоматическая защита")
@@ -764,7 +794,7 @@ class MainModeSelector(QWidget):
         # Кнопка Анализ файлов
         # Используем язык по умолчанию (Русский) при инициализации
         default_lang = LANGUAGES["Русский"]
-        self.btn_analysis = QPushButton("🔍\n" + default_lang["analysis_mode"])
+        self.btn_analysis = QPushButton("\n" + default_lang["analysis_mode"])
         self.btn_analysis.setObjectName("modeBtn")
         self.btn_analysis.clicked.connect(lambda: self.mode_selected.emit("analysis"))
         self.btn_analysis.setToolTip("Ручной анализ подозрительных файлов в Docker")
@@ -835,7 +865,7 @@ class MainModeSelector(QWidget):
             self.btn_exit.setText("Выйти")
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText("🔍\n" + lang["analysis_mode"])
+        self.btn_analysis.setText("\n" + lang["analysis_mode"])
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
@@ -1408,19 +1438,23 @@ class AnalysisPanel(QWidget):
             recommendation = lang.get("rec_clean", "File is safe. You can use it.")
             action_text = lang.get("action_keep", "Keep")
         
-        # Автоматически помещаем в карантин опасные и подозрительные файлы
-        if threat_level in ['MALICIOUS', 'SUSPICIOUS'] and self.parent_ref:
+        # Автоматически помещаем в карантин ТОЛЬКО опасные файлы (MALICIOUS)
+        if threat_level == 'MALICIOUS' and self.parent_ref:
             try:
                 reason = f"{threat_level}: Risk Score {risk_score}"
                 if detected_threats:
                     reason += f" - {', '.join(detected_threats[:2])}"
-                self.parent_ref.quarantine_manager.add_to_quarantine(
+                # Используем правильный метод move_to_quarantine
+                self.parent_ref.quarantine_manager.move_to_quarantine(
                     file_path=self.file_path_edit.text().strip(),
                     reason=reason
                 )
                 self.log_message('WARNING', f"{lang['file_quarantined_log']} {reason}")
             except Exception as e:
                 self.log_message('ERROR', f"{lang['quarantine_error_log']} {e}")
+        elif threat_level == 'SUSPICIOUS':
+            # Для подозрительных файлов только предупреждение, без карантина
+            self.log_message('INFO', lang.get('suspicious_file_warning', 'Подозрительный файл обнаружен. Рекомендуется дополнительная проверка.'))
         
         self.progress_bar.setValue(100)
         self.progress_label.setText(lang["analysis_complete"])
@@ -1779,11 +1813,22 @@ class ScanHistoryDialog(QDialog):
         """Очистить историю"""
         lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
         confirm_key = "clear_history_confirm" if self.current_lang == "Русский" else "clear_history_confirm_en"
-        reply = QMessageBox.question(self, lang["clear_history"],
-            lang.get(confirm_key, lang["clear_history_confirm"]),
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         
-        if reply == QMessageBox.Yes and self.parent_ref:
+        msg_box = QMessageBox(self)
+        msg_box.setIcon(QMessageBox.Question)
+        msg_box.setWindowTitle(lang["clear_history"])
+        msg_box.setText(lang.get(confirm_key, lang["clear_history_confirm"]))
+        
+        # Локализованные кнопки
+        yes_btn = QPushButton(lang.get("yes", "Да"))
+        no_btn = QPushButton(lang.get("no", "Нет"))
+        
+        msg_box.addButton(yes_btn, QMessageBox.YesRole)
+        msg_box.addButton(no_btn, QMessageBox.NoRole)
+        
+        reply = msg_box.exec()
+        
+        if reply == 0 and self.parent_ref:  # 0 = YesRole
             self.parent_ref.scan_history = []
             self.scan_history = []
             self.load_history()
@@ -2166,6 +2211,16 @@ class SettingsDialog(QDialog):
                                          lang.get("sensitivity_medium", "Средняя"), 
                                          lang.get("sensitivity_high", "Высокая")])
         sens_idx = self.settings.get('sensitivity', 1)
+        # Гарантируем, что индекс целочисленный
+        if isinstance(sens_idx, str):
+            try:
+                sens_idx = int(sens_idx)
+            except ValueError:
+                sens_idx = 1
+        elif not isinstance(sens_idx, int):
+            sens_idx = 1
+        # Проверяем диапазон
+        sens_idx = max(0, min(2, sens_idx))
         self.sensitivity_combo.setCurrentIndex(sens_idx)
         sensitivity_layout.addWidget(self.sensitivity_combo)
         sensitivity_layout.addStretch()
