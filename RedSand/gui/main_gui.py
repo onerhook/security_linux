@@ -486,7 +486,32 @@ LANGUAGES = {
         "settings_saved": "Настройки сохранены",
         "theme_label": "Тема оформления",
         "dark_theme_btn": "🌙 Тёмная",
-        "light_theme_btn": "☀️ Светлая"
+        "light_theme_btn": "☀️ Светлая",
+        "rec_malicious": "НЕ ИСПОЛЬЗОВАТЬ! Файл содержит вредоносный код.",
+        "rec_suspicious": "Будьте осторожны. Файл содержит подозрительные элементы.",
+        "rec_clean": "Файл безопасен. Вы можете его использовать.",
+        "action_quarantine": "Карантин",
+        "action_delete": "Удалить",
+        "action_keep": "Оставить",
+        "action_required": "Требуемое действие",
+        "recommendation": "Рекомендация",
+        "file_type": "Тип файла",
+        "size": "Размер",
+        "detected_threats": "Обнаруженные угрозы",
+        "matched_signatures": "Совпавшие сигнатуры",
+        "matched_patterns": "Подозрительные паттерны",
+        "static_analysis_progress": "Статический анализ...",
+        "signature_check_progress": "Проверка сигнатур вирусов...",
+        "behavior_analysis_progress": "Анализ поведения...",
+        "static_analysis_log": "Выполняется статический анализ файла...",
+        "signature_check_log": "Проверка по базе вредоносных сигнатур...",
+        "behavior_analysis_log": "Анализ подозрительных паттернов...",
+        "scan_error_log": "Ошибка сканирования:",
+        "quarantine_error_log": "Ошибка карантина:",
+        "file_quarantined_log": "Файл помещен в карантин:",
+        "no_file_selected_error": "Пожалуйста, выберите существующий файл для анализа.",
+        "analysis_start_log": "Начало анализа файла:",
+        "using_virus_scanner": "Используется VirusScanner для проверки на вирусы"
     },
     "English": {
         "title": "RedSand Secure",
@@ -597,7 +622,32 @@ LANGUAGES = {
         "settings_saved": "Settings saved",
         "theme_label": "Theme",
         "dark_theme_btn": "🌙 Dark",
-        "light_theme_btn": "☀️ Light"
+        "light_theme_btn": "☀️ Light",
+        "rec_malicious": "DO NOT USE! File contains malicious code.",
+        "rec_suspicious": "Be careful. File contains suspicious elements.",
+        "rec_clean": "File is safe. You can use it.",
+        "action_quarantine": "Quarantine",
+        "action_delete": "Delete",
+        "action_keep": "Keep",
+        "action_required": "Action Required",
+        "recommendation": "Recommendation",
+        "file_type": "File Type",
+        "size": "Size",
+        "detected_threats": "Detected Threats",
+        "matched_signatures": "Matched Signatures",
+        "matched_patterns": "Suspicious Patterns",
+        "static_analysis_progress": "Static analysis...",
+        "signature_check_progress": "Virus signature check...",
+        "behavior_analysis_progress": "Behavior analysis...",
+        "static_analysis_log": "Performing static file analysis...",
+        "signature_check_log": "Checking against malware signatures database...",
+        "behavior_analysis_log": "Analyzing suspicious patterns...",
+        "scan_error_log": "Scan error:",
+        "quarantine_error_log": "Quarantine error:",
+        "file_quarantined_log": "File quarantined:",
+        "no_file_selected_error": "Please select an existing file for analysis.",
+        "analysis_start_log": "Starting file analysis:",
+        "using_virus_scanner": "Using VirusScanner for virus detection"
     }
 }
 
@@ -851,8 +901,8 @@ class AntivirusPanel(QWidget):
                         monitor_paths.append(expanded)
                 
                 if not monitor_paths:
-                    QMessageBox.warning(self, "Предупреждение", 
-                        "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.")
+                    QMessageBox.warning(self, lang.get("warning", "Warning"), 
+                        lang.get("no_folders", "No standard folders found for monitoring.\nAntivirus cannot be started."))
                     self.btn_toggle_av.setChecked(False)
                     return
                 
@@ -867,17 +917,17 @@ class AntivirusPanel(QWidget):
                 self.av_monitor.start_background()
                 
                 self.av_active = True
-                self.btn_toggle_av.setText("⏹️ ВЫКЛ")
-                self.av_status_label.setText("🛡️ Антивирус: ВКЛ")
+                self.btn_toggle_av.setText(lang["av_on"])
+                self.av_status_label.setText(lang["av_status_on"])
                 self.av_status_label.setStyleSheet("color: #059669; font-weight: bold; font-size: 24px;")
-                self.log_event(f"Антивирус запущен. Мониторинг: {', '.join(monitor_paths)}")
+                self.log_event(f"{lang['av_running']} {', '.join(monitor_paths)}")
                 
-                QMessageBox.information(self, "Антивирус активирован",
-                    f"Защита реального времени включена!\n\nМониторимые папки:\n{chr(10).join(monitor_paths)}\n\nВсе подозрительные файлы будут автоматически помещены в карантин.")
+                QMessageBox.information(self, lang.get("av_activated", "Antivirus Activated"),
+                    f"{lang.get('av_start_msg', 'Real-time protection enabled!')}\n\n{lang.get('monitored_folders', 'Monitored folders:')}\n{chr(10).join(monitor_paths)}\n\n{lang.get('auto_quarantine_msg', 'All suspicious files will be automatically quarantined.')}")
                     
             except Exception as e:
-                self.log_event(f"Ошибка запуска: {e}")
-                QMessageBox.critical(self, "Ошибка", f"Не удалось запустить антивирус:\n{str(e)}")
+                self.log_event(f"{lang.get('av_start_error', 'Failed to start antivirus:')} {e}")
+                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\\n{str(e)}")
                 self.btn_toggle_av.setChecked(False)
     
     def log_event(self, message: str):
@@ -887,16 +937,17 @@ class AntivirusPanel(QWidget):
     
     def add_folder(self):
         """Добавить папку для мониторинга"""
-        folder = QFileDialog.getExistingDirectory(self, "Выберите папку для мониторинга")
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        folder = QFileDialog.getExistingDirectory(self, lang.get("select_folder_title", "Select folder for monitoring"))
         if folder:
             # Проверяем, нет ли уже такой папки в списке
             for i in range(self.folder_list.count()):
                 if os.path.expanduser(self.folder_list.item(i).text()) == folder:
-                    QMessageBox.information(self, "Информация", "Эта папка уже добавлена")
+                    QMessageBox.information(self, lang.get("information", "Information"), lang.get("folder_exists", "This folder is already added"))
                     return
             
             self.folder_list.addItem(folder)
-            self.log_event(f"Добавлена папка: {folder}")
+            self.log_event(lang.get("folder_added", "Folder added: ") + folder)
     
     def remove_folder(self):
         """Удалить выбранную папку из мониторинга"""
@@ -1128,7 +1179,8 @@ class AnalysisPanel(QWidget):
         """Запуск анализа файла с использованием VirusScanner"""
         file_path = self.file_path_edit.text().strip()
         if not file_path or not os.path.exists(file_path):
-            QMessageBox.warning(self, "Ошибка", "Пожалуйста, выберите существующий файл для анализа.")
+            QMessageBox.warning(self, lang.get("no_file_selected_error", "Please select an existing file for analysis."), 
+                               lang.get("no_file_selected_error", "Please select an existing file for analysis."))
             return
         
         self.btn_analyze.setEnabled(False)
@@ -1140,8 +1192,8 @@ class AnalysisPanel(QWidget):
         lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         is_ru = (self.parent_ref.current_lang if self.parent_ref else "Русский") == "Русский"
         
-        self.log_message('INFO', f"Начало анализа файла: {file_path}")
-        self.log_message('INFO', "Используется VirusScanner для проверки на вирусы")
+        self.log_message('INFO', f"{lang['analysis_start_log']} {file_path}")
+        self.log_message('INFO', lang['using_virus_scanner'])
         
         # Добавляем запись в историю сканирований
         scan_record = {
@@ -1156,16 +1208,16 @@ class AnalysisPanel(QWidget):
         
         # Прогресс анализа
         self.progress_bar.setValue(25)
-        self.progress_label.setText("Статический анализ..." if is_ru else "Static analysis...")
-        self.log_message('INFO', "Выполняется статический анализ файла..." if is_ru else "Performing static file analysis...")
+        self.progress_label.setText(lang['static_analysis_progress'])
+        self.log_message('INFO', lang['static_analysis_log'])
         
         self.progress_bar.setValue(50)
-        self.progress_label.setText("Проверка сигнатур вирусов..." if is_ru else "Virus signature check...")
-        self.log_message('INFO', "Проверка по базе вредоносных сигнатур..." if is_ru else "Checking against malware signatures database...")
+        self.progress_label.setText(lang['signature_check_progress'])
+        self.log_message('INFO', lang['signature_check_log'])
         
         self.progress_bar.setValue(75)
-        self.progress_label.setText("Анализ поведения..." if is_ru else "Behavior analysis...")
-        self.log_message('INFO', "Анализ подозрительных паттернов..." if is_ru else "Analyzing suspicious patterns...")
+        self.progress_label.setText(lang['behavior_analysis_progress'])
+        self.log_message('INFO', lang['behavior_analysis_log'])
         
         # Используем VirusScanner для реального анализа
         try:
@@ -1213,13 +1265,13 @@ class AnalysisPanel(QWidget):
                         file_path=file_path,
                         reason=reason
                     )
-                    self.log_message('WARNING', f"Файл помещен в карантин: {reason}" if is_ru else f"File quarantined: {reason}")
+                    self.log_message('WARNING', f"{lang['file_quarantined_log']} {reason}")
                 except Exception as e:
-                    self.log_message('ERROR', f"Ошибка карантина: {e}" if is_ru else f"Quarantine error: {e}")
+                    self.log_message('ERROR', f"{lang['quarantine_error_log']} {e}")
             
         except Exception as e:
             threat_level = 'ERROR'
-            status_text = "❌ Ошибка" if is_ru else "❌ Error"
+            status_text = "❌ " + lang.get("status_malicious", "Error") if is_ru else "❌ Error"
             status_color = "#666666"
             final_threat_level = 'ERROR'
             recommendation = str(e)
@@ -1228,7 +1280,7 @@ class AnalysisPanel(QWidget):
             matched_signatures = []
             matched_patterns = []
             risk_score = 0
-            self.log_message('ERROR', f"Ошибка сканирования: {e}" if is_ru else f"Scan error: {e}")
+            self.log_message('ERROR', f"{lang['scan_error_log']} {e}")
         
         self.progress_bar.setValue(100)
         self.progress_label.setText(lang["analysis_complete"])
@@ -1239,17 +1291,10 @@ class AnalysisPanel(QWidget):
         self.results_table.setVisible(True)
         
         # Формируем данные для таблицы результатов
-        file_type_ru = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
-        file_type_en = "PE Executable (EXE)" if file_path.endswith('.exe') else ("Script" if file_path.endswith(('.py', '.bat', '.ps1')) else "Other")
-        file_type = file_type_ru if is_ru else file_type_en
+        file_type = lang.get("file_type", "File Type")
         
-        size_label_ru = "Размер"
-        size_label_en = "Size"
-        size_label = size_label_ru if is_ru else size_label_en
-        
-        size_value_ru = f"{os.path.getsize(file_path)} байт"
-        size_value_en = f"{os.path.getsize(file_path)} bytes"
-        size_value = size_value_ru if is_ru else size_value_en
+        size_label = lang.get("size", "Size")
+        size_value = f"{os.path.getsize(file_path)} bytes"
         
         results_data = [
             (lang.get("col_file", "File"), os.path.basename(file_path)),
@@ -1262,17 +1307,13 @@ class AnalysisPanel(QWidget):
         
         # Добавляем обнаруженные угрозы если есть
         if detected_threats:
-            threats_label_ru = "Обнаруженные угрозы"
-            threats_label_en = "Detected Threats"
-            threats_label = threats_label_ru if is_ru else threats_label_en
+            threats_label = lang.get("detected_threats", "Detected Threats")
             threats_str = ', '.join(detected_threats)
             results_data.append((threats_label, threats_str))
         
         # Добавляем matched signatures если есть
         if matched_signatures:
-            sig_label_ru = "Совпавшие сигнатуры"
-            sig_label_en = "Matched Signatures"
-            sig_label = sig_label_ru if is_ru else sig_label_en
+            sig_label = lang.get("matched_signatures", "Matched Signatures")
             sig_str = ', '.join(matched_signatures[:3])
             if len(matched_signatures) > 3:
                 sig_str += f" (+{len(matched_signatures)-3})"
@@ -1280,9 +1321,7 @@ class AnalysisPanel(QWidget):
         
         # Добавляем matched patterns если есть
         if matched_patterns:
-            pat_label_ru = "Подозрительные паттерны"
-            pat_label_en = "Suspicious Patterns"
-            pat_label = pat_label_ru if is_ru else pat_label_en
+            pat_label = lang.get("matched_patterns", "Suspicious Patterns")
             pat_str = ', '.join(matched_patterns[:3])
             if len(matched_patterns) > 3:
                 pat_str += f" (+{len(matched_patterns)-3})"
@@ -1788,10 +1827,10 @@ class QuarantineDialog(QDialog):
                     QMessageBox.information(self, lang["restore"], lang["restore_success"])
                     self.load_quarantine()
                 else:
-                    QMessageBox.critical(self, "Error", lang["restore_error"])
+                    QMessageBox.critical(self, lang.get("error", "Error"), lang["restore_error"])
         except Exception as e:
             lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
-            QMessageBox.critical(self, "Error", f"{lang['restore_error']}: {str(e)}")
+            QMessageBox.critical(self, lang.get("error", "Error"), f"{lang['restore_error']}: {str(e)}")
     
     def delete_selected(self):
         """Удаление выбранного файла"""
@@ -1813,8 +1852,8 @@ class QuarantineDialog(QDialog):
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
-            reply = QMessageBox.warning(self, "Delete Confirmation",
-                "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
+            reply = QMessageBox.warning(self, lang.get("delete_forever", "Delete Forever"),
+                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!"),
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
@@ -1826,10 +1865,10 @@ class QuarantineDialog(QDialog):
                 del self.quarantine_manager.quarantined_files[quarantine_path]
                 self.quarantine_manager._save_quarantine_log()
                 
-                QMessageBox.information(self, "Deletion", "File successfully deleted!")
+                QMessageBox.information(self, lang.get("delete_success", "Deletion"), lang.get("delete_success", "File successfully deleted!"))
                 self.load_quarantine()
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Deletion error: {str(e)}")
+            QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('deletion_error', 'Deletion error:')} {str(e)}")
 
 
 class SettingsDialog(QDialog):
