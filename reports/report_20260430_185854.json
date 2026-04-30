@@ -1,0 +1,21 @@
+{
+  "scan_type": "realtime",
+  "file": {
+    "path": "C:/Users/vanished4ever/Downloads\\fake_ransomware.exe",
+    "name": "fake_ransomware.exe",
+    "size": 0.96,
+    "hash": "091370bda4542db57dea24d51075ab96e3400fdfd1fb51d02136104544547c31"
+  },
+  "result": {
+    "threat_level": "MALICIOUS",
+    "risk_score": 0.96,
+    "is_malicious": true,
+    "detected_threats": [
+      "Ransomware"
+    ],
+    "action_taken": "QUARANTINE",
+    "message": "Файл перемещен в карантин"
+  },
+  "scan_time": "2026-04-30T18:58:54.166480",
+  "action": "QUARANTINE"
+}

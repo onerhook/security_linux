@@ -1,0 +1,23 @@
+{
+  "quarantine\\20260430_185854_fake_ransomware.exe": {
+    "original_path": "C:/Users/vanished4ever/Downloads\\fake_ransomware.exe",
+    "original_name": "fake_ransomware.exe",
+    "quarantine_time": "2026-04-30T18:58:54.083476",
+    "reason": "MALICIOUS",
+    "can_restore": true
+  },
+  "quarantine\\20260430_185924_TgWsProxy_windows (2) — копия — копия.exe": {
+    "original_path": "C:/Users/vanished4ever/Downloads\\TgWsProxy_windows (2) — копия — копия.exe",
+    "original_name": "TgWsProxy_windows (2) — копия — копия.exe",
+    "quarantine_time": "2026-04-30T18:59:24.083602",
+    "reason": "MALICIOUS",
+    "can_restore": true
+  },
+  "quarantine\\20260430_191731_fake_keylogger.exe": {
+    "original_path": "C:/Users/vanished4ever/Downloads\\fake_keylogger.exe",
+    "original_name": "fake_keylogger.exe",
+    "quarantine_time": "2026-04-30T19:17:31.058858",
+    "reason": "MALICIOUS: Risk Score 0.96 - Keylogger",
+    "can_restore": true
+  }
+}
