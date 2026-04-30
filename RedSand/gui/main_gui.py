@@ -10,6 +10,7 @@ RedSand Secure GUI v12.0 - Главный экран с выбором режи�
 
 import sys
 import os
+import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -2343,7 +2344,6 @@ class QuarantineDialog(QDialog):
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
-                import shutil
                 if os.path.exists(quarantine_path):
                     shutil.rmtree(quarantine_path) if os.path.isdir(quarantine_path) else os.remove(quarantine_path)
                 
