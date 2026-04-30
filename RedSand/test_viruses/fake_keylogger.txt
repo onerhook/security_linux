@@ -1,0 +1,25 @@
+# FAKE VIRUS SAMPLE - KEYLOGGER
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+THREAT_TYPE: KEYLOGGER
+GENERATED: 2024-01-15
+RANDOM_ID: FAKE_KEYLOGGER_001
+
+[MALICIOUS_INDICATORS]
+SetWindowsHookExA(WH_KEYBOARD_LL, HookProc, hInstance, 0)
+GetAsyncKeyState(VK_CONTROL) & 0x8000
+GetForegroundWindow()
+BitBlt(hDC, 0, 0, width, height, hSrcDC, 0, 0, SRCCOPY)
+GetClipboardData(CF_TEXT)
+send("credit card data", remote_server)
+
+[SIGNATURE]
+Trojan-Spy.Win32.Keylogger
+Spyware.Generic.KeyCapture
+Win32/Agent.KEYLOGGER
+
+[MOCK_BEHAVIOR]
+This file simulates keylogger behavior by containing known malicious patterns.
+When analyzed, it should be detected as MALICIOUS.
+DO NOT EXECUTE - THIS IS A TEST FILE ONLY.

@@ -1,0 +1,5 @@
+MZ...FAKE_MINER_SIGNATURE...
+This is a fake crypto miner for testing.
+stratum+tcp://pool.mining.com:3333
+coinhive mining script loaded
+MALICIOUS_PAYLOAD_DETECTED

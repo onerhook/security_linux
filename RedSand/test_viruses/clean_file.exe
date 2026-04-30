@@ -1,0 +1,26 @@
+MZ...fake_exe_header...
+# CLEAN EXE SAMPLE - SAFE FILE
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+FILE_TYPE: CLEAN_APPLICATION
+GENERATED: 2024-01-15
+RANDOM_ID: CLEAN_EXE_001
+
+[LEGITIMATE_INDICATORS]
+Standard Windows application entry point
+Normal API calls: CreateWindow, GetMessage, DispatchMessage
+No suspicious memory operations
+No process injection attempts
+No registry modifications for persistence
+No network communication to unknown servers
+Digital signature: Microsoft Corporation (simulated)
+
+[SIGNATURE]
+Clean.Application
+Trusted.Software
+
+[MOCK_BEHAVIOR]
+This file simulates a legitimate Windows application.
+When analyzed, it should be detected as SAFE.
+Contains only standard Windows API calls.

@@ -1,0 +1,5 @@
+MZ...FAKE_TROJAN_SIGNATURE...
+This is a fake trojan for testing.
+cmd.exe /c del system32
+reverse_shell connection established
+MALICIOUS_PAYLOAD_DETECTED

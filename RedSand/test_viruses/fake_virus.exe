@@ -1,0 +1,28 @@
+MZ...fake_exe_header...
+# FAKE VIRUS SAMPLE - MALICIOUS EXE
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+THREAT_TYPE: TROJAN
+GENERATED: 2024-01-15
+RANDOM_ID: FAKE_EXE_VIRUS_001
+
+[MALICIOUS_INDICATORS]
+CreateRemoteThread API call
+VirtualAllocEx with PAGE_EXECUTE_READWRITE
+WriteProcessMemory to foreign process
+NtUnmapViewOfSection for process hollowing
+LoadLibraryA with suspicious DLL
+GetProcAddress for API resolution
+RegSetValueEx for persistence
+InternetOpenA for C2 communication
+
+[SIGNATURE]
+Trojan.Win32.Generic
+Win32/TrojanDownloader
+Heuristics.Malicious
+
+[MOCK_BEHAVIOR]
+This file simulates malicious EXE behavior by containing known malicious API patterns.
+When analyzed, it should be detected as MALICIOUS.
+DO NOT EXECUTE - THIS IS A TEST FILE ONLY.

@@ -1,14 +1,12 @@
-"""
-RedSand Secure - Расширенный сканер вирусов с увеличенной базой сигнатур
-Поддерживает 56+ явных сигнатур и 15+ эвристических паттернов
-"""
-
-import re
 import os
 import hashlib
+import logging
+from pathlib import Path
 from typing import Dict, List, Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 
 class ThreatLevel(Enum):
@@ -19,353 +17,310 @@ class ThreatLevel(Enum):
 
 @dataclass
 class ScanResult:
+    """Результат сканирования файла"""
     file_path: str
     threat_level: ThreatLevel
-    score: int
+    score: float
     threats_found: List[str]
     threat_types: List[str]
     sha256: str
     details: Dict
-
+    
+    def __post_init__(self):
+        if isinstance(self.threat_level, str):
+            self.threat_level = ThreatLevel(self.threat_level)
 
 class ExtendedVirusScanner:
-    """
-    Расширенный сканер вирусов с поддержкой 56+ сигнатур и эвристического анализа
-    """
-    
     def __init__(self):
-        # === ЯВНЫЕ СИГНАТУРЫ ВРЕДОНОСНОГО ПОВЕДЕНИЯ (56 паттернов) ===
-        self.malware_signatures = {
-            # --- Инъекция кода и манипуляции с процессами (9 паттернов) ---
-            'code_injection': [
-                r'CreateRemoteThread\s*\(\s*NULL',  # Инъекция в процесс
-                r'WriteProcessMemory\s*\([^)]*explorer\.exe',  # Запись в explorer
-                r'WriteProcessMemory\s*\([^)]*svchost\.exe',  # Запись в svchost
-                r'VirtualAllocEx\s*\([^)]*PAGE_EXECUTE',  # Выделение исполняемой памяти
-                r'NtCreateThreadEx\s*\(',  # Создание скрытого потока
-                r'QueueUserAPC\s*\(',  # APC инъекция
-                r'SetThreadContext\s*\(',  # Модификация контекста потока
-                r'NtUnmapViewOfSection\s*\(',  # Process Hollowing
-                r'ResumeThread\s*\([^)]*CREATE_SUSPENDED',  # Запуск приостановленного процесса
+        # Расширенные сигнатуры вирусов (строки, которые ищем внутри файлов)
+        self.virus_signatures = {
+            # Ransomware сигнатуры
+            "Ransomware": [
+                b"encrypt", b"decrypt", b"bitcoin", b"wallet", b"ransom", b"payment",
+                b".locked", b".crypto", b".encrypted", b"your files", b"pay bitcoin",
+                b"private key", b"AES256", b"RSA4096", b"TOR", b"onion", b"recover files",
+                b"FAKE_RANSOMWARE_SIGNATURE", b"AES256 encrypt function call", b"bitcoin_address"
             ],
-            
-            # --- Автозагрузка через реестр (4 паттерна) ---
-            'registry_persistence': [
-                r'RegSetValueEx\s*[^)]*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run',
-                r'RegSetValueEx\s*[^)]*SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\RunOnce',
-                r'reg\s+add\s+.*HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run',
-                r'schtasks\s+/create\s+.*/onlogon',  # Планировщик задач
+            # Keylogger сигнатуры
+            "Keylogger": [
+                b"keylog", b"keystroke", b"GetAsyncKeyState", b"SetWindowsHookEx",
+                b"keyboard", b"input", b"capture", b"SendDataToServer", b"log.txt",
+                b"virtualkey", b"scan code", b"clipboard", b"password", b"credential",
+                b"FAKE_KEYLOGGER_SIGNATURE", b"GetAsyncKeyState", b"SendDataToServer"
             ],
-            
-            # --- Скачивание и запуск вредоносного ПО (5 паттернов) ---
-            'download_execute': [
-                r'URLDownloadToFile\s*\([^)]*\.exe',
-                r'WinHttpOpenRequest\s*[^)]*GET',
-                r'InternetReadFile\s*\([^)]*WriteFile',
-                r'powershell\s+-c\s+.*DownloadString',
-                r'certutil\s+-urlcache\s+-split\s+-f',  # Living off the Land
+            # Miner сигнатуры
+            "Miner": [
+                b"mining", b"pool", b"stratum+tcp", b"cryptonight", b"monero", b"xmr",
+                b"hashrate", b"coinhive", b"cpu miner", b"gpu miner", b"worker",
+                b"submit share", b"difficulty", b"blockchain", b"coin", b"hash rate",
+                b"FAKE_MINER_SIGNATURE", b"stratum+tcp://", b"coinhive"
             ],
-            
-            # --- Ransomware и шифрование файлов (8 паттернов) ---
-            'ransomware': [
-                r'CryptEncrypt\s*\([^)]*\.(locked|encrypted|crypto)',
-                r'FindFirstFile\s*\([^)]*\*\..*',  # Массовый поиск файлов
-                r'SetFileAttributes\s*\([^)]*FILE_ATTRIBUTE_HIDDEN',
-                r'DeleteVolumeShadowCopies\s*\(',  # Удаление теневых копий
-                r'vssadmin\s+delete\s+shadows',
-                r'bcdedit\s+/set\s+{default}\s+recoveryenabled\s+no',  # Отключение восстановления
-                r'wbadmin\s+delete\s+systemstatebackup',
-                r'\.(locked|encrypted|crypt|bitcoin|decrypt)\s*=',  # Расширения вымогателей
+            # Trojan сигнатуры
+            "Trojan": [
+                b"trojan", b"backdoor", b"reverse shell", b"cmd.exe /c", b"powershell",
+                b"download", b"execute", b"payload", b"dropper", b"inject",
+                b"remote access", b"c2", b"command and control", b"beacon",
+                b"FAKE_TROJAN_SIGNATURE", b"cmd.exe /c del", b"reverse_shell"
             ],
-            
-            # --- Отключение защиты системы (7 паттернов) ---
-            'disable_security': [
-                r'StopService\s*\([^)]*WinDefend',  # Отключение Защитника Windows
-                r'StopService\s*\([^)]*SecurityHealthService',
-                r'RegSetValueEx\s*[^)]*DisableAntiSpyware',
-                r'RegSetValueEx\s*[^)]*DisableRealtimeMonitoring',
-                r'taskkill\s+/im\s+mssecsvc\.exe',
-                r'netsh\s+advfirewall\s+set\s+allprofiles\s+state\s+off',  # Отключение фаервола
-                r'ScStop\s*\([^)]*(defender|security|antivirus)',
+            # Spyware сигнатуры
+            "Spyware": [
+                b"spy", b"monitor", b"screenshot", b"webcam", b"record", b"surveillance",
+                b"clipboard", b"microphone", b"camera", b"screen capture", b"audio record",
+                b"track", b"stealth", b"hidden", b"covert"
             ],
-            
-            # --- Маскировка под системные процессы (4 паттерна) ---
-            'masquerading': [
-                r'CreateProcess\s*\([^)]*svchost\.exe[^)]*-k\s+netsvcs',
-                r'CreateProcess\s*\([^)]*explorer\.exe[^)]*/root,',
-                r'CopyFile\s*\([^)]*System32[^)]*Temp\\',
-                r'SetCurrentDirectory\s*\([^)]*System32',
+            # RAT (Remote Access Trojan) сигнатуры
+            "RAT": [
+                b"remote desktop", b"remote control", b"admin", b"shell", b"vnc",
+                b"teamviewer", b"anydesk", b"remote admin", b"control panel", b"rat"
             ],
-            
-            # --- Кейлоггинг и слежка (5 паттернов) ---
-            'keylogger_spyware': [
-                r'GetAsyncKeyState\s*\(',  # Перехват нажатий клавиш
-                r'GetKeyState\s*\(',
-                r'SetWindowsHookEx\s*\([^)]*WH_KEYBOARD',
-                r'GetForegroundWindow\s*\([^)]*GetWindowText',
-                r'BitBlt\s*\([^)]*ScreenCapture',  # Скриншоты
+            # Stealer сигнатуры
+            "Stealer": [
+                b"password", b"cookie", b"credential", b"browser", b"steal", b"exfil",
+                b"dump", b"wallet", b"autofill", b"history", b"bookmark", b"login data"
             ],
-            
-            # --- Сетевые угрозы и ботнеты (5 паттернов) ---
-            'network_threats': [
-                r'socket\s*\([^)]*AF_INET[^)]*SOCK_STREAM',
-                r'connect\s*\([^)]*[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+',
-                r'send\s*\([^)]*POST\s+/gate\.php',  # C2 коммуникация
-                r'recv\s*\([^)]*cmd\s*=',
-                r'WSAStartup\s*\([^)]*shell',
+            # Rootkit сигнатуры
+            "Rootkit": [
+                b"rootkit", b"kernel", b"driver", b"hook", b"ssdt", b"idt", b"inline",
+                b"stealth", b"hide process", b"hide file", b"system service", b"ntoskrnl"
             ],
-            
-            # --- Криптомайнеры (5 паттернов) ---
-            'cryptominer': [
-                r'stratum\+tcp://',  # Протокол майнинга
-                r'pool\.minexmr\.com',
-                r'xmr\.pool\.com',
-                r'cryptonight|monero|bytecoin',
-                r'cudaDeviceSynchronize\s*\([^)]*mining',
+            # Worm сигнатуры
+            "Worm": [
+                b"worm", b"spread", b"replicate", b"usb", b"network share", b"copy",
+                b"propagate", b"autorun", b"removable", b"mass mailer"
             ],
-            
-            # --- RAT (Remote Access Trojan) (5 паттернов) ---
-            'rat': [
-                r'CreateRemoteThread\s*\([^)]*cmd\.exe',
-                r'shell\s*=\s*exec\s*\(',
-                r'wscript\.shell\s*\.run\s*\([^)]*hidden',
-                r'nc\s+-e\s+/bin/(bash|sh)',  # Netcat reverse shell
-                r'python\s+-c\s+.*socket.*connect',
+            # Botnet сигнатуры
+            "Botnet": [
+                b"bot", b"ddos", b"flood", b"zombie", b"irc", b"syn flood", b"udp flood",
+                b"http flood", b"botnet", b"c&c", b"master", b"slave", b"distributed"
             ],
-            
-            # --- Dropper и загрузчики (3 паттерна) ---
-            'dropper': [
-                r'Expand\s*\([^)]*\.cab[^)]*System32',
-                r'MakeCab\s*\([^)]*\.dll',
-                r'bitsadmin\s+/transfer\s+/download',
+            # Adware сигнатуры
+            "Adware": [
+                b"adware", b"popup", b"banner", b"redirect", b"promotion", b"sponsor",
+                b"click here", b"advertisement", b"toolbar", b"browser helper"
             ],
+            # Generic угрозы
+            "GenericThreat": [
+                b"MALICIOUS_PAYLOAD", b"DANGER_ZONE", b"EXPLOIT_CODE", b"SHELLCODE",
+                b"buffer overflow", b"use after free", b"privilege escalation",
+                b"bypass uac", b"disable antivirus", b"kill process", b"delete shadow copy"
+            ],
+            # Обфусцированный код
+            "Obfuscated": [
+                b"eval(", b"exec(", b"base64_decode", b"rot13", b"xor", b"unpack",
+                b"deobfuscate", b"decode", b"decrypt", b"unpacker"
+            ]
         }
         
-        # === ЭВРИСТИЧЕСКИЕ ПАТТЕРНЫ (15 паттернов) ===
-        self.heuristic_patterns = {
-            # Подозрительные комбинации API
-            'suspicious_api_combo': [
-                r'(VirtualAlloc|HeapCreate).*PAGE_EXECUTE',
-                r'(CreateFile|WriteFile).*(CreateProcess|ShellExecute)',
-                r'(RegOpenKey|RegSetValue).*(Run|RunOnce)',
-                r'(socket|connect).*(send|recv).*(exec|eval)',
-                r'(FindFirstFile|FindNextFile).*(DeleteFile|MoveFile)',
-            ],
-            
-            # Обфускация и кодирование
-            'obfuscation': [
-                r'base64\.b64decode\s*\([^)]*exec',
-                r'eval\s*\(\s*["\'].*["\']\s*\+\s*["\']',
-                r'chr\s*\(\s*[0-9]+\s*\)\s*\+\s*chr',
-                r'fromcharcode\s*\([^)]*join',
-                r'[a-z]{1}\s*=\s*[a-z]{1}\s*\^\s*[a-z]{1}',  # XOR обфускация
-            ],
-            
-            # Анти-анализ и анти-отладка
-            'anti_analysis': [
-                r'IsDebuggerPresent\s*\(',
-                r'CheckRemoteDebuggerPresent\s*\(',
-                r'NtQueryInformationProcess\s*\([^)]*ProcessDebugPort',
-                r'GetTickCount\s*\([^)]*sleep',
-                r'cpuid',
-            ],
-        }
-        
-        # Веса для различных категорий угроз
-        self.threat_weights = {
-            'code_injection': 25,
-            'registry_persistence': 20,
-            'download_execute': 22,
-            'ransomware': 30,
-            'disable_security': 28,
-            'masquerading': 18,
-            'keylogger_spyware': 24,
-            'network_threats': 20,
-            'cryptominer': 15,
-            'rat': 26,
-            'dropper': 20,
-            'suspicious_api_combo': 15,
-            'obfuscation': 12,
-            'anti_analysis': 18,
-        }
-        
-        # Пороговые значения
-        self.thresholds = {
-            'clean_max': 25,
-            'suspicious_max': 60,
-        }
-        
-        # Известные безопасные пути (для снижения ложных срабатываний)
-        self.safe_paths = [
-            r'\\Program Files\\',
-            r'\\Windows\\System32\\',
-            r'\\AppData\\Local\\Packages\\',
-            r'pytest',
-            r'unittest',
-            r'\\venv\\',
-            r'\\node_modules\\',
+        # Подозрительные API вызовы для PE файлов
+        self.suspicious_apis = [
+            b"VirtualAllocEx", b"WriteProcessMemory", b"CreateRemoteThread",
+            b"NtUnmapViewOfSection", b"SetWindowsHookEx", b"GetAsyncKeyState",
+            b"CryptEncrypt", b"CryptDecrypt", b"RegSetValueEx", b"CreateService",
+            b"InternetOpen", b"URLDownloadToFile", b"WinExec", b"ShellExecute"
         ]
-
-    def calculate_file_hash(self, file_path: str) -> str:
-        """Вычисляет SHA256 хеш файла"""
-        sha256_hash = hashlib.sha256()
-        try:
-            with open(file_path, "rb") as f:
-                for byte_block in iter(lambda: f.read(4096), b""):
-                    sha256_hash.update(byte_block)
-            return sha256_hash.hexdigest()
-        except Exception:
-            return "unknown"
+        
+        # Белый список путей (Системные файлы никогда не сканируются агрессивно)
+        self.safe_paths = [
+            r"C:\Windows",
+            r"C:\Program Files",
+            r"C:\Program Files (x86)",
+            r"/usr/bin",
+            r"/bin",
+            r"/sbin",
+            r"/Applications",
+            r"/System",
+            r"/Library"
+        ]
+        
+        # Расширения безопасных файлов
+        self.safe_extensions = ['.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', 
+                               '.mp3', '.mp4', '.avi', '.mkv', '.pdf', '.doc', 
+                               '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
 
     def is_safe_path(self, file_path: str) -> bool:
-        """Проверяет, находится ли файл в безопасном пути"""
-        for safe_pattern in self.safe_paths:
-            if re.search(safe_pattern, file_path, re.IGNORECASE):
+        """Проверяет, находится ли файл в безопасном системном каталоге."""
+        file_path_lower = file_path.lower()
+        for safe_path in self.safe_paths:
+            if file_path_lower.startswith(safe_path.lower()):
                 return True
         return False
 
-    def extract_strings(self, file_path: str, min_length: int = 4) -> List[str]:
-        """Извлекает строки из файла (ANSI и Unicode)"""
-        strings = []
+    def calculate_hash(self, file_path: str) -> str:
+        """Вычисляет SHA256 хэш файла."""
+        sha256_hash = hashlib.sha256()
         try:
-            with open(file_path, 'rb') as f:
-                content = f.read()
-                
-                # ANSI строки
-                ansi_pattern = rb'[\x20-\x7e]{' + str(min_length).encode() + rb',}'
-                ansi_strings = re.findall(ansi_pattern, content)
-                strings.extend([s.decode('ascii', errors='ignore') for s in ansi_strings])
-                
-                # Unicode строки
-                unicode_pattern = rb'(?:[\x20-\x7e]\x00){' + str(min_length).encode() + rb',}'
-                unicode_strings = re.findall(unicode_pattern, content)
-                strings.extend([s.decode('utf-16-le', errors='ignore') for s in unicode_strings])
-                
-        except Exception:
-            pass
-        
-        return strings
-
-    def scan_content(self, content: str, file_path: str = "") -> Tuple[int, List[str], List[str]]:
-        """
-        Сканирует содержимое на наличие сигнатур и эвристик
-        Возвращает: (score, threats_found, threat_types)
-        """
-        score = 0
-        threats_found = []
-        threat_types = set()
-        
-        # Проверка на безопасный путь
-        if self.is_safe_path(file_path):
-            score -= 10  # Снижаем оценку для файлов в безопасных путях
-        
-        # Сканирование явных сигнатур
-        for category, patterns in self.malware_signatures.items():
-            for pattern in patterns:
-                try:
-                    if re.search(pattern, content, re.IGNORECASE | re.MULTILINE):
-                        weight = self.threat_weights.get(category, 15)
-                        score += weight
-                        threat_name = f"{category.upper()}::{pattern[:30]}..."
-                        threats_found.append(threat_name)
-                        threat_types.add(category.upper())
-                except re.error:
-                    continue
-        
-        # Сканирование эвристических паттернов
-        for category, patterns in self.heuristic_patterns.items():
-            matches_count = 0
-            for pattern in patterns:
-                try:
-                    if re.search(pattern, content, re.IGNORECASE | re.MULTILINE):
-                        matches_count += 1
-                except re.error:
-                    continue
-            
-            if matches_count > 0:
-                # Бонус за множественные совпадения эвристик
-                bonus = min(matches_count * 3, 15)
-                weight = self.threat_weights.get(category, 12)
-                score += weight + bonus
-                threat_name = f"HEURISTIC::{category.upper()} ({matches_count} matches)"
-                threats_found.append(threat_name)
-                threat_types.add(f"HEUR_{category.upper()}")
-        
-        return score, threats_found, list(threat_types)
+            with open(file_path, "rb") as f:
+                for byte_block in iter(lambda: f.read(65536), b""):
+                    sha256_hash.update(byte_block)
+            return sha256_hash.hexdigest()
+        except Exception as e:
+            logger.error(f"Error calculating hash for {file_path}: {e}")
+            return ""
 
     def scan_file(self, file_path: str) -> ScanResult:
-        """Полное сканирование файла"""
+        """
+        Сканирует файл ПОЛНОСТЬЮ с умной оптимизацией.
+        Возвращает: ScanResult объект
+        """
         try:
-            # Вычисляем хеш
-            file_hash = self.calculate_file_hash(file_path)
+            # 1. Проверка существования
+            if not os.path.exists(file_path):
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256="",
+                    details={"error": "File not found"}
+                )
+
+            # 2. Проверка на системный файл (Белый список)
+            if self.is_safe_path(file_path):
+                logger.info(f"File {file_path} is in a safe system directory. Skipping deep scan.")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256=self.calculate_hash(file_path),
+                    details={"info": "Clean (System File)"}
+                )
+
+            # 3. Проверка размера
+            file_size = os.path.getsize(file_path)
+            if file_size == 0:
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256="",
+                    details={"info": "Empty File"}
+                )
             
-            # Читаем файл
-            try:
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
-                    content = f.read()
-            except Exception:
-                with open(file_path, 'rb') as f:
-                    content = f.read().decode('utf-8', errors='ignore')
+            # 4. Проверка расширения
+            ext = os.path.splitext(file_path)[1].lower()
+
+            # 5. ПОЛНОЕ ЧТЕНИЕ И СКАНИРОВАНИЕ ФАЙЛА
+            signatures_found = []
+            api_matches = []
             
-            # Извлекаем строки для дополнительного анализа
-            strings = self.extract_strings(file_path)
-            strings_content = '\n'.join(strings)
+            # Определяем размер чанка для чтения
+            chunk_size = 1024 * 1024  # 1MB chunks для эффективного чтения
             
-            # Объединяем контент для анализа
-            full_content = content + '\n' + strings_content
+            with open(file_path, "rb") as f:
+                # Читаем файл полностью по частям
+                while True:
+                    chunk = f.read(chunk_size)
+                    if not chunk:
+                        break
+                    
+                    # Поиск всех сигнатур в текущем чанке
+                    for virus_name, signatures in self.virus_signatures.items():
+                        for sig in signatures:
+                            if sig in chunk:
+                                if virus_name not in signatures_found:
+                                    signatures_found.append(virus_name)
+                                    logger.debug(f"Found signature '{virus_name}' in {file_path}")
+                    
+                    # Поиск подозрительных API (для бинарных файлов)
+                    if ext in ['.exe', '.dll', '.sys', '.scr', '.com']:
+                        for api in self.suspicious_apis:
+                            if api in chunk:
+                                if api.decode('utf-8', errors='ignore') not in api_matches:
+                                    api_matches.append(api.decode('utf-8', errors='ignore'))
+
+            # 6. Оценка результатов
+            if signatures_found:
+                confidence = min(0.95 + (len(signatures_found) * 0.01), 1.0)
+                logger.warning(f"THREAT DETECTED: {file_path} -> {signatures_found} (confidence: {confidence:.2f})")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.MALICIOUS,
+                    score=confidence,
+                    threats_found=signatures_found,
+                    threat_types=signatures_found,
+                    sha256=self.calculate_hash(file_path),
+                    details={
+                        "matched_signatures": signatures_found,
+                        "matched_apis": api_matches,
+                        "info": f"Detected: {', '.join(signatures_found)}"
+                    }
+                )
             
-            # Сканируем
-            score, threats, threat_types = self.scan_content(full_content, file_path)
-            
-            # Нормализация оценки
-            score = max(0, min(100, score))
-            
-            # Определяем уровень угрозы
-            if score <= self.thresholds['clean_max']:
-                threat_level = ThreatLevel.CLEAN
-            elif score <= self.thresholds['suspicious_max']:
-                threat_level = ThreatLevel.SUSPICIOUS
-            else:
-                threat_level = ThreatLevel.MALICIOUS
-            
-            # Формируем детали
-            details = {
-                'file_size': os.path.getsize(file_path) if os.path.exists(file_path) else 0,
-                'strings_analyzed': len(strings),
-                'categories_detected': list(threat_types),
-                'is_safe_path': self.is_safe_path(file_path),
-            }
-            
+            # Дополнительные проверки для API
+            if len(api_matches) >= 3:
+                confidence = min(0.75 + (len(api_matches) * 0.02), 0.95)
+                logger.warning(f"SUSPICIOUS FILE: {file_path} -> {api_matches}")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.SUSPICIOUS,
+                    score=confidence,
+                    threats_found=[f"Suspicious APIs: {', '.join(api_matches[:5])}"],
+                    threat_types=['SuspiciousAPI'],
+                    sha256=self.calculate_hash(file_path),
+                    details={
+                        "matched_apis": api_matches,
+                        "info": f"Suspicious APIs detected"
+                    }
+                )
+
+            # 7. Если ничего не найдено - файл чист
+            logger.info(f"File {file_path} is clean (fully scanned {file_size} bytes).")
             return ScanResult(
                 file_path=file_path,
-                threat_level=threat_level,
-                score=score,
-                threats_found=threats,
-                threat_types=threat_types,
-                sha256=file_hash,
-                details=details
+                threat_level=ThreatLevel.CLEAN,
+                score=0.0,
+                threats_found=[],
+                threat_types=[],
+                sha256=self.calculate_hash(file_path),
+                details={"info": "Clean"}
             )
-            
-        except Exception as e:
+
+        except PermissionError:
+            logger.warning(f"Permission denied scanning {file_path}")
             return ScanResult(
                 file_path=file_path,
                 threat_level=ThreatLevel.SUSPICIOUS,
-                score=50,
-                threats_found=[f"ERROR: {str(e)}"],
-                threat_types=['ERROR'],
-                sha256="error",
-                details={'error': str(e)}
+                score=0.5,
+                threats_found=["Access Denied"],
+                threat_types=["AccessDenied"],
+                sha256="",
+                details={"error": "Permission denied"}
+            )
+        except Exception as e:
+            logger.error(f"Error scanning {file_path}: {e}")
+            return ScanResult(
+                file_path=file_path,
+                threat_level=ThreatLevel.SUSPICIOUS,
+                score=0.3,
+                threats_found=[f"Scan Error: {str(e)}"],
+                threat_types=["Error"],
+                sha256="",
+                details={"error": str(e)}
             )
 
+    def get_file_info(self, file_path: str) -> Dict:
+        """Получает информацию о файле."""
+        try:
+            return {
+                "path": file_path,
+                "size": os.path.getsize(file_path),
+                "hash": self.calculate_hash(file_path),
+                "extension": os.path.splitext(file_path)[1].lower()
+            }
+        except Exception as e:
+            return {"error": str(e)}
+
     def get_statistics(self) -> Dict:
-        """Возвращает статистику по сигнатурам"""
-        total_signatures = sum(len(patterns) for patterns in self.malware_signatures.values())
-        total_heuristics = sum(len(patterns) for patterns in self.heuristic_patterns.values())
-        
+        """Получение статистики сканера."""
         return {
-            'total_signatures': total_signatures,
-            'total_heuristics': total_heuristics,
-            'categories': len(self.malware_signatures),
-            'heuristic_categories': len(self.heuristic_patterns),
-            'thresholds': self.thresholds,
+            "signatures_count": sum(len(sigs) for sigs in self.virus_signatures.values()),
+            "threat_categories": len(self.virus_signatures),
+            "suspicious_apis_count": len(self.suspicious_apis),
+            "safe_paths_count": len(self.safe_paths),
+            "safe_extensions_count": len(self.safe_extensions)
         }

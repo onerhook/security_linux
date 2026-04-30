@@ -1,0 +1,25 @@
+# FAKE VIRUS SAMPLE - RANSOMWARE
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+THREAT_TYPE: RANSOMWARE
+GENERATED: 2024-01-15
+RANDOM_ID: FAKE_RANSOMWARE_001
+
+[MALICIOUS_INDICATORS]
+CryptEncrypt(hCryptKey, hHash, TRUE, 0, pbBuffer, &dwDataLen, dwBufSize)
+FindFirstFileA("C:\\Users\\*.*", &findData)
+SetFileAttributesA("important.docx", FILE_ATTRIBUTE_HIDDEN)
+vssadmin delete shadows /all /quiet
+bcdedit /set {default} recoveryenabled no
+wbadmin delete systemstatebackup -quiet
+
+[SIGNATURE]
+Ransom.Win32.CryptoLocker
+Ransomware.Generic.Encryptor
+Win32/Filecoder.Generic
+
+[MOCK_BEHAVIOR]
+This file simulates ransomware behavior by containing known malicious patterns.
+When analyzed, it should be detected as MALICIOUS.
+DO NOT EXECUTE - THIS IS A TEST FILE ONLY.

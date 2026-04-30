@@ -1,0 +1,24 @@
+# FAKE VIRUS SAMPLE - CRYPTOMINER
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+THREAT_TYPE: MINER
+GENERATED: 2024-01-15
+RANDOM_ID: FAKE_MINER_001
+
+[MALICIOUS_INDICATORS]
+stratum+tcp://pool.mining.com:3333
+cryptonight_hashAlgorithm
+xmrig --donate-level=5 --url=stratum+tcp://pool.com
+cpuminer --url=http://pool.com --user=wallet
+gpu miner pool connect
+
+[SIGNATURE]
+Trojan.Win32.Miner
+Cryptominer.Generic
+Win32/CoinMiner
+
+[MOCK_BEHAVIOR]
+This file simulates cryptominer behavior by containing known malicious patterns.
+When analyzed, it should be detected as MALICIOUS.
+DO NOT EXECUTE - THIS IS A TEST FILE ONLY.
