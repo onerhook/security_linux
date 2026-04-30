@@ -565,7 +565,13 @@ LANGUAGES = {
         "auto_update_tooltip": "Автоматически обновлять базу сигнатур вирусов",
         "reset_defaults": "Сбросить настройки",
         "confirm_reset": "Подтверждение сброса",
-        "reset_confirm_msg": "Вы уверены, что хотите сбросить все настройки?"
+        "reset_confirm_msg": "Вы уверены, что хотите сбросить все настройки?",
+        "sensitivity_low": "Низкая",
+        "sensitivity_medium": "Средняя",
+        "sensitivity_high": "Высокая",
+        "log_level_low": "Низкий",
+        "log_level_medium": "Средний",
+        "log_level_high": "Высокий"
     },
     "English": {
         "title": "RedSand Secure",
