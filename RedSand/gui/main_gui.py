@@ -589,7 +589,17 @@ LANGUAGES = {
         "sensitivity_high": "Высокая",
         "log_level_low": "Низкий",
         "log_level_medium": "Средний",
-        "log_level_high": "Высокий"
+        "log_level_high": "Высокий",
+        "interface_settings_group": "Настройки интерфейса",
+        "security_settings_group": "Настройки безопасности",
+        "interface_language_label": "Язык интерфейса:",
+        "notifications_check": "Показывать уведомления",
+        "sound_check": "Звуковые уведомления",
+        "minimize_tray_check": "Сворачивать в трей",
+        "panic_button_check": "Кнопка экстренной остановки",
+        "auto_update_check": "Автообновление сигнатур",
+        "update_interval_label": "Интервал обновления (часы):",
+        "select_folder_btn": "📁 Выбрать папку"
     },
     "English": {
         "title": "RedSand Secure",
@@ -763,7 +773,20 @@ LANGUAGES = {
         "log_level_label": "Log level:",
         "log_level_low": "Low",
         "log_level_medium": "Medium",
-        "log_level_high": "High"
+        "log_level_high": "High",
+        "interface_settings_group": "Interface Settings",
+        "security_settings_group": "Security Settings",
+        "interface_language_label": "Interface Language:",
+        "notifications_check": "Show notifications",
+        "sound_check": "Sound notifications",
+        "minimize_tray_check": "Minimize to tray",
+        "panic_button_check": "Emergency stop button",
+        "auto_update_check": "Auto-update signatures",
+        "update_interval_label": "Update interval (hours):",
+        "select_folder_btn": "📁 Select Folder",
+        "reset_defaults": "Reset Settings",
+        "confirm_reset": "Confirm Reset",
+        "reset_confirm_msg": "Are you sure you want to reset all settings?"
     }
 }
 
@@ -996,11 +1019,14 @@ class AntivirusPanel(QWidget):
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
-        self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
+        # Получаем текущий язык для чекбоксов
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        self.chk_auto_quarantine = QCheckBox(lang.get("auto_quarantine", "Автоматический карантин угроз"))
         self.chk_auto_quarantine.setChecked(True)
         monitor_layout.addWidget(self.chk_auto_quarantine)
         
-        self.chk_scan_on_access = QCheckBox("Сканирование при доступе к файлу")
+        self.chk_scan_on_access = QCheckBox(lang.get("scan_on_access", "Сканирование при доступе к файлу"))
         self.chk_scan_on_access.setChecked(True)
         monitor_layout.addWidget(self.chk_scan_on_access)
         
@@ -1322,7 +1348,7 @@ class AnalysisPanel(QWidget):
         self.btn_select_file.clicked.connect(self.select_file)
         btn_layout.addWidget(self.btn_select_file)
         
-        self.btn_select_dir = QPushButton("📁 Выбрать папку")
+        self.btn_select_dir = QPushButton(lang.get("select_folder_btn", "📁 Выбрать папку"))
         self.btn_select_dir.setObjectName("actionBtn")
         self.btn_select_dir.clicked.connect(self.select_directory)
         btn_layout.addWidget(self.btn_select_dir)
