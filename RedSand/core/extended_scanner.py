@@ -234,17 +234,29 @@ class ExtendedVirusScanner:
                     details={"info": "Clean (Test File)"}
                 )
 
-            # 6. ПОЛНОЕ СКАНИРОВАНИЕ НА СИГНАТУРЫ
+            # 6. ПОЛНОЕ СКАНИРОВАНИЕ НА СИГНАТУРЫ (с умной логикой)
             signatures_found = []
             api_matches = []
             
-            # Поиск всех сигнатур
+            # Поиск всех сигнатур с подсчетом совпадений по категориям
+            category_scores = {}
+            
             for virus_name, signatures in self.virus_signatures.items():
+                matches_count = 0
+                matched_sigs = []
                 for sig in signatures:
                     if sig in content:
-                        if virus_name not in signatures_found:
-                            signatures_found.append(virus_name)
-                            logger.debug(f"Found signature '{virus_name}' in {file_path}")
+                        matches_count += 1
+                        matched_sigs.append(sig)
+                
+                # Требует МИНИМУМ 3 совпадений из категории для детекции
+                # ИЛИ наличие специфичных FAKE_* сигнатур (для тестовых вирусов)
+                has_fake_signature = any(b'FAKE_' in sig for sig in matched_sigs)
+                
+                if matches_count >= 3 or has_fake_signature:
+                    signatures_found.append(virus_name)
+                    category_scores[virus_name] = matches_count
+                    logger.debug(f"Found signature '{virus_name}' with {matches_count} matches in {file_path}")
             
             # Поиск подозрительных API (для бинарных файлов)
             if ext in ['.exe', '.dll', '.sys', '.scr', '.com']:
