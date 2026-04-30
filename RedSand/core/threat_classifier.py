@@ -157,6 +157,13 @@ class ThreatClassifier:
 
     def classify_static(self, static_results):
         """Классификация на основе статического анализа с расширенной эвристикой"""
+        
+        # Проверяем, является ли файл чистым по результатам статического сканера
+        static_threat_level = static_results.get('threat_level', 'CLEAN')
+        if static_threat_level == 'CLEAN':
+            # Для чистых файлов не определяем тип угрозы
+            return 'CLEAN'
+        
         scores = {}
 
         strings_found = static_results.get('strings', [])
@@ -191,8 +198,9 @@ class ThreatClassifier:
 
             scores[threat_type] = min(score, 100)
 
-        # Возвращаем тип с максимальным скором
-        if max(scores.values()) > 0:
+        # Возвращаем тип с максимальным скором, только если есть значимые совпадения
+        max_score = max(scores.values()) if scores else 0
+        if max_score >= self.weights['multiple_indicators_bonus']:  # Минимум 20 баллов для классификации
             return max(scores, key=scores.get)
         return 'UNKNOWN'
 
@@ -297,8 +305,12 @@ class ThreatClassifier:
         primary_threat = max(threat_scores, key=threat_scores.get)
         risk_score = threat_scores[primary_threat]
 
+        # Если статический анализ показал CLEAN и нет явных индикаторов малвари, считаем файл чистым
+        if static_type == 'CLEAN' and not has_malicious_indicators:
+            primary_threat = 'CLEAN'
+            risk_score = min(threat_scores.values())
         # Если все скоры низкие (< 20) и нет явных индикаторов, считаем файл чистым
-        if max(threat_scores.values()) < 20 and not has_malicious_indicators:
+        elif max(threat_scores.values()) < 20 and not has_malicious_indicators:
             primary_threat = 'CLEAN'
             risk_score = min(threat_scores.values())
         elif has_malicious_indicators and primary_threat == 'CLEAN':
