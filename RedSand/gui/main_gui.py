@@ -1488,10 +1488,19 @@ class AnalysisPanel(QWidget):
         # Формируем данные для таблицы результатов
         file_type = lang.get("file_type", "File Type")
         size_label = lang.get("size", "Size")
-        size_value = f"{os.path.getsize(self.file_path_edit.text().strip())} bytes"
+        
+        # Безопасное получение размера файла
+        file_path = self.file_path_edit.text().strip()
+        try:
+            if os.path.exists(file_path):
+                size_value = f"{os.path.getsize(file_path)} bytes"
+            else:
+                size_value = "Unknown (Quarantined)"
+        except Exception:
+            size_value = "Unknown"
         
         results_data = [
-            (lang.get("col_file", "File"), os.path.basename(self.file_path_edit.text().strip())),
+            (lang.get("col_file", "File"), os.path.basename(file_path)),
             (lang.get("col_status", "Status"), status_text),
             (lang.get("recommendation", "Recommendation"), recommendation),
             (lang.get("action_required", "Action Required"), action_text),
