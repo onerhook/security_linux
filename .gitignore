@@ -1,1 +1,7 @@
-Nothing needs to be added to .gitignore since only a Python source file (`RedSand/gui/main_gui.py`) was modified and there are no build artifacts, dependencies, or temporary files in the changes.
+```
+# Executables and binaries
+*.exe
+
+# Test viruses directory
+RedSand/test_viruses/
+```

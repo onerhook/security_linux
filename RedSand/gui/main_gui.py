@@ -885,7 +885,7 @@ class MainModeSelector(QWidget):
             self.btn_exit.setText("Выйти")
         
         self.btn_antivirus.setText(lang["antivirus_mode"])
-        self.btn_analysis.setText("\n" + lang["analysis_mode"])
+        self.btn_analysis.setText(lang["analysis_mode"])
         self.btn_settings.setText(lang["settings"])
         self.btn_history.setText(lang["history"])
         self.btn_quarantine.setText(lang["quarantine"])
@@ -2313,11 +2313,15 @@ class SettingsDialog(QDialog):
         log_level_label = QLabel(lang.get("log_level_label", "Уровень логирования:"))
         self.log_level_layout.addWidget(log_level_label)
         self.log_level_combo = QComboBox()
-        self.log_level_combo.addItems(["DEBUG", "INFO", "WARNING", "ERROR"])
-        log_level = self.settings.get('log_level', 'INFO')
-        log_levels = ["DEBUG", "INFO", "WARNING", "ERROR"]
+        self.log_level_combo.addItems([lang.get("log_level_low", "Low"),
+                                       lang.get("log_level_medium", "Medium"),
+                                       lang.get("log_level_high", "High")])
+        log_level = self.settings.get('log_level', 'Medium')
+        log_levels_display = [lang.get("log_level_low", "Low"),
+                              lang.get("log_level_medium", "Medium"),
+                              lang.get("log_level_high", "High")]
         try:
-            log_idx = log_levels.index(log_level)
+            log_idx = log_levels_display.index(log_level)
         except ValueError:
             log_idx = 1
         self.log_level_combo.setCurrentIndex(log_idx)
