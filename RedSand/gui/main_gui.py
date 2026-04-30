@@ -24,13 +24,24 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
     QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QStackedWidget
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve, QFileSystemWatcher
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
 # Импорт компонентов ядра
-from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
+from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager, FileMonitorHandler
 from core.virus_scanner import VirusScanner
 from core.extended_scanner import ExtendedVirusScanner, ThreatLevel
+
+# Импорты для watchdog
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    Observer = None
+    FileSystemEventHandler = None
+    FileCreatedEvent = None
 
 
 class AnalysisWorker(QThread):
@@ -1090,30 +1101,54 @@ class AntivirusPanel(QWidget):
         try:
             # Небольшая задержка чтобы файл полностью записался / Small delay for file to be fully written
             import time
-            time.sleep(0.3)
+            time.sleep(0.5)
+            
+            self.log_event(f"Directory changed: {directory_path}")
             
             # Проверяем файлы в директории / Check files in directory
             if os.path.exists(directory_path):
-                files = os.listdir(directory_path)
+                try:
+                    files = os.listdir(directory_path)
+                except PermissionError:
+                    self.log_event(f"Permission denied: {directory_path}")
+                    return
+                    
                 for filename in files:
                     file_path = os.path.join(directory_path, filename)
-                    # Проверяем только новые файлы (созданные в последнюю минуту) / Check only new files (created in last minute)
+                    
+                    # Пропускаем директории / Skip directories
+                    if os.path.isdir(file_path):
+                        continue
+                        
+                    # Проверяем только новые файлы (созданные/модифицированные в последние 2 минуты) 
+                    # Check only new files (created/modified in last 2 minutes)
                     try:
                         mtime = os.path.getmtime(file_path)
+                        ctime = os.path.getctime(file_path)
                         import datetime
-                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту / File created in last minute
-                            # Проверяем расширение / Check extension
-                            ext = os.path.splitext(filename)[1].lower()
-                            monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com']
-                            if ext in monitored_exts and not filename.startswith('~$'):
-                                lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
-                                self.log_event(f"{lang.get('new_file_detected', 'New file detected: ')}{filename}")
-                                # Запускаем сканирование в отдельном потоке / Start scanning in separate thread
-                                worker = AnalysisWorker(file_path)
-                                worker.result_ready.connect(self.on_new_file_scanned)
-                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Error scanning {filename}: {err}"))
-                                worker.start()
-                    except (OSError, IOError):
+                        now = datetime.datetime.now().timestamp()
+                        
+                        # Файл новый если создан или изменен в последние 2 минуты
+                        # File is new if created or modified in last 2 minutes
+                        is_new = (now - mtime < 120) or (now - ctime < 120)
+                        
+                        if not is_new:
+                            continue
+                            
+                        # Проверяем расширение / Check extension
+                        ext = os.path.splitext(filename)[1].lower()
+                        monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com', '.txt']
+                        
+                        if ext in monitored_exts and not filename.startswith('~$') and not filename.startswith('.'):
+                            lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+                            self.log_event(f"{lang.get('new_file_detected', 'New file detected: ')}{filename}")
+                            
+                            # Запускаем сканирование в отдельном потоке / Start scanning in separate thread
+                            worker = AnalysisWorker(file_path)
+                            worker.result_ready.connect(self.on_new_file_scanned)
+                            worker.error_occurred.connect(lambda err: self.log_event(f"[-] Error scanning {filename}: {err}"))
+                            worker.start()
+                    except (OSError, IOError) as e:
                         pass  # Файл может быть еще не готов / File may not be ready yet
                         
             # Перезапускаем watcher если директория изменилась / Restart watcher if directory changed
