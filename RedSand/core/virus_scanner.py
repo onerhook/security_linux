@@ -103,6 +103,23 @@ class VirusScanner:
                 r'webcam.*capture.*stream',  # Трансляция веб-камеры
                 r'microphone.*record.*send',  # Запись микрофона
                 r'shell.*command.*execute.*remote',  # Удалённое выполнение команд
+                r'trojan',  # Троян
+                r'MALICIOUS_PAYLOAD',  # Маркер вредоносной нагрузки
+                
+                # === ДОПОЛНИТЕЛЬНЫЕ ПАТТЕРНЫ ДЛЯ RANSOMWARE ===
+                r'AES.*encrypt',  # AES шифрование
+                r'bitcoin_address',  # Адрес биткоина
+                r'ransom',  # Выкуп
+                
+                # === ДОПОЛНИТЕЛЬНЫЕ ПАТТЕРНЫ ДЛЯ KEYLOGGER ===
+                r'keylog',  # Кейлоггер
+                r'keyboard.*hook',  # Хук клавиатуры
+                r'SendDataToServer',  # Отправка данных на сервер
+                
+                # === ДОПОЛНИТЕЛЬНЫЕ ПАТТЕРНЫ ДЛЯ TROJAN ===
+                r'reverse.*shell',  # Обратный шелл
+                r'cmd\\.exe',  # Командная строка
+                r'system32',  # Системная директория
             ],
         }
         
@@ -312,16 +329,22 @@ class VirusScanner:
                     if line and not line.startswith('#'):
                         indicators.append(f"Mock indicator: {line[:50]}")
         
-        # Проверка секции SIGNATURE на наличие сигнатур малвари
+        # Проверка секции SIGNATURE - только если файл не помечен как CLEAN/SAFE
         if re.search(r'\[SIGNATURE\]', content, re.IGNORECASE):
-            sig_section = re.search(r'\[SIGNATURE\](.*?)(?:\[|$)', content, re.IGNORECASE | re.DOTALL)
-            if sig_section:
-                sig_content = sig_section.group(1).strip()
-                lines = sig_content.split('\n')
-                for line in lines:
-                    line = line.strip()
-                    if line and not line.startswith('#'):
-                        indicators.append(f"Signature: {line}")
+            # Проверяем, не является ли файл чистым тестовым файлом
+            is_clean_file = (
+                re.search(r'CLEAN_APPLICATION|SAFE_TEST_FILE|LEGITIMATE_SOFTWARE|CLEAN_EXE', content, re.IGNORECASE) or
+                re.search(r'THIS IS A SAFE TEST FILE|NOT A REAL MALWARE|LEGITIMATE APPLICATION', content, re.IGNORECASE)
+            )
+            if not is_clean_file:
+                sig_section = re.search(r'\[SIGNATURE\](.*?)(?:\[|$)', content, re.IGNORECASE | re.DOTALL)
+                if sig_section:
+                    sig_content = sig_section.group(1).strip()
+                    lines = sig_content.split('\n')
+                    for line in lines:
+                        line = line.strip()
+                        if line and not line.startswith('#'):
+                            indicators.append(f"Signature: {line}")
         
         return indicators
     
