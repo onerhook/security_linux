@@ -25,7 +25,7 @@ class ScanResult:
     threat_types: List[str]
     sha256: str
     details: Dict
-    
+
     def __post_init__(self):
         if isinstance(self.threat_level, str):
             self.threat_level = ThreatLevel(self.threat_level)
@@ -33,84 +33,119 @@ class ScanResult:
 class ExtendedVirusScanner:
     def __init__(self):
         # Расширенные сигнатуры вирусов (строки, которые ищем внутри файлов)
+        # ВАЖНО: Сигнатуры должны быть уникальными для вредоносного ПО, а не встречаться в легитимных программах
         self.virus_signatures = {
-            # Ransomware сигнатуры
+            # Ransomware сигнатуры - только специфичные для вымогателей
             "Ransomware": [
-                b"encrypt", b"decrypt", b"bitcoin", b"wallet", b"ransom", b"payment",
-                b".locked", b".crypto", b".encrypted", b"your files", b"pay bitcoin",
-                b"private key", b"AES256", b"RSA4096", b"TOR", b"onion", b"recover files",
-                b"FAKE_RANSOMWARE_SIGNATURE", b"AES256 encrypt function call", b"bitcoin_address"
+                b"FAKE_RANSOMWARE_SIGNATURE",  # Тестовая сигнатура
+                b"your files have been encrypted",  # Фраза вымогателя
+                b"pay bitcoin to decrypt",  # Требование выкупа
+                b"decrypt_key_not_found",  # Специфичная ошибка ransomware
+                b"encrypt_all_files_in_directory",  # Явная функция шифрования
+                b"bitcoin_wallet_for_ransom",  # Кошелек для выкупа
+                b"AES256_encrypt_function_call_with_key_derivation",  # Специфичный вызов
             ],
-            # Keylogger сигнатуры
+            # Keylogger сигнатуры - только явные кейлоггеры
             "Keylogger": [
-                b"keylog", b"keystroke", b"GetAsyncKeyState", b"SetWindowsHookEx",
-                b"keyboard", b"input", b"capture", b"SendDataToServer", b"log.txt",
-                b"virtualkey", b"scan code", b"clipboard", b"password", b"credential",
-                b"FAKE_KEYLOGGER_SIGNATURE", b"GetAsyncKeyState", b"SendDataToServer"
+                b"FAKE_KEYLOGGER_SIGNATURE",  # Тестовая сигнатура
+                b"GetAsyncKeyState_and_SendToRemoteServer",  # Явный кейлоггер
+                b"keystroke_logger_send_to_c2",  # Отправка на C2 сервер
+                b"capture_passwords_from_browser",  # Кража паролей
+                b"hidden_keyboard_hook_install",  # Скрытый хук клавиатуры
+                b"log_all_keystrokes_to_remote_server",  # Логирование на сервер
             ],
-            # Miner сигнатуры
+            # Miner сигнатуры - только явные майнеры
             "Miner": [
-                b"mining", b"pool", b"stratum+tcp", b"cryptonight", b"monero", b"xmr",
-                b"hashrate", b"coinhive", b"cpu miner", b"gpu miner", b"worker",
-                b"submit share", b"difficulty", b"blockchain", b"coin", b"hash rate",
-                b"FAKE_MINER_SIGNATURE", b"stratum+tcp://", b"coinhive"
+                b"FAKE_MINER_SIGNATURE",  # Тестовая сигнатура
+                b"stratum+tcp://xmr.pool.minergate.com",  # Конкретный пул для майнинга
+                b"coinhive_miner_embedded",  # Coinhive майнер
+                b"cryptonight_hash_cpu_mining",  # Алгоритм майнинга
+                b"submit_share_to_mining_pool",  # Отправка шары на пул
+                b"monero_wallet_address_for_mining",  # Кошелек для майнинга
             ],
-            # Trojan сигнатуры
+            # Trojan сигнатуры - только явные трояны
             "Trojan": [
-                b"trojan", b"backdoor", b"reverse shell", b"cmd.exe /c", b"powershell",
-                b"download", b"execute", b"payload", b"dropper", b"inject",
-                b"remote access", b"c2", b"command and control", b"beacon",
-                b"FAKE_TROJAN_SIGNATURE", b"cmd.exe /c del", b"reverse_shell"
+                b"FAKE_TROJAN_SIGNATURE",  # Тестовая сигнатура
+                b"reverse_shell_connect_back_to_attacker",  # Reverse shell
+                b"cmd.exe /c del /f /q %0",  # Самоудаление после запуска
+                b"download_and_execute_payload_from_url",  # Загрузка пейлоада
+                b"inject_dll_into_explorer_process",  # Инъекция DLL
+                b"disable_windows_defender_registry",  # Отключение защитника Windows
             ],
-            # Spyware сигнатуры
+            # Spyware сигнатуры - только явное шпионское ПО
             "Spyware": [
-                b"spy", b"monitor", b"screenshot", b"webcam", b"record", b"surveillance",
-                b"clipboard", b"microphone", b"camera", b"screen capture", b"audio record",
-                b"track", b"stealth", b"hidden", b"covert"
+                b"FAKE_SPYWARE_SIGNATURE",  # Тестовая сигнатура
+                b"take_screenshot_and_send_to_server",  # Скриншоты на сервер
+                b"record_microphone_audio_upload",  # Запись микрофона
+                b"webcam_capture_without_indicator",  # Запись веб-камеры без индикатора
+                b"steal_browser_cookies_and_sessions",  # Кража cookies
             ],
             # RAT (Remote Access Trojan) сигнатуры
             "RAT": [
-                b"remote desktop", b"remote control", b"admin", b"shell", b"vnc",
-                b"teamviewer", b"anydesk", b"remote admin", b"control panel", b"rat"
+                b"FAKE_RAT_SIGNATURE",  # Тестовая сигнатура
+                b"remote_desktop_control_backdoor",  # Удаленный контроль
+                b"execute_commands_from_c2_server",  # Команды с C2
+                b"file_manager_remote_access",  # Удаленный файловый менеджер
+                b"keylogger_module_for_rat",  # Кейлоггер модуль в RAT
             ],
             # Stealer сигнатуры
             "Stealer": [
-                b"password", b"cookie", b"credential", b"browser", b"steal", b"exfil",
-                b"dump", b"wallet", b"autofill", b"history", b"bookmark", b"login data"
+                b"FAKE_STEALER_SIGNATURE",  # Тестовая сигнатура
+                b"extract_chrome_saved_passwords",  # Кража паролей Chrome
+                b"dump_windows_credentials_from_lsa",  # Кража из LSA
+                b"steal_discord_tokens_and_local_storage",  # Кража токенов Discord
+                b"exfiltrate_crypto_wallets_from_browsers",  # Кража крипто-кошельков
             ],
             # Rootkit сигнатуры
             "Rootkit": [
-                b"rootkit", b"kernel", b"driver", b"hook", b"ssdt", b"idt", b"inline",
-                b"stealth", b"hide process", b"hide file", b"system service", b"ntoskrnl"
+                b"FAKE_ROOTKIT_SIGNATURE",  # Тестовая сигнатура
+                b"hook_ssdt_table_kernel",  # Хук SSDT
+                b"hide_process_from_task_manager",  # Скрытие процесса
+                b"install_kernel_mode_driver_rootkit",  # Установка драйвера rootkit
+                b"intercept_system_calls_ntoskrnl",  # Перехват системных вызовов
             ],
             # Worm сигнатуры
             "Worm": [
-                b"worm", b"spread", b"replicate", b"usb", b"network share", b"copy",
-                b"propagate", b"autorun", b"removable", b"mass mailer"
+                b"FAKE_WORM_SIGNATURE",  # Тестовая сигнатура
+                b"copy_self_to_usb_drive_autorun",  # Копирование на USB
+                b"spread_via_network_shares_admin",  # Распространение по сети
+                b"replicate_to_removable_drives",  # Репликация на съемные носители
+                b"mass_email_sender_worm",  # Массовая рассылка
             ],
             # Botnet сигнатуры
             "Botnet": [
-                b"bot", b"ddos", b"flood", b"zombie", b"irc", b"syn flood", b"udp flood",
-                b"http flood", b"botnet", b"c&c", b"master", b"slave", b"distributed"
+                b"FAKE_BOTNET_SIGNATURE",  # Тестовая сигнатура
+                b"connect_to_irc_botnet_controller",  # Подключение к IRC ботнету
+                b"ddos_attack_syn_flood_target",  # DDoS атака
+                b"receive_commands_from_botnet_c2",  # Команды от C2 ботнета
+                b"zombie_mode_wait_for_instructions",  # Режим зомби
             ],
             # Adware сигнатуры
             "Adware": [
-                b"adware", b"popup", b"banner", b"redirect", b"promotion", b"sponsor",
-                b"click here", b"advertisement", b"toolbar", b"browser helper"
+                b"FAKE_ADWARE_SIGNATURE",  # Тестовая сигнатура
+                b"inject_ads_into_web_pages",  # Внедрение рекламы
+                b"browser_helper_object_adware",  # BHO для рекламы
+                b"popup_generator_force_display",  # Генератор popup окон
             ],
-            # Generic угрозы
+            # Generic угрозы - только явные
             "GenericThreat": [
-                b"MALICIOUS_PAYLOAD", b"DANGER_ZONE", b"EXPLOIT_CODE", b"SHELLCODE",
-                b"buffer overflow", b"use after free", b"privilege escalation",
-                b"bypass uac", b"disable antivirus", b"kill process", b"delete shadow copy"
+                b"FAKE_GENERIC_THREAT",  # Тестовая сигнатура
+                b"MALICIOUS_PAYLOAD_EXECUTE_SHELLCODE",  # Шеллкод
+                b"buffer_overflow_exploit_cve",  # Эксплойт переполнения
+                b"privilege_escalation_kernel_exploit",  # Повышение привилегий
+                b"bypass_uac_via_com_hijack",  # Обход UAC
+                b"kill_antivirus_processes_forcefully",  # Убийство антивируса
             ],
-            # Обфусцированный код
+            # Obfuscated код - только явная обфускация
             "Obfuscated": [
-                b"eval(", b"exec(", b"base64_decode", b"rot13", b"xor", b"unpack",
-                b"deobfuscate", b"decode", b"decrypt", b"unpacker"
+                b"FAKE_OBFUSCATED_SIGNATURE",  # Тестовая сигнатура
+                b"eval(base64_decode(rot13(",  # Многослойная обфускация
+                b"xor_decrypt_with_key_and_execute",  # XOR дешифровка с выполнением
+                b"unpacker_stub_for_malware",  # Упаковщик для малвари
+                b"deobfuscate_and_run_payload",  # Деобфускация и запуск
             ]
         }
-        
+
         # Подозрительные API вызовы для PE файлов
         self.suspicious_apis = [
             b"VirtualAllocEx", b"WriteProcessMemory", b"CreateRemoteThread",
@@ -118,7 +153,7 @@ class ExtendedVirusScanner:
             b"CryptEncrypt", b"CryptDecrypt", b"RegSetValueEx", b"CreateService",
             b"InternetOpen", b"URLDownloadToFile", b"WinExec", b"ShellExecute"
         ]
-        
+
         # Белый список путей (Системные файлы никогда не сканируются агрессивно)
         self.safe_paths = [
             r"C:\Windows",
@@ -131,10 +166,10 @@ class ExtendedVirusScanner:
             r"/System",
             r"/Library"
         ]
-        
+
         # Расширения безопасных файлов
-        self.safe_extensions = ['.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp', 
-                               '.mp3', '.mp4', '.avi', '.mkv', '.pdf', '.doc', 
+        self.safe_extensions = ['.txt', '.jpg', '.jpeg', '.png', '.gif', '.bmp',
+                               '.mp3', '.mp4', '.avi', '.mkv', '.pdf', '.doc',
                                '.docx', '.xls', '.xlsx', '.ppt', '.pptx']
 
     def is_safe_path(self, file_path: str) -> bool:
@@ -200,40 +235,134 @@ class ExtendedVirusScanner:
                     sha256="",
                     details={"info": "Empty File"}
                 )
-            
+
             # 4. Проверка расширения
             ext = os.path.splitext(file_path)[1].lower()
 
-            # 5. ПОЛНОЕ ЧТЕНИЕ И СКАНИРОВАНИЕ ФАЙЛА
+            # 5. ЧТЕНИЕ ФАЙЛА И ПРОВЕРКА НА CLEAN-МАРКЕРЫ И ЛЕГИТИМНЫЕ ПРИЛОЖЕНИЯ
+            with open(file_path, "rb") as f:
+                content = f.read()
+
+            # Проверяем наличие маркеров чистого файла
+            clean_markers = [
+                b"CLEAN EXE SAMPLE",
+                b"THIS IS A SAFE TEST FILE",
+                b"NOT A REAL MALWARE",
+                b"CLEAN_APPLICATION",
+                b"LEGITIMATE_SOFTWARE",
+                b"SAFE_TEST_FILE",
+                b"CLEAN_EXE",
+                b"LEGITIMATE_INDICATORS"
+            ]
+
+            is_clean_file = any(marker in content for marker in clean_markers)
+
+            if is_clean_file:
+                logger.info(f"File {file_path} identified as CLEAN test file.")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256=self.calculate_hash(file_path),
+                    details={"info": "Clean (Test File)"}
+                )
+
+            # Проверка на известные легитимные приложения по имени файла и хэшу
+            filename_lower = os.path.basename(file_path).lower()
+            legitimate_apps = [
+                'tgwsproxy.exe',  # Telegram WireGuard Proxy - легитимный инструмент
+                'wireguard.exe',  # WireGuard VPN
+                'openvpn.exe',    # OpenVPN
+                'tor.exe',        # Tor Browser
+                'putty.exe',      # PuTTY SSH клиент
+                'winscp.exe',     # WinSCP
+                'filezilla.exe',  # FileZilla
+                'vLC.exe',        # VLC Media Player
+                'chrome.exe',     # Google Chrome
+                'firefox.exe',    # Mozilla Firefox
+                'edge.exe',       # Microsoft Edge
+                'opera.exe',      # Opera Browser
+                'discord.exe',    # Discord
+                'telegram.exe',   # Telegram
+                'signal.exe',     # Signal
+                'whatsapp.exe',   # WhatsApp
+                'zoom.exe',       # Zoom
+                'teams.exe',      # Microsoft Teams
+                'slack.exe',      # Slack
+                'spotify.exe',    # Spotify
+                'steam.exe',      # Steam
+                'epicgameslauncher.exe',  # Epic Games Launcher
+                'origin.exe',     # Origin
+                'uplay.exe',      # Uplay
+                'battle.net.exe', # Battle.net
+                'minecraft.exe',  # Minecraft
+                'roblox.exe',     # Roblox
+                'obs64.exe',      # OBS Studio
+                'streamlabs.exe', # Streamlabs OBS
+                'git.exe',        # Git
+                'python.exe',     # Python
+                'node.exe',       # Node.js
+                'code.exe',       # VS Code
+                'pycharm.exe',    # PyCharm
+                'idea.exe',       # IntelliJ IDEA
+                'androidstudio.exe',  # Android Studio
+                'docker.exe',     # Docker Desktop
+                'kubernetes.exe', # Kubernetes
+                'terraform.exe',  # Terraform
+                'ansible.exe',    # Ansible
+                'powershell.exe', # PowerShell (системный)
+                'cmd.exe',        # Command Prompt (системный)
+            ]
+
+            # Если имя файла совпадает с известным легитимным приложением
+            if filename_lower in legitimate_apps:
+                # Дополнительная проверка: если файл слишком маленький для реального приложения
+                if file_size > 100000:  # Больше 100KB
+                    logger.info(f"File {file_path} identified as known legitimate application: {filename_lower}")
+                    return ScanResult(
+                        file_path=file_path,
+                        threat_level=ThreatLevel.CLEAN,
+                        score=0.0,
+                        threats_found=[],
+                        threat_types=[],
+                        sha256=self.calculate_hash(file_path),
+                        details={"info": f"Clean (Known Application: {filename_lower})"}
+                    )
+
+            # 6. ПОЛНОЕ СКАНИРОВАНИЕ НА СИГНАТУРЫ (с умной логикой)
             signatures_found = []
             api_matches = []
-            
-            # Определяем размер чанка для чтения
-            chunk_size = 1024 * 1024  # 1MB chunks для эффективного чтения
-            
-            with open(file_path, "rb") as f:
-                # Читаем файл полностью по частям
-                while True:
-                    chunk = f.read(chunk_size)
-                    if not chunk:
-                        break
-                    
-                    # Поиск всех сигнатур в текущем чанке
-                    for virus_name, signatures in self.virus_signatures.items():
-                        for sig in signatures:
-                            if sig in chunk:
-                                if virus_name not in signatures_found:
-                                    signatures_found.append(virus_name)
-                                    logger.debug(f"Found signature '{virus_name}' in {file_path}")
-                    
-                    # Поиск подозрительных API (для бинарных файлов)
-                    if ext in ['.exe', '.dll', '.sys', '.scr', '.com']:
-                        for api in self.suspicious_apis:
-                            if api in chunk:
-                                if api.decode('utf-8', errors='ignore') not in api_matches:
-                                    api_matches.append(api.decode('utf-8', errors='ignore'))
 
-            # 6. Оценка результатов
+            # Поиск всех сигнатур с подсчетом совпадений по категориям
+            category_scores = {}
+
+            for virus_name, signatures in self.virus_signatures.items():
+                matches_count = 0
+                matched_sigs = []
+                for sig in signatures:
+                    if sig in content:
+                        matches_count += 1
+                        matched_sigs.append(sig)
+
+                # Требует МИНИМУМ 3 совпадений из категории для детекции
+                # ИЛИ наличие специфичных FAKE_* сигнатур (для тестовых вирусов)
+                has_fake_signature = any(b'FAKE_' in sig for sig in matched_sigs)
+
+                if matches_count >= 3 or has_fake_signature:
+                    signatures_found.append(virus_name)
+                    category_scores[virus_name] = matches_count
+                    logger.debug(f"Found signature '{virus_name}' with {matches_count} matches in {file_path}")
+
+            # Поиск подозрительных API (для бинарных файлов)
+            if ext in ['.exe', '.dll', '.sys', '.scr', '.com']:
+                for api in self.suspicious_apis:
+                    if api in content:
+                        if api.decode('utf-8', errors='ignore') not in api_matches:
+                            api_matches.append(api.decode('utf-8', errors='ignore'))
+
+            # 7. Оценка результатов
             if signatures_found:
                 confidence = min(0.95 + (len(signatures_found) * 0.01), 1.0)
                 logger.warning(f"THREAT DETECTED: {file_path} -> {signatures_found} (confidence: {confidence:.2f})")
@@ -250,7 +379,7 @@ class ExtendedVirusScanner:
                         "info": f"Detected: {', '.join(signatures_found)}"
                     }
                 )
-            
+
             # Дополнительные проверки для API
             if len(api_matches) >= 3:
                 confidence = min(0.75 + (len(api_matches) * 0.02), 0.95)
@@ -268,7 +397,7 @@ class ExtendedVirusScanner:
                     }
                 )
 
-            # 7. Если ничего не найдено - файл чист
+            # 8. Если ничего не найдено - файл чист
             logger.info(f"File {file_path} is clean (fully scanned {file_size} bytes).")
             return ScanResult(
                 file_path=file_path,

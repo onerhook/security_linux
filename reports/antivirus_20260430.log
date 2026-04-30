@@ -1,0 +1,109 @@
+2026-04-30 18:03:04,236 - INFO - ✅ Антивирус включен
+2026-04-30 18:03:04,237 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:03:04,237 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:03:04,237 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:03:04,238 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:12:06,748 - INFO - ✅ Антивирус включен
+2026-04-30 18:12:06,748 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:12:06,749 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:12:06,749 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:12:06,749 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:18:48,417 - INFO - ✅ Антивирус включен
+2026-04-30 18:18:48,417 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:18:48,417 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:18:48,417 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:18:48,417 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:39:22,767 - INFO - ✅ Антивирус включен
+2026-04-30 18:39:22,768 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:39:22,768 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:39:22,768 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:39:22,769 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:43:36,406 - INFO - ✅ Антивирус включен
+2026-04-30 18:43:36,406 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:43:36,406 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:43:36,406 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:43:36,406 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:46:41,051 - INFO - ✅ Антивирус включен
+2026-04-30 18:46:41,051 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:46:41,051 - INFO - Мониторинг папок: C:/Users/vanished4ever/Documents/GitHub/security_linux
+2026-04-30 18:46:41,051 - INFO - Добавлена папка: C:/Users/vanished4ever/Documents/GitHub/security_linux
+2026-04-30 18:46:41,051 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:47:12,348 - INFO - Остановка антивируса...
+2026-04-30 18:47:12,348 - INFO - ❌ Антивирус остановлен
+2026-04-30 18:47:12,996 - INFO - ✅ Антивирус включен
+2026-04-30 18:47:12,996 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:47:12,996 - INFO - Мониторинг папок: C:/Users/vanished4ever/Documents/GitHub/security_linux, C:/Users/vanished4ever/Downloads
+2026-04-30 18:47:12,996 - INFO - Добавлена папка: C:/Users/vanished4ever/Documents/GitHub/security_linux
+2026-04-30 18:47:12,996 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:47:12,996 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:48:12,281 - INFO - File C:/Users/vanished4ever/Downloads\Hiddify-Windows-Setup-x64 — копия.exe is clean (fully scanned 36486310 bytes).
+2026-04-30 18:48:20,184 - INFO - Остановка антивируса...
+2026-04-30 18:48:20,184 - INFO - ❌ Антивирус остановлен
+2026-04-30 18:51:09,623 - INFO - ✅ Антивирус включен
+2026-04-30 18:51:09,623 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:51:09,623 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:51:09,623 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:51:09,623 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:51:22,681 - INFO - File C:/Users/vanished4ever/Downloads\Hiddify-Windows-Setup-x64 — копия.exe is clean (fully scanned 36486310 bytes).
+2026-04-30 18:51:30,814 - INFO - 
+[!] Обнаружен НОВЫЙ файл: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия.exe
+2026-04-30 18:51:30,814 - INFO - [LOG] New file detected: TgWsProxy_windows (2) — копия.exe
+2026-04-30 18:51:30,814 - INFO - [+] Добавлен в очередь: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия.exe
+2026-04-30 18:51:31,336 - INFO - Сканирование файла: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия.exe
+2026-04-30 18:51:34,863 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия.exe -> ['RAT', 'Stealer', 'Botnet', 'Obfuscated'] (confidence: 0.99)
+2026-04-30 18:51:35,076 - INFO - File C:/Users/vanished4ever/Downloads\Hiddify-Windows-Setup-x64 — копия.exe is clean (fully scanned 36486310 bytes).
+2026-04-30 18:51:35,111 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия.exe -> ['RAT', 'Stealer', 'Botnet', 'Obfuscated'] (confidence: 0.99)
+2026-04-30 18:58:24,274 - INFO - ✅ Антивирус включен
+2026-04-30 18:58:24,275 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:58:24,275 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:58:24,275 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:58:24,276 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:58:37,342 - INFO - File C:/Users/vanished4ever/Downloads\Hiddify-Windows-Setup-x64 — копия — копия.exe is clean (fully scanned 36486310 bytes).
+2026-04-30 18:58:53,186 - INFO - 
+[!] Обнаружен НОВЫЙ файл: C:/Users/vanished4ever/Downloads\fake_ransomware.exe
+2026-04-30 18:58:53,186 - INFO - [LOG] New file detected: fake_ransomware.exe
+2026-04-30 18:58:53,186 - INFO - [+] Добавлен в очередь: C:/Users/vanished4ever/Downloads\fake_ransomware.exe
+2026-04-30 18:58:53,388 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\fake_ransomware.exe -> ['Ransomware'] (confidence: 0.96)
+2026-04-30 18:58:53,691 - INFO - Сканирование файла: C:/Users/vanished4ever/Downloads\fake_ransomware.exe
+2026-04-30 18:58:53,901 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\fake_ransomware.exe -> ['Ransomware'] (confidence: 0.96)
+2026-04-30 18:58:54,249 - INFO - Отчет сохранен: reports\report_20260430_185854.json
+2026-04-30 18:58:54,307 - INFO - Сканирование завершено за 0.58с: MALICIOUS
+2026-04-30 18:59:08,261 - INFO - ✅ Антивирус включен
+2026-04-30 18:59:08,261 - INFO - Запуск антивируса реального времени...
+2026-04-30 18:59:08,261 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 18:59:08,261 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 18:59:08,261 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 18:59:19,773 - INFO - 
+[!] Обнаружен НОВЫЙ файл: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 18:59:19,773 - INFO - [LOG] New file detected: TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 18:59:19,773 - INFO - [+] Добавлен в очередь: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 18:59:20,322 - INFO - Сканирование файла: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 18:59:23,582 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe -> ['RAT', 'Stealer', 'Botnet', 'Obfuscated'] (confidence: 0.99)
+2026-04-30 18:59:23,676 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe -> ['RAT', 'Stealer', 'Botnet', 'Obfuscated'] (confidence: 0.99)
+2026-04-30 18:59:24,059 - INFO - File C:/Users/vanished4ever/Downloads\Hiddify-Windows-Setup-x64 — копия — копия.exe is clean (fully scanned 36486310 bytes).
+2026-04-30 19:16:50,443 - INFO - ✅ Антивирус включен
+2026-04-30 19:16:50,443 - INFO - Запуск антивируса реального времени...
+2026-04-30 19:16:50,443 - INFO - Мониторинг папок: C:/Users/vanished4ever/Downloads
+2026-04-30 19:16:50,443 - INFO - Добавлена папка: C:/Users/vanished4ever/Downloads
+2026-04-30 19:16:50,443 - INFO - ✅ Антивирус реального времени запущен
+2026-04-30 19:16:59,497 - INFO - 
+[!] Обнаружен НОВЫЙ файл: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 19:16:59,497 - INFO - [LOG] New file detected: TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 19:16:59,497 - INFO - [+] Добавлен в очередь: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 19:17:00,000 - INFO - File C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe is clean (fully scanned 21076153 bytes).
+2026-04-30 19:17:00,000 - INFO - Сканирование файла: C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 19:17:00,251 - INFO - File C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe is clean (fully scanned 21076153 bytes).
+2026-04-30 19:17:00,267 - INFO - Сканирование завершено за 0.27с: CLEAN
+2026-04-30 19:17:00,267 - INFO - [LOG] File is CLEAN: TgWsProxy_windows (2) — копия — копия.exe
+2026-04-30 19:17:00,267 - INFO - [LOG] TgWsProxy_windows (2) — копия — копия.exe - чистый файл
+2026-04-30 19:17:30,845 - INFO - 
+[!] Обнаружен НОВЫЙ файл: C:/Users/vanished4ever/Downloads\fake_keylogger.exe
+2026-04-30 19:17:30,845 - INFO - [LOG] New file detected: fake_keylogger.exe
+2026-04-30 19:17:30,845 - INFO - [+] Добавлен в очередь: C:/Users/vanished4ever/Downloads\fake_keylogger.exe
+2026-04-30 19:17:31,047 - WARNING - THREAT DETECTED: C:/Users/vanished4ever/Downloads\fake_keylogger.exe -> ['Keylogger'] (confidence: 0.96)
+2026-04-30 19:17:31,289 - INFO - File C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe is clean (fully scanned 21076153 bytes).
+2026-04-30 19:17:31,346 - INFO - Сканирование файла: C:/Users/vanished4ever/Downloads\fake_keylogger.exe
+2026-04-30 19:17:31,346 - INFO - Сканирование завершено за 0.00с: CLEAN
+2026-04-30 19:17:31,346 - INFO - [LOG] File is CLEAN: fake_keylogger.exe
+2026-04-30 19:17:31,346 - INFO - [LOG] fake_keylogger.exe - чистый файл
+2026-04-30 19:17:31,838 - INFO - File C:/Users/vanished4ever/Downloads\TgWsProxy_windows (2) — копия — копия.exe is clean (fully scanned 21076153 bytes).

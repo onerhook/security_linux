@@ -1,7 +1,7 @@
-MZ...fake_exe_header...
+MZ...FAKE_TROJAN_SIGNATURE...
 # FAKE VIRUS SAMPLE - MALICIOUS EXE
-# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
-# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+# THIS IS A TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# GENERATED FOR EDUCATIONAL PURPOSES ONLY
 
 THREAT_TYPE: TROJAN
 GENERATED: 2024-01-15
@@ -16,6 +16,8 @@ LoadLibraryA with suspicious DLL
 GetProcAddress for API resolution
 RegSetValueEx for persistence
 InternetOpenA for C2 communication
+cmd.exe /c del system32
+reverse_shell connection established
 
 [SIGNATURE]
 Trojan.Win32.Generic

@@ -187,6 +187,7 @@ class FileMonitorHandler(FileSystemEventHandler):
             
             if self._should_scan(file_path):
                 self.logger_callback(f"\n[!] Обнаружен НОВЫЙ файл: {file_path}")
+                self.logger_callback(f"[LOG] New file detected: {os.path.basename(file_path)}")
                 self._queue_for_scanning(file_path)
     
     def on_modified(self, event):
@@ -237,10 +238,27 @@ class FileMonitorHandler(FileSystemEventHandler):
                 self.logger_callback(f"Угрозы: {', '.join(result.detected_threats)}")
             self.logger_callback(f"Действие: {result.action_taken}")
             self.logger_callback(f"Сообщение: {result.message}\n")
+            
+            # Логирование на английском
+            self.logger_callback(f"[LOG] VIRUS DETECTED: {result.file_name}")
+            self.logger_callback(f"[LOG] Threat level: {result.threat_level}")
+            self.logger_callback(f"[LOG] Risk score: {result.risk_score}/100")
+            if result.detected_threats:
+                self.logger_callback(f"[LOG] Threats: {', '.join(result.detected_threats)}")
+            self.logger_callback(f"[LOG] Action taken: {result.action_taken}")
+            
         elif result.threat_level == 'SUSPICIOUS':
             self.logger_callback(f"\n⚠️ ПОДОЗРИТЕЛЬНЫЙ ФАЙЛ ⚠️")
             self.logger_callback(f"Файл: {result.file_name}")
             self.logger_callback(f"Рекомендация: Будьте осторожны с этим файлом\n")
+            
+            # Логирование на английском
+            self.logger_callback(f"[LOG] SUSPICIOUS FILE: {result.file_name}")
+            self.logger_callback(f"[LOG] Recommendation: Be careful with this file")
+        else:
+            # Логирование чистых файлов
+            self.logger_callback(f"[LOG] File is CLEAN: {result.file_name}")
+            self.logger_callback(f"[LOG] {result.file_name} - чистый файл")
 
 
 class RealTimeAntivirus:

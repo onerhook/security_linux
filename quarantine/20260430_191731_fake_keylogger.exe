@@ -1,0 +1,5 @@
+MZ...FAKE_KEYLOGGER_SIGNATURE...
+This is a fake keylogger for testing.
+GetAsyncKeyState hook installed
+SendDataToServer: remote_host = evil.com
+MALICIOUS_PAYLOAD_DETECTED

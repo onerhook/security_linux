@@ -24,13 +24,24 @@ from PyQt5.QtWidgets import (
     QTableWidget, QTableWidgetItem, QHeaderView, QComboBox,
     QScrollArea, QGridLayout, QListWidget, QListWidgetItem, QStackedWidget
 )
-from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve
+from PyQt5.QtCore import Qt, pyqtSignal, QObject, QThread, QSize, QUrl, QMimeData, QPropertyAnimation, QEasingCurve, QFileSystemWatcher
 from PyQt5.QtGui import QFont, QColor, QDesktopServices, QIcon, QPixmap, QDragEnterEvent, QDropEvent
 
 # Импорт компонентов ядра
-from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager
+from core.realtime_antivirus import RealTimeAntivirus, QuarantineManager, FileMonitorHandler
 from core.virus_scanner import VirusScanner
-from core.extended_scanner import ExtendedVirusScanner
+from core.extended_scanner import ExtendedVirusScanner, ThreatLevel
+
+# Импорты для watchdog
+try:
+    from watchdog.observers import Observer
+    from watchdog.events import FileSystemEventHandler, FileCreatedEvent
+    WATCHDOG_AVAILABLE = True
+except ImportError:
+    WATCHDOG_AVAILABLE = False
+    Observer = None
+    FileSystemEventHandler = None
+    FileCreatedEvent = None
 
 
 class AnalysisWorker(QThread):
@@ -370,20 +381,23 @@ def generate_stylesheet(theme_name: str = "Dark") -> str:
     QTabBar::tab {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_secondary']};
-        padding: 12px 25px;
+        padding: 12px 40px;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         margin-right: 3px;
         font-weight: bold;
+        text-align: center;
     }}
     
     QTabBar::tab:selected {{
         background-color: {theme['accent']};
         color: white;
+        text-align: center;
     }}
     
     QTabBar::tab:hover:!selected {{
         background-color: {theme['bg_tertiary']};
+        text-align: center;
     }}
     
     QScrollBar:vertical {{
@@ -459,7 +473,7 @@ LANGUAGES = {
         "restore_confirm": "Вы уверены, что хотите восстановить этот файл? Убедитесь, что он безопасен!",
         "restore_success": "Файл успешно восстановлен!",
         "restore_error": "Не удалось восстановить файл",
-        "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\\nЭто действие необратимо!",
+        "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
         "delete_success": "Файл успешно удален!",
         "history_title": "История сканирований файлов",
         "history_info": "Здесь отображаются все файлы, которые были проанализированы.",
@@ -482,11 +496,15 @@ LANGUAGES = {
         "av_running": "Антивирус запущен. Мониторинг: ",
         "av_start_error": "Не удалось запустить антивирус:",
         "av_stop_error": "Ошибка остановки: ",
-        "av_start_msg": "Защита реального времени включена!\\n\\nМониторимые папки:\\n",
+        "av_start_msg": "Защита реального времени включена!\n\nМониторимые папки:\n",
+        "auto_quarantine_msg": "Все подозрительные файлы будут автоматически помещены в карантин.",
         "folder_exists": "Эта папка уже добавлена",
         "folder_added": "Добавлена папка: ",
         "folder_removed": "Удалена папка: ",
-        "no_folders": "Не найдены стандартные папки для мониторинга.\\nАнтивирус не может быть запущен.",
+        "no_folders": "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.",
+        "new_file_detected": "Обнаружен новый файл: ",
+        "file_is_virus": " - ВИРУС!",
+        "file_is_clean": " - чистый",
         "docker_info": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
         "file_selected": "Выбран файл: ",
         "no_file": "Файл не выбран",
@@ -571,7 +589,19 @@ LANGUAGES = {
         "sensitivity_high": "Высокая",
         "log_level_low": "Низкий",
         "log_level_medium": "Средний",
-        "log_level_high": "Высокий"
+        "log_level_high": "Высокий",
+        "antivirus_settings_group": "Настройки антивируса",
+        "sandbox_settings_group": "Настройки песочницы",
+        "interface_settings_group": "Настройки интерфейса",
+        "security_settings_group": "Настройки безопасности",
+        "interface_language_label": "Язык интерфейса:",
+        "notifications_check": "Показывать уведомления",
+        "sound_check": "Звуковые уведомления",
+        "minimize_tray_check": "Сворачивать в трей",
+        "panic_button_check": "Кнопка экстренной остановки",
+        "auto_update_check": "Автообновление сигнатур",
+        "update_interval_label": "Интервал обновления (часы):",
+        "select_folder_btn": "📁 Выбрать папку"
     },
     "English": {
         "title": "RedSand Secure",
@@ -619,7 +649,7 @@ LANGUAGES = {
         "restore_confirm": "Are you sure you want to restore this file? Make sure it is safe!",
         "restore_success": "File successfully restored!",
         "restore_error": "Failed to restore file",
-        "delete_confirm": "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!",
+        "delete_confirm": "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
         "delete_success": "File successfully deleted!",
         "history_title": "Scan History",
         "history_info": "All analyzed files are displayed here.",
@@ -642,11 +672,15 @@ LANGUAGES = {
         "av_running": "Antivirus running. Monitoring: ",
         "av_start_error": "Failed to start antivirus:",
         "av_stop_error": "Stop error: ",
-        "av_start_msg": "Real-time protection enabled!\\n\\nMonitored folders:\\n",
+        "av_start_msg": "Real-time protection enabled!\n\nMonitored folders:\n",
+        "auto_quarantine_msg": "All suspicious files will be automatically quarantined.",
         "folder_exists": "This folder is already added",
         "folder_added": "Folder added: ",
         "folder_removed": "Folder removed: ",
-        "no_folders": "No standard folders found for monitoring.\\nAntivirus cannot be started.",
+        "no_folders": "No standard folders found for monitoring.\nAntivirus cannot be started.",
+        "new_file_detected": "New file detected: ",
+        "file_is_virus": " - VIRUS!",
+        "file_is_clean": " - clean",
         "docker_info": "ℹ️ All files are analyzed in an isolated Docker container",
         "file_selected": "Selected file: ",
         "no_file": "No file selected",
@@ -741,7 +775,20 @@ LANGUAGES = {
         "log_level_label": "Log level:",
         "log_level_low": "Low",
         "log_level_medium": "Medium",
-        "log_level_high": "High"
+        "log_level_high": "High",
+        "interface_settings_group": "Interface Settings",
+        "security_settings_group": "Security Settings",
+        "interface_language_label": "Interface Language:",
+        "notifications_check": "Show notifications",
+        "sound_check": "Sound notifications",
+        "minimize_tray_check": "Minimize to tray",
+        "panic_button_check": "Emergency stop button",
+        "auto_update_check": "Auto-update signatures",
+        "update_interval_label": "Update interval (hours):",
+        "select_folder_btn": "📁 Select Folder",
+        "reset_defaults": "Reset Settings",
+        "confirm_reset": "Confirm Reset",
+        "reset_confirm_msg": "Are you sure you want to reset all settings?"
     }
 }
 
@@ -974,11 +1021,14 @@ class AntivirusPanel(QWidget):
         
         self.folder_list.itemSelectionChanged.connect(lambda: self.btn_remove_folder.setEnabled(len(self.folder_list.selectedItems()) > 0))
         
-        self.chk_auto_quarantine = QCheckBox("Автоматический карантин угроз")
+        # Получаем текущий язык для чекбоксов
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        self.chk_auto_quarantine = QCheckBox(lang.get("auto_quarantine", "Автоматический карантин угроз"))
         self.chk_auto_quarantine.setChecked(True)
         monitor_layout.addWidget(self.chk_auto_quarantine)
         
-        self.chk_scan_on_access = QCheckBox("Сканирование при доступе к файлу")
+        self.chk_scan_on_access = QCheckBox(lang.get("scan_on_access", "Сканирование при доступе к файлу"))
         self.chk_scan_on_access.setChecked(True)
         monitor_layout.addWidget(self.chk_scan_on_access)
         
@@ -1071,57 +1121,98 @@ class AntivirusPanel(QWidget):
                     
             except Exception as e:
                 self.log_event(f"{lang.get('av_start_error', 'Failed to start antivirus:')} {e}")
-                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\\n{str(e)}")
+                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\n{str(e)}")
                 self.btn_toggle_av.setChecked(False)
     
     def on_directory_changed(self, directory_path):
-        """Обработка изменений в директории - обнаружение новых файлов"""
+        """Обработка изменений в директории - обнаружение новых файлов / Handle directory changes - detect new files"""
         try:
-            # Небольшая задержка чтобы файл полностью записался
+            # Небольшая задержка чтобы файл полностью записался / Small delay for file to be fully written
             import time
-            time.sleep(0.3)
+            time.sleep(0.5)
             
-            # Проверяем файлы в директории
+            self.log_event(f"Directory changed: {directory_path}")
+            
+            # Проверяем файлы в директории / Check files in directory
             if os.path.exists(directory_path):
-                files = os.listdir(directory_path)
+                try:
+                    files = os.listdir(directory_path)
+                except PermissionError:
+                    self.log_event(f"Permission denied: {directory_path}")
+                    return
+                    
                 for filename in files:
                     file_path = os.path.join(directory_path, filename)
-                    # Проверяем только новые файлы (созданные в последнюю минуту)
+                    
+                    # Пропускаем директории / Skip directories
+                    if os.path.isdir(file_path):
+                        continue
+                        
+                    # Проверяем только новые файлы (созданные/модифицированные в последние 2 минуты) 
+                    # Check only new files (created/modified in last 2 minutes)
                     try:
                         mtime = os.path.getmtime(file_path)
+                        ctime = os.path.getctime(file_path)
                         import datetime
-                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту
-                            # Проверяем расширение
-                            ext = os.path.splitext(filename)[1].lower()
-                            monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com']
-                            if ext in monitored_exts and not filename.startswith('~$'):
-                                self.log_event(f"[!] Обнаружен новый файл: {filename}")
-                                # Запускаем сканирование в отдельном потоке
-                                worker = AnalysisWorker(file_path)
-                                worker.result_ready.connect(self.on_new_file_scanned)
-                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Ошибка сканирования {filename}: {err}"))
-                                worker.start()
-                    except (OSError, IOError):
-                        pass  # Файл может быть еще не готов
+                        now = datetime.datetime.now().timestamp()
                         
-            # Перезапускаем watcher если директория изменилась
+                        # Файл новый если создан или изменен в последние 2 минуты
+                        # File is new if created or modified in last 2 minutes
+                        is_new = (now - mtime < 120) or (now - ctime < 120)
+                        
+                        if not is_new:
+                            continue
+                            
+                        # Проверяем расширение / Check extension
+                        ext = os.path.splitext(filename)[1].lower()
+                        monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com', '.txt']
+                        
+                        if ext in monitored_exts and not filename.startswith('~$') and not filename.startswith('.'):
+                            lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+                            self.log_event(f"{lang.get('new_file_detected', 'New file detected: ')}{filename}")
+                            
+                            # Запускаем сканирование в отдельном потоке / Start scanning in separate thread
+                            worker = AnalysisWorker(file_path)
+                            worker.result_ready.connect(self.on_new_file_scanned)
+                            worker.error_occurred.connect(lambda err: self.log_event(f"[-] Error scanning {filename}: {err}"))
+                            worker.start()
+                    except (OSError, IOError) as e:
+                        pass  # Файл может быть еще не готов / File may not be ready yet
+                        
+            # Перезапускаем watcher если директория изменилась / Restart watcher if directory changed
             if self.file_watcher and directory_path not in self.file_watcher.directories():
                 self.file_watcher.addPath(directory_path)
         except Exception as e:
-            self.log_event(f"Ошибка обработки изменений: {e}")
+            self.log_event(f"Error processing changes: {e}")
     
     def on_new_file_scanned(self, scan_result: dict):
-        """Обработка результатов сканирования нового файла"""
+        """Обработка результатов сканирования нового файла / Handle new file scan results"""
         threat_level = scan_result.get('threat_level', 'CLEAN')
         file_path = scan_result.get('file_path', 'Unknown')
         file_name = os.path.basename(file_path)
+        detected_threats = scan_result.get('detected_threats', [])
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         
         if threat_level == 'MALICIOUS':
-            self.log_event(f"🚨 УГРОЗА! Файл {file_name} помещен в карантин")
+            threat_info = ""
+            if detected_threats:
+                threat_info = f" ({', '.join(detected_threats)})"
+            self.log_event(f"🚨 {lang.get('status_malicious', 'MALICIOUS')}! {file_name}{threat_info} - {lang.get('file_is_virus', 'VIRUS!')}")
+            # Автоматический карантин / Auto quarantine
+            if self.chk_auto_quarantine.isChecked():
+                try:
+                    reason = f"{threat_level}: Risk Score {scan_result.get('risk_score', 1.0)}"
+                    if detected_threats:
+                        reason += f" - {', '.join(detected_threats[:2])}"
+                    self.parent_ref.quarantine_manager.move_to_quarantine(file_path=file_path, reason=reason)
+                    self.log_event(f"⚠️ {lang.get('file_quarantined_log', 'File quarantined:')} {reason}")
+                except Exception as e:
+                    self.log_event(f"❌ {lang.get('quarantine_error_log', 'Quarantine error:')} {e}")
         elif threat_level == 'SUSPICIOUS':
-            self.log_event(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ файл: {file_name}")
+            self.log_event(f"⚠️ {lang.get('status_suspicious', 'SUSPICIOUS')} - {file_name}")
         else:
-            self.log_event(f"✅ Безопасный файл: {file_name}")
+            self.log_event(f"✅ {lang.get('status_clean', 'CLEAN')} - {file_name} - {lang.get('file_is_clean', 'clean')}")
     
     def log_event(self, message: str):
         """Запись события в лог"""
@@ -1205,6 +1296,9 @@ class AntivirusPanel(QWidget):
 class AnalysisPanel(QWidget):
     """Панель анализа файлов"""
     
+    # Сигналы для обновления прогресса при сканировании папки
+    progress = pyqtSignal(int, str)  # прогресс, текст
+    
     def __init__(self, parent=None):
         super().__init__(parent)
         self.parent_ref = parent
@@ -1212,6 +1306,9 @@ class AnalysisPanel(QWidget):
         self.worker = None
         self.analysis_completed = False
         self.setup_ui()
+        
+        # Подключаем сигнал прогресса к слоту обновления
+        self.progress.connect(self.update_progress)
     
     def setup_ui(self):
         layout = QVBoxLayout(self)
@@ -1245,10 +1342,20 @@ class AnalysisPanel(QWidget):
         self.file_path_edit.setMinimumHeight(50)
         file_layout.addWidget(self.file_path_edit)
         
+        # Кнопки выбора файла и папки в одну строку
+        btn_layout = QHBoxLayout()
+        
         self.btn_select_file = QPushButton(lang["select_file"])
         self.btn_select_file.setObjectName("actionBtn")
         self.btn_select_file.clicked.connect(self.select_file)
-        file_layout.addWidget(self.btn_select_file)
+        btn_layout.addWidget(self.btn_select_file)
+        
+        self.btn_select_dir = QPushButton(lang.get("select_folder_btn", "📁 Выбрать папку"))
+        self.btn_select_dir.setObjectName("actionBtn")
+        self.btn_select_dir.clicked.connect(self.select_directory)
+        btn_layout.addWidget(self.btn_select_dir)
+        
+        file_layout.addLayout(btn_layout)
         
         left_layout.addWidget(file_group)
         
@@ -1364,14 +1471,23 @@ class AnalysisPanel(QWidget):
         if file_path:
             self.file_path_edit.setText(file_path)
     
+    def select_directory(self):
+        """Выбор папки для сканирования всех файлов"""
+        dir_path = QFileDialog.getExistingDirectory(
+            self, "Выберите папку для сканирования", ""
+        )
+        if dir_path:
+            self.file_path_edit.setText(dir_path)
+            self.log_message('INFO', f"Выбрана папка для сканирования: {dir_path}")
+    
     def start_analysis(self):
-        """Запуск анализа файла в отдельном потоке без блокировки GUI"""
-        file_path = self.file_path_edit.text().strip()
+        """Запуск анализа файла или папки в отдельном потоке без блокировки GUI"""
+        target_path = self.file_path_edit.text().strip()
         
         # Получаем язык ПЕРЕД использованием
         lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         
-        if not file_path or not os.path.exists(file_path):
+        if not target_path or not os.path.exists(target_path):
             QMessageBox.warning(self, lang.get("warning", "Warning"), 
                                lang.get("no_file_selected_error", "Please select an existing file for analysis."))
             return
@@ -1389,25 +1505,73 @@ class AnalysisPanel(QWidget):
         self.results_table.setVisible(False)
         self.analysis_completed = False
         
-        self.log_message('INFO', f"{lang['analysis_start_log']} {file_path}")
-        self.log_message('INFO', lang['using_virus_scanner'])
+        # Определяем тип цели: файл или папка
+        is_directory = os.path.isdir(target_path)
+        
+        if is_directory:
+            self.log_message('INFO', f"{lang['analysis_start_log']} папка: {target_path}")
+            self.log_message('INFO', 'Сканирование всех файлов в папке...')
+            
+            # Сканируем папку
+            scanner = ExtendedVirusScanner()
+            try:
+                results = []
+                total_files = 0
+                malicious_count = 0
+                
+                for root, dirs, files in os.walk(target_path):
+                    for filename in files:
+                        file_path = os.path.join(root, filename)
+                        total_files += 1
+                        
+                        self.progress.emit(int((total_files / max(total_files, 1)) * 100), f"Сканирование: {filename}")
+                        
+                        scan_result = scanner.scan_file(file_path)
+                        results.append({
+                            'file': file_path,
+                            'threat_level': scan_result.threat_level.value,
+                            'score': scan_result.score,
+                            'threats': scan_result.threats_found
+                        })
+                        
+                        if scan_result.threat_level == ThreatLevel.MALICIOUS:
+                            malicious_count += 1
+                            self.log_message('MALICIOUS', f"Угроза обнаружена: {file_path} - {scan_result.threats_found}")
+                        elif scan_result.threat_level == ThreatLevel.SUSPICIOUS:
+                            self.log_message('SUSPICIOUS', f"Подозрительный файл: {file_path}")
+                        else:
+                            self.log_message('CLEAN', f"Чистый файл: {file_path}")
+                
+                # Показываем сводку
+                self.progress.emit(100, "Сканирование завершено!")
+                self.show_directory_results(results, total_files, malicious_count)
+                self.btn_analyze.setEnabled(True)
+                return
+                
+            except Exception as e:
+                self.log_message('ERROR', f"Ошибка сканирования папки: {str(e)}")
+                self.btn_analyze.setEnabled(True)
+                return
+        else:
+            self.log_message('INFO', f"{lang['analysis_start_log']} {target_path}")
+            self.log_message('INFO', lang['using_virus_scanner'])
         
         # Добавляем запись в историю сканирований
         scan_record = {
             'timestamp': datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            'file_name': os.path.basename(file_path),
-            'file_path': file_path,
+            'file_name': os.path.basename(target_path),
+            'file_path': target_path,
             'status': 'IN_PROGRESS',
             'threats': 0
         }
         if self.parent_ref:
             self.parent_ref.scan_history.append(scan_record)
         
-        # Создаём и запускаем worker в отдельном потоке
+        # Создаём и запускаем worker в отдельном потоке (только для单个 файлов)
         use_poly = self.poly_check.isChecked() if hasattr(self, 'poly_check') else False
         timeout = self.timeout_spin.value() if hasattr(self, 'timeout_spin') else 60
         
-        self.worker = AnalysisWorker(file_path, use_poly=use_poly, timeout=timeout)
+        self.worker = AnalysisWorker(target_path, use_poly=use_poly, timeout=timeout)
         self.worker.progress.connect(self.update_progress)
         self.worker.result_ready.connect(self.on_analysis_complete)
         self.worker.error_occurred.connect(self.on_analysis_error)
@@ -1606,9 +1770,72 @@ class AnalysisPanel(QWidget):
     def log_message(self, level: str, message: str):
         """Запись сообщения в лог"""
         timestamp = datetime.now().strftime("%H:%M:%S")
-        colors = {'INFO': '#4CAF50', 'WARNING': '#FF9800', 'ERROR': '#F44336', 'SUCCESS': '#00BCD4'}
+        colors = {'INFO': '#4CAF50', 'WARNING': '#FF9800', 'ERROR': '#F44336', 'SUCCESS': '#00BCD4', 'MALICIOUS': '#dc2626', 'SUSPICIOUS': '#d97706', 'CLEAN': '#059669'}
         color = colors.get(level, '#FFFFFF')
         self.log_text.append(f'<span style="color: {color};">[{timestamp}] [{level}] {message}</span>')
+    
+    def show_directory_results(self, results: list, total_files: int, malicious_count: int):
+        """Показывает результаты сканирования папки"""
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+        
+        self.results_summary.setVisible(False)
+        self.results_table.setVisible(True)
+        
+        # Показываем сводку
+        summary_text = f"Всего файлов: {total_files}\n"
+        summary_text += f"Обнаружено угроз: {malicious_count}\n"
+        summary_text += f"Чистых файлов: {total_files - malicious_count}\n"
+        
+        if malicious_count > 0:
+            summary_text += f"\n⚠️ ОБНАРУЖЕНЫ УГРОЗЫ! Рекомендуется карантин или удаление."
+        else:
+            summary_text += f"\n✅ Все файлы чистые!"
+        
+        self.results_summary.setText(summary_text)
+        self.results_summary.setVisible(True)
+        
+        # Заполняем таблицу результатами (показываем только угрозы и подозрительные)
+        self.results_table.setRowCount(0)
+        self.results_table.setColumnCount(4)
+        self.results_table.setHorizontalHeaderLabels(["Файл", "Статус", "Угрозы", "Путь"])
+        
+        threat_rows = []
+        for r in results:
+            if r['threat_level'] in ['MALICIOUS', 'SUSPICIOUS']:
+                threat_rows.append(r)
+        
+        self.results_table.setRowCount(len(threat_rows))
+        
+        for i, r in enumerate(threat_rows):
+            # Файл
+            file_item = QTableWidgetItem(os.path.basename(r['file']))
+            file_item.setForeground(QColor("#ffffff"))
+            self.results_table.setItem(i, 0, file_item)
+            
+            # Статус
+            status = r['threat_level']
+            status_color = "#dc2626" if status == 'MALICIOUS' else "#d97706"
+            status_item = QTableWidgetItem(status)
+            status_item.setForeground(QColor(status_color))
+            self.results_table.setItem(i, 1, status_item)
+            
+            # Угрозы
+            threats = ', '.join(r['threats']) if r['threats'] else '-'
+            threats_item = QTableWidgetItem(threats)
+            threats_item.setForeground(QColor("#ffffff"))
+            self.results_table.setItem(i, 2, threats_item)
+            
+            # Путь
+            path_item = QTableWidgetItem(r['file'])
+            path_item.setForeground(QColor("#b0b0b0"))
+            self.results_table.setItem(i, 3, path_item)
+        
+        self.results_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        self.results_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        self.results_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.Stretch)
+        self.results_table.horizontalHeader().setSectionResizeMode(3, QHeaderView.Stretch)
+        
+        self.btn_analyze.setEnabled(True)
     
     def update_texts(self):
         """Обновление текстов при смене языка"""
@@ -2102,7 +2329,7 @@ class QuarantineDialog(QDialog):
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
             reply = QMessageBox.warning(self, lang.get("delete_forever", "Delete Forever"),
-                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!"),
+                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!"),
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
