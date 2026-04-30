@@ -9,6 +9,7 @@ import os
 import sys
 import time
 import json
+import shutil
 import threading
 import hashlib
 from pathlib import Path
@@ -88,8 +89,9 @@ class QuarantineManager:
             quarantine_name = f"{timestamp}_{file_name}"
             quarantine_path = self.quarantine_dir / quarantine_name
             
-            # Перемещаем файл
-            os.rename(file_path, quarantine_path)
+            # Перемещаем файл с копированием и удалением оригинала (более надежно)
+            shutil.copy2(file_path, quarantine_path)
+            os.remove(file_path)
             
             # Записываем в журнал
             self.quarantined_files[str(quarantine_path)] = {

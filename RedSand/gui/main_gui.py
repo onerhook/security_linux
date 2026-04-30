@@ -10,6 +10,7 @@ RedSand Secure GUI v12.0 - Главный экран с выбором режи�
 
 import sys
 import os
+import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Optional, Dict, Any
@@ -1537,6 +1538,14 @@ class AnalysisPanel(QWidget):
                         if scan_result.threat_level == ThreatLevel.MALICIOUS:
                             malicious_count += 1
                             self.log_message('MALICIOUS', f"Угроза обнаружена: {file_path} - {scan_result.threats_found}")
+                            # Автоматически помещаем в карантин
+                            if self.parent_ref:
+                                try:
+                                    reason = f"MALICIOUS: {scan_result.threats_found}"
+                                    self.parent_ref.quarantine_manager.move_to_quarantine(file_path=file_path, reason=reason)
+                                    self.log_message('WARNING', f"Файл перемещён в карантин: {file_path}")
+                                except Exception as e:
+                                    self.log_message('ERROR', f"Ошибка карантина: {e}")
                         elif scan_result.threat_level == ThreatLevel.SUSPICIOUS:
                             self.log_message('SUSPICIOUS', f"Подозрительный файл: {file_path}")
                         else:
@@ -2320,6 +2329,8 @@ class QuarantineDialog(QDialog):
         if not id_item:
             return
         
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         try:
             idx = int(id_item.text())
             items = self.quarantine_manager.list_quarantined()
@@ -2333,7 +2344,6 @@ class QuarantineDialog(QDialog):
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:
-                import shutil
                 if os.path.exists(quarantine_path):
                     shutil.rmtree(quarantine_path) if os.path.isdir(quarantine_path) else os.remove(quarantine_path)
                 
