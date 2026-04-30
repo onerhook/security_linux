@@ -462,7 +462,7 @@ LANGUAGES = {
         "restore_confirm": "Вы уверены, что хотите восстановить этот файл? Убедитесь, что он безопасен!",
         "restore_success": "Файл успешно восстановлен!",
         "restore_error": "Не удалось восстановить файл",
-        "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\\nЭто действие необратимо!",
+        "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\nЭто действие необратимо!",
         "delete_success": "Файл успешно удален!",
         "history_title": "История сканирований файлов",
         "history_info": "Здесь отображаются все файлы, которые были проанализированы.",
@@ -485,11 +485,11 @@ LANGUAGES = {
         "av_running": "Антивирус запущен. Мониторинг: ",
         "av_start_error": "Не удалось запустить антивирус:",
         "av_stop_error": "Ошибка остановки: ",
-        "av_start_msg": "Защита реального времени включена!\\n\\nМониторимые папки:\\n",
+        "av_start_msg": "Защита реального времени включена!\n\nМониторимые папки:\n",
         "folder_exists": "Эта папка уже добавлена",
         "folder_added": "Добавлена папка: ",
         "folder_removed": "Удалена папка: ",
-        "no_folders": "Не найдены стандартные папки для мониторинга.\\nАнтивирус не может быть запущен.",
+        "no_folders": "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.",
         "docker_info": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
         "file_selected": "Выбран файл: ",
         "no_file": "Файл не выбран",
@@ -622,7 +622,7 @@ LANGUAGES = {
         "restore_confirm": "Are you sure you want to restore this file? Make sure it is safe!",
         "restore_success": "File successfully restored!",
         "restore_error": "Failed to restore file",
-        "delete_confirm": "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!",
+        "delete_confirm": "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!",
         "delete_success": "File successfully deleted!",
         "history_title": "Scan History",
         "history_info": "All analyzed files are displayed here.",
@@ -645,11 +645,11 @@ LANGUAGES = {
         "av_running": "Antivirus running. Monitoring: ",
         "av_start_error": "Failed to start antivirus:",
         "av_stop_error": "Stop error: ",
-        "av_start_msg": "Real-time protection enabled!\\n\\nMonitored folders:\\n",
+        "av_start_msg": "Real-time protection enabled!\n\nMonitored folders:\n",
         "folder_exists": "This folder is already added",
         "folder_added": "Folder added: ",
         "folder_removed": "Folder removed: ",
-        "no_folders": "No standard folders found for monitoring.\\nAntivirus cannot be started.",
+        "no_folders": "No standard folders found for monitoring.\nAntivirus cannot be started.",
         "docker_info": "ℹ️ All files are analyzed in an isolated Docker container",
         "file_selected": "Selected file: ",
         "no_file": "No file selected",
@@ -1074,7 +1074,7 @@ class AntivirusPanel(QWidget):
                     
             except Exception as e:
                 self.log_event(f"{lang.get('av_start_error', 'Failed to start antivirus:')} {e}")
-                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\\n{str(e)}")
+                QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('av_start_error', 'Failed to start antivirus:')}\n{str(e)}")
                 self.btn_toggle_av.setChecked(False)
     
     def on_directory_changed(self, directory_path):
@@ -2241,7 +2241,7 @@ class QuarantineDialog(QDialog):
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
             
             reply = QMessageBox.warning(self, lang.get("delete_forever", "Delete Forever"),
-                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!"),
+                lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!"),
                 QMessageBox.Yes | QMessageBox.No)
             
             if reply == QMessageBox.Yes:

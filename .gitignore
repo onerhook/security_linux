@@ -1,1 +1,29 @@
-Nothing needs to be added to the .gitignore file since only a Python source file was modified and no build artifacts, dependencies, or temporary files were included in the changes.
+```
+# Executables and binaries
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.ENV
+.ENV.local
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# OS generated files
+.DS_Store
+Thumbs.db
+```
