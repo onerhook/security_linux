@@ -421,7 +421,7 @@ LANGUAGES = {
         "settings": "⚙ Настройки",
         "history": "📜 История",
         "quarantine": "⚠️ Карантин",
-        "select_file": "📁 Выбрать файл",
+        "select_file": "Выбрать файл",
         "analyze_btn": "🚀 ЗАПУСТИТЬ АНАЛИЗ",
         "av_on": "⏹️ ВЫКЛ",
         "av_off": "▶️ ВКЛ",
@@ -437,8 +437,8 @@ LANGUAGES = {
         "auto_quarantine": "Авто-карантин угроз",
         "scan_on_access": "Сканирование при доступе",
         "language_label": "Язык/Language:",
-        "add_folder": "📁 Добавить",
-        "remove_folder": "🗑️ Удалить",
+        "add_folder": "Добавить",
+        "remove_folder": "Удалить",
         "event_log": "Журнал событий антивируса",
         "log_placeholder": "Здесь будут отображаться события антивируса...",
         "protection_status": "Статус защиты",
@@ -447,9 +447,9 @@ LANGUAGES = {
         "quarantine_title": "Карантин - Обнаруженные угрозы",
         "quarantine_info": "Файлы в карантине обезврежены и не могут нанести вред системе.",
         "quarantine_empty": "Карантин пуст",
-        "refresh": "🔄 Обновить",
-        "restore": "♻️ Восстановить",
-        "delete_forever": "🗑️ Удалить навсегда",
+        "refresh": "Обновить",
+        "restore": "Восстановить",
+        "delete_forever": "Удалить навсегда",
         "close": "Закрыть",
         "col_date": "Дата",
         "col_filename": "Имя файла",
@@ -461,10 +461,10 @@ LANGUAGES = {
         "restore_error": "Не удалось восстановить файл",
         "delete_confirm": "Вы уверены, что хотите удалить этот файл НАВСЕГДА?\\nЭто действие необратимо!",
         "delete_success": "Файл успешно удален!",
-        "history_title": "📋 История сканирований файлов",
+        "history_title": "История сканирований файлов",
         "history_info": "Здесь отображаются все файлы, которые были проанализированы.",
         "history_empty": "История пуста",
-        "clear_history": "🗑️ Очистить историю",
+        "clear_history": "Очистить историю",
         "clear_history_confirm": "Вы уверены, что хотите очистить всю историю сканирований?",
         "col_status": "Статус",
         "col_threats": "Угрозы",
@@ -472,10 +472,10 @@ LANGUAGES = {
         "status_clean": "БЕЗОПАСНЫЙ",
         "status_suspicious": "ПОДОЗРИТЕЛЬНЫЙ",
         "status_malicious": "ОПАСНЫЙ",
-        "settings_title": "⚙ Настройки приложения",
+        "settings_title": "Настройки приложения",
         "theme_group": "Тема оформления",
         "analysis_settings_group": "Настройки анализа",
-        "application_settings": "⚙ Настройки приложения",
+        "application_settings": "Настройки приложения",
         "analysis_settings": "Настройки анализа",
         "timeout_label": "Время анализа (сек):",
         "app_language": "Язык интерфейса",
@@ -499,8 +499,8 @@ LANGUAGES = {
         "file_placeholder": "Файл еще не выбран... или перетащите сюда",
         "analysis_progress": "Прогресс анализа",
         "waiting": "Ожидание...",
-        "logs_tab": "📋 Журнал      ",
-        "results_tab": "📊 Результаты   ",
+        "logs_tab": "Журнал      ",
+        "results_tab": "Результаты   ",
         "log_placeholder": "Здесь будет отображаться ход анализа...",
         "results_placeholder": "Результаты анализа появятся здесь после завершения...",
         "param_column": "Параметр",
@@ -575,7 +575,7 @@ LANGUAGES = {
         "settings": "⚙ Settings",
         "history": "📜 History",
         "quarantine": "⚠️ Quarantine",
-        "select_file": "📁 Select File",
+        "select_file": "Select File",
         "analyze_btn": "🚀 START ANALYSIS",
         "av_on": "⏹️ OFF",
         "av_off": "▶️ ON",
@@ -591,8 +591,8 @@ LANGUAGES = {
         "auto_quarantine": "Auto-quarantine threats",
         "scan_on_access": "Scan on access",
         "language_label": "Language/Language:",
-        "add_folder": "📁 Add",
-        "remove_folder": "🗑️ Remove",
+        "add_folder": "Add",
+        "remove_folder": "Remove",
         "event_log": "Antivirus Event Log",
         "log_placeholder": "Antivirus events will be displayed here...",
         "protection_status": "Protection Status",
@@ -601,9 +601,9 @@ LANGUAGES = {
         "quarantine_title": "Quarantine - Detected Threats",
         "quarantine_info": "Files in quarantine are neutralized and cannot harm the system.",
         "quarantine_empty": "Quarantine is empty",
-        "refresh": "🔄 Refresh",
-        "restore": "♻️ Restore",
-        "delete_forever": "🗑️ Delete Forever",
+        "refresh": "Refresh",
+        "restore": "Restore",
+        "delete_forever": "Delete Forever",
         "close": "Close",
         "col_date": "Date",
         "col_filename": "File Name",
@@ -615,10 +615,10 @@ LANGUAGES = {
         "restore_error": "Failed to restore file",
         "delete_confirm": "Are you sure you want to delete this file FOREVER?\\nThis action is irreversible!",
         "delete_success": "File successfully deleted!",
-        "history_title": "📋 Scan History",
+        "history_title": "Scan History",
         "history_info": "All analyzed files are displayed here.",
         "history_empty": "History is empty",
-        "clear_history": "🗑️ Clear History",
+        "clear_history": "Clear History",
         "clear_history_confirm": "Are you sure you want to clear all scan history?",
         "col_status": "Status",
         "col_threats": "Threats",
@@ -626,10 +626,10 @@ LANGUAGES = {
         "status_clean": "SAFE",
         "status_suspicious": "SUSPICIOUS",
         "status_malicious": "DANGEROUS",
-        "settings_title": "⚙ Application Settings",
+        "settings_title": "Application Settings",
         "theme_group": "Theme",
         "analysis_settings_group": "Analysis Settings",
-        "application_settings": "⚙ Application Settings",
+        "application_settings": "Application Settings",
         "analysis_settings": "Analysis Settings",
         "timeout_label": "Analysis Time (sec):",
         "app_language": "Interface Language",
@@ -653,8 +653,8 @@ LANGUAGES = {
         "file_placeholder": "File not selected... or drag and drop here",
         "analysis_progress": "Analysis Progress",
         "waiting": "Waiting...",
-        "logs_tab": "📋 Logs      ",
-        "results_tab": "📊 Results   ",
+        "logs_tab": "Logs      ",
+        "results_tab": "Results   ",
         "log_placeholder": "Analysis progress will be displayed here...",
         "results_placeholder": "Analysis results will appear here after completion...",
         "param_column": "Parameter",
@@ -1704,13 +1704,15 @@ class ScanHistoryDialog(QDialog):
         btn_layout = QHBoxLayout()
         btn_layout.addStretch()
         
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton(self.tr("refresh"))
         self.btn_refresh.setObjectName("secondaryBtn")
+        self.btn_refresh.setMinimumHeight(45)
         self.btn_refresh.clicked.connect(self.load_history)
         btn_layout.addWidget(self.btn_refresh)
         
         self.btn_clear = QPushButton(self.tr("Clear History"))
         self.btn_clear.setObjectName("dangerBtn")
+        self.btn_clear.setMinimumHeight(45)
         self.btn_clear.clicked.connect(self.clear_history)
         btn_layout.addWidget(self.btn_clear)
         
@@ -1719,7 +1721,7 @@ class ScanHistoryDialog(QDialog):
         # Кнопка "Закрыть" - уменьшена до размера кнопки "Сбросить настройки"
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.setFixedHeight(45)
+        self.btn_close.setMinimumHeight(45)
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
@@ -1900,9 +1902,9 @@ class QuarantineDialog(QDialog):
         btn_layout.setContentsMargins(0, 15, 0, 15)
         
         # Кнопка "Обновить" слева
-        self.btn_refresh = QPushButton("🔄 Обновить")
+        self.btn_refresh = QPushButton(self.tr("refresh"))
         self.btn_refresh.setObjectName("secondaryBtn")
-        self.btn_refresh.setMinimumHeight(50)
+        self.btn_refresh.setMinimumHeight(45)
         self.btn_refresh.clicked.connect(self.load_quarantine)
         btn_layout.addWidget(self.btn_refresh)
         
@@ -1915,14 +1917,14 @@ class QuarantineDialog(QDialog):
         center_layout.setSpacing(10)
         self.btn_restore = QPushButton(self.tr("Restore"))
         self.btn_restore.setObjectName("actionBtn")
-        self.btn_restore.setMinimumHeight(55)
+        self.btn_restore.setMinimumHeight(45)
         self.btn_restore.clicked.connect(self.restore_selected)
         self.btn_restore.setEnabled(False)
         center_layout.addWidget(self.btn_restore)
         
         self.btn_delete = QPushButton(self.tr("Delete Permanently"))
         self.btn_delete.setObjectName("dangerBtn")
-        self.btn_delete.setMinimumHeight(55)
+        self.btn_delete.setMinimumHeight(45)
         self.btn_delete.clicked.connect(self.delete_selected)
         self.btn_delete.setEnabled(False)
         center_layout.addWidget(self.btn_delete)
@@ -1933,7 +1935,7 @@ class QuarantineDialog(QDialog):
         # Кнопка "Закрыть" - уменьшена до размера кнопки "Сбросить настройки"
         self.btn_close = QPushButton(self.tr("Close"))
         self.btn_close.setObjectName("secondaryBtn")
-        self.btn_close.setFixedHeight(45)
+        self.btn_close.setMinimumHeight(45)
         self.btn_close.clicked.connect(self.accept)
         btn_layout.addWidget(self.btn_close)
         
