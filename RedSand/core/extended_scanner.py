@@ -2,9 +2,33 @@ import os
 import hashlib
 import logging
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
+from enum import Enum
 
 logger = logging.getLogger(__name__)
+
+
+class ThreatLevel(Enum):
+    CLEAN = "CLEAN"
+    SUSPICIOUS = "SUSPICIOUS"
+    MALICIOUS = "MALICIOUS"
+
+
+@dataclass
+class ScanResult:
+    """Результат сканирования файла"""
+    file_path: str
+    threat_level: ThreatLevel
+    score: float
+    threats_found: List[str]
+    threat_types: List[str]
+    sha256: str
+    details: Dict
+    
+    def __post_init__(self):
+        if isinstance(self.threat_level, str):
+            self.threat_level = ThreatLevel(self.threat_level)
 
 class ExtendedVirusScanner:
     def __init__(self):
@@ -133,31 +157,52 @@ class ExtendedVirusScanner:
             logger.error(f"Error calculating hash for {file_path}: {e}")
             return ""
 
-    def scan_file(self, file_path: str) -> Tuple[bool, str, float]:
+    def scan_file(self, file_path: str) -> ScanResult:
         """
         Сканирует файл ПОЛНОСТЬЮ с умной оптимизацией.
-        Возвращает: (is_malicious, threat_name, confidence)
+        Возвращает: ScanResult объект
         """
         try:
             # 1. Проверка существования
             if not os.path.exists(file_path):
-                return False, "File not found", 0.0
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256="",
+                    details={"error": "File not found"}
+                )
 
             # 2. Проверка на системный файл (Белый список)
             if self.is_safe_path(file_path):
                 logger.info(f"File {file_path} is in a safe system directory. Skipping deep scan.")
-                return False, "Clean (System File)", 0.0
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256=self.calculate_hash(file_path),
+                    details={"info": "Clean (System File)"}
+                )
 
             # 3. Проверка размера
             file_size = os.path.getsize(file_path)
             if file_size == 0:
-                return False, "Empty File", 0.0
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.CLEAN,
+                    score=0.0,
+                    threats_found=[],
+                    threat_types=[],
+                    sha256="",
+                    details={"info": "Empty File"}
+                )
             
-            # 4. Проверка расширения (быстрая проверка для заведомо безопасных файлов)
+            # 4. Проверка расширения
             ext = os.path.splitext(file_path)[1].lower()
-            if ext in self.safe_extensions and file_size < 10 * 1024 * 1024:  # < 10MB
-                # Для безопасных расширений всё равно проводим быструю проверку
-                pass
 
             # 5. ПОЛНОЕ ЧТЕНИЕ И СКАНИРОВАНИЕ ФАЙЛА
             signatures_found = []
@@ -190,29 +235,73 @@ class ExtendedVirusScanner:
 
             # 6. Оценка результатов
             if signatures_found:
-                threat_name = ", ".join(signatures_found)
                 confidence = min(0.95 + (len(signatures_found) * 0.01), 1.0)
-                logger.warning(f"THREAT DETECTED: {file_path} -> {threat_name} (confidence: {confidence:.2f})")
-                return True, threat_name, confidence
+                logger.warning(f"THREAT DETECTED: {file_path} -> {signatures_found} (confidence: {confidence:.2f})")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.MALICIOUS,
+                    score=confidence,
+                    threats_found=signatures_found,
+                    threat_types=signatures_found,
+                    sha256=self.calculate_hash(file_path),
+                    details={
+                        "matched_signatures": signatures_found,
+                        "matched_apis": api_matches,
+                        "info": f"Detected: {', '.join(signatures_found)}"
+                    }
+                )
             
             # Дополнительные проверки для API
             if len(api_matches) >= 3:
-                threat_name = f"Suspicious APIs: {', '.join(api_matches[:5])}"
-                confidence = 0.75 + (len(api_matches) * 0.02)
-                confidence = min(confidence, 0.95)
-                logger.warning(f"SUSPICIOUS FILE: {file_path} -> {threat_name}")
-                return True, threat_name, confidence
+                confidence = min(0.75 + (len(api_matches) * 0.02), 0.95)
+                logger.warning(f"SUSPICIOUS FILE: {file_path} -> {api_matches}")
+                return ScanResult(
+                    file_path=file_path,
+                    threat_level=ThreatLevel.SUSPICIOUS,
+                    score=confidence,
+                    threats_found=[f"Suspicious APIs: {', '.join(api_matches[:5])}"],
+                    threat_types=['SuspiciousAPI'],
+                    sha256=self.calculate_hash(file_path),
+                    details={
+                        "matched_apis": api_matches,
+                        "info": f"Suspicious APIs detected"
+                    }
+                )
 
             # 7. Если ничего не найдено - файл чист
             logger.info(f"File {file_path} is clean (fully scanned {file_size} bytes).")
-            return False, "Clean", 0.0
+            return ScanResult(
+                file_path=file_path,
+                threat_level=ThreatLevel.CLEAN,
+                score=0.0,
+                threats_found=[],
+                threat_types=[],
+                sha256=self.calculate_hash(file_path),
+                details={"info": "Clean"}
+            )
 
         except PermissionError:
             logger.warning(f"Permission denied scanning {file_path}")
-            return False, "Access Denied", 0.0
+            return ScanResult(
+                file_path=file_path,
+                threat_level=ThreatLevel.SUSPICIOUS,
+                score=0.5,
+                threats_found=["Access Denied"],
+                threat_types=["AccessDenied"],
+                sha256="",
+                details={"error": "Permission denied"}
+            )
         except Exception as e:
             logger.error(f"Error scanning {file_path}: {e}")
-            return False, "Scan Error", 0.0
+            return ScanResult(
+                file_path=file_path,
+                threat_level=ThreatLevel.SUSPICIOUS,
+                score=0.3,
+                threats_found=[f"Scan Error: {str(e)}"],
+                threat_types=["Error"],
+                sha256="",
+                details={"error": str(e)}
+            )
 
     def get_file_info(self, file_path: str) -> Dict:
         """Получает информацию о файле."""
@@ -225,3 +314,13 @@ class ExtendedVirusScanner:
             }
         except Exception as e:
             return {"error": str(e)}
+
+    def get_statistics(self) -> Dict:
+        """Получение статистики сканера."""
+        return {
+            "signatures_count": sum(len(sigs) for sigs in self.virus_signatures.values()),
+            "threat_categories": len(self.virus_signatures),
+            "suspicious_apis_count": len(self.suspicious_apis),
+            "safe_paths_count": len(self.safe_paths),
+            "safe_extensions_count": len(self.safe_extensions)
+        }
