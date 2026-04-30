@@ -370,20 +370,23 @@ def generate_stylesheet(theme_name: str = "Dark") -> str:
     QTabBar::tab {{
         background-color: {theme['bg_secondary']};
         color: {theme['text_secondary']};
-        padding: 12px 25px;
+        padding: 12px 40px;
         border-top-left-radius: 8px;
         border-top-right-radius: 8px;
         margin-right: 3px;
         font-weight: bold;
+        text-align: center;
     }}
     
     QTabBar::tab:selected {{
         background-color: {theme['accent']};
         color: white;
+        text-align: center;
     }}
     
     QTabBar::tab:hover:!selected {{
         background-color: {theme['bg_tertiary']};
+        text-align: center;
     }}
     
     QScrollBar:vertical {{
