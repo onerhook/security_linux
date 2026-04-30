@@ -2320,6 +2320,8 @@ class QuarantineDialog(QDialog):
         if not id_item:
             return
         
+        lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
+        
         try:
             idx = int(id_item.text())
             items = self.quarantine_manager.list_quarantined()
@@ -2327,7 +2329,6 @@ class QuarantineDialog(QDialog):
                 return
             
             quarantine_path = list(self.quarantine_manager.quarantined_files.keys())[idx]
-            lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
             
             reply = QMessageBox.warning(self, lang.get("delete_forever", "Delete Forever"),
                 lang.get("delete_confirm", "Are you sure you want to delete this file FOREVER?\nThis action is irreversible!"),
@@ -2345,7 +2346,6 @@ class QuarantineDialog(QDialog):
                 QMessageBox.information(self, lang.get("delete_success", "Deletion"), lang.get("delete_success", "File successfully deleted!"))
                 self.load_quarantine()
         except Exception as e:
-            lang = LANGUAGES.get(self.current_lang, LANGUAGES["Русский"])
             QMessageBox.critical(self, lang.get("error", "Error"), f"{lang.get('deletion_error', 'Deletion error:')} {str(e)}")
 
 
