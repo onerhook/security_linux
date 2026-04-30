@@ -486,10 +486,14 @@ LANGUAGES = {
         "av_start_error": "Не удалось запустить антивирус:",
         "av_stop_error": "Ошибка остановки: ",
         "av_start_msg": "Защита реального времени включена!\n\nМониторимые папки:\n",
+        "auto_quarantine_msg": "Все подозрительные файлы будут автоматически помещены в карантин.",
         "folder_exists": "Эта папка уже добавлена",
         "folder_added": "Добавлена папка: ",
         "folder_removed": "Удалена папка: ",
         "no_folders": "Не найдены стандартные папки для мониторинга.\nАнтивирус не может быть запущен.",
+        "new_file_detected": "Обнаружен новый файл: ",
+        "file_is_virus": " - ВИРУС!",
+        "file_is_clean": " - чистый",
         "docker_info": "ℹ️ Все файлы анализируются в изолированном Docker контейнере",
         "file_selected": "Выбран файл: ",
         "no_file": "Файл не выбран",
@@ -646,10 +650,14 @@ LANGUAGES = {
         "av_start_error": "Failed to start antivirus:",
         "av_stop_error": "Stop error: ",
         "av_start_msg": "Real-time protection enabled!\n\nMonitored folders:\n",
+        "auto_quarantine_msg": "All suspicious files will be automatically quarantined.",
         "folder_exists": "This folder is already added",
         "folder_added": "Folder added: ",
         "folder_removed": "Folder removed: ",
         "no_folders": "No standard folders found for monitoring.\nAntivirus cannot be started.",
+        "new_file_detected": "New file detected: ",
+        "file_is_virus": " - VIRUS!",
+        "file_is_clean": " - clean",
         "docker_info": "ℹ️ All files are analyzed in an isolated Docker container",
         "file_selected": "Selected file: ",
         "no_file": "No file selected",
@@ -1078,53 +1086,70 @@ class AntivirusPanel(QWidget):
                 self.btn_toggle_av.setChecked(False)
     
     def on_directory_changed(self, directory_path):
-        """Обработка изменений в директории - обнаружение новых файлов"""
+        """Обработка изменений в директории - обнаружение новых файлов / Handle directory changes - detect new files"""
         try:
-            # Небольшая задержка чтобы файл полностью записался
+            # Небольшая задержка чтобы файл полностью записался / Small delay for file to be fully written
             import time
             time.sleep(0.3)
             
-            # Проверяем файлы в директории
+            # Проверяем файлы в директории / Check files in directory
             if os.path.exists(directory_path):
                 files = os.listdir(directory_path)
                 for filename in files:
                     file_path = os.path.join(directory_path, filename)
-                    # Проверяем только новые файлы (созданные в последнюю минуту)
+                    # Проверяем только новые файлы (созданные в последнюю минуту) / Check only new files (created in last minute)
                     try:
                         mtime = os.path.getmtime(file_path)
                         import datetime
-                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту
-                            # Проверяем расширение
+                        if datetime.datetime.now().timestamp() - mtime < 60:  # Файл создан в последнюю минуту / File created in last minute
+                            # Проверяем расширение / Check extension
                             ext = os.path.splitext(filename)[1].lower()
                             monitored_exts = ['.exe', '.bat', '.cmd', '.ps1', '.vbs', '.js', '.msi', '.dll', '.scr', '.pif', '.com']
                             if ext in monitored_exts and not filename.startswith('~$'):
-                                self.log_event(f"[!] Обнаружен новый файл: {filename}")
-                                # Запускаем сканирование в отдельном потоке
+                                lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
+                                self.log_event(f"{lang.get('new_file_detected', 'New file detected: ')}{filename}")
+                                # Запускаем сканирование в отдельном потоке / Start scanning in separate thread
                                 worker = AnalysisWorker(file_path)
                                 worker.result_ready.connect(self.on_new_file_scanned)
-                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Ошибка сканирования {filename}: {err}"))
+                                worker.error_occurred.connect(lambda err: self.log_event(f"[-] Error scanning {filename}: {err}"))
                                 worker.start()
                     except (OSError, IOError):
-                        pass  # Файл может быть еще не готов
+                        pass  # Файл может быть еще не готов / File may not be ready yet
                         
-            # Перезапускаем watcher если директория изменилась
+            # Перезапускаем watcher если директория изменилась / Restart watcher if directory changed
             if self.file_watcher and directory_path not in self.file_watcher.directories():
                 self.file_watcher.addPath(directory_path)
         except Exception as e:
-            self.log_event(f"Ошибка обработки изменений: {e}")
+            self.log_event(f"Error processing changes: {e}")
     
     def on_new_file_scanned(self, scan_result: dict):
-        """Обработка результатов сканирования нового файла"""
+        """Обработка результатов сканирования нового файла / Handle new file scan results"""
         threat_level = scan_result.get('threat_level', 'CLEAN')
         file_path = scan_result.get('file_path', 'Unknown')
         file_name = os.path.basename(file_path)
+        detected_threats = scan_result.get('detected_threats', [])
+        
+        lang = LANGUAGES.get(self.parent_ref.current_lang if self.parent_ref else "Русский", LANGUAGES["Русский"])
         
         if threat_level == 'MALICIOUS':
-            self.log_event(f"🚨 УГРОЗА! Файл {file_name} помещен в карантин")
+            threat_info = ""
+            if detected_threats:
+                threat_info = f" ({', '.join(detected_threats)})"
+            self.log_event(f"🚨 {lang.get('status_malicious', 'MALICIOUS')}! {file_name}{threat_info} - {lang.get('file_is_virus', 'VIRUS!')}")
+            # Автоматический карантин / Auto quarantine
+            if self.auto_quarantine_check.isChecked():
+                try:
+                    reason = f"{threat_level}: Risk Score {scan_result.get('risk_score', 1.0)}"
+                    if detected_threats:
+                        reason += f" - {', '.join(detected_threats[:2])}"
+                    self.parent_ref.quarantine_manager.move_to_quarantine(file_path=file_path, reason=reason)
+                    self.log_event(f"⚠️ {lang.get('file_quarantined_log', 'File quarantined:')} {reason}")
+                except Exception as e:
+                    self.log_event(f"❌ {lang.get('quarantine_error_log', 'Quarantine error:')} {e}")
         elif threat_level == 'SUSPICIOUS':
-            self.log_event(f"⚠️ ПОДОЗРИТЕЛЬНЫЙ файл: {file_name}")
+            self.log_event(f"⚠️ {lang.get('status_suspicious', 'SUSPICIOUS')} - {file_name}")
         else:
-            self.log_event(f"✅ Безопасный файл: {file_name}")
+            self.log_event(f"✅ {lang.get('status_clean', 'CLEAN')} - {file_name} - {lang.get('file_is_clean', 'clean')}")
     
     def log_event(self, message: str):
         """Запись события в лог"""
