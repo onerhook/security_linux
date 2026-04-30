@@ -562,7 +562,10 @@ LANGUAGES = {
         "docker_tooltip": "Запускать подозрительные файлы в Docker контейнере",
         "behavioral_tooltip": "Использовать эмуляцию Windows API для анализа поведения",
         "panic_button_tooltip": "Отображать кнопку для немедленной остановки всех процессов",
-        "auto_update_tooltip": "Автоматически обновлять базу сигнатур вирусов"
+        "auto_update_tooltip": "Автоматически обновлять базу сигнатур вирусов",
+        "reset_defaults": "Сбросить настройки",
+        "confirm_reset": "Подтверждение сброса",
+        "reset_confirm_msg": "Вы уверены, что хотите сбросить все настройки?"
     },
     "English": {
         "title": "RedSand Secure",
@@ -718,9 +721,21 @@ LANGUAGES = {
         "confirm_reset": "Confirm Reset",
         "reset_confirm_msg": "Are you sure you want to reset all settings?",
         "antivirus_settings_group": "Real-time Antivirus Settings",
-        "protection_status": "Protection Status",
-        "folder_monitoring": "Folder Monitoring",
-        "select_folder_title": "Select folder for monitoring"
+        "deep_scan_check": "Deep file analysis",
+        "ml_analysis_check": "Use ML classifier",
+        "multi_thread_check": "Multi-threaded scanning",
+        "thread_count_label": "Number of threads:",
+        "auto_quarantine_check": "Automatic quarantine",
+        "scan_on_access_check": "Scan on access",
+        "sensitivity_label": "Sensitivity:",
+        "sensitivity_low": "Low",
+        "sensitivity_medium": "Medium",
+        "sensitivity_high": "High",
+        "sandbox_settings_group": "Sandbox Settings",
+        "log_level_label": "Log level:",
+        "log_level_low": "Low",
+        "log_level_medium": "Medium",
+        "log_level_high": "High"
     }
 }
 
