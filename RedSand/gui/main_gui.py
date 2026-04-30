@@ -590,6 +590,8 @@ LANGUAGES = {
         "log_level_low": "Низкий",
         "log_level_medium": "Средний",
         "log_level_high": "Высокий",
+        "antivirus_settings_group": "Настройки антивируса",
+        "sandbox_settings_group": "Настройки песочницы",
         "interface_settings_group": "Настройки интерфейса",
         "security_settings_group": "Настройки безопасности",
         "interface_language_label": "Язык интерфейса:",
@@ -1198,7 +1200,7 @@ class AntivirusPanel(QWidget):
                 threat_info = f" ({', '.join(detected_threats)})"
             self.log_event(f"🚨 {lang.get('status_malicious', 'MALICIOUS')}! {file_name}{threat_info} - {lang.get('file_is_virus', 'VIRUS!')}")
             # Автоматический карантин / Auto quarantine
-            if self.auto_quarantine_check.isChecked():
+            if self.chk_auto_quarantine.isChecked():
                 try:
                     reason = f"{threat_level}: Risk Score {scan_result.get('risk_score', 1.0)}"
                     if detected_threats:
