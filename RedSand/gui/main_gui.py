@@ -1537,6 +1537,14 @@ class AnalysisPanel(QWidget):
                         if scan_result.threat_level == ThreatLevel.MALICIOUS:
                             malicious_count += 1
                             self.log_message('MALICIOUS', f"Угроза обнаружена: {file_path} - {scan_result.threats_found}")
+                            # Автоматически помещаем в карантин
+                            if self.parent_ref:
+                                try:
+                                    reason = f"MALICIOUS: {scan_result.threats_found}"
+                                    self.parent_ref.quarantine_manager.move_to_quarantine(file_path=file_path, reason=reason)
+                                    self.log_message('WARNING', f"Файл перемещён в карантин: {file_path}")
+                                except Exception as e:
+                                    self.log_message('ERROR', f"Ошибка карантина: {e}")
                         elif scan_result.threat_level == ThreatLevel.SUSPICIOUS:
                             self.log_message('SUSPICIOUS', f"Подозрительный файл: {file_path}")
                         else:
